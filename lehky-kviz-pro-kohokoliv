@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lehký kvíz pro kohokoliv</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 16px;
+    line-height: 1.5;
+  }
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.9rem;
+    color: #2c2c2c;
+    line-height: 1.3;
+    margin: 0 0 18px;
+  }
+  .perex {
+    font-size: 1.1rem;
+    color: #4a4a4a;
+    margin: 0 0 32px;
+  }
+  .question {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .question-text {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin: 0 0 18px;
+  }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    transition: background 0.15s ease;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover:not(.locked) { background: #ede8e1; }
+  .option.selected {
+    background: #dcd3c7;
+    border: 1px solid #a89e92;
+    font-weight: bold;
+  }
+  .option.locked { cursor: default; }
+  .option.correct {
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    color: #1e5631;
+  }
+  .option.wrong {
+    background: #f8d7da;
+    border: 1px solid #d4848a;
+    color: #721c24;
+  }
+  .correct-note {
+    margin-top: 12px;
+    font-size: 0.98rem;
+    color: #1e5631;
+  }
+  .btn-evaluate {
+    background: #5b7e5f;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    transition: background 0.15s ease;
+  }
+  .btn-evaluate:hover:not(:disabled) { background: #4a6b4e; }
+  .btn-evaluate:disabled {
+    background: #b5b5b5;
+    cursor: not-allowed;
+  }
+  .result {
+    background: #fefcf9;
+    border-radius: 12px;
+    border-top: 4px solid #5b7e5f;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-top: 24px;
+    text-align: center;
+  }
+  .score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    margin: 0 0 12px;
+  }
+  .verdict {
+    font-size: 1rem;
+    color: #4a4a4a;
+    margin: 0;
+  }
+  .btn-retry {
+    background: #8c7b6b;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    transition: background 0.15s ease;
+  }
+  .btn-retry:hover { background: #756658; }
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%) translateY(20px);
+    background: #2c2c2c;
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 1000;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.55rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Lehký kvíz pro kohokoliv. Kdo v něm dá aspoň 7 bodů, má průměrné znalosti</h1>
+  <p class="perex">Deset otázek z přírody, kultury i běžného života, u kterých se neztratí skoro nikdo. Kdo posbírá aspoň sedm bodů, má přehled na úrovni průměrného Čecha. Tak kolik jich dáte bez nápovědy?</p>
+
+  <div id="quiz"></div>
+
+  <button id="evaluate" class="btn-evaluate" disabled>Vyhodnotit</button>
+
+  <div id="result"></div>
+</div>
+
+<div id="toast" class="toast">Odpovězte prosím na všechny otázky</div>
+
+<script>
+(function () {
+  const questions = [
+    {
+      text: `1. Který lidský orgán je řídicím centrem nervové soustavy?`,
+      options: [`a) mozek`, `b) srdce`, `c) plíce`, `d) játra`],
+      correct: 0
+    },
+    {
+      text: `2. Který pták je tradičním celosvětovým symbolem míru?`,
+      options: [`a) orel`, `b) sokol`, `c) labuť`, `d) holubice`],
+      correct: 3
+    },
+    {
+      text: `3. Z jakého nerostu je vyrobené jádro obyčejné tužky?`,
+      options: [`a) olovo`, `b) křemen`, `c) grafit`, `d) síra`],
+      correct: 2
+    },
+    {
+      text: `4. Který živočich si na vodních tocích staví hráze z větví a bláta?`,
+      options: [`a) vydra`, `b) bobr`, `c) ondatra`, `d) nutrie`],
+      correct: 1
+    },
+    {
+      text: `5. Který křesťanský svátek připomíná narození Ježíše Krista?`,
+      options: [`a) Vánoce`, `b) Velikonoce`, `c) Letnice`, `d) Nanebevstoupení Páně`],
+      correct: 0
+    },
+    {
+      text: `6. Z čeho včely stavějí plásty ve svém úlu?`,
+      options: [`a) z pylu`, `b) z propolisu`, `c) z nektaru`, `d) z vosku`],
+      correct: 3
+    },
+    {
+      text: `7. Kolik celých týdnů má jeden kalendářní rok?`,
+      options: [`a) 48`, `b) 50`, `c) 52`, `d) 54`],
+      correct: 2
+    },
+    {
+      text: `8. Z jaké suroviny se tradičně vyrábí víno?`,
+      options: [`a) z ječmene`, `b) z hroznů`, `c) z brambor`, `d) z chmele`],
+      correct: 1
+    },
+    {
+      text: `9. Které zvíře bývá tradičně označováno jako král zvířat?`,
+      options: [`a) tygr`, `b) medvěd`, `c) slon`, `d) lev`],
+      correct: 3
+    },
+    {
+      text: `10. Kolik smyslů tradičně rozlišujeme u člověka?`,
+      options: [`a) pět`, `b) čtyři`, `c) šest`, `d) tři`],
+      correct: 0
+    }
+  ];
+
+  const verdicts = [
+    { min: 0, max: 3, text: `Tentokrát to úplně nesedlo. Nevadí, pár otázek vypadá snadněji, než ve skutečnosti je. Zkuste to znovu a uvidíte, že se výsledek rychle zvedne.` },
+    { min: 4, max: 6, text: `Slušný základ, ale k průměru vám pár bodů schází. Většinu věcí máte v hlavě správně, jen tu a tam vás svedla lákavá varianta.` },
+    { min: 7, max: 9, text: `Přesně tady leží hranice průměrného Čecha, a vy jste ji zvládli. Máte pěkný všeobecný přehled a běžné chytáky vás nenachytají.` },
+    { min: 10, max: 10, text: `Bezchybně. Deset z deseti v kvízu, kde stačí selhat u jediné maličkosti. Váš přehled je nadprůměrný a je na co být hrdý.` }
+  ];
+
+  const selected = new Array(questions.length).fill(-1);
+  let evaluated = false;
+
+  const quizEl = document.getElementById(`quiz`);
+  const evaluateBtn = document.getElementById(`evaluate`);
+  const resultEl = document.getElementById(`result`);
+  const toastEl = document.getElementById(`toast`);
+  let toastTimer = null;
+
+  function buildQuiz() {
+    questions.forEach((q, qi) => {
+      const box = document.createElement(`div`);
+      box.className = `question`;
+
+      const qText = document.createElement(`p`);
+      qText.className = `question-text`;
+      qText.textContent = q.text;
+      box.appendChild(qText);
+
+      q.options.forEach((opt, oi) => {
+        const btn = document.createElement(`button`);
+        btn.type = `button`;
+        btn.className = `option`;
+        btn.textContent = opt;
+        btn.addEventListener(`click`, function () {
+          if (evaluated) return;
+          selectOption(qi, oi);
+        });
+        box.appendChild(btn);
+      });
+
+      quizEl.appendChild(box);
+    });
+  }
+
+  function selectOption(qi, oi) {
+    selected[qi] = oi;
+    const box = quizEl.children[qi];
+    const opts = box.querySelectorAll(`.option`);
+    opts.forEach((o, i) => {
+      if (i === oi) {
+        o.classList.add(`selected`);
+      } else {
+        o.classList.remove(`selected`);
+      }
+    });
+    updateEvaluateState();
+  }
+
+  function updateEvaluateState() {
+    const allAnswered = selected.every(function (s) { return s !== -1; });
+    evaluateBtn.disabled = !allAnswered;
+  }
+
+  function showToast() {
+    toastEl.classList.add(`show`);
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastEl.classList.remove(`show`);
+    }, 2600);
+  }
+
+  function evaluate() {
+    const allAnswered = selected.every(function (s) { return s !== -1; });
+    if (!allAnswered) {
+      showToast();
+      return;
+    }
+
+    evaluated = true;
+    let score = 0;
+
+    questions.forEach((q, qi) => {
+      const box = quizEl.children[qi];
+      const opts = box.querySelectorAll(`.option`);
+      opts.forEach(function (o) { o.classList.add(`locked`); });
+
+      const chosen = selected[qi];
+      if (chosen === q.correct) {
+        score++;
+        opts[chosen].classList.remove(`selected`);
+        opts[chosen].classList.add(`correct`);
+      } else {
+        opts[chosen].classList.remove(`selected`);
+        opts[chosen].classList.add(`wrong`);
+        opts[q.correct].classList.add(`correct`);
+
+        const note = document.createElement(`p`);
+        note.className = `correct-note`;
+        note.textContent = `Správná odpověď: ` + q.options[q.correct];
+        box.appendChild(note);
+      }
+    });
+
+    evaluateBtn.style.display = `none`;
+    showResult(score);
+  }
+
+  function showResult(score) {
+    let verdictText = ``;
+    verdicts.forEach(function (v) {
+      if (score >= v.min && score <= v.max) {
+        verdictText = v.text;
+      }
+    });
+
+    const box = document.createElement(`div`);
+    box.className = `result`;
+
+    const scoreEl = document.createElement(`p`);
+    scoreEl.className = `score`;
+    scoreEl.textContent = score + ` z ` + questions.length;
+    box.appendChild(scoreEl);
+
+    const verdictEl = document.createElement(`p`);
+    verdictEl.className = `verdict`;
+    verdictEl.textContent = verdictText;
+    box.appendChild(verdictEl);
+
+    const retryBtn = document.createElement(`button`);
+    retryBtn.type = `button`;
+    retryBtn.className = `btn-retry`;
+    retryBtn.textContent = `Zkusit znovu`;
+    retryBtn.addEventListener(`click`, resetQuiz);
+    box.appendChild(retryBtn);
+
+    resultEl.appendChild(box);
+    box.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function resetQuiz() {
+    evaluated = false;
+    for (let i = 0; i < selected.length; i++) selected[i] = -1;
+    quizEl.innerHTML = ``;
+    resultEl.innerHTML = ``;
+    evaluateBtn.style.display = `block`;
+    evaluateBtn.disabled = true;
+    buildQuiz();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evaluateBtn.addEventListener(`click`, evaluate);
+
+  buildQuiz();
+})();
+</script>
+</body>
+</html>
