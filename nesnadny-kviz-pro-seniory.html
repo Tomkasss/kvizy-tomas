@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nesnadný kvíz pro nejstarší seniory</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 16px;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.3;
+    color: #2c2c2c;
+    margin: 0 0 20px;
+  }
+  .perex {
+    font-size: 1.1rem;
+    color: #4a4a4a;
+    margin: 0 0 36px;
+  }
+  .question {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin-bottom: 18px;
+  }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 12px;
+    transition: background 0.15s ease;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover { background: #ede8e1; }
+  .option.selected {
+    background: #dcd3c7;
+    border: 1px solid #a89e92;
+    font-weight: bold;
+  }
+  .option.correct {
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    color: #1e5631;
+  }
+  .option.wrong {
+    background: #f8d7da;
+    border: 1px solid #d4848a;
+    color: #721c24;
+  }
+  .option.locked { cursor: default; }
+  .reveal {
+    margin-top: 12px;
+    font-size: 0.98rem;
+    color: #1e5631;
+  }
+  #evaluate, #retry {
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+  }
+  #evaluate { background: #5b7e5f; }
+  #evaluate:hover { background: #4a6b4e; }
+  #evaluate:disabled {
+    background: #b5b5b5;
+    cursor: not-allowed;
+  }
+  #retry { background: #8c7b6b; }
+  #retry:hover { background: #756658; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-top: 24px;
+  }
+  .score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    text-align: center;
+    margin: 0 0 16px;
+  }
+  .verdict {
+    font-size: 1rem;
+    color: #4a4a4a;
+    text-align: center;
+    margin: 0;
+  }
+  .hidden { display: none; }
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%);
+    background: #2c2c2c;
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 100;
+  }
+  #toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Nesnadný kvíz pro nejstarší seniory: kdo dá 10/10, ten má mozek v kondici i v důchodu</h1>
+  <p class="perex">Deset záludných otázek z deseti různých oborů, u kterých zaváhá i leckterý mladší. Milí senioři, kdo z vás zvládne všech deset, má hlavu v plné kondici i po letech. Zkuste, kolik bodů uhrajete.</p>
+
+  <div id="quiz"></div>
+
+  <button id="evaluate" disabled>Vyhodnotit</button>
+
+  <div id="result" class="hidden">
+    <p class="score" id="score"></p>
+    <p class="verdict" id="verdict"></p>
+  </div>
+
+  <button id="retry" class="hidden">Zkusit znovu</button>
+</div>
+<div id="toast"></div>
+
+<script>
+(function () {
+  const questions = [
+    {
+      q: `1. Jak se v lékařství odborně označuje krátkozrakost?`,
+      options: [`a) presbyopie`, `b) myopie`, `c) hypermetropie`, `d) astigmatismus`],
+      correct: 1
+    },
+    {
+      q: `2. Jak se nazývá technika nástěnné malby nanášené do vlhké omítky?`,
+      options: [`a) tempera`, `b) mozaika`, `c) secco`, `d) freska`],
+      correct: 3
+    },
+    {
+      q: `3. Jak se nazývá zdánlivá dráha Slunce po obloze během roku?`,
+      options: [`a) ekliptika`, `b) nebeský rovník`, `c) zenit`, `d) poledník`],
+      correct: 0
+    },
+    {
+      q: `4. Jak se nazývá pět knih Mojžíšových, které tvoří základ judaismu?`,
+      options: [`a) Talmud`, `b) Tanach`, `c) Tóra`, `d) Korán`],
+      correct: 2
+    },
+    {
+      q: `5. Kolik hráčů nastupuje v poli za jedno mužstvo v ragby union?`,
+      options: [`a) 15`, `b) 13`, `c) 11`, `d) 7`],
+      correct: 0
+    },
+    {
+      q: `6. Který německý kancléř je znám pod přezdívkou železný kancléř?`,
+      options: [`a) Konrad Adenauer`, `b) Otto von Bismarck`, `c) Willy Brandt`, `d) Helmut Kohl`],
+      correct: 1
+    },
+    {
+      q: `7. Která kyselina se používá k leptání skla?`,
+      options: [`a) kyselina sírová`, `b) kyselina chlorovodíková`, `c) kyselina dusičná`, `d) kyselina fluorovodíková`],
+      correct: 3
+    },
+    {
+      q: `8. Který průliv odděluje Asii od Severní Ameriky?`,
+      options: [`a) Gibraltarský průliv`, `b) Magalhãesův průliv`, `c) Beringův průliv`, `d) Davisův průliv`],
+      correct: 2
+    },
+    {
+      q: `9. Jak se nazývá nauka o správné spisovné výslovnosti?`,
+      options: [`a) ortoepie`, `b) ortografie`, `c) etymologie`, `d) morfologie`],
+      correct: 0
+    },
+    {
+      q: `10. Kdo je autorem Božské komedie?`,
+      options: [`a) Francesco Petrarca`, `b) Dante Alighieri`, `c) Giovanni Boccaccio`, `d) Vergilius`],
+      correct: 1
+    }
+  ];
+
+  const verdicts = [
+    { min: 0, max: 3, text: `Pár otázek dnes zaskočilo a to nevadí. Tenhle kvíz byl schválně nelítostný a sahal i po věcech, na které člověk za celý život narazí jen párkrát. Vezměte si ho jako rozcvičku, ne jako vysvědčení. I jedna nová odpověď v hlavě je výhra.` },
+    { min: 4, max: 6, text: `Pevný střed, kam se dostane jen ten, kdo má slušný rozhled napříč obory. Něco vám zůstalo ze školy, něco z četby a poslechu. Pár otázek vás zradilo právě tím, jak blízko si byly nabízené možnosti. Solidní výkon, na kterém se dá stavět.` },
+    { min: 7, max: 9, text: `Výborně. Tady už mluvíme o rozhledu, jakým se málokdo může pochlubit. Pamatujete si i to, co většina lidí nikdy nevěděla nebo dávno zapomněla. Roky čtení, sledování a přemýšlení se nedají ošidit a vy jste toho živým důkazem.` },
+    { min: 10, max: 10, text: `Bezchybně. Tenhle výsledek nedá ani většina vysokoškoláků bez přípravy. Máte hlavu v takové kondici, že by vám ji leckdo mladší mohl závidět. Vnoučata by za vámi měla chodit pro radu dřív než na internet.` }
+  ];
+
+  const quizEl = document.getElementById(`quiz`);
+  const evaluateBtn = document.getElementById(`evaluate`);
+  const retryBtn = document.getElementById(`retry`);
+  const resultEl = document.getElementById(`result`);
+  const scoreEl = document.getElementById(`score`);
+  const verdictEl = document.getElementById(`verdict`);
+  const toastEl = document.getElementById(`toast`);
+
+  const answers = new Array(questions.length).fill(null);
+  let evaluated = false;
+  let toastTimer = null;
+
+  function render() {
+    quizEl.innerHTML = ``;
+    questions.forEach((item, qi) => {
+      const box = document.createElement(`div`);
+      box.className = `question`;
+
+      const qText = document.createElement(`div`);
+      qText.className = `q-text`;
+      qText.textContent = item.q;
+      box.appendChild(qText);
+
+      item.options.forEach((opt, oi) => {
+        const btn = document.createElement(`button`);
+        btn.className = `option`;
+        btn.type = `button`;
+        btn.textContent = opt;
+        btn.addEventListener(`click`, function () {
+          if (evaluated) return;
+          answers[qi] = oi;
+          Array.from(box.querySelectorAll(`.option`)).forEach(b => b.classList.remove(`selected`));
+          btn.classList.add(`selected`);
+          updateEvaluateState();
+        });
+        box.appendChild(btn);
+      });
+
+      quizEl.appendChild(box);
+    });
+  }
+
+  function updateEvaluateState() {
+    evaluateBtn.disabled = answers.some(a => a === null);
+  }
+
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add(`show`);
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove(`show`), 2500);
+  }
+
+  function getVerdict(score) {
+    const v = verdicts.find(x => score >= x.min && score <= x.max);
+    return v ? v.text : ``;
+  }
+
+  evaluateBtn.addEventListener(`click`, function () {
+    if (answers.some(a => a === null)) {
+      showToast(`Odpovězte prosím na všechny otázky`);
+      return;
+    }
+    evaluated = true;
+    let score = 0;
+
+    const boxes = quizEl.querySelectorAll(`.question`);
+    boxes.forEach((box, qi) => {
+      const opts = box.querySelectorAll(`.option`);
+      const correct = questions[qi].correct;
+      const chosen = answers[qi];
+      if (chosen === correct) score++;
+
+      opts.forEach((btn, oi) => {
+        btn.classList.remove(`selected`);
+        btn.classList.add(`locked`);
+        if (oi === correct) {
+          btn.classList.add(`correct`);
+        } else if (oi === chosen) {
+          btn.classList.add(`wrong`);
+        }
+      });
+
+      if (chosen !== correct) {
+        const reveal = document.createElement(`div`);
+        reveal.className = `reveal`;
+        reveal.textContent = `Správná odpověď: ` + questions[qi].options[correct];
+        box.appendChild(reveal);
+      }
+    });
+
+    scoreEl.textContent = score + ` z ` + questions.length;
+    verdictEl.textContent = getVerdict(score);
+    resultEl.classList.remove(`hidden`);
+    retryBtn.classList.remove(`hidden`);
+    evaluateBtn.classList.add(`hidden`);
+
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  });
+
+  retryBtn.addEventListener(`click`, function () {
+    evaluated = false;
+    for (let i = 0; i < answers.length; i++) answers[i] = null;
+    resultEl.classList.add(`hidden`);
+    retryBtn.classList.add(`hidden`);
+    evaluateBtn.classList.remove(`hidden`);
+    evaluateBtn.disabled = true;
+    render();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
