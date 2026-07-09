@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rychlý test věku pro seniory</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 16px;
+    line-height: 1.55;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.3;
+    color: #2c2c2c;
+    margin: 0 0 18px;
+  }
+  .perex {
+    font-size: 1.1rem;
+    color: #4a4a4a;
+    margin: 0 0 32px;
+  }
+  .question {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin: 0 0 18px;
+  }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 12px;
+    transition: background 0.15s ease;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover { background: #ede8e1; }
+  .option.selected {
+    background: #dcd3c7;
+    border: 1px solid #a89e92;
+    font-weight: bold;
+  }
+  .option.chosen-final {
+    background: #dcd3c7;
+    border: 1px solid #a89e92;
+    font-weight: bold;
+  }
+  .quiz-locked .option {
+    cursor: default;
+  }
+  .quiz-locked .option:hover {
+    background: #f7f4f0;
+  }
+  .quiz-locked .option.selected:hover,
+  .quiz-locked .option.chosen-final:hover {
+    background: #dcd3c7;
+  }
+  #evaluateBtn {
+    background: #5b7e5f;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    transition: background 0.15s ease;
+  }
+  #evaluateBtn:hover { background: #4a6b4e; }
+  #evaluateBtn.disabled {
+    background: #b5b5b5;
+    cursor: not-allowed;
+  }
+  #evaluateBtn.disabled:hover { background: #b5b5b5; }
+  .result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 24px;
+  }
+  .result-headline {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    text-align: center;
+    margin: 0 0 8px;
+  }
+  .result-tally {
+    text-align: center;
+    font-size: 1rem;
+    color: #6a6a6a;
+    margin: 0 0 20px;
+  }
+  .result-verdict {
+    font-size: 1rem;
+    color: #4a4a4a;
+    text-align: center;
+    margin: 0 0 16px;
+  }
+  .result-verdict:last-of-type { margin-bottom: 0; }
+  .result-note {
+    font-size: 0.95rem;
+    color: #6a6a6a;
+    text-align: center;
+    font-style: italic;
+    margin: 20px 0 0;
+  }
+  #retryBtn {
+    background: #8c7b6b;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    transition: background 0.15s ease;
+  }
+  #retryBtn:hover { background: #756658; }
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%) translateY(20px);
+    background: #2c2c2c;
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 100;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  @media (max-width: 600px) {
+    body { padding: 24px 16px; }
+    h1 { font-size: 1.55rem; }
+    .question { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="quizTitle"></h1>
+  <p class="perex" id="quizPerex"></p>
+  <div id="questions"></div>
+  <button id="evaluateBtn" class="disabled" type="button"></button>
+  <div id="resultArea"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const titleText = `Rychlý test věku pro seniory: odpovězte na 10 bleskových otázek a já si tipnu, kolik vám je let`;
+  const perexText = `Léta se nepočítají jen v občance, ale i v tom, jak žijete, jak nakupujete a co posloucháte. Odpovězte, milí senioři, na deset bleskových otázek a nechte mě hádat, kolik vám doopravdy je.`;
+
+  const questions = [
+    {
+      q: `1. Jaký rytmus dne vám teď vyhovuje nejvíc?`,
+      options: [
+        `nabitý program, kdy stihnete spoustu věcí a ještě vyrazíte ven`,
+        `svižné dopoledne a odpoledne vyhrazené jen pro to, co vás baví`,
+        `klidné tempo s dostatkem času na každou činnost`,
+        `poklidný den s dlouhými přestávkami na odpočinek`
+      ]
+    },
+    {
+      q: `2. Jak se nejčastěji spojíte s rodinou?`,
+      options: [
+        `videohovorem, kde se všichni vidíte a hned si ukážete, co je nového`,
+        `zprávou v telefonu nebo krátkým zavoláním, kdykoli vás něco napadne`,
+        `zavoláte na pevnou linku nebo počkáte, až se stavíte osobně`,
+        `domluvíte se na návštěvě a vše proberete až u kávy`
+      ]
+    },
+    {
+      q: `3. Jak nejraději platíte při běžném nákupu?`,
+      options: [
+        `mobilem nebo hodinkami, jen přiložíte a je hotovo`,
+        `kartou bez přemýšlení, pípnete a jdete dál`,
+        `kartou, ale radši ji vložíte a zadáte kód pro jistotu`,
+        `hotovostí, ať máte přehled o každé koruně`
+      ]
+    },
+    {
+      q: `4. Kde si nejraději obstaráte týdenní nákup?`,
+      options: [
+        `objednáte online a necháte si vše dovézt až domů`,
+        `zajedete do velkého obchodu a nakoupíte vše najednou`,
+        `obejdete pár prodejen, které dobře znáte`,
+        `chodíte do stejného krámku, kde vás znají jménem`
+      ]
+    },
+    {
+      q: `5. Jak si nejraději uchováváte vzpomínky?`,
+      options: [
+        `ukládáte fotky do telefonu a sdílíte je s rodinou`,
+        `občas si něco vytisknete a zbytek necháte v počítači`,
+        `máte fotky v albech, která si ráda prohlížíte`,
+        `chováte vzpomínky v hlavě a ve schránce plné dopisů`
+      ]
+    },
+    {
+      q: `6. Odkud se nejčastěji dozvídáte, co je nového?`,
+      options: [
+        `z telefonu, kde vám novinky naskakují průběžně`,
+        `z internetu i televize, podle toho, co máte zrovna po ruce`,
+        `z večerních zpráv v televizi, na které se těšíte`,
+        `z rozhlasu a novin, které si pročtete od začátku do konce`
+      ]
+    },
+    {
+      q: `7. Co si nejraději obléknete na běžný den?`,
+      options: [
+        `pohodlné sportovní kousky, ve kterých se hýbete i vyrazíte ven`,
+        `něco praktického, co vydrží celý den a hodí se všude`,
+        `osvědčené oblečení, které vám sedí a nezklame`,
+        `upravený a klasický styl, na kterém si zakládáte`
+      ]
+    },
+    {
+      q: `8. Jaká hudba vás nejspíš pohladí?`,
+      options: [
+        `současné písničky, které slýcháte kolem sebe`,
+        `svižné melodie, u kterých vydržíte podupávat do rytmu`,
+        `osvědčené písně, které si pobrukujete`,
+        `klasické skladby a lidovky, které vás vždycky potěší`
+      ]
+    },
+    {
+      q: `9. Jak si nejraději zařídíte, co je potřeba vyřídit?`,
+      options: [
+        `vše zvládnete online z pohodlí domova`,
+        `něco vyřídíte na internetu a na zbytek zajdete osobně`,
+        `radši zajdete na místo a domluvíte se z očí do očí`,
+        `vše vyřizujete osobně nebo dopisem, na papíře je to jisté`
+      ]
+    },
+    {
+      q: `10. Co si nejraději dopřejete k příjemnému posezení?`,
+      options: [
+        `něco nového, co vás láká ochutnat`,
+        `osvědčenou dobrotu z oblíbené kavárny nebo cukrárny`,
+        `domácí kávu a vlastní bábovku podle staré receptury`,
+        `sklenku něčeho dobrého a poctivé domácí jídlo jako kdysi`
+      ]
+    }
+  ];
+
+  const results = {
+    A: {
+      title: `Kolem 60 až 65 let`,
+      text: `Převaha odpovědí A: Kolem 60 až 65 let. Jste čerstvý senior s chutí do života a s dobou držíte krok úplně bez potíží. Novinky vás baví, technika vám slouží a den si rád naplníte pohybem i zážitky. Kdyby vám měl někdo hádat věk, klidně by pár let ubral.`
+    },
+    B: {
+      title: `Kolem 66 až 72 let`,
+      text: `Převaha odpovědí B: Kolem 66 až 72 let. Jste vitální a plný elánu, ale z novinek si vybíráte hlavně to, co vám usnadní život. Umíte spojit moderní vymoženosti s osvědčenými zvyky a den máte pěkně vyvážený. Roky na vás nejsou znát tak, jak by čísla napovídala.`
+    },
+    C: {
+      title: `Kolem 73 až 79 let`,
+      text: `Převaha odpovědí C: Kolem 73 až 79 let. Máte rád klidnější tempo a jistotu věcí, které dobře znáte. Novým vymoženostem se nebráníte, ale sáhnete po nich jen tehdy, když se opravdu hodí. Ceníte si pohody, řádu a času stráveného přesně po svém.`
+    },
+    D: {
+      title: `80 let a více`,
+      text: `Převaha odpovědí D: 80 let a více. Jste věrný klasice, tradici a osvědčeným způsobům, které vás nikdy nezklamaly. Máte rád klid, rozvahu a věci dělané pořádně a s rozmyslem. Vaše zkušenost a nadhled jsou bohatstvím, které se s lety jen násobí.`
+    }
+  };
+
+  const letters = [`A`, `B`, `C`, `D`];
+
+  const titleEl = document.getElementById(`quizTitle`);
+  const perexEl = document.getElementById(`quizPerex`);
+  const questionsEl = document.getElementById(`questions`);
+  const evaluateBtn = document.getElementById(`evaluateBtn`);
+  const resultArea = document.getElementById(`resultArea`);
+  const toast = document.getElementById(`toast`);
+
+  titleEl.textContent = titleText;
+  perexEl.textContent = perexText;
+  evaluateBtn.textContent = `Vyhodnotit`;
+
+  const answers = new Array(questions.length).fill(null);
+  let locked = false;
+  let toastTimer = null;
+
+  function buildQuestions() {
+    questionsEl.innerHTML = ``;
+    questions.forEach(function (item, qIndex) {
+      const box = document.createElement(`div`);
+      box.className = `question`;
+
+      const qText = document.createElement(`div`);
+      qText.className = `q-text`;
+      qText.textContent = item.q;
+      box.appendChild(qText);
+
+      item.options.forEach(function (optText, oIndex) {
+        const btn = document.createElement(`button`);
+        btn.className = `option`;
+        btn.type = `button`;
+        btn.textContent = optText;
+        btn.setAttribute(`data-q`, String(qIndex));
+        btn.setAttribute(`data-o`, String(oIndex));
+        btn.addEventListener(`click`, function () {
+          if (locked) return;
+          answers[qIndex] = oIndex;
+          const siblings = box.querySelectorAll(`.option`);
+          siblings.forEach(function (s) { s.classList.remove(`selected`); });
+          btn.classList.add(`selected`);
+          updateEvaluateState();
+        });
+        box.appendChild(btn);
+      });
+
+      questionsEl.appendChild(box);
+    });
+  }
+
+  function allAnswered() {
+    return answers.every(function (a) { return a !== null; });
+  }
+
+  function updateEvaluateState() {
+    if (allAnswered()) {
+      evaluateBtn.classList.remove(`disabled`);
+    } else {
+      evaluateBtn.classList.add(`disabled`);
+    }
+  }
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add(`show`);
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toast.classList.remove(`show`);
+    }, 2600);
+  }
+
+  function evaluate() {
+    if (!allAnswered()) {
+      showToast(`Odpovězte prosím na všechny otázky`);
+      return;
+    }
+
+    locked = true;
+    document.querySelector(`.wrap`).classList.add(`quiz-locked`);
+
+    const tally = { A: 0, B: 0, C: 0, D: 0 };
+    answers.forEach(function (o) {
+      tally[letters[o]] += 1;
+    });
+
+    document.querySelectorAll(`.question`).forEach(function (box, qIndex) {
+      const chosen = answers[qIndex];
+      const opts = box.querySelectorAll(`.option`);
+      opts.forEach(function (opt, oIndex) {
+        opt.classList.remove(`selected`);
+        if (oIndex === chosen) {
+          opt.classList.add(`chosen-final`);
+        }
+      });
+    });
+
+    let max = 0;
+    letters.forEach(function (l) { if (tally[l] > max) max = tally[l]; });
+    const winners = letters.filter(function (l) { return tally[l] === max; });
+
+    renderResult(winners, tally);
+
+    evaluateBtn.style.display = `none`;
+    document.getElementById(`resultScroll`).scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function renderResult(winners, tally) {
+    resultArea.innerHTML = ``;
+
+    const anchor = document.createElement(`div`);
+    anchor.id = `resultScroll`;
+    resultArea.appendChild(anchor);
+
+    const box = document.createElement(`div`);
+    box.className = `result`;
+
+    const tallyLine = document.createElement(`p`);
+    tallyLine.className = `result-tally`;
+    tallyLine.textContent = `Vaše odpovědi: A × ` + tally.A + `, B × ` + tally.B + `, C × ` + tally.C + `, D × ` + tally.D;
+
+    if (winners.length === 1) {
+      const r = results[winners[0]];
+      const headline = document.createElement(`div`);
+      headline.className = `result-headline`;
+      headline.textContent = r.title;
+      box.appendChild(headline);
+      box.appendChild(tallyLine);
+
+      const verdict = document.createElement(`p`);
+      verdict.className = `result-verdict`;
+      verdict.textContent = r.text;
+      box.appendChild(verdict);
+    } else {
+      const headline = document.createElement(`div`);
+      headline.className = `result-headline`;
+      headline.textContent = `Shoda na více výsledcích`;
+      box.appendChild(headline);
+      box.appendChild(tallyLine);
+
+      const note = document.createElement(`p`);
+      note.className = `result-note`;
+      note.textContent = `Máte stejný počet odpovědí u více písmen, proto vám sedí hned několik výsledků. Podívejte se, který vás vystihuje nejvíc.`;
+      box.appendChild(note);
+
+      winners.forEach(function (l) {
+        const verdict = document.createElement(`p`);
+        verdict.className = `result-verdict`;
+        verdict.textContent = results[l].text;
+        box.appendChild(verdict);
+      });
+    }
+
+    const retryBtn = document.createElement(`button`);
+    retryBtn.id = `retryBtn`;
+    retryBtn.type = `button`;
+    retryBtn.textContent = `Zkusit znovu`;
+    retryBtn.addEventListener(`click`, resetQuiz);
+
+    resultArea.appendChild(box);
+    resultArea.appendChild(retryBtn);
+  }
+
+  function resetQuiz() {
+    for (let i = 0; i < answers.length; i++) answers[i] = null;
+    locked = false;
+    document.querySelector(`.wrap`).classList.remove(`quiz-locked`);
+    resultArea.innerHTML = ``;
+    evaluateBtn.style.display = `block`;
+    buildQuestions();
+    updateEvaluateState();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evaluateBtn.addEventListener(`click`, evaluate);
+
+  buildQuestions();
+  updateEvaluateState();
+})();
+</script>
+</body>
+</html>
