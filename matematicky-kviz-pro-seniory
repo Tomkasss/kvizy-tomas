@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matematický kvíz pro seniory</title>
+<style>
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 16px 80px;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.3;
+    color: #2c2c2c;
+    margin: 0 0 20px;
+  }
+  .perex {
+    font-size: 1.1rem;
+    color: #4a4a4a;
+    margin: 0 0 32px;
+  }
+  .question {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin: 0 0 18px;
+  }
+  input[type="text"] {
+    width: 100%;
+    font-family: "Georgia", "Times New Roman", serif;
+    font-size: 1rem;
+    color: #3a3a3a;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    outline: none;
+  }
+  input[type="text"]:focus {
+    background: #ede8e1;
+    border-color: #a89e92;
+  }
+  input[type="text"].correct {
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    color: #1e5631;
+    font-weight: bold;
+  }
+  input[type="text"].wrong {
+    background: #f8d7da;
+    border: 1px solid #d4848a;
+    color: #721c24;
+    font-weight: bold;
+  }
+  input[type="text"]:disabled {
+    cursor: not-allowed;
+  }
+  .reveal {
+    margin-top: 14px;
+    font-size: 1rem;
+    color: #1e5631;
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: none;
+  }
+  .reveal.show { display: block; }
+  #evaluate, #retry {
+    display: block;
+    margin: 40px auto 0;
+    padding: 16px 40px;
+    font-family: "Georgia", "Times New Roman", serif;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  #evaluate {
+    background: #5b7e5f;
+  }
+  #evaluate:hover:not(:disabled) {
+    background: #4a6b4e;
+  }
+  #evaluate:disabled {
+    background: #b5b5b5;
+    cursor: not-allowed;
+  }
+  #retry {
+    background: #8c7b6b;
+  }
+  #retry:hover {
+    background: #756658;
+  }
+  #result {
+    background: #fefcf9;
+    border-radius: 12px;
+    border-top: 4px solid #5b7e5f;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-top: 40px;
+    display: none;
+  }
+  #result.show { display: block; }
+  .score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    text-align: center;
+    margin: 0 0 8px;
+  }
+  .result-heading {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #2c2c2c;
+    text-align: center;
+    margin: 0 0 16px;
+  }
+  .verdict {
+    font-size: 1rem;
+    color: #4a4a4a;
+    text-align: center;
+    margin: 0;
+  }
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%) translateY(20px);
+    background: #2c2c2c;
+    color: #ffffff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 100;
+    max-width: 90%;
+    text-align: center;
+  }
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="quiz-title"></h1>
+  <p class="perex" id="quiz-perex"></p>
+  <div id="questions"></div>
+  <button id="evaluate" type="button" disabled></button>
+  <div id="result">
+    <p class="score" id="score"></p>
+    <p class="result-heading" id="result-heading"></p>
+    <p class="verdict" id="verdict"></p>
+    <button id="retry" type="button"></button>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+(function () {
+  const TITLE = `Matematický kvíz pro seniory: kdo zvládne všech 10 otázek, počítá jako třicátník`;
+  const PEREX = `Senioři, tenhle test není o vědomostech, ale o počítání z hlavy. Deset úloh na procenta, zlomky, poměry i selský rozum kolem peněz. Kdo zvládne všech deset bez zaváhání, počítá stejně hbitě jako leckterý třicátník.`;
+
+  const RESULT_HEADING = `Jak hbitě počítá vaše hlava?`;
+
+  const questions = [
+    { q: `Kabát stál 800 korun, nejdřív zdražil o 10 procent a potom zase zlevnil o 10 procent. Kolik korun stojí nyní?`,
+      answers: [`792`, `sedm set devadesát dva`] },
+    { q: `Kolik korun úroku dostanete za jeden rok, když uložíte 25 000 korun na úrok 4 procenta ročně?`,
+      answers: [`1000`, `tisíc`, `jeden tisíc`] },
+    { q: `Pět rohlíků stojí 20 korun. Kolik korun zaplatíte za osm rohlíků?`,
+      answers: [`32`, `třicet dva`] },
+    { q: `Výhru 3 500 korun si dva vnuci rozdělí v poměru 3 ku 4. Kolik korun dostane ten, na kterého připadne větší díl?`,
+      answers: [`2000`, `dva tisíce`] },
+    { q: `Pole má rozlohu 840 metrů čtverečních, třetinu osázíte bramborami a čtvrtinu mrkví. Kolik metrů čtverečních zbude na trávu?`,
+      answers: [`350`, `tři sta padesát`, `třista padesát`] },
+    { q: `Kolik korun zaplatíte za 4 kilogramy brambor po 15 korunách a 3 kilogramy cibule po 20 korunách?`,
+      answers: [`120`, `sto dvacet`] },
+    { q: `Na kolik dní vystačí balení s 84 tabletami, když berete 2 tablety denně?`,
+      answers: [`42`, `čtyřicet dva`] },
+    { q: `Kolik zavařovacích sklenic zbyde, když jich 90 rovnáte po osmi do krabic?`,
+      answers: [`2`, `dva`, `dvě`] },
+    { q: `Kolik metrů plotu potřebujete na oplocení celého obvodu obdélníkové zahrady o rozměrech 18 krát 7 metrů?`,
+      answers: [`50`, `padesát`] },
+    { q: `Kolik korun naspoříte za tři čtvrtě roku, když si každý měsíc odložíte 350 korun?`,
+      answers: [`3150`, `tři tisíce sto padesát`] }
+  ];
+
+  const tiers = [
+    { min: 0, max: 3, text: `Počítání si žádá rozcvičku. Procenta, poměry i řetězené úlohy vás dnes přibrzdily. Nic dramatického, hlava jen chvíli běžela na volnoběh. Počítejte nákup z hlavy, kontrolujte účtenky bez kalkulačky a za pár týdnů uvidíte znatelný posun.` },
+    { min: 4, max: 6, text: `Solidní průměr. Základní počty vám jdou spolehlivě, u záludnějších úloh se zlomky a procenty přišlo zaváhání. Přesně sem spadne většina lidí, kteří si k testu sednou bez přípravy. Máte co zlepšovat, ale základ je pevný.` },
+    { min: 7, max: 9, text: `Bystrý počtář. Procenta, poměry i práce se zlomky vám jdou výrazně líp než většině vrstevníků. Vaše hlava počítá rychle a přesně, jen o vlásek vám unikla dokonalost.` },
+    { min: 10, max: 10, text: `Bezchybný výkon. Past se zdražením a zlevněním o stejná procenta, poměry, zlomky z pole i spoření po měsících, nic vás nezaskočilo. Takhle pružnou hlavu na počítání by vám záviděl leckdo o generaci mladší.` }
+  ];
+
+  const tierHeadings = [
+    { min: 0, max: 3, label: `Počítání si žádá rozcvičku` },
+    { min: 4, max: 6, label: `Solidní průměr` },
+    { min: 7, max: 9, label: `Bystrý počtář` },
+    { min: 10, max: 10, label: `Počítáte jako třicátník` }
+  ];
+
+  const titleEl = document.getElementById(`quiz-title`);
+  const perexEl = document.getElementById(`quiz-perex`);
+  const questionsEl = document.getElementById(`questions`);
+  const evaluateBtn = document.getElementById(`evaluate`);
+  const retryBtn = document.getElementById(`retry`);
+  const resultEl = document.getElementById(`result`);
+  const scoreEl = document.getElementById(`score`);
+  const resultHeadingEl = document.getElementById(`result-heading`);
+  const verdictEl = document.getElementById(`verdict`);
+  const toastEl = document.getElementById(`toast`);
+
+  titleEl.textContent = TITLE;
+  perexEl.textContent = PEREX;
+  evaluateBtn.textContent = `Vyhodnotit`;
+  retryBtn.textContent = `Zkusit znovu`;
+
+  let evaluated = false;
+  let toastTimer = null;
+
+  function normalize(str) {
+    return String(str)
+      .toLowerCase()
+      .normalize(`NFD`).replace(/[\u0300-\u036f]/g, ``)
+      .replace(/,/g, `.`)
+      .replace(/[\s\u00a0]+/g, ``)
+      .replace(/(kc|koruny|korunami|korun|kn)/g, ``)
+      .replace(/\.-$/, ``)
+      .replace(/\.0+$/, ``)
+      .trim();
+  }
+
+  function buildInputs() {
+    questionsEl.innerHTML = ``;
+    questions.forEach(function (item, index) {
+      const box = document.createElement(`div`);
+      box.className = `question`;
+
+      const qText = document.createElement(`p`);
+      qText.className = `q-text`;
+      qText.textContent = (index + 1) + `. ` + item.q;
+      box.appendChild(qText);
+
+      const input = document.createElement(`input`);
+      input.type = `text`;
+      input.setAttribute(`inputmode`, `text`);
+      input.setAttribute(`autocomplete`, `off`);
+      input.setAttribute(`data-index`, String(index));
+      input.setAttribute(`aria-label`, `Odpověď na otázku ` + (index + 1));
+      input.placeholder = `Vaše odpověď`;
+      input.addEventListener(`input`, updateEvaluateState);
+      box.appendChild(input);
+
+      const reveal = document.createElement(`div`);
+      reveal.className = `reveal`;
+      reveal.setAttribute(`data-reveal`, String(index));
+      box.appendChild(reveal);
+
+      questionsEl.appendChild(box);
+    });
+  }
+
+  function allAnswered() {
+    const inputs = questionsEl.querySelectorAll(`input[type="text"]`);
+    for (let i = 0; i < inputs.length; i++) {
+      if (inputs[i].value.trim() === ``) return false;
+    }
+    return true;
+  }
+
+  function updateEvaluateState() {
+    if (evaluated) return;
+    evaluateBtn.disabled = !allAnswered();
+  }
+
+  function showToast(message) {
+    toastEl.textContent = message;
+    toastEl.classList.add(`show`);
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastEl.classList.remove(`show`);
+    }, 2600);
+  }
+
+  function isCorrect(index, value) {
+    const normVal = normalize(value);
+    if (normVal === ``) return false;
+    return questions[index].answers.some(function (a) {
+      return normalize(a) === normVal;
+    });
+  }
+
+  function tierFor(score) {
+    for (let i = 0; i < tiers.length; i++) {
+      if (score >= tiers[i].min && score <= tiers[i].max) return tiers[i].text;
+    }
+    return ``;
+  }
+
+  function headingFor(score) {
+    for (let i = 0; i < tierHeadings.length; i++) {
+      if (score >= tierHeadings[i].min && score <= tierHeadings[i].max) return tierHeadings[i].label;
+    }
+    return ``;
+  }
+
+  function evaluate() {
+    if (evaluated) return;
+    if (!allAnswered()) {
+      showToast(`Odpovězte prosím na všechny otázky`);
+      return;
+    }
+
+    evaluated = true;
+    let score = 0;
+    const inputs = questionsEl.querySelectorAll(`input[type="text"]`);
+
+    inputs.forEach(function (input) {
+      const index = parseInt(input.getAttribute(`data-index`), 10);
+      const correct = isCorrect(index, input.value);
+      input.disabled = true;
+      if (correct) {
+        input.classList.add(`correct`);
+        score++;
+      } else {
+        input.classList.add(`wrong`);
+        const reveal = questionsEl.querySelector(`[data-reveal="` + index + `"]`);
+        reveal.textContent = `Správná odpověď: ` + questions[index].answers[0];
+        reveal.classList.add(`show`);
+      }
+    });
+
+    scoreEl.textContent = score + ` z ` + questions.length;
+    resultHeadingEl.textContent = RESULT_HEADING + ` ` + headingFor(score);
+    verdictEl.textContent = tierFor(score);
+
+    evaluateBtn.disabled = true;
+    evaluateBtn.style.display = `none`;
+    resultEl.classList.add(`show`);
+
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function reset() {
+    evaluated = false;
+    resultEl.classList.remove(`show`);
+    evaluateBtn.style.display = `block`;
+    evaluateBtn.disabled = true;
+    buildInputs();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evaluateBtn.addEventListener(`click`, evaluate);
+  retryBtn.addEventListener(`click`, reset);
+
+  buildInputs();
+})();
+</script>
+</body>
+</html>
