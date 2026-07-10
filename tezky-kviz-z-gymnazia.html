@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Těžký kvíz z gymnázia: 10 otázek, se kterými mají často problém i absolventi</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 16px;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.3;
+    color: #2c2c2c;
+    margin: 0 0 18px;
+  }
+  .perex {
+    font-size: 1.1rem;
+    color: #4a4a4a;
+    margin: 0 0 36px;
+  }
+  .question {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin: 0 0 18px;
+  }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #3a3a3a;
+    margin-bottom: 12px;
+    transition: background 0.15s ease;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover:not(.locked) { background: #ede8e1; }
+  .option.selected {
+    background: #dcd3c7;
+    border: 1px solid #a89e92;
+    font-weight: bold;
+  }
+  .option.locked { cursor: default; }
+  .option.correct {
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    color: #1e5631;
+  }
+  .option.wrong {
+    background: #f8d7da;
+    border: 1px solid #d4848a;
+    color: #721c24;
+  }
+  .input-answer {
+    width: 100%;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #3a3a3a;
+  }
+  .input-answer:disabled { cursor: default; }
+  .input-answer.correct {
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    color: #1e5631;
+  }
+  .input-answer.wrong {
+    background: #f8d7da;
+    border: 1px solid #d4848a;
+    color: #721c24;
+  }
+  .correct-reveal {
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    border-radius: 8px;
+    color: #1e5631;
+    font-size: 0.98rem;
+  }
+  .btn-evaluate {
+    background: #5b7e5f;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    transition: background 0.15s ease;
+  }
+  .btn-evaluate:hover:not(:disabled) { background: #4a6b4e; }
+  .btn-evaluate:disabled {
+    background: #b5b5b5;
+    cursor: not-allowed;
+  }
+  .result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 24px;
+  }
+  .score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    text-align: center;
+    margin: 0 0 12px;
+  }
+  .verdict {
+    font-size: 1rem;
+    color: #4a4a4a;
+    text-align: center;
+    margin: 0;
+  }
+  .btn-retry {
+    background: #8c7b6b;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 24px auto 0;
+    transition: background 0.15s ease;
+  }
+  .btn-retry:hover { background: #756658; }
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%) translateY(20px);
+    background: #2c2c2c;
+    color: #ffffff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 0.98rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 100;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Těžký kvíz z gymnázia: 10 otázek, se kterými mají často problém i absolventi</h1>
+  <p class="perex">Deset otázek napříč gymnaziálními předměty od literární teorie přes fyziku a chemii až po dějiny a dějiny umění. Nejde o základní pojmy, ale o detaily, na kterých pohoří i nejeden absolvent. Kolik z nich zvládnete vy?</p>
+
+  <div id="quiz"></div>
+
+  <button id="evaluateBtn" class="btn-evaluate" disabled>Vyhodnotit</button>
+
+  <div id="resultSection"></div>
+</div>
+
+<div id="toast" class="toast">Odpovězte prosím na všechny otázky</div>
+
+<script>
+(function () {
+  const questions = [
+    {
+      q: `1. Jak se v literární teorii nazývá dvojslabičná stopa, v níž je přízvučná slabika následována nepřízvučnou?`,
+      options: [`a) trochej`, `b) jamb`, `c) daktyl`, `d) spondej`],
+      correct: 0
+    },
+    {
+      q: `2. Kolik vrcholů má pravidelný dvanáctistěn?`,
+      options: [`a) 8`, `b) 12`, `c) 30`, `d) 20`],
+      correct: 3
+    },
+    {
+      q: `3. Jak se nazývá vlastnost tělesa zůstávat v klidu nebo v rovnoměrném přímočarém pohybu, dokud na něj nezačne působit síla?`,
+      options: [`a) hmotnost`, `b) setrvačnost`, `c) tření`, `d) tíhová síla`],
+      correct: 1
+    },
+    {
+      q: `4. Jak se v chemii nazývá děj, při kterém se částice plynu nebo rozpuštěné látky hromadí na povrchu pevné látky?`,
+      options: [`a) difúze`, `b) absorpce`, `c) adsorpce`, `d) destilace`],
+      correct: 2
+    },
+    {
+      q: `5. Jak se nazývá vědní obor zabývající se studiem hub?`,
+      options: [`a) mykologie`, `b) botanika`, `c) zoologie`, `d) entomologie`],
+      correct: 0
+    },
+    {
+      q: `6. Který velkomoravský kníže pozval roku 863 na Moravu byzantskou misi Konstantina a Metoděje?`,
+      options: [`a) Mojmír I.`, `b) Svatopluk`, `c) Rostislav`, `d) Bořivoj`],
+      correct: 2
+    },
+    {
+      q: `7. Kdo se roku 1871 stal prvním císařem nově sjednoceného Německa?`,
+      options: [`a) Otto von Bismarck`, `b) Vilém I.`, `c) Fridrich III.`, `d) Vilém II.`],
+      correct: 1
+    },
+    {
+      q: `8. Který ostrov je největší v Asii?`,
+      options: [`a) Sumatra`, `b) Honšú`, `c) Sulawesi`, `d) Borneo`],
+      correct: 3
+    },
+    {
+      q: `9. Jak se nazývá umělecký sloh 18. století, který navázal na baroko a vyznačoval se lehkostí, hravostí a bohatou ornamentikou?`,
+      options: [`a) klasicismus`, `b) gotika`, `c) rokoko`, `d) secese`],
+      correct: 2
+    },
+    {
+      q: `10. Kdo je podle Ústavy České republiky vrchním velitelem ozbrojených sil?`,
+      options: [`a) prezident republiky`, `b) předseda vlády`, `c) ministr obrany`, `d) náčelník Generálního štábu`],
+      correct: 0
+    }
+  ];
+
+  const verdicts = [
+    { min: 0, max: 3, text: `Gymnázium je nejspíš dávno za vámi a hlubší detaily se z paměti vytratily jako první. Nevadí, právě u těchhle otázek pohoří velká část absolventů. Každá vysvětlená odpověď je pozvánka pustit se do tématu znovu.` },
+    { min: 4, max: 6, text: `Solidní výsledek přesně na úrovni průměrného absolventa. Základ máte pevný, jen nejzáludnější chytáky napříč obory vás dokázaly potrápit. Pár správných tipů a byli byste ještě výš.` },
+    { min: 7, max: 9, text: `Výborně. Orientujete se v literární teorii stejně jako v geometrii, dějinách i chemii. Takovou šíři a přesnost si po letech od maturity udrží málokdo.` },
+    { min: 10, max: 10, text: `Bezchybně. Znalosti napříč všemi gymnaziálními předměty vám zůstaly v hlavě jako přišité. Tenhle výsledek by obstál i u přísné maturitní komise.` }
+  ];
+
+  const quizEl = document.getElementById(`quiz`);
+  const evaluateBtn = document.getElementById(`evaluateBtn`);
+  const resultSection = document.getElementById(`resultSection`);
+  const toast = document.getElementById(`toast`);
+
+  const selected = new Array(questions.length).fill(null);
+  let evaluated = false;
+
+  function render() {
+    quizEl.innerHTML = ``;
+    questions.forEach((item, qi) => {
+      const box = document.createElement(`div`);
+      box.className = `question`;
+
+      const qText = document.createElement(`div`);
+      qText.className = `q-text`;
+      qText.textContent = item.q;
+      box.appendChild(qText);
+
+      item.options.forEach((optText, oi) => {
+        const btn = document.createElement(`button`);
+        btn.className = `option`;
+        btn.type = `button`;
+        btn.textContent = optText;
+        if (selected[qi] === oi) btn.classList.add(`selected`);
+        btn.addEventListener(`click`, function () {
+          if (evaluated) return;
+          selected[qi] = oi;
+          render();
+          updateEvaluateState();
+        });
+        box.appendChild(btn);
+      });
+
+      quizEl.appendChild(box);
+    });
+  }
+
+  function updateEvaluateState() {
+    const allAnswered = selected.every(function (s) { return s !== null; });
+    evaluateBtn.disabled = !allAnswered;
+  }
+
+  let toastTimer = null;
+  function showToast() {
+    toast.classList.add(`show`);
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toast.classList.remove(`show`);
+    }, 2600);
+  }
+
+  function evaluate() {
+    const allAnswered = selected.every(function (s) { return s !== null; });
+    if (!allAnswered) {
+      showToast();
+      return;
+    }
+
+    evaluated = true;
+    let score = 0;
+
+    quizEl.innerHTML = ``;
+    questions.forEach((item, qi) => {
+      const box = document.createElement(`div`);
+      box.className = `question`;
+
+      const qText = document.createElement(`div`);
+      qText.className = `q-text`;
+      qText.textContent = item.q;
+      box.appendChild(qText);
+
+      const isCorrect = selected[qi] === item.correct;
+      if (isCorrect) score++;
+
+      item.options.forEach((optText, oi) => {
+        const btn = document.createElement(`button`);
+        btn.className = `option locked`;
+        btn.type = `button`;
+        btn.disabled = true;
+        btn.textContent = optText;
+        if (oi === item.correct) {
+          btn.classList.add(`correct`);
+        } else if (selected[qi] === oi) {
+          btn.classList.add(`wrong`);
+        }
+        box.appendChild(btn);
+      });
+
+      if (!isCorrect) {
+        const reveal = document.createElement(`div`);
+        reveal.className = `correct-reveal`;
+        reveal.textContent = `Správná odpověď: ` + item.options[item.correct];
+        box.appendChild(reveal);
+      }
+
+      quizEl.appendChild(box);
+    });
+
+    evaluateBtn.style.display = `none`;
+    showResult(score);
+    resultSection.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function showResult(score) {
+    let verdictText = ``;
+    for (let i = 0; i < verdicts.length; i++) {
+      if (score >= verdicts[i].min && score <= verdicts[i].max) {
+        verdictText = verdicts[i].text;
+        break;
+      }
+    }
+
+    resultSection.innerHTML = ``;
+    const box = document.createElement(`div`);
+    box.className = `result`;
+
+    const scoreEl = document.createElement(`div`);
+    scoreEl.className = `score`;
+    scoreEl.textContent = score + ` z ` + questions.length;
+    box.appendChild(scoreEl);
+
+    const verdictEl = document.createElement(`p`);
+    verdictEl.className = `verdict`;
+    verdictEl.textContent = verdictText;
+    box.appendChild(verdictEl);
+
+    const retryBtn = document.createElement(`button`);
+    retryBtn.className = `btn-retry`;
+    retryBtn.type = `button`;
+    retryBtn.textContent = `Zkusit znovu`;
+    retryBtn.addEventListener(`click`, reset);
+    box.appendChild(retryBtn);
+
+    resultSection.appendChild(box);
+  }
+
+  function reset() {
+    for (let i = 0; i < selected.length; i++) selected[i] = null;
+    evaluated = false;
+    resultSection.innerHTML = ``;
+    evaluateBtn.style.display = `block`;
+    evaluateBtn.disabled = true;
+    render();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evaluateBtn.addEventListener(`click`, evaluate);
+
+  render();
+  updateEvaluateState();
+})();
+</script>
+</body>
+</html>
