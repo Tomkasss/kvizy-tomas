@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test pro seniory: jak silná je vaše vnitřní pohoda?</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 16px;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.3;
+    color: #2c2c2c;
+    margin: 0 0 18px;
+  }
+  .perex {
+    font-size: 1.1rem;
+    color: #4a4a4a;
+    margin: 0 0 32px;
+  }
+  .question {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin: 0 0 18px;
+  }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 12px;
+    transition: background 0.15s ease;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover:not(:disabled) { background: #ede8e1; }
+  .option.selected {
+    background: #dcd3c7;
+    border: 1px solid #a89e92;
+    font-weight: bold;
+  }
+  .option:disabled { cursor: default; }
+  .option.selected:disabled {
+    background: #dcd3c7;
+    border: 1px solid #a89e92;
+    font-weight: bold;
+  }
+  #evaluateBtn {
+    background: #5b7e5f;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+  }
+  #evaluateBtn:hover:not(:disabled) { background: #4a6b4e; }
+  #evaluateBtn:disabled {
+    background: #b5b5b5;
+    cursor: not-allowed;
+  }
+  #result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 32px;
+    display: none;
+  }
+  .result-name {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    text-align: center;
+    margin: 0 0 8px;
+    line-height: 1.2;
+  }
+  .result-text {
+    font-size: 1rem;
+    color: #4a4a4a;
+    text-align: center;
+    margin: 0 0 8px;
+  }
+  .result-note {
+    font-size: 0.95rem;
+    color: #756658;
+    text-align: center;
+    font-style: italic;
+    margin: 18px 0 0;
+  }
+  .result-block + .result-block {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e6ded3;
+  }
+  #retryBtn {
+    background: #8c7b6b;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+  }
+  #retryBtn:hover { background: #756658; }
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%) translateY(20px);
+    background: #2c2c2c;
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 100;
+  }
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  @media (max-width: 600px) {
+    body { padding: 24px 16px; }
+    h1 { font-size: 1.55rem; }
+    .result-name { font-size: 2rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="quizTitle"></h1>
+  <p class="perex" id="quizPerex"></p>
+  <div id="questions"></div>
+  <button id="evaluateBtn" disabled></button>
+  <div id="result"></div>
+  <button id="retryBtn" style="display:none"></button>
+</div>
+<div id="toast"></div>
+
+<script>
+(function () {
+  const TITLE = `Test pro seniory: jak silná je vaše vnitřní pohoda? Stačí odpovědět na 10 otázek`;
+  const PEREX = `S přibývajícími lety si vnitřní pohoda žije po svém. Odpovězte na deset otázek a zjistěte, z čeho pramení váš klid a jak pevnou oporu v sobě nosíte.`;
+
+  const questions = [
+    {
+      q: `1. Jak se nejčastěji cítíte hned po ránu?`,
+      options: [
+        { letter: `A`, text: `V klidu a vyrovnaně, ať už mě čeká cokoli.` },
+        { letter: `B`, text: `S chutí ozvat se někomu blízkému a začít den spolu.` },
+        { letter: `C`, text: `S drobnou radostí, že mám před sebou další obyčejný den.` },
+        { letter: `D`, text: `Zvědavě, co všechno dnešek přinese.` }
+      ]
+    },
+    {
+      q: `2. Jak se stavíte k věcem, které nemůžete změnit?`,
+      options: [
+        { letter: `A`, text: `Přijmu je a v klidu se smířím s tím, jak věci jsou.` },
+        { letter: `B`, text: `Proberu je s někým blízkým a spolu je líp unesu.` },
+        { letter: `C`, text: `Řeknu si, že i tak mi zůstává spousta dobrého.` },
+        { letter: `D`, text: `Hledám v nich něco, co mě může posunout dál.` }
+      ]
+    },
+    {
+      q: `3. Jak se cítíte, když jste delší dobu bez společnosti?`,
+      options: [
+        { letter: `A`, text: `Naprosto v pohodě, vlastní společnost mi bohatě stačí.` },
+        { letter: `B`, text: `Chybí mi lidé a hledám, s kým se spojit.` },
+        { letter: `C`, text: `Spokojeně, mám své zvyky, které mi dělají den příjemným.` },
+        { letter: `D`, text: `Využiju to k něčemu, na co jindy nemám čas.` }
+      ]
+    },
+    {
+      q: `4. Co od svých blízkých potřebujete nejvíc?`,
+      options: [
+        { letter: `A`, text: `Klid a respekt k mému vlastnímu prostoru.` },
+        { letter: `B`, text: `Blízkost, sdílení a pocit, že k sobě patříme.` },
+        { letter: `C`, text: `Pár drobných jistot a vědomí, že jsou spolehlivě po ruce.` },
+        { letter: `D`, text: `Rozhovory, podněty a chuť společně něco objevovat.` }
+      ]
+    },
+    {
+      q: `5. Co nejspíš uděláte, když se stane něco pěkného?`,
+      options: [
+        { letter: `A`, text: `V tichosti si to vychutnám a nechám to na sebe pomalu působit.` },
+        { letter: `B`, text: `Hned se o tu radost podělím s blízkými.` },
+        { letter: `C`, text: `Zůstanu u toho v duchu déle a hřeje mě to celý den.` },
+        { letter: `D`, text: `Chytnu se toho a hledám, jak na tu chvíli navázat.` }
+      ]
+    },
+    {
+      q: `6. Jak přemýšlíte o tom, co vás ještě čeká?`,
+      options: [
+        { letter: `A`, text: `S klidem přijímám, ať přijde cokoli.` },
+        { letter: `B`, text: `Těším se hlavně na společné chvíle s blízkými.` },
+        { letter: `C`, text: `Přeji si hlavně, aby mi zůstaly moje malé radosti.` },
+        { letter: `D`, text: `Láká mě, co všechno se ještě můžu dozvědět a zažít.` }
+      ]
+    },
+    {
+      q: `7. Co vám ve všední den nejspíš udělá radost?`,
+      options: [
+        { letter: `A`, text: `Chvíle ticha, kdy si můžu jen tak sednout a vydechnout.` },
+        { letter: `B`, text: `Milé slovo nebo setkání s někým blízkým.` },
+        { letter: `C`, text: `Vůně kávy, hezké počasí nebo jiná maličkost.` },
+        { letter: `D`, text: `Zajímavý nápad nebo něco nového, co mě zaujme.` }
+      ]
+    },
+    {
+      q: `8. Jak se díváte na vlastní chyby a nedokonalosti?`,
+      options: [
+        { letter: `A`, text: `Beru je s klidem, patří k životu a nehroutím se z nich.` },
+        { letter: `B`, text: `Pomůže mi, když si o nich s někým otevřeně promluvím.` },
+        { letter: `C`, text: `Odpustím si a soustředím se radši na to, co mi jde.` },
+        { letter: `D`, text: `Beru je jako příležitost něco vylepšit a posunout se.` }
+      ]
+    },
+    {
+      q: `9. Jak pečujete o svůj odpočinek a klid?`,
+      options: [
+        { letter: `A`, text: `Dopřeju si klid o samotě a nechám tělo i hlavu vydechnout.` },
+        { letter: `B`, text: `Odpočívám nejlíp mezi lidmi, se kterými je mi dobře.` },
+        { letter: `C`, text: `Držím se svých osvědčených rituálů, které mě spolehlivě zklidní.` },
+        { letter: `D`, text: `Zkusím občas i něco nového, co mě příjemně provětrá.` }
+      ]
+    },
+    {
+      q: `10. Co uděláte, když vám hlavou víří samé starosti?`,
+      options: [
+        { letter: `A`, text: `Nechám je odeznít a počkám, až se hlava sama zklidní.` },
+        { letter: `B`, text: `Svěřím se někomu a uleví se mi, když to vyslovím.` },
+        { letter: `C`, text: `Zaměřím se na něco milého a známého, co mě uzemní.` },
+        { letter: `D`, text: `Pustím se do řešení a hledám, co se s tím dá udělat.` }
+      ]
+    }
+  ];
+
+  const profiles = {
+    A: {
+      name: `Tichá síla`,
+      text: `Vaše vnitřní pohoda stojí na klidu a smíření. Jen tak vás něco nevyvede z míry a v sobě nosíte oporu, která drží, ať se děje cokoli. Samota vás neděsí, protože ve vlastní společnosti nacházíte pokoj. Vaše síla je tichá, ale hluboká a spolehlivá.`
+    },
+    B: {
+      name: `Vřelé srdce`,
+      text: `Vaši pohodu živí lidé a blízkost. Sílu čerpáte ze sdílení, milých slov a pocitu, že někam patříte. Když máte kolem sebe ty, na kterých vám záleží, unesete skoro cokoli a hned je vám líp. Vaše srdce hřeje vás i všechny okolo.`
+    },
+    C: {
+      name: `Vděčná duše`,
+      text: `Vaše pohoda vyrůstá z vděčnosti za obyčejný den. Umíte se radovat z maličkostí, které mnozí přehlédnou, a ve svých zvycích nacházíte klid i jistotu. Netoužíte po velkých zvratech, protože bohatství vidíte v tom, co už máte. Právě tahle spokojenost vás drží pevně při zemi.`
+    },
+    D: {
+      name: `Otevřená mysl`,
+      text: `Vaši pohodu drží zvědavost a chuť žít dál naplno. Roky vás nezastavily v objevování, učení a těšení se na to, co teprve přijde. Změny neberete jako hrozbu, ale jako pozvání. Dokud vás něco zajímá, váš duch zůstává mladý.`
+    }
+  };
+
+  const answers = new Array(questions.length).fill(null);
+  let evaluated = false;
+
+  const titleEl = document.getElementById(`quizTitle`);
+  const perexEl = document.getElementById(`quizPerex`);
+  const questionsEl = document.getElementById(`questions`);
+  const evaluateBtn = document.getElementById(`evaluateBtn`);
+  const resultEl = document.getElementById(`result`);
+  const retryBtn = document.getElementById(`retryBtn`);
+  const toastEl = document.getElementById(`toast`);
+
+  titleEl.textContent = TITLE;
+  perexEl.textContent = PEREX;
+  evaluateBtn.textContent = `Vyhodnotit`;
+  retryBtn.textContent = `Zkusit znovu`;
+
+  let toastTimer = null;
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add(`show`);
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastEl.classList.remove(`show`);
+    }, 2600);
+  }
+
+  function updateEvaluateState() {
+    const allAnswered = answers.every(function (a) { return a !== null; });
+    evaluateBtn.disabled = !allAnswered;
+  }
+
+  function buildQuestions() {
+    questionsEl.innerHTML = ``;
+    questions.forEach(function (item, qIndex) {
+      const box = document.createElement(`div`);
+      box.className = `question`;
+
+      const qText = document.createElement(`p`);
+      qText.className = `q-text`;
+      qText.textContent = item.q;
+      box.appendChild(qText);
+
+      item.options.forEach(function (opt, oIndex) {
+        const btn = document.createElement(`button`);
+        btn.type = `button`;
+        btn.className = `option`;
+        btn.textContent = opt.text;
+        btn.dataset.letter = opt.letter;
+        btn.addEventListener(`click`, function () {
+          if (evaluated) return;
+          answers[qIndex] = oIndex;
+          const siblings = box.querySelectorAll(`.option`);
+          siblings.forEach(function (s) { s.classList.remove(`selected`); });
+          btn.classList.add(`selected`);
+          updateEvaluateState();
+        });
+        box.appendChild(btn);
+      });
+
+      questionsEl.appendChild(box);
+    });
+  }
+
+  function evaluate() {
+    const allAnswered = answers.every(function (a) { return a !== null; });
+    if (!allAnswered) {
+      showToast(`Odpovězte prosím na všechny otázky`);
+      return;
+    }
+
+    evaluated = true;
+
+    // Zamknout všechny volby
+    const allButtons = questionsEl.querySelectorAll(`.option`);
+    allButtons.forEach(function (b) { b.disabled = true; });
+
+    // Sečíst písmena
+    const tally = { A: 0, B: 0, C: 0, D: 0 };
+    questions.forEach(function (item, qIndex) {
+      const letter = item.options[answers[qIndex]].letter;
+      tally[letter]++;
+    });
+
+    let max = 0;
+    Object.keys(tally).forEach(function (k) {
+      if (tally[k] > max) max = tally[k];
+    });
+
+    const winners = Object.keys(tally).filter(function (k) {
+      return tally[k] === max;
+    });
+
+    // Sestavit výsledek
+    resultEl.innerHTML = ``;
+
+    if (winners.length > 1) {
+      const note = document.createElement(`p`);
+      note.className = `result-note`;
+      note.textContent = `Vaše odpovědi se rovnoměrně dělí mezi několik typů. Ve vaší vnitřní pohodě se prolíná víc podob – přečtěte si všechny, které vám vyšly shodně.`;
+      resultEl.appendChild(note);
+    }
+
+    winners.forEach(function (letter) {
+      const p = profiles[letter];
+      const block = document.createElement(`div`);
+      block.className = `result-block`;
+
+      const nameEl = document.createElement(`div`);
+      nameEl.className = `result-name`;
+      nameEl.textContent = p.name;
+      block.appendChild(nameEl);
+
+      const textEl = document.createElement(`p`);
+      textEl.className = `result-text`;
+      textEl.textContent = p.text;
+      block.appendChild(textEl);
+
+      resultEl.appendChild(block);
+    });
+
+    evaluateBtn.style.display = `none`;
+    resultEl.style.display = `block`;
+    retryBtn.style.display = `block`;
+
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function reset() {
+    for (let i = 0; i < answers.length; i++) answers[i] = null;
+    evaluated = false;
+    resultEl.style.display = `none`;
+    resultEl.innerHTML = ``;
+    retryBtn.style.display = `none`;
+    evaluateBtn.style.display = `block`;
+    buildQuestions();
+    updateEvaluateState();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evaluateBtn.addEventListener(`click`, evaluate);
+  retryBtn.addEventListener(`click`, reset);
+
+  buildQuestions();
+  updateEvaluateState();
+})();
+</script>
+</body>
+</html>
