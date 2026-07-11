@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tento kvíz bez chyby zvládnou jen lidé, kteří opravdu dobře znají Česko. Většina lidí vyhoří</title>
+<style>
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 16px;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.3;
+    color: #2c2c2c;
+    margin: 0 0 20px;
+  }
+  .perex {
+    font-size: 1.1rem;
+    color: #4a4a4a;
+    margin: 0 0 36px;
+  }
+  .question {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin: 0 0 18px;
+  }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 12px;
+    transition: background 0.15s ease;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover:not(.locked) { background: #ede8e1; }
+  .option.selected {
+    background: #dcd3c7;
+    border: 1px solid #a89e92;
+    font-weight: bold;
+  }
+  .option.locked { cursor: default; }
+  .option.correct {
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    color: #1e5631;
+  }
+  .option.wrong {
+    background: #f8d7da;
+    border: 1px solid #d4848a;
+    color: #721c24;
+  }
+  .evaluate-btn {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #ffffff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .evaluate-btn:hover:not(:disabled) { background: #4a6b4e; }
+  .evaluate-btn:disabled {
+    background: #b5b5b5;
+    cursor: not-allowed;
+  }
+  .retry-btn {
+    display: block;
+    margin: 40px auto 0;
+    background: #8c7b6b;
+    color: #ffffff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .retry-btn:hover { background: #756658; }
+  .result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 40px;
+  }
+  .score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    text-align: center;
+    margin: 0 0 4px;
+  }
+  .verdict-title {
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #2c2c2c;
+    margin: 12px 0 10px;
+  }
+  .verdict-text {
+    font-size: 1rem;
+    color: #4a4a4a;
+    text-align: center;
+    margin: 0;
+  }
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%) translateY(20px);
+    background: #2c2c2c;
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 1000;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  @media (max-width: 600px) {
+    body { padding: 24px 16px; }
+    h1 { font-size: 1.5rem; }
+    .question, .result { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1 id="quiz-title"></h1>
+    <p class="perex" id="quiz-perex"></p>
+    <div id="questions"></div>
+    <button class="evaluate-btn" id="evaluate-btn" disabled></button>
+    <div id="result-area"></div>
+  </div>
+  <div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const title = `Tento kvíz bez chyby zvládnou jen lidé, kteří opravdu dobře znají Česko. Většina lidí vyhoří`;
+  const perex = `Deset otázek pro ty, kdo si troufají tvrdit, že Česko znají opravdu dobře. Rekordy, prvenství a detaily, které se v učebnicích krčí malým písmem. Většina lidí u nich vyhoří dřív, než dojde na konec.`;
+
+  const questions = [
+    {
+      q: `Jakým prvenstvím se pyšní lávka Sky Bridge 721?`,
+      options: [
+        `nejdelší visutý most pro pěší v Česku`,
+        `nejvýše položená lávka pro pěší v Česku`,
+        `první visutý most pro pěší v Česku`,
+        `nejdelší dřevěná lávka v Česku`
+      ],
+      correct: 0
+    },
+    {
+      q: `Kolik oblouků má Karlův most?`,
+      options: [`14`, `16`, `18`, `20`],
+      correct: 1
+    },
+    {
+      q: `Ve kterém městě se razí české oběžné mince?`,
+      options: [`Jablonec nad Nisou`, `Kutná Hora`, `Kremnica`, `Praha`],
+      correct: 0
+    },
+    {
+      q: `Která přehrada má nejvyšší hráz v Česku?`,
+      options: [`Orlík`, `Lipno`, `Slapy`, `Dalešice`],
+      correct: 3
+    },
+    {
+      q: `Který národní park je rozlohou největší v Česku?`,
+      options: [
+        `Krkonošský národní park`,
+        `Národní park Podyjí`,
+        `Národní park Šumava`,
+        `Národní park České Švýcarsko`
+      ],
+      correct: 2
+    },
+    {
+      q: `Které náměstí je rozlohou největší v Česku?`,
+      options: [
+        `Václavské náměstí v Praze`,
+        `náměstí Přemysla Otakara II. v Českých Budějovicích`,
+        `Masarykovo náměstí v Jihlavě`,
+        `Karlovo náměstí v Praze`
+      ],
+      correct: 3
+    },
+    {
+      q: `V kterém roce se konal první ročník Velké pardubické?`,
+      options: [`1836`, `1856`, `1874`, `1890`],
+      correct: 2
+    },
+    {
+      q: `Který starověký kmen sídlil na území Čech a dal jim jejich pozdější latinský název?`,
+      options: [`Bójové`, `Markomani`, `Kvádové`, `Langobardi`],
+      correct: 0
+    },
+    {
+      q: `Která dřevina je v českých lesích nejrozšířenější?`,
+      options: [`borovice lesní`, `smrk ztepilý`, `buk lesní`, `dub letní`],
+      correct: 1
+    },
+    {
+      q: `Který tunel je nejdelším silničním tunelem v Česku?`,
+      options: [`Strahovský tunel`, `tunel Panenská`, `tunel Blanka`, `Lochkovský tunel`],
+      correct: 2
+    }
+  ];
+
+  const verdicts = [
+    {
+      min: 0, max: 3,
+      title: `Návštěvník ve vlastní zemi`,
+      text: `Česko znáte hlavně z dálnice a z dovolené. Velké názvy trefíte, ale jakmile přijde na rekordy a méně známá prvenství, hoříte. Nevad, právě tyhle detaily se schovávají malým písmem. Pár výletů a čtení navíc a příště to bude jinak.`
+    },
+    {
+      min: 4, max: 6,
+      title: `Slušný domácí přehled`,
+      text: `Patříte k většině, která svou zem zná v hrubých obrysech, ale u opravdových chytáků jistota povolí. Základ máte pevný, jen do detailů jste se zatím nepouštěli. Do party znalců to není daleko.`
+    },
+    {
+      min: 7, max: 9,
+      title: `Znalec Česka`,
+      text: `Tohle už je výkon člověka, který o své zemi ví podstatně víc než okolí. Nejvyšší hráz, nejdelší tunel i keltský původ jména vám nedělají problém. Na plný počet chyběla jedna dvě drobnosti.`
+    },
+    {
+      min: 10, max: 10,
+      title: `Chodící encyklopedie`,
+      text: `Naprostá bezchybnost. Znáte rekordy, prvenství i kuriozity, které většina lidí mine bez povšimnutí. Na tomhle kvízu si zuby rozhodně nevylámete, spíš byste ho mohli sami sestavovat.`
+    }
+  ];
+
+  const answers = new Array(questions.length).fill(null);
+  let evaluated = false;
+
+  const titleEl = document.getElementById(`quiz-title`);
+  const perexEl = document.getElementById(`quiz-perex`);
+  const questionsEl = document.getElementById(`questions`);
+  const evaluateBtn = document.getElementById(`evaluate-btn`);
+  const resultArea = document.getElementById(`result-area`);
+  const toast = document.getElementById(`toast`);
+
+  titleEl.textContent = title;
+  perexEl.textContent = perex;
+  evaluateBtn.textContent = `Vyhodnotit`;
+
+  const letters = [`a`, `b`, `c`, `d`];
+  let toastTimer = null;
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add(`show`);
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toast.classList.remove(`show`);
+    }, 2600);
+  }
+
+  function updateEvaluateState() {
+    const allAnswered = answers.every(function (a) { return a !== null; });
+    evaluateBtn.disabled = !allAnswered;
+  }
+
+  function renderQuestions() {
+    questionsEl.innerHTML = ``;
+    questions.forEach(function (item, qi) {
+      const box = document.createElement(`div`);
+      box.className = `question`;
+
+      const qText = document.createElement(`div`);
+      qText.className = `q-text`;
+      qText.textContent = (qi + 1) + `. ` + item.q;
+      box.appendChild(qText);
+
+      item.options.forEach(function (opt, oi) {
+        const btn = document.createElement(`button`);
+        btn.type = `button`;
+        btn.className = `option`;
+        btn.textContent = letters[oi] + `) ` + opt;
+        btn.setAttribute(`data-q`, String(qi));
+        btn.setAttribute(`data-o`, String(oi));
+        btn.addEventListener(`click`, function () {
+          if (evaluated) return;
+          answers[qi] = oi;
+          const siblings = box.querySelectorAll(`.option`);
+          siblings.forEach(function (s) { s.classList.remove(`selected`); });
+          btn.classList.add(`selected`);
+          updateEvaluateState();
+        });
+        box.appendChild(btn);
+      });
+
+      questionsEl.appendChild(box);
+    });
+  }
+
+  function evaluate() {
+    if (evaluated) return;
+    const allAnswered = answers.every(function (a) { return a !== null; });
+    if (!allAnswered) {
+      showToast(`Odpovězte prosím na všechny otázky`);
+      return;
+    }
+
+    evaluated = true;
+    let score = 0;
+
+    const boxes = questionsEl.querySelectorAll(`.question`);
+    boxes.forEach(function (box, qi) {
+      const opts = box.querySelectorAll(`.option`);
+      const correctIndex = questions[qi].correct;
+      const chosen = answers[qi];
+      if (chosen === correctIndex) score++;
+
+      opts.forEach(function (opt, oi) {
+        opt.classList.add(`locked`);
+        opt.classList.remove(`selected`);
+        if (oi === correctIndex) {
+          opt.classList.add(`correct`);
+        } else if (oi === chosen) {
+          opt.classList.add(`wrong`);
+        }
+      });
+    });
+
+    let verdict = verdicts[0];
+    for (let i = 0; i < verdicts.length; i++) {
+      if (score >= verdicts[i].min && score <= verdicts[i].max) {
+        verdict = verdicts[i];
+        break;
+      }
+    }
+
+    resultArea.innerHTML = ``;
+    const result = document.createElement(`div`);
+    result.className = `result`;
+
+    const scoreEl = document.createElement(`div`);
+    scoreEl.className = `score`;
+    scoreEl.textContent = score + ` z ` + questions.length;
+    result.appendChild(scoreEl);
+
+    const vTitle = document.createElement(`div`);
+    vTitle.className = `verdict-title`;
+    vTitle.textContent = verdict.title;
+    result.appendChild(vTitle);
+
+    const vText = document.createElement(`p`);
+    vText.className = `verdict-text`;
+    vText.textContent = verdict.text;
+    result.appendChild(vText);
+
+    const retryBtn = document.createElement(`button`);
+    retryBtn.type = `button`;
+    retryBtn.className = `retry-btn`;
+    retryBtn.textContent = `Zkusit znovu`;
+    retryBtn.addEventListener(`click`, resetQuiz);
+    result.appendChild(retryBtn);
+
+    resultArea.appendChild(result);
+
+    evaluateBtn.style.display = `none`;
+
+    result.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function resetQuiz() {
+    evaluated = false;
+    for (let i = 0; i < answers.length; i++) answers[i] = null;
+    resultArea.innerHTML = ``;
+    evaluateBtn.style.display = `block`;
+    evaluateBtn.disabled = true;
+    renderQuestions();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evaluateBtn.addEventListener(`click`, evaluate);
+
+  renderQuestions();
+  updateEvaluateState();
+})();
+</script>
+</body>
+</html>
