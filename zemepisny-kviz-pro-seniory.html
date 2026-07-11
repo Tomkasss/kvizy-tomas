@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zeměpisný kvíz pro seniory: kdo dá 10/10, orientuje se líp než dnešní maturanti</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    line-height: 1.6;
+    padding: 40px 16px;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.3;
+    color: #2c2c2c;
+    margin: 0 0 20px;
+  }
+  .perex {
+    font-size: 1.1rem;
+    color: #4a4a4a;
+    margin: 0 0 36px;
+  }
+  .question {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin: 0 0 18px;
+  }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #3a3a3a;
+    margin-bottom: 12px;
+    transition: background 0.15s ease;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover:not(.locked) { background: #ede8e1; }
+  .option.selected {
+    background: #dcd3c7;
+    border: 1px solid #a89e92;
+    font-weight: bold;
+  }
+  .option.locked { cursor: default; }
+  .option.correct {
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    color: #1e5631;
+  }
+  .option.wrong {
+    background: #f8d7da;
+    border: 1px solid #d4848a;
+    color: #721c24;
+  }
+  .correct-note {
+    margin-top: 14px;
+    font-size: 0.98rem;
+    color: #1e5631;
+  }
+  .correct-note strong { font-weight: bold; }
+  #evaluate {
+    background: #5b7e5f;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    transition: background 0.15s ease;
+  }
+  #evaluate:hover:not(:disabled) { background: #4a6b4e; }
+  #evaluate:disabled {
+    background: #b5b5b5;
+    cursor: not-allowed;
+  }
+  #result {
+    background: #fefcf9;
+    border-radius: 12px;
+    border-top: 4px solid #5b7e5f;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-top: 24px;
+  }
+  .score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    text-align: center;
+    margin: 0 0 12px;
+  }
+  .verdict {
+    font-size: 1rem;
+    color: #4a4a4a;
+    text-align: center;
+    margin: 0;
+  }
+  #retry {
+    background: #8c7b6b;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    transition: background 0.15s ease;
+  }
+  #retry:hover { background: #756658; }
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%) translateY(20px);
+    background: #2c2c2c;
+    color: #ffffff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 100;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="quiz-title"></h1>
+  <p class="perex" id="quiz-perex"></p>
+  <div id="questions"></div>
+  <button id="evaluate" disabled>Vyhodnotit</button>
+  <div id="result" style="display:none;">
+    <div class="score" id="score"></div>
+    <p class="verdict" id="verdict"></p>
+  </div>
+  <button id="retry" style="display:none;">Zkusit znovu</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const title = `Zeměpisný kvíz pro seniory: kdo dá 10/10, orientuje se líp než dnešní maturanti`;
+  const perex = `Zálivy, průlivy, sopky a ostrovy z celého světa. Tenhle klasický zeměpis se dřív ve škole bral do hloubky. Deset otázek pro seniory, jejichž mapa světa v hlavě často předčí i dnešní maturanty.`;
+
+  const questions = [
+    {
+      q: `Který záliv Atlantského oceánu omývá severní pobřeží Španělska a západní pobřeží Francie?`,
+      options: [`Lyonský záliv`, `Janovský záliv`, `Biskajský záliv`, `Valencijský záliv`],
+      correct: 2
+    },
+    {
+      q: `Které jezero se pro svou rozlohu přezdívá maďarské moře?`,
+      options: [`Balaton`, `Neziderské jezero`, `Ženevské jezero`, `Ohridské jezero`],
+      correct: 0
+    },
+    {
+      q: `Kterému státu patří Kanárské ostrovy?`,
+      options: [`Portugalsku`, `Španělsku`, `Maroku`, `Francii`],
+      correct: 1
+    },
+    {
+      q: `Který záliv odděluje pobřeží Švédska a Finska?`,
+      options: [`Finský záliv`, `Rižský záliv`, `Gdaňský záliv`, `Botnický záliv`],
+      correct: 3
+    },
+    {
+      q: `Kterému státu patří poloostrov Kamčatka?`,
+      options: [`Rusku`, `Japonsku`, `Číně`, `Mongolsku`],
+      correct: 0
+    },
+    {
+      q: `Která hora je nejvyšší horou Japonska?`,
+      options: [`Tate`, `Ontake`, `Fudži`, `Kita`],
+      correct: 2
+    },
+    {
+      q: `Ve které zemi leží proslulý horký pramen Geysir?`,
+      options: [`v Chile`, `na Islandu`, `na Novém Zélandu`, `ve Spojených státech`],
+      correct: 1
+    },
+    {
+      q: `Které jezero je rozlohou největší v Itálii?`,
+      options: [`Lago Maggiore`, `Comské jezero`, `Trasimenské jezero`, `Gardské jezero`],
+      correct: 3
+    },
+    {
+      q: `Jak se nazývá poloostrov tvořící nejjižnější část pevninského Řecka?`,
+      options: [`Peloponés`, `Attika`, `Thesálie`, `Epirus`],
+      correct: 0
+    },
+    {
+      q: `Který průliv odděluje Severní a Jižní ostrov Nového Zélandu?`,
+      options: [`Bassův průliv`, `Torresův průliv`, `Cookův průliv`, `Foveauxův průliv`],
+      correct: 2
+    }
+  ];
+
+  const verdicts = [
+    { min: 0, max: 3, text: `Mapa světa vám trochu zarostla mechem. Zálivy, průlivy a ostrovy se přes léta rozpostavily jinam, než jste je nechali. Nevadí, atlas rád počká a rád vám ledacos připomene.` },
+    { min: 4, max: 6, text: `Slušný výkon. Základ máte pevný a v pár záludných otázkách jste nesedli na lep. Přesně tady se pohybuje velká část dospělých, takže se nemáte za co stydět.` },
+    { min: 7, max: 9, text: `Tohle je zeměpis pravého znalce. Orientujete se i v koutech mapy, na které si dnešní maturant sotva vzpomene. Do plného počtu chybělo jen málo.` },
+    { min: 10, max: 10, text: `Bezchybně. Zálivy, sopky, poloostrovy i vzdálené průlivy máte v hlavě srovnané jako v atlasu. Tenhle kvíz měl potrápit, vás ale nezaskočil ani jednou.` }
+  ];
+
+  const answers = new Array(questions.length).fill(null);
+  let locked = false;
+
+  const titleEl = document.getElementById(`quiz-title`);
+  const perexEl = document.getElementById(`quiz-perex`);
+  const questionsEl = document.getElementById(`questions`);
+  const evaluateBtn = document.getElementById(`evaluate`);
+  const retryBtn = document.getElementById(`retry`);
+  const resultEl = document.getElementById(`result`);
+  const scoreEl = document.getElementById(`score`);
+  const verdictEl = document.getElementById(`verdict`);
+  const toastEl = document.getElementById(`toast`);
+
+  titleEl.textContent = title;
+  perexEl.textContent = perex;
+
+  let toastTimer = null;
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add(`show`);
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastEl.classList.remove(`show`);
+    }, 3000);
+  }
+
+  function updateEvaluateState() {
+    const allAnswered = answers.every(function (a) { return a !== null; });
+    evaluateBtn.disabled = !allAnswered;
+  }
+
+  function renderQuestions() {
+    questionsEl.innerHTML = ``;
+    questions.forEach(function (item, qi) {
+      const box = document.createElement(`div`);
+      box.className = `question`;
+
+      const qText = document.createElement(`p`);
+      qText.className = `q-text`;
+      qText.textContent = (qi + 1) + `. ` + item.q;
+      box.appendChild(qText);
+
+      item.options.forEach(function (opt, oi) {
+        const btn = document.createElement(`button`);
+        btn.className = `option`;
+        btn.type = `button`;
+        btn.textContent = opt;
+        btn.setAttribute(`data-q`, String(qi));
+        btn.setAttribute(`data-o`, String(oi));
+        btn.addEventListener(`click`, function () {
+          if (locked) return;
+          answers[qi] = oi;
+          const siblings = box.querySelectorAll(`.option`);
+          siblings.forEach(function (s) { s.classList.remove(`selected`); });
+          btn.classList.add(`selected`);
+          updateEvaluateState();
+        });
+        box.appendChild(btn);
+      });
+
+      questionsEl.appendChild(box);
+    });
+  }
+
+  function evaluate() {
+    const allAnswered = answers.every(function (a) { return a !== null; });
+    if (!allAnswered) {
+      showToast(`Odpovězte prosím na všechny otázky`);
+      return;
+    }
+
+    locked = true;
+    let score = 0;
+
+    const boxes = questionsEl.querySelectorAll(`.question`);
+    boxes.forEach(function (box, qi) {
+      const correctIdx = questions[qi].correct;
+      const chosen = answers[qi];
+      if (chosen === correctIdx) score++;
+
+      const opts = box.querySelectorAll(`.option`);
+      opts.forEach(function (opt, oi) {
+        opt.classList.add(`locked`);
+        opt.classList.remove(`selected`);
+        if (oi === correctIdx) {
+          opt.classList.add(`correct`);
+        } else if (oi === chosen) {
+          opt.classList.add(`wrong`);
+        }
+      });
+
+      if (chosen !== correctIdx) {
+        const note = document.createElement(`p`);
+        note.className = `correct-note`;
+        note.innerHTML = `Správná odpověď: <strong></strong>`;
+        note.querySelector(`strong`).textContent = questions[qi].options[correctIdx];
+        box.appendChild(note);
+      }
+    });
+
+    let verdictText = ``;
+    for (let i = 0; i < verdicts.length; i++) {
+      if (score >= verdicts[i].min && score <= verdicts[i].max) {
+        verdictText = verdicts[i].text;
+        break;
+      }
+    }
+
+    scoreEl.textContent = score + ` z ` + questions.length;
+    verdictEl.textContent = verdictText;
+    resultEl.style.display = `block`;
+
+    evaluateBtn.style.display = `none`;
+    retryBtn.style.display = `block`;
+
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function reset() {
+    for (let i = 0; i < answers.length; i++) answers[i] = null;
+    locked = false;
+    resultEl.style.display = `none`;
+    retryBtn.style.display = `none`;
+    evaluateBtn.style.display = `block`;
+    evaluateBtn.disabled = true;
+    renderQuestions();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evaluateBtn.addEventListener(`click`, evaluate);
+  retryBtn.addEventListener(`click`, reset);
+
+  renderQuestions();
+  updateEvaluateState();
+})();
+</script>
+</body>
+</html>
