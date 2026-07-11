@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IQ test pro nadané. Jen málokdo dá 10/10 správně</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 16px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.3;
+    color: #2c2c2c;
+    margin: 0 0 16px;
+  }
+  .perex {
+    font-size: 1.1rem;
+    color: #4a4a4a;
+    margin: 0 0 36px;
+  }
+  .question-box {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .question-text {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin: 0 0 18px;
+  }
+  .answer-input {
+    width: 100%;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+  }
+  .answer-input:focus {
+    outline: none;
+    border-color: #a89e92;
+    background: #ffffff;
+  }
+  .answer-input:disabled {
+    cursor: not-allowed;
+  }
+  .answer-input.correct {
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    color: #1e5631;
+  }
+  .answer-input.incorrect {
+    background: #f8d7da;
+    border: 1px solid #d4848a;
+    color: #721c24;
+  }
+  .correct-reveal {
+    margin-top: 12px;
+    font-size: 0.98rem;
+    color: #1e5631;
+    display: none;
+  }
+  .correct-reveal.show { display: block; }
+  .eval-btn {
+    background: #5b7e5f;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+  }
+  .eval-btn:hover { background: #4a6b4e; }
+  .eval-btn:disabled {
+    background: #b5b5b5;
+    cursor: not-allowed;
+  }
+  .result-box {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 40px;
+    display: none;
+  }
+  .result-box.show { display: block; }
+  .score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    text-align: center;
+    margin: 0 0 12px;
+  }
+  .verdict {
+    font-size: 1rem;
+    color: #4a4a4a;
+    text-align: center;
+    margin: 0;
+  }
+  .retry-btn {
+    background: #8c7b6b;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+  }
+  .retry-btn:hover { background: #756658; }
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%) translateY(20px);
+    background: #2c2c2c;
+    color: #ffffff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 100;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  @media (max-width: 600px) {
+    body { padding: 24px 16px; }
+    h1 { font-size: 1.55rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1 id="quiz-title"></h1>
+  <p class="perex" id="quiz-perex"></p>
+  <div id="questions"></div>
+  <button class="eval-btn" id="eval-btn" disabled>Vyhodnotit</button>
+  <div class="result-box" id="result-box">
+    <div class="score" id="score"></div>
+    <p class="verdict" id="verdict"></p>
+    <button class="retry-btn" id="retry-btn">Zkusit znovu</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const title = `IQ test pro nadané. Jen málokdo dá 10/10 správně`;
+  const perex = `Deset úloh, kde nepomůže kalkulačka ani encyklopedie. Rozhoduje logika, postřeh a schopnost prokouknout to, co ostatním unikne. Kdo posbírá všech deset bodů, patří mezi skutečně nadané. Zaváhá i chytrý člověk.`;
+
+  const questions = [
+    { text: `Kolika nulami končí součin všech celých čísel od 1 do 10?`, answers: [`2`, `dva`, `dvě`, `dve`], display: `2` },
+    { text: `Jaké je nejmenší celé číslo větší než 1, které je zároveň druhou i třetí mocninou celého čísla?`, answers: [`64`, `šedesát čtyři`], display: `64` },
+    { text: `Které přirozené číslo se rovná zároveň součtu i součinu tří po sobě jdoucích přirozených čísel?`, answers: [`6`, `šest`], display: `6` },
+    { text: `Kolik hodin ukazuje dvanáctihodinový ciferník za sto hodin, jestliže právě teď ukazuje tři?`, answers: [`7`, `sedm`], display: `7` },
+    { text: `Které slovo je ve slovníku vždy napsáno špatně?`, answers: [`špatně`, `spatne`], display: `špatně` },
+    { text: `Které je menší z dvou po sobě jdoucích přirozených čísel, jejichž součin je 132?`, answers: [`11`, `jedenáct`], display: `11` },
+    { text: `Kolik různých hodnot může padnout jako součet dvou hracích kostek?`, answers: [`11`, `jedenáct`], display: `11` },
+    { text: `Kolik os souměrnosti má čtverec?`, answers: [`4`, `čtyři`], display: `4` },
+    { text: `Kolik hran má trojboký jehlan?`, answers: [`6`, `šest`], display: `6` },
+    { text: `Jaké je nejmenší přirozené číslo větší než 1, které dává při dělení dvěma, třemi, čtyřmi, pěti i šesti vždy zbytek jedna?`, answers: [`61`, `šedesát jedna`, `šedesát jedno`], display: `61` }
+  ];
+
+  const verdicts = [
+    { min: 0, max: 3, text: `Většina úloh vás nachytala tam, kde mozek skočil po první nabízející se odpovědi. To není známka nízké inteligence, spíš netrpělivosti. Zkuste si každou úlohu přečíst dvakrát a rozepsat postup, uvidíte, že řešení nejsou složitá, jen záludná.` },
+    { min: 4, max: 6, text: `Přesně tady končí většina dospělých. Logiku i počítání máte v pořádku, ale u úloh, které vyžadují zastavit se a přemýšlet netypicky, vás intuice svedla ke špatné stopě. Solidní výkon, na kterém se dá stavět.` },
+    { min: 7, max: 9, text: `Nadprůměr, který zvládne málokdo. Nenecháte se zmást zdánlivě jasnou odpovědí, počítáte přesně a úvahu dotáhnete do konce. Chybějící body nejspíš padly na jednu jedinou přehlédnutou past.` },
+    { min: 10, max: 10, text: `Bezchybný průchod deseti záludnostmi. Trailing nuly faktoriálu, šestá mocnina, zbytky po dělení, slovní past i prostorová představivost. Nic vám neuniklo. Patříte mezi skutečně nadané, a to bez nadsázky.` }
+  ];
+
+  function normalize(str) {
+    return str
+      .toLowerCase()
+      .normalize(`NFD`)
+      .replace(/[\u0300-\u036f]/g, ``)
+      .replace(/\s+/g, ` `)
+      .trim();
+  }
+
+  document.getElementById(`quiz-title`).textContent = title;
+  document.getElementById(`quiz-perex`).textContent = perex;
+
+  const questionsWrap = document.getElementById(`questions`);
+  const inputs = [];
+
+  questions.forEach(function (q, i) {
+    const box = document.createElement(`div`);
+    box.className = `question-box`;
+
+    const qText = document.createElement(`div`);
+    qText.className = `question-text`;
+    qText.textContent = (i + 1) + `. ` + q.text;
+    box.appendChild(qText);
+
+    const input = document.createElement(`input`);
+    input.type = `text`;
+    input.className = `answer-input`;
+    input.setAttribute(`aria-label`, `Odpověď na otázku ` + (i + 1));
+    box.appendChild(input);
+    inputs.push(input);
+
+    const reveal = document.createElement(`div`);
+    reveal.className = `correct-reveal`;
+    reveal.textContent = `Správná odpověď: ` + q.display;
+    box.appendChild(reveal);
+
+    input.addEventListener(`input`, updateEvalState);
+
+    questionsWrap.appendChild(box);
+  });
+
+  const evalBtn = document.getElementById(`eval-btn`);
+  const retryBtn = document.getElementById(`retry-btn`);
+  const resultBox = document.getElementById(`result-box`);
+  const toast = document.getElementById(`toast`);
+  let evaluated = false;
+  let toastTimer = null;
+
+  function allAnswered() {
+    return inputs.every(function (inp) { return inp.value.trim() !== ``; });
+  }
+
+  function updateEvalState() {
+    evalBtn.disabled = !allAnswered();
+  }
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add(`show`);
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toast.classList.remove(`show`);
+    }, 3000);
+  }
+
+  evalBtn.addEventListener(`click`, function () {
+    if (evaluated) return;
+    if (!allAnswered()) {
+      showToast(`Odpovězte prosím na všechny otázky`);
+      return;
+    }
+    evaluate();
+  });
+
+  function evaluate() {
+    evaluated = true;
+    let score = 0;
+
+    inputs.forEach(function (input, i) {
+      const userNorm = normalize(input.value);
+      const isCorrect = questions[i].answers.some(function (a) {
+        return normalize(a) === userNorm;
+      });
+      input.disabled = true;
+      if (isCorrect) {
+        input.classList.add(`correct`);
+        score++;
+      } else {
+        input.classList.add(`incorrect`);
+        input.parentElement.querySelector(`.correct-reveal`).classList.add(`show`);
+      }
+    });
+
+    document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+
+    let verdictText = ``;
+    for (let j = 0; j < verdicts.length; j++) {
+      if (score >= verdicts[j].min && score <= verdicts[j].max) {
+        verdictText = verdicts[j].text;
+        break;
+      }
+    }
+    document.getElementById(`verdict`).textContent = verdictText;
+
+    evalBtn.disabled = true;
+    resultBox.classList.add(`show`);
+    resultBox.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  retryBtn.addEventListener(`click`, function () {
+    evaluated = false;
+    inputs.forEach(function (input) {
+      input.value = ``;
+      input.disabled = false;
+      input.classList.remove(`correct`, `incorrect`);
+      input.parentElement.querySelector(`.correct-reveal`).classList.remove(`show`);
+    });
+    resultBox.classList.remove(`show`);
+    evalBtn.disabled = true;
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  });
+
+  updateEvalState();
+})();
+</script>
+</body>
+</html>
