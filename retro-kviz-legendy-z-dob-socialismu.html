@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retro kvíz: pamatujete si na těchto 10 legend z dob socialismu?</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 16px;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.3;
+    color: #2c2c2c;
+    margin: 0 0 20px;
+  }
+  .perex {
+    font-size: 1.1rem;
+    color: #4a4a4a;
+    margin: 0 0 36px;
+  }
+  .question {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin: 0 0 18px;
+  }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    transition: background 0.15s ease;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover:not(:disabled) { background: #ede8e1; }
+  .option.selected {
+    background: #dcd3c7;
+    border: 1px solid #a89e92;
+    font-weight: bold;
+  }
+  .option.correct {
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    color: #1e5631;
+  }
+  .option.wrong {
+    background: #f8d7da;
+    border: 1px solid #d4848a;
+    color: #721c24;
+  }
+  .option:disabled { cursor: default; }
+  .evaluate-btn {
+    background: #5b7e5f;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    transition: background 0.15s ease;
+  }
+  .evaluate-btn:hover:not(:disabled) { background: #4a6b4e; }
+  .evaluate-btn:disabled {
+    background: #b5b5b5;
+    cursor: not-allowed;
+  }
+  .result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 24px;
+    text-align: center;
+  }
+  .score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    margin: 0 0 12px;
+  }
+  .verdict {
+    font-size: 1rem;
+    color: #4a4a4a;
+    margin: 0;
+  }
+  .retry-btn {
+    background: #8c7b6b;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    transition: background 0.15s ease;
+  }
+  .retry-btn:hover { background: #756658; }
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%) translateY(20px);
+    background: #2c2c2c;
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 100;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1></h1>
+  <p class="perex"></p>
+  <div id="quiz"></div>
+  <button class="evaluate-btn" id="evaluateBtn" disabled>Vyhodnotit</button>
+  <div class="result hidden" id="result">
+    <div class="score" id="score"></div>
+    <p class="verdict" id="verdict"></p>
+  </div>
+  <button class="retry-btn hidden" id="retryBtn">Zkusit znovu</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const heading = `Retro kvíz: pamatujete si na těchto 10 legend z dob socialismu? Husákovy děti dají 10/10`;
+  const perex = `Fernet, kola Favorit, sobotní Televarieté i nanuky Míša. Legendy, které Husákovy děti znají zpaměti. Deset otázek prověří, jestli si po letech vybavíte i detaily, které většina lidí dávno pustila z hlavy.`;
+
+  const questions = [
+    {
+      q: `1. Ve kterém městě se vyrábí bylinný likér Fernet Stock?`,
+      options: [`Karlovy Vary`, `Plzeň`, `Prostějov`, `Brno`],
+      correct: 1
+    },
+    {
+      q: `2. Který bavič tvořil s Jiřinou Bohdalovou moderátorskou dvojici v pořadu Televarieté?`,
+      options: [`Miloslav Šimek`, `Karel Šíp`, `Vladimír Dvořák`, `Luděk Sobota`],
+      correct: 2
+    },
+    {
+      q: `3. Ve kterém městě se vyráběla jízdní kola značky Favorit?`,
+      options: [`Rokycany`, `Rakovník`, `Cheb`, `Kolín`],
+      correct: 0
+    },
+    {
+      q: `4. Ve kterém rozhlasovém pořadu se v roce 1966 poprvé objevila postava Járy Cimrmana?`,
+      options: [`Gramotingltangl`, `Tobogan`, `Nealkoholická vinárna U Pavouka`, `Meteor`],
+      correct: 2
+    },
+    {
+      q: `5. Čím se lišila původní zmrzlina Míša z roku 1962 od té dnešní?`,
+      options: [`prodávala se v kelímku`, `neměla dřívko`, `balila se do alobalu`, `měla oříškovou příchuť`],
+      correct: 1
+    },
+    {
+      q: `6. Kdo stál v čele rockové skupiny Katapult jako její kytarista a zpěvák?`,
+      options: [`Petr Janda`, `Oldřich Říha`, `Vladimír Mišík`, `Roman Dragoun`],
+      correct: 1
+    },
+    {
+      q: `7. Jak trampové označují své slavnostní setkání u táborového ohně?`,
+      options: [`čundr`, `vandr`, `potlach`, `camp`],
+      correct: 2
+    },
+    {
+      q: `8. Který pražský fotbalový klub býval za socialismu armádním klubem?`,
+      options: [`Sparta Praha`, `Slavia Praha`, `Bohemians Praha`, `Dukla Praha`],
+      correct: 3
+    },
+    {
+      q: `9. Podle čeho dostaly čokoládové bonbony Lentilky své jméno?`,
+      options: [`podle tvaru připomínajícího čočku`, `podle příjmení vynálezce`, `podle italského města`, `podle barvy první edice`],
+      correct: 0
+    },
+    {
+      q: `10. Jak se jmenoval nejznámější satirický a humoristický týdeník vycházející v českých zemích za socialismu?`,
+      options: [`Roháč`, `Trn`, `Ježek`, `Dikobraz`],
+      correct: 3
+    }
+  ];
+
+  const verdicts = [
+    { min: 0, max: 3, text: `Tyhle legendy vám nejspíš znějí jen z vyprávění. Socialistické Československo je pro vás vzdálená kapitola, kterou znáte spíš z retro pořadů než z vlastní paměti. Nic se neděje, zeptejte se doma pamětníků, ti vám o Fernetu i Favoritu rádi povyprávějí.` },
+    { min: 4, max: 6, text: `Slušný výsledek. Něco jste zažili, něco odposlechli, ale u detailů vás kvíz místy nachytal. Hlavní obrysy té doby máte pevně, jen podrobnosti se po letech trochu rozostřily.` },
+    { min: 7, max: 9, text: `Výborně. Tohle je rajón člověka, který ta léta prožil s otevřenýma očima. Znělku Televarieté, chuť Míši i vůni Fernetu máte v paměti jako včerejšek. Na plný počet vám chybí jen kousek.` },
+    { min: 10, max: 10, text: `Bezchybný výkon. Vy jste opravdové Husákovo dítě se vším všudy. Pamatujete si nejen značky a jména, ale i to, kde se co vyrábělo a kdo co uváděl. Tuhle éru byste mohli klidně učit.` }
+  ];
+
+  const answers = new Array(questions.length).fill(null);
+  let evaluated = false;
+
+  const quizEl = document.getElementById(`quiz`);
+  const evaluateBtn = document.getElementById(`evaluateBtn`);
+  const retryBtn = document.getElementById(`retryBtn`);
+  const resultEl = document.getElementById(`result`);
+  const scoreEl = document.getElementById(`score`);
+  const verdictEl = document.getElementById(`verdict`);
+  const toastEl = document.getElementById(`toast`);
+
+  document.querySelector(`h1`).textContent = heading;
+  document.querySelector(`.perex`).textContent = perex;
+
+  let toastTimer = null;
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add(`show`);
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastEl.classList.remove(`show`);
+    }, 2500);
+  }
+
+  function renderQuiz() {
+    quizEl.innerHTML = ``;
+    questions.forEach(function (item, qi) {
+      const box = document.createElement(`div`);
+      box.className = `question`;
+
+      const qText = document.createElement(`p`);
+      qText.className = `q-text`;
+      qText.textContent = item.q;
+      box.appendChild(qText);
+
+      item.options.forEach(function (opt, oi) {
+        const btn = document.createElement(`button`);
+        btn.type = `button`;
+        btn.className = `option`;
+        btn.textContent = opt;
+        btn.addEventListener(`click`, function () {
+          if (evaluated) return;
+          answers[qi] = oi;
+          const siblings = box.querySelectorAll(`.option`);
+          siblings.forEach(function (s) { s.classList.remove(`selected`); });
+          btn.classList.add(`selected`);
+          updateEvaluateState();
+        });
+        box.appendChild(btn);
+      });
+
+      quizEl.appendChild(box);
+    });
+  }
+
+  function updateEvaluateState() {
+    const allAnswered = answers.every(function (a) { return a !== null; });
+    evaluateBtn.disabled = !allAnswered;
+  }
+
+  function evaluate() {
+    if (answers.some(function (a) { return a === null; })) {
+      showToast(`Odpovězte prosím na všechny otázky`);
+      return;
+    }
+    evaluated = true;
+    let score = 0;
+
+    const boxes = quizEl.querySelectorAll(`.question`);
+    boxes.forEach(function (box, qi) {
+      const opts = box.querySelectorAll(`.option`);
+      const chosen = answers[qi];
+      const correct = questions[qi].correct;
+      if (chosen === correct) score++;
+
+      opts.forEach(function (btn, oi) {
+        btn.disabled = true;
+        btn.classList.remove(`selected`);
+        if (oi === correct) {
+          btn.classList.add(`correct`);
+        } else if (oi === chosen) {
+          btn.classList.add(`wrong`);
+        }
+      });
+    });
+
+    evaluateBtn.classList.add(`hidden`);
+    scoreEl.textContent = score + ` z ` + questions.length;
+
+    const v = verdicts.find(function (t) { return score >= t.min && score <= t.max; });
+    verdictEl.textContent = v ? v.text : ``;
+
+    resultEl.classList.remove(`hidden`);
+    retryBtn.classList.remove(`hidden`);
+
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function reset() {
+    evaluated = false;
+    for (let i = 0; i < answers.length; i++) answers[i] = null;
+    renderQuiz();
+    resultEl.classList.add(`hidden`);
+    retryBtn.classList.add(`hidden`);
+    evaluateBtn.classList.remove(`hidden`);
+    evaluateBtn.disabled = true;
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evaluateBtn.addEventListener(`click`, evaluate);
+  retryBtn.addEventListener(`click`, reset);
+
+  renderQuiz();
+})();
+</script>
+</body>
+</html>
