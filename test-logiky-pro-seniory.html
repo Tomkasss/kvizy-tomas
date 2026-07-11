@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test logiky pro seniory: dokážete odpovědět správně na všech 10 otázek?</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 32px; }
+  .q-box {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+  .answer-input {
+    width: 100%;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+  }
+  .answer-input:focus { outline: none; border-color: #a89e92; background: #ede8e1; }
+  .answer-input.correct {
+    background: #d4edda; border: 1px solid #7cb987; color: #1e5631; font-weight: bold;
+  }
+  .answer-input.incorrect {
+    background: #f8d7da; border: 1px solid #d4848a; color: #721c24; font-weight: bold;
+  }
+  .answer-input:disabled { cursor: not-allowed; }
+  .correct-reveal {
+    margin-top: 12px; font-size: 0.98rem; color: #1e5631;
+    background: #d4edda; border: 1px solid #7cb987; border-radius: 8px; padding: 10px 14px;
+  }
+  .eval-btn {
+    background: #5b7e5f; color: #fff; padding: 16px 40px; border-radius: 8px;
+    font-size: 1.1rem; font-weight: bold; border: none; cursor: pointer;
+    display: block; margin: 40px auto 0; font-family: inherit;
+  }
+  .eval-btn:hover { background: #4a6b4e; }
+  .eval-btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .retry-btn {
+    background: #8c7b6b; color: #fff; padding: 16px 40px; border-radius: 8px;
+    font-size: 1.1rem; font-weight: bold; border: none; cursor: pointer;
+    display: block; margin: 24px auto 0; font-family: inherit;
+  }
+  .retry-btn:hover { background: #756658; }
+  .result-box {
+    background: #fefcf9; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-top: 4px solid #5b7e5f; padding: 28px; margin-top: 40px;
+  }
+  .score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  .verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  .toast {
+    position: fixed; left: 50%; bottom: 32px; transform: translateX(-50%);
+    background: #2c2c2c; color: #fff; padding: 14px 24px; border-radius: 8px;
+    font-size: 1rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 100;
+  }
+  .toast.show { opacity: 1; }
+  @media (max-width: 600px) {
+    body { padding: 24px 16px; }
+    h1 { font-size: 1.6rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="quiz-title"></h1>
+  <p class="perex" id="quiz-perex"></p>
+  <div id="questions"></div>
+  <button class="eval-btn" id="evalBtn" disabled>Vyhodnotit</button>
+  <div id="result"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const titleText = `Test logiky pro seniory: dokážete odpovědět správně na všech 10 otázek?`;
+  const perexText = `Milí senioři, tenhle test nestojí na paměti ani na znalostech, ale na čisté logice a počítání z hlavy. Deset úloh prozradí, jestli vám to pořád myslí bystře a bez zaváhání. Dokážete odpovědět správně na všech deset?`;
+
+  const questions = [
+    { q: `Kým je pro mě jediný syn matky mého otce?`, answers: [`otec`], display: `otec` },
+    { q: `Kolik litrů vody musíte přilít ke třem litrům šťávy, aby výsledný nápoj obsahoval přesně čtvrtinu šťávy?`, answers: [`9`, `devet`, `devět`], display: `9` },
+    { q: `Jaké je nejmenší celé číslo větší než jedna, které dává po dělení dvěma, třemi, čtyřmi, pěti i šesti pokaždé zbytek jedna?`, answers: [`61`, `sedesat jedna`, `šedesát jedna`], display: `61` },
+    { q: `Kolik pradědečků a prababiček dohromady má každý člověk?`, answers: [`8`, `osm`], display: `8` },
+    { q: `Kolika různými způsoby se může seřadit do jedné fronty za sebou čtveřice lidí?`, answers: [`24`, `dvacet ctyri`, `dvacet čtyři`], display: `24` },
+    { q: `Jaká jediná číslice zbude, sečtete-li číslice čísla 9875, poté číslice nového výsledku a takto pokračujete, dokud nezůstane jediná číslice?`, answers: [`2`, `dva`, `dvě`, `dve`], display: `2` },
+    { q: `Kolik nejméně lidí musí být ve skupině, aby měli určitě aspoň dva z nich narozeniny ve stejném měsíci?`, answers: [`13`, `trinact`, `třináct`], display: `13` },
+    { q: `Kolik přestupných roků leží v období od roku 2004 do roku 2024 včetně?`, answers: [`6`, `sest`, `šest`], display: `6` },
+    { q: `Které slovo do řady kapr, štika, delfín, okoun, sumec nepatří?`, answers: [`delfin`, `delfín`], display: `delfín` },
+    { q: `Kolika různými způsoby lze vyjít schodiště o čtyřech schodech, smíte-li v každém kroku vystoupit buď o jeden, nebo o dva schody najednou?`, answers: [`5`, `pet`, `pět`], display: `5` }
+  ];
+
+  const tiers = [
+    { min: 0, max: 3, text: `Logika vám dnes dala zabrat. Většina těchto úloh je postavená tak, aby svedla k rychlému a chybnému odhadu. Nic ztraceného, mozek je jako sval a časté počítání z hlavy, křížovky nebo karetní hry ho spolehlivě rozhýbou.` },
+    { min: 4, max: 6, text: `Solidní výkon, který odpovídá průměru dospělé populace bez rozdílu věku. Základní úvahu zvládáte hravě, jen záludnější chytáky vás nachytaly. Kdo si u těžších úloh dá čas a zadání si přečte dvakrát, posune se výš.` },
+    { min: 7, max: 9, text: `Výborně. Umíte se soustředit, nenecháte se strhnout prvním dojmem a dotáhnete úvahu do konce. Váš mozek pracuje ostřeji než u většiny lidí a věk mu na tom nic neubírá.` },
+    { min: 10, max: 10, text: `Bezchybný výsledek. Perfektní kombinace logiky, pozornosti a trpělivosti. Ani jedna nastražená past vás nedostala, což se povede opravdu málokomu.` }
+  ];
+
+  const titleEl = document.getElementById(`quiz-title`);
+  const perexEl = document.getElementById(`quiz-perex`);
+  const questionsEl = document.getElementById(`questions`);
+  const evalBtn = document.getElementById(`evalBtn`);
+  const resultEl = document.getElementById(`result`);
+  const toastEl = document.getElementById(`toast`);
+
+  titleEl.textContent = titleText;
+  perexEl.textContent = perexText;
+
+  let evaluated = false;
+  const inputs = [];
+
+  function normalize(str) {
+    return str
+      .toLowerCase()
+      .normalize(`NFD`)
+      .replace(/[\u0300-\u036f]/g, ``)
+      .replace(/\s+/g, ` `)
+      .trim();
+  }
+
+  function buildQuestions() {
+    questions.forEach((item, idx) => {
+      const box = document.createElement(`div`);
+      box.className = `q-box`;
+
+      const qText = document.createElement(`div`);
+      qText.className = `q-text`;
+      qText.textContent = `${idx + 1}. ${item.q}`;
+      box.appendChild(qText);
+
+      const input = document.createElement(`input`);
+      input.type = `text`;
+      input.className = `answer-input`;
+      input.setAttribute(`aria-label`, `Odpověď na otázku ${idx + 1}`);
+      input.setAttribute(`autocomplete`, `off`);
+      input.addEventListener(`input`, updateEvalState);
+      box.appendChild(input);
+      inputs.push(input);
+
+      questionsEl.appendChild(box);
+    });
+  }
+
+  function allAnswered() {
+    return inputs.every(inp => inp.value.trim().length > 0);
+  }
+
+  function updateEvalState() {
+    if (evaluated) return;
+    evalBtn.disabled = !allAnswered();
+  }
+
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add(`show`);
+    setTimeout(() => toastEl.classList.remove(`show`), 2500);
+  }
+
+  function isCorrect(item, value) {
+    const norm = normalize(value);
+    return item.answers.some(a => normalize(a) === norm);
+  }
+
+  function evaluate() {
+    if (!allAnswered()) {
+      showToast(`Odpovězte prosím na všechny otázky`);
+      return;
+    }
+    evaluated = true;
+    let score = 0;
+
+    questions.forEach((item, idx) => {
+      const input = inputs[idx];
+      input.disabled = true;
+      const ok = isCorrect(item, input.value);
+      if (ok) {
+        input.classList.add(`correct`);
+        score++;
+      } else {
+        input.classList.add(`incorrect`);
+        const reveal = document.createElement(`div`);
+        reveal.className = `correct-reveal`;
+        reveal.textContent = `Správná odpověď: ${item.display}`;
+        input.parentNode.appendChild(reveal);
+      }
+    });
+
+    evalBtn.style.display = `none`;
+
+    const tier = tiers.find(t => score >= t.min && score <= t.max) || tiers[0];
+
+    const resultBox = document.createElement(`div`);
+    resultBox.className = `result-box`;
+
+    const scoreEl = document.createElement(`div`);
+    scoreEl.className = `score`;
+    scoreEl.textContent = `${score} z ${questions.length}`;
+    resultBox.appendChild(scoreEl);
+
+    const verdictEl = document.createElement(`p`);
+    verdictEl.className = `verdict`;
+    verdictEl.textContent = tier.text;
+    resultBox.appendChild(verdictEl);
+
+    const retryBtn = document.createElement(`button`);
+    retryBtn.className = `retry-btn`;
+    retryBtn.textContent = `Zkusit znovu`;
+    retryBtn.addEventListener(`click`, resetQuiz);
+    resultBox.appendChild(retryBtn);
+
+    resultEl.appendChild(resultBox);
+    resultBox.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function resetQuiz() {
+    evaluated = false;
+    resultEl.innerHTML = ``;
+    inputs.forEach(inp => {
+      inp.value = ``;
+      inp.disabled = false;
+      inp.classList.remove(`correct`, `incorrect`);
+    });
+    document.querySelectorAll(`.correct-reveal`).forEach(el => el.remove());
+    evalBtn.style.display = `block`;
+    evalBtn.disabled = true;
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evalBtn.addEventListener(`click`, evaluate);
+  buildQuestions();
+  updateEvalState();
+})();
+</script>
+</body>
+</html>
