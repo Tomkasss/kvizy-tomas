@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test pro seniory: odpovězte na 10 otázek a my vám řekneme, v čem je vaše síla</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 16px;
+    line-height: 1.55;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.3;
+    color: #2c2c2c;
+    margin: 0 0 20px;
+  }
+  .perex {
+    font-size: 1.1rem;
+    color: #4a4a4a;
+    margin: 0 0 32px;
+  }
+  .question {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin: 0 0 18px;
+  }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 12px;
+    transition: background 0.15s ease;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover { background: #ede8e1; }
+  .option.selected {
+    background: #dcd3c7;
+    border: 1px solid #a89e92;
+    font-weight: bold;
+  }
+  .option.locked {
+    cursor: default;
+  }
+  .option:focus-visible {
+    outline: 2px solid #5b7e5f;
+    outline-offset: 2px;
+  }
+  .evaluate-btn {
+    background: #5b7e5f;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+  }
+  .evaluate-btn:hover { background: #4a6b4e; }
+  .evaluate-btn:disabled,
+  .evaluate-btn.disabled {
+    background: #b5b5b5;
+    cursor: not-allowed;
+  }
+  .result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 32px;
+  }
+  .result-title {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    text-align: center;
+    margin: 0 0 16px;
+  }
+  .result-text {
+    font-size: 1.05rem;
+    color: #4a4a4a;
+    margin: 0 0 14px;
+  }
+  .result-text:last-child { margin-bottom: 0; }
+  .result-note {
+    font-size: 0.95rem;
+    color: #6a6a6a;
+    font-style: italic;
+    text-align: center;
+    margin: 0 0 20px;
+  }
+  .retry-btn {
+    background: #8c7b6b;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+  }
+  .retry-btn:hover { background: #756658; }
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%) translateY(20px);
+    background: #2c2c2c;
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 100;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1></h1>
+  <p class="perex"></p>
+  <div id="quiz"></div>
+  <button id="evaluateBtn" class="evaluate-btn disabled">Vyhodnotit</button>
+  <div id="resultArea"></div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+(function () {
+  const titleText = `Test pro seniory: odpovězte na 10 otázek a my vám řekneme, v čem je vaše síla`;
+  const perexText = `Každý z vás, milí senioři, má svou vlastní sílu, v níž druhé předčí. Někdo ji nosí v rukou, jiný v srdci, další ve své houževnatosti a poslední v tom, jak umí spojovat lidi. Odpovězte na deset otázek a zjistěte, v čem je ta vaše.`;
+
+  const questions = [
+    {
+      q: `1. Kvůli čemu za vámi blízcí nejčastěji přijdou?`,
+      options: [
+        { key: `a`, text: `Když je potřeba něco spravit, vyrobit nebo zařídit.` },
+        { key: `b`, text: `Když potřebují vyslechnout a pohladit po duši.` },
+        { key: `c`, text: `Když hledají oporu, která nepovolí ani v těžké chvíli.` },
+        { key: `d`, text: `Když se má něco zorganizovat a sezvat lidi dohromady.` }
+      ]
+    },
+    {
+      q: `2. Jak nejraději trávíte volný den?`,
+      options: [
+        { key: `a`, text: `Prací kolem domu nebo na zahradě, u které je vidět výsledek.` },
+        { key: `b`, text: `S někým, kdo zrovna potřebuje společnost nebo pomoc.` },
+        { key: `c`, text: `Dotažením něčeho, co jste si předsevzali a co dá zabrat.` },
+        { key: `d`, text: `Návštěvou nebo posezením ve větší společnosti.` }
+      ]
+    },
+    {
+      q: `3. Co vám dodává sílu, když je vám těžko?`,
+      options: [
+        { key: `a`, text: `Že se pustíte do nějaké práce a zabavíte se u ní.` },
+        { key: `b`, text: `Blízkost lidí, na kterých vám záleží, a jejich vlídnost.` },
+        { key: `c`, text: `Vědomí, že jste zvládli i horší věci a nezlomilo vás to.` },
+        { key: `d`, text: `Že se obklopíte lidmi a nezůstanete na to sami.` }
+      ]
+    },
+    {
+      q: `4. Co uděláte, když se sejde celá rodina?`,
+      options: [
+        { key: `a`, text: `Postaráte se, aby všechno klapalo a nic nechybělo.` },
+        { key: `b`, text: `Věnujete se každému a ptáte se, jak se komu daří.` },
+        { key: `c`, text: `Zvládnete i celodenní shon a vydržíte s energií až do konce.` },
+        { key: `d`, text: `Bavíte se s každým a dbáte, ať jsou si všichni blízko.` }
+      ]
+    },
+    {
+      q: `5. Jak se pustíte do nového úkolu?`,
+      options: [
+        { key: `a`, text: `Vezmete to prakticky a rovnou se do toho opřete.` },
+        { key: `b`, text: `Nejdřív myslíte na to, komu tím pomůžete.` },
+        { key: `c`, text: `Zaberete a nepustíte, dokud to není hotové.` },
+        { key: `d`, text: `Domluvíte se s ostatními a pustíte se do toho společně.` }
+      ]
+    },
+    {
+      q: `6. Čím nejraději potěšíte druhé?`,
+      options: [
+        { key: `a`, text: `Něčím, co sami vyrobíte, upečete nebo spravíte.` },
+        { key: `b`, text: `Pozorností a časem, kdy jste jen pro ně.` },
+        { key: `c`, text: `Tím, že u nich vytrváte tak dlouho, dokud se jim neuleví.` },
+        { key: `d`, text: `Setkáním, kam pozvete i ostatní, ať je veselo.` }
+      ]
+    },
+    {
+      q: `7. Co nejraději předáte mladším?`,
+      options: [
+        { key: `a`, text: `Praktickou dovednost, která se v životě vždycky hodí.` },
+        { key: `b`, text: `Laskavost a cit pro druhé.` },
+        { key: `c`, text: `Že se nemá couvat před těžkostmi a má se vydržet.` },
+        { key: `d`, text: `Že se mají lidé scházet a držet spolu.` }
+      ]
+    },
+    {
+      q: `8. Co uděláte, když má někdo z blízkých starost?`,
+      options: [
+        { key: `a`, text: `Hledáte, jak mu prakticky ulevit a co pro něj udělat.` },
+        { key: `b`, text: `Sednete si k němu a v klidu ho vyslechnete.` },
+        { key: `c`, text: `Ujistíte ho, že se to dá zvládnout, a stojíte při něm, dokud nepřejde nejhorší.` },
+        { key: `d`, text: `Svoláte kolem něj lidi, ať na to není sám.` }
+      ]
+    },
+    {
+      q: `9. Na čem si doma nejvíc zakládáte?`,
+      options: [
+        { key: `a`, text: `Aby všechno fungovalo a bylo o co se opřít.` },
+        { key: `b`, text: `Aby se u vás každý cítil vítaný a v teple.` },
+        { key: `c`, text: `Aby to mělo řád, který vydrží i v náročných časech.` },
+        { key: `d`, text: `Aby bylo pořád kolem koho a živo.` }
+      ]
+    },
+    {
+      q: `10. Jak nejraději naložíte s penězi, které vám zbydou?`,
+      options: [
+        { key: `a`, text: `Vylepšíte s nimi domácnost nebo koupíte, co je třeba spravit.` },
+        { key: `b`, text: `Uděláte radost někomu, kdo to potřebuje.` },
+        { key: `c`, text: `Odložíte si je stranou pro případ horších časů.` },
+        { key: `d`, text: `Uspořádáte za ně setkání nebo pohostíte rodinu.` }
+      ]
+    }
+  ];
+
+  const profiles = {
+    a: {
+      title: `Vaše síla je v rukou`,
+      text: `Vaše síla je v rukou. Patříte k lidem, kteří věci nejen vymyslí, ale hlavně udělají. Doma, na zahradě i u příbuzných spravíte, vyrobíte a zařídíte, co je potřeba, a těší vás každá práce, po které zůstane vidět výsledek. Okolí dobře ví, že se na vás dá spolehnout, když se má něco skutečně dotáhnout.`
+    },
+    b: {
+      title: `Vaše síla je v srdci`,
+      text: `Vaše síla je v srdci. Cítíte s druhými a umíte být nablízku, když někdo potřebuje pohladit po duši nebo prostě vědět, že v tom není sám. Máte trpělivost naslouchat a laskavost, která hřeje. Ve vaší blízkosti se lidé cítí přijatí a v bezpečí.`
+    },
+    c: {
+      title: `Vaše síla je ve vytrvalosti`,
+      text: `Vaše síla je ve vytrvalosti. Život vás už leccos naučil a vy jste nikdy nesložili ruce do klína. Když přijdou těžké časy, zaberete a jdete dál, i když ostatní couvají. Vaše houževnatost je tichá opora, o kterou se druzí opřou, když jim dojdou síly.`
+    },
+    d: {
+      title: `Vaše síla je ve spojování lidí`,
+      text: `Vaše síla je ve spojování lidí. Kolem vás je vždycky živo a nikdo u vás nezůstane sám. Umíte svolat rodinu, prostřít stůl pro všechny a udržet, aby lidé drželi pohromadě i v době, kdy se každý žene po svém. Díky vám mají blízcí kam patřit.`
+    }
+  };
+
+  const answers = new Array(questions.length).fill(null);
+  let locked = false;
+
+  document.querySelector(`h1`).textContent = titleText;
+  document.querySelector(`.perex`).textContent = perexText;
+
+  const quizEl = document.getElementById(`quiz`);
+  const evaluateBtn = document.getElementById(`evaluateBtn`);
+  const resultArea = document.getElementById(`resultArea`);
+  const toast = document.getElementById(`toast`);
+  let toastTimer = null;
+
+  function buildQuiz() {
+    quizEl.innerHTML = ``;
+    questions.forEach((item, qIndex) => {
+      const box = document.createElement(`div`);
+      box.className = `question`;
+
+      const qText = document.createElement(`p`);
+      qText.className = `q-text`;
+      qText.textContent = item.q;
+      box.appendChild(qText);
+
+      item.options.forEach((opt) => {
+        const btn = document.createElement(`button`);
+        btn.type = `button`;
+        btn.className = `option`;
+        btn.textContent = opt.text;
+        btn.setAttribute(`data-q`, String(qIndex));
+        btn.setAttribute(`data-key`, opt.key);
+        btn.addEventListener(`click`, function () {
+          if (locked) return;
+          answers[qIndex] = opt.key;
+          const siblings = box.querySelectorAll(`.option`);
+          siblings.forEach((s) => s.classList.remove(`selected`));
+          btn.classList.add(`selected`);
+          updateEvaluateState();
+        });
+        box.appendChild(btn);
+      });
+
+      quizEl.appendChild(box);
+    });
+  }
+
+  function allAnswered() {
+    return answers.every((a) => a !== null);
+  }
+
+  function updateEvaluateState() {
+    if (allAnswered()) {
+      evaluateBtn.classList.remove(`disabled`);
+    } else {
+      evaluateBtn.classList.add(`disabled`);
+    }
+  }
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add(`show`);
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove(`show`), 2600);
+  }
+
+  function evaluate() {
+    if (!allAnswered()) {
+      showToast(`Odpovězte prosím na všechny otázky`);
+      return;
+    }
+
+    locked = true;
+
+    const counts = { a: 0, b: 0, c: 0, d: 0 };
+    answers.forEach((a) => { counts[a] += 1; });
+
+    document.querySelectorAll(`.option`).forEach((btn) => {
+      btn.classList.add(`locked`);
+      btn.disabled = true;
+    });
+
+    evaluateBtn.style.display = `none`;
+
+    const max = Math.max(counts.a, counts.b, counts.c, counts.d);
+    const winners = [`a`, `b`, `c`, `d`].filter((k) => counts[k] === max);
+
+    const result = document.createElement(`div`);
+    result.className = `result`;
+
+    if (winners.length === 1) {
+      const p = profiles[winners[0]];
+      const title = document.createElement(`p`);
+      title.className = `result-title`;
+      title.textContent = p.title;
+      result.appendChild(title);
+
+      const text = document.createElement(`p`);
+      text.className = `result-text`;
+      text.textContent = p.text;
+      result.appendChild(text);
+    } else {
+      const title = document.createElement(`p`);
+      title.className = `result-title`;
+      title.textContent = `Vaše síly jsou vyrovnané`;
+      result.appendChild(title);
+
+      const note = document.createElement(`p`);
+      note.className = `result-note`;
+      note.textContent = `Několik vašich sil je stejně silných – patří vám všechny níže uvedené profily.`;
+      result.appendChild(note);
+
+      winners.forEach((k) => {
+        const p = profiles[k];
+        const text = document.createElement(`p`);
+        text.className = `result-text`;
+        text.textContent = p.text;
+        result.appendChild(text);
+      });
+    }
+
+    const retry = document.createElement(`button`);
+    retry.type = `button`;
+    retry.className = `retry-btn`;
+    retry.textContent = `Zkusit znovu`;
+    retry.addEventListener(`click`, resetQuiz);
+    result.appendChild(retry);
+
+    resultArea.appendChild(result);
+    result.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function resetQuiz() {
+    for (let i = 0; i < answers.length; i++) answers[i] = null;
+    locked = false;
+    resultArea.innerHTML = ``;
+    evaluateBtn.style.display = `block`;
+    evaluateBtn.classList.add(`disabled`);
+    buildQuiz();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evaluateBtn.addEventListener(`click`, evaluate);
+
+  buildQuiz();
+  updateEvaluateState();
+})();
+</script>
+</body>
+</html>
