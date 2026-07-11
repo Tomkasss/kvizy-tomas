@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Těžký kvíz z počítání z hlavy: kdo dá 10/10, má mozek svěží i v důchodu</title>
+<style>
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 16px;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.3;
+    color: #2c2c2c;
+    margin: 0 0 20px;
+  }
+  .perex {
+    font-size: 1.1rem;
+    color: #4a4a4a;
+    margin: 0 0 36px;
+  }
+  .question {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin-bottom: 16px;
+  }
+  .answer-input {
+    width: 100%;
+    font-family: "Georgia", "Times New Roman", serif;
+    font-size: 1rem;
+    color: #3a3a3a;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    outline: none;
+  }
+  .answer-input:focus {
+    border-color: #a89e92;
+    background: #ede8e1;
+  }
+  .answer-input.correct {
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    color: #1e5631;
+    font-weight: bold;
+  }
+  .answer-input.wrong {
+    background: #f8d7da;
+    border: 1px solid #d4848a;
+    color: #721c24;
+    font-weight: bold;
+  }
+  .correct-reveal {
+    margin-top: 12px;
+    font-size: 1rem;
+    color: #1e5631;
+    display: none;
+  }
+  .correct-reveal strong { color: #1e5631; }
+  #evaluate-btn, #reset-btn {
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: "Georgia", "Times New Roman", serif;
+  }
+  #evaluate-btn {
+    background: #5b7e5f;
+  }
+  #evaluate-btn:hover {
+    background: #4a6b4e;
+  }
+  #evaluate-btn.disabled {
+    background: #b5b5b5;
+    cursor: not-allowed;
+  }
+  #reset-btn {
+    background: #8c7b6b;
+  }
+  #reset-btn:hover {
+    background: #756658;
+  }
+  #result {
+    background: #fefcf9;
+    border-radius: 12px;
+    border-top: 4px solid #5b7e5f;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-top: 32px;
+    display: none;
+  }
+  #result h2 {
+    text-align: center;
+    font-size: 1.4rem;
+    color: #2c2c2c;
+    margin: 0 0 16px;
+  }
+  #score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    text-align: center;
+    margin: 0 0 16px;
+  }
+  #verdict {
+    font-size: 1rem;
+    color: #4a4a4a;
+    text-align: center;
+    margin: 0;
+  }
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%) translateY(20px);
+    background: #2c2c2c;
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 1000;
+  }
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="quiz-title"></h1>
+  <p class="perex" id="quiz-perex"></p>
+  <div id="questions"></div>
+  <button id="evaluate-btn" type="button"></button>
+  <div id="result">
+    <h2 id="result-heading"></h2>
+    <div id="score"></div>
+    <p id="verdict"></p>
+    <button id="reset-btn" type="button"></button>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+(function () {
+  const title = `Těžký kvíz z počítání z hlavy: kdo dá 10/10, má mozek svěží i v důchodu`;
+  const perex = `Druhé mocniny, odmocniny, zlomky, procenta i triky s násobením. Deset těžkých příkladů čistě z hlavy, bez tužky a kalkulačky. Kdo z vás v důchodovém věku dá všech deset, má mozek svěží jako zamlada.`;
+
+  const questions = [
+    { text: `Kolik je 65 na druhou?`, accepted: [`4225`, `4 225`], display: `4 225` },
+    { text: `Kolik je 105 na druhou?`, accepted: [`11025`, `11 025`], display: `11 025` },
+    { text: `Kolik je 48 krát 25?`, accepted: [`1200`, `1 200`], display: `1 200` },
+    { text: `Kolik jsou čtyři pětiny z čísla 615?`, accepted: [`492`, `čtyři sta devadesát dva`], display: `492` },
+    { text: `Kolik je 37,5 procenta z 96?`, accepted: [`36`, `třicet šest`], display: `36` },
+    { text: `Kolik je 84 děleno 0,7?`, accepted: [`120`, `sto dvacet`], display: `120` },
+    { text: `Jaká je druhá odmocnina z čísla 4 356?`, accepted: [`66`, `šedesát šest`], display: `66` },
+    { text: `Jaká je třetí odmocnina z čísla 3 375?`, accepted: [`15`, `patnáct`], display: `15` },
+    { text: `Kolik je 2 na desátou?`, accepted: [`1024`, `1 024`], display: `1 024` },
+    { text: `Kolik je 101 krát 99?`, accepted: [`9999`, `9 999`], display: `9 999` }
+  ];
+
+  const verdictHeading = `Jak svěží mozek máte v důchodu?`;
+  const verdicts = [
+    { min: 0, max: 3, text: `Těžké příklady vám daly pořádně zabrat a kalkulačka by od vás dostala metál za věrné služby. Nic ve zlém, počítání z hlavy je dovednost, ne dar. Zkuste si při nakupování tipovat cenu košíku dřív, než ji ukáže pokladna. Za pár týdnů mozek zase chytí druhý dech.` },
+    { min: 4, max: 6, text: `Základní operace vám jdou, ale mocniny větších čísel, odmocniny a zlomky vás přibrzdily. Přesně tak dopadá většina lidí, kteří kalkulačku nosí v kapse a hlavu šetří. Základ máte pevný, chce to jen občas počítat bez mobilu.` },
+    { min: 7, max: 9, text: `Tady je vidět, že vám hlava pořád pálí. Násobení, procenta i odmocniny zvládáte svižně a přesně, jen jeden přehlédnutý krok vás možná stál plný počet. Na svůj věk máte mozek v obdivuhodné kondici.` },
+    { min: 10, max: 10, text: `Deset z deseti bez jediného zaváhání. Druhé mocniny, třetí odmocniny, zlomky i triky s násobením z hlavy a bez chyby. Váš mozek je svěží, jako by léta nestárl, a kalkulačka ve vaší přítomnosti může klidně do důchodu.` }
+  ];
+
+  const titleEl = document.getElementById(`quiz-title`);
+  const perexEl = document.getElementById(`quiz-perex`);
+  const questionsEl = document.getElementById(`questions`);
+  const evaluateBtn = document.getElementById(`evaluate-btn`);
+  const resultEl = document.getElementById(`result`);
+  const resultHeadingEl = document.getElementById(`result-heading`);
+  const scoreEl = document.getElementById(`score`);
+  const verdictEl = document.getElementById(`verdict`);
+  const resetBtn = document.getElementById(`reset-btn`);
+  const toastEl = document.getElementById(`toast`);
+
+  titleEl.textContent = title;
+  perexEl.textContent = perex;
+  evaluateBtn.textContent = `Vyhodnotit`;
+  resetBtn.textContent = `Zkusit znovu`;
+  resultHeadingEl.textContent = verdictHeading;
+
+  let evaluated = false;
+  const inputs = [];
+
+  function normalize(s) {
+    return s
+      .toLowerCase()
+      .normalize(`NFD`)
+      .replace(/[\u0300-\u036f]/g, ``)
+      .replace(/\s+/g, ``)
+      .replace(/,/g, `.`);
+  }
+
+  function buildQuiz() {
+    questions.forEach(function (q, i) {
+      const box = document.createElement(`div`);
+      box.className = `question`;
+
+      const qText = document.createElement(`div`);
+      qText.className = `q-text`;
+      qText.textContent = (i + 1) + `. ` + q.text;
+
+      const input = document.createElement(`input`);
+      input.type = `text`;
+      input.className = `answer-input`;
+      input.setAttribute(`inputmode`, `text`);
+      input.setAttribute(`autocomplete`, `off`);
+      input.setAttribute(`placeholder`, `Vaše odpověď`);
+      input.addEventListener(`input`, updateEvaluateState);
+
+      const reveal = document.createElement(`div`);
+      reveal.className = `correct-reveal`;
+
+      box.appendChild(qText);
+      box.appendChild(input);
+      box.appendChild(reveal);
+      questionsEl.appendChild(box);
+
+      inputs.push({ input: input, reveal: reveal, data: q });
+    });
+  }
+
+  function allAnswered() {
+    return inputs.every(function (item) {
+      return item.input.value.trim() !== ``;
+    });
+  }
+
+  function updateEvaluateState() {
+    if (evaluated) return;
+    if (allAnswered()) {
+      evaluateBtn.classList.remove(`disabled`);
+    } else {
+      evaluateBtn.classList.add(`disabled`);
+    }
+  }
+
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add(`show`);
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function () {
+      toastEl.classList.remove(`show`);
+    }, 2800);
+  }
+
+  function evaluate() {
+    if (evaluated) return;
+    if (!allAnswered()) {
+      showToast(`Odpovězte prosím na všechny otázky`);
+      return;
+    }
+
+    let score = 0;
+    inputs.forEach(function (item) {
+      const userNorm = normalize(item.input.value);
+      const isCorrect = item.data.accepted.some(function (a) {
+        return normalize(a) === userNorm;
+      });
+
+      item.input.disabled = true;
+      if (isCorrect) {
+        item.input.classList.add(`correct`);
+        score++;
+      } else {
+        item.input.classList.add(`wrong`);
+        item.reveal.innerHTML = `Správná odpověď: <strong></strong>`;
+        item.reveal.querySelector(`strong`).textContent = item.data.display;
+        item.reveal.style.display = `block`;
+      }
+    });
+
+    const verdict = verdicts.find(function (v) {
+      return score >= v.min && score <= v.max;
+    });
+
+    scoreEl.textContent = score + ` z ` + questions.length;
+    verdictEl.textContent = verdict ? verdict.text : ``;
+
+    evaluated = true;
+    evaluateBtn.style.display = `none`;
+    resultEl.style.display = `block`;
+
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function reset() {
+    evaluated = false;
+    inputs.forEach(function (item) {
+      item.input.value = ``;
+      item.input.disabled = false;
+      item.input.classList.remove(`correct`, `wrong`);
+      item.reveal.style.display = `none`;
+      item.reveal.innerHTML = ``;
+    });
+    resultEl.style.display = `none`;
+    evaluateBtn.style.display = `block`;
+    evaluateBtn.classList.add(`disabled`);
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  buildQuiz();
+  updateEvaluateState();
+
+  evaluateBtn.addEventListener(`click`, evaluate);
+  resetBtn.addEventListener(`click`, reset);
+})();
+</script>
+</body>
+</html>
