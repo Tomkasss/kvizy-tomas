@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retro kvíz: Husákovy děti</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 16px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.3;
+    color: #2c2c2c;
+    margin: 0 0 20px;
+  }
+  .perex {
+    font-size: 1.1rem;
+    color: #4a4a4a;
+    margin: 0 0 36px;
+  }
+  .q-box {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin: 0 0 18px;
+  }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    transition: background 0.15s ease;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected {
+    background: #dcd3c7;
+    border: 1px solid #a89e92;
+    font-weight: bold;
+  }
+  .opt.correct {
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    color: #1e5631;
+  }
+  .opt.wrong {
+    background: #f8d7da;
+    border: 1px solid #d4848a;
+    color: #721c24;
+  }
+  .opt.locked { cursor: default; }
+  .opt:focus-visible { outline: 2px solid #5b7e5f; outline-offset: 2px; }
+
+  .eval-btn {
+    background: #5b7e5f;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    transition: background 0.15s ease;
+  }
+  .eval-btn:hover { background: #4a6b4e; }
+  .eval-btn:disabled {
+    background: #b5b5b5;
+    cursor: not-allowed;
+  }
+
+  .result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 24px;
+    text-align: center;
+  }
+  .score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    margin: 0 0 12px;
+  }
+  .verdict {
+    font-size: 1rem;
+    color: #4a4a4a;
+    margin: 0;
+  }
+  .retry-btn {
+    background: #8c7b6b;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 24px auto 0;
+    font-family: inherit;
+    transition: background 0.15s ease;
+  }
+  .retry-btn:hover { background: #756658; }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%) translateY(20px);
+    background: #2c2c2c;
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 100;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1 id="quiz-title"></h1>
+    <p class="perex" id="quiz-perex"></p>
+    <div id="questions"></div>
+    <button class="eval-btn" id="eval-btn" disabled>Vyhodnotit</button>
+    <div id="result-area"></div>
+  </div>
+  <div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const title = `Retro kvíz: v tomto testu dají Husákovy děti bez problému 10/10. Všichni jsme měli ty věci doma`;
+  const perex = `Papiňák syčel na plotně, v koupelně hučela Karma a ve vitríně se leskl broušený křišťál. Předměty, které měly Husákovy děti doma úplně samozřejmě. Kolik jejich tajemství si po letech ještě vybavíte?`;
+
+  const questions = [
+    {
+      q: `Proč je příprava jídla v papiňáku rychlejší než v obyčejném hrnci?`,
+      options: [
+        `protože vyšší tlak uvnitř zvyšuje teplotu varu vody`,
+        `protože pára pod pokličkou potraviny rozmělňuje`,
+        `protože sníženým tlakem se voda vaří už při nižší teplotě`,
+        `protože silnostěnné dno rovnoměrněji rozvádí teplo`
+      ],
+      correct: 0
+    },
+    {
+      q: `Čím je tvořena izolace, díky které termoska udrží nápoj dlouho teplý?`,
+      options: [
+        `vrstvou polystyrenu mezi vnějším a vnitřním pláštěm`,
+        `silnou vrstvou korku ve stěně`,
+        `hliníkovou fólií omotanou kolem vnitřní nádoby`,
+        `vakuem mezi dvojitými stěnami nádoby`
+      ],
+      correct: 3
+    },
+    {
+      q: `Jaký druh záření vydávalo horské slunce?`,
+      options: [
+        `infračervené`,
+        `ultrafialové`,
+        `rentgenové`,
+        `mikrovlnné`
+      ],
+      correct: 1
+    },
+    {
+      q: `Která příměs dává pravému broušenému křišťálu vyšší hmotnost a jiskřivý lesk?`,
+      options: [
+        `stříbro`,
+        `rtuť`,
+        `olovo`,
+        `vápník`
+      ],
+      correct: 2
+    },
+    {
+      q: `Který výrobek se v Soběslavi vyráběl pod značkou Lada?`,
+      options: [
+        `šicí stroje`,
+        `osobní automobily`,
+        `jízdní kola`,
+        `chladničky`
+      ],
+      correct: 0
+    },
+    {
+      q: `Čím se v koupelnové Karmě ohřívala protékající voda?`,
+      options: [
+        `elektrickou spirálou`,
+        `tuhými palivy`,
+        `horkou párou z ústředního topení`,
+        `plynem`
+      ],
+      correct: 3
+    },
+    {
+      q: `Jak se na zavařovací sklenici upevňovalo klasické víčko Omnia?`,
+      options: [
+        `našroubováním po závitu`,
+        `přitlačením a zamáčknutím okraje`,
+        `kovovou sponou přes gumový kroužek`,
+        `zatavením horkým voskem`
+      ],
+      correct: 1
+    },
+    {
+      q: `Jak parní odšťavňovač získával z ovoce šťávu?`,
+      options: [
+        `rychlým odstřeďováním rozdrceného ovoce`,
+        `lisováním ovoce mezi dvěma válci`,
+        `horkou stoupající párou`,
+        `zmražením a následným rozmělněním`
+      ],
+      correct: 2
+    },
+    {
+      q: `K sestrojení jakého vynálezu použil Otto Wichterle díly stavebnice Merkur?`,
+      options: [
+        `přístroje na výrobu kontaktních čoček`,
+        `prvního československého počítače`,
+        `funkčního modelu parní lokomotivy`,
+        `prototypu umělého srdce`
+      ],
+      correct: 0
+    },
+    {
+      q: `Který podnik vyráběl proslulé československé psací stroje značky Consul?`,
+      options: [
+        `Tesla`,
+        `Meopta`,
+        `ČKD Praha`,
+        `Zbrojovka Brno`
+      ],
+      correct: 3
+    }
+  ];
+
+  const verdicts = [
+    { min: 0, max: 3, text: `Tyhle věci vám doma nejspíš protekly mezi prsty. Husákovy děti by nad vaším výsledkem soucitně zakroutily hlavou.` },
+    { min: 4, max: 6, text: `Slušný průměr. Pár předmětů jste doma měli, ale jejich fungování jste nikdy moc neřešili.` },
+    { min: 7, max: 9, text: `Vzpomínky máte živé a paměť slouží. Domácnost z té doby si pamatujete skoro do detailu.` },
+    { min: 10, max: 10, text: `Dokonalost. Vyrostli jste mezi papiňáky, karmami a stavebnicemi Merkur a nezapomněli jste ani čárku.` }
+  ];
+
+  const answers = new Array(questions.length).fill(null);
+  let evaluated = false;
+
+  const titleEl = document.getElementById(`quiz-title`);
+  const perexEl = document.getElementById(`quiz-perex`);
+  const questionsEl = document.getElementById(`questions`);
+  const evalBtn = document.getElementById(`eval-btn`);
+  const resultArea = document.getElementById(`result-area`);
+  const toastEl = document.getElementById(`toast`);
+
+  titleEl.textContent = title;
+  perexEl.textContent = perex;
+
+  let toastTimer = null;
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add(`show`);
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastEl.classList.remove(`show`);
+    }, 2600);
+  }
+
+  function updateEvalState() {
+    const allAnswered = answers.every(function (a) { return a !== null; });
+    evalBtn.disabled = !allAnswered;
+  }
+
+  function buildQuestions() {
+    questionsEl.innerHTML = ``;
+    questions.forEach(function (item, qi) {
+      const box = document.createElement(`div`);
+      box.className = `q-box`;
+
+      const qText = document.createElement(`p`);
+      qText.className = `q-text`;
+      qText.textContent = (qi + 1) + `. ` + item.q;
+      box.appendChild(qText);
+
+      item.options.forEach(function (optText, oi) {
+        const btn = document.createElement(`button`);
+        btn.className = `opt`;
+        btn.type = `button`;
+        btn.textContent = optText;
+        btn.dataset.q = String(qi);
+        btn.dataset.o = String(oi);
+        btn.addEventListener(`click`, function () {
+          if (evaluated) return;
+          answers[qi] = oi;
+          const siblings = box.querySelectorAll(`.opt`);
+          siblings.forEach(function (s) { s.classList.remove(`selected`); });
+          btn.classList.add(`selected`);
+          updateEvalState();
+        });
+        box.appendChild(btn);
+      });
+
+      questionsEl.appendChild(box);
+    });
+  }
+
+  function evaluate() {
+    if (evaluated) return;
+    const allAnswered = answers.every(function (a) { return a !== null; });
+    if (!allAnswered) {
+      showToast(`Odpovězte prosím na všechny otázky`);
+      return;
+    }
+    evaluated = true;
+
+    let score = 0;
+    const boxes = questionsEl.querySelectorAll(`.q-box`);
+    boxes.forEach(function (box, qi) {
+      const opts = box.querySelectorAll(`.opt`);
+      const chosen = answers[qi];
+      const correct = questions[qi].correct;
+      if (chosen === correct) score++;
+      opts.forEach(function (opt, oi) {
+        opt.classList.add(`locked`);
+        opt.classList.remove(`selected`);
+        if (oi === correct) {
+          opt.classList.add(`correct`);
+        } else if (oi === chosen) {
+          opt.classList.add(`wrong`);
+        }
+      });
+    });
+
+    evalBtn.disabled = true;
+    evalBtn.style.display = `none`;
+
+    let verdictText = ``;
+    for (let i = 0; i < verdicts.length; i++) {
+      if (score >= verdicts[i].min && score <= verdicts[i].max) {
+        verdictText = verdicts[i].text;
+        break;
+      }
+    }
+
+    const result = document.createElement(`div`);
+    result.className = `result`;
+
+    const scoreEl = document.createElement(`div`);
+    scoreEl.className = `score`;
+    scoreEl.textContent = score + ` z ` + questions.length;
+    result.appendChild(scoreEl);
+
+    const verdictEl = document.createElement(`p`);
+    verdictEl.className = `verdict`;
+    verdictEl.textContent = verdictText;
+    result.appendChild(verdictEl);
+
+    const retryBtn = document.createElement(`button`);
+    retryBtn.className = `retry-btn`;
+    retryBtn.type = `button`;
+    retryBtn.textContent = `Zkusit znovu`;
+    retryBtn.addEventListener(`click`, resetQuiz);
+    result.appendChild(retryBtn);
+
+    resultArea.appendChild(result);
+    result.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function resetQuiz() {
+    evaluated = false;
+    for (let i = 0; i < answers.length; i++) answers[i] = null;
+    resultArea.innerHTML = ``;
+    evalBtn.style.display = `block`;
+    evalBtn.disabled = true;
+    buildQuestions();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evalBtn.addEventListener(`click`, evaluate);
+
+  buildQuestions();
+  updateEvalState();
+})();
+</script>
+</body>
+</html>
