@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro nejchytřjší seniory: kdo zvládne 8/10, strčí do kapsy leckterého dvacátníka</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.25; color: #2c2c2c; margin: 0 0 18px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 36px; }
+  .q-box {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 16px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    transition: background 0.15s ease;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover:not(:disabled) { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .opt:disabled { cursor: default; }
+  .reveal { margin-top: 12px; font-size: 0.98rem; color: #1e5631; }
+  #evaluate, #retry {
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+  }
+  #evaluate { background: #5b7e5f; }
+  #evaluate:hover:not(:disabled) { background: #4a6b4e; }
+  #evaluate:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #retry { background: #8c7b6b; }
+  #retry:hover { background: #756658; }
+  .result {
+    background: #fefcf9;
+    border-radius: 12px;
+    border-top: 4px solid #5b7e5f;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-top: 36px;
+    text-align: center;
+  }
+  .score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; margin: 0 0 12px; }
+  .verdict { font-size: 1rem; color: #4a4a4a; margin: 0; }
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%) translateY(20px);
+    background: #2c2c2c;
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 50;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  @media (max-width: 600px) {
+    body { padding: 24px 16px; }
+    h1 { font-size: 1.55rem; }
+    .q-box { padding: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="title"></h1>
+  <p class="perex" id="perex"></p>
+  <div id="quiz"></div>
+  <button id="evaluate" disabled>Vyhodnotit</button>
+  <div id="resultZone"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const titleText = `Kvíz pro nejchytřjší seniory: kdo zvládne 8/10, strčí do kapsy leckterého dvacátníka`;
+  const perexText = `Tenhle test není pro každého. Deset otázek napříč obory, u kterých se zapotí i sečtělý člověk. Kdo z vás dříve narozených zvládne osm z deseti, může se směle měřit s kdejakým dvacátníkem.`;
+
+  const questions = [
+    {
+      q: `Který mozkový lalok zpracovává zrakové vjemy?`,
+      opts: [`čelní lalok`, `temenní lalok`, `týlní lalok`, `spánkový lalok`],
+      correct: 2
+    },
+    {
+      q: `Který nerost je hlavní rudou rtuti?`,
+      opts: [`rumělka`, `galenit`, `sfalerit`, `pyrit`],
+      correct: 0
+    },
+    {
+      q: `Kdo jako první popsal a pojmenoval buňku?`,
+      opts: [`Antonie van Leeuwenhoek`, `Robert Hooke`, `Louis Pasteur`, `Gregor Mendel`],
+      correct: 1
+    },
+    {
+      q: `Nedostatek kterého vitamínu způsobuje šeroslepost?`,
+      opts: [`vitamínu C`, `vitamínu D`, `vitamínu B12`, `vitamínu A`],
+      correct: 3
+    },
+    {
+      q: `Který mys je nejzápadnějším bodem pevninské Evropy?`,
+      opts: [`mys Finisterre`, `mys Roca`, `mys svatého Vincenta`, `mys Matapan`],
+      correct: 1
+    },
+    {
+      q: `Který trávicí enzym štěpí tuky?`,
+      opts: [`amyláza`, `pepsin`, `lipáza`, `laktáza`],
+      correct: 2
+    },
+    {
+      q: `Jak se nazývá přesunutí rytmického přízvuku z těžké doby na lehkou?`,
+      opts: [`synkopa`, `triola`, `takt`, `předtaktí`],
+      correct: 0
+    },
+    {
+      q: `Který slovanský bůh byl vládcem hromu a blesku?`,
+      opts: [`Veles`, `Svarog`, `Dažbog`, `Perun`],
+      correct: 3
+    },
+    {
+      q: `Jak se nazývá čára na mapě spojující místa se stejným tlakem vzduchu?`,
+      opts: [`izobara`, `izoterma`, `izohypsa`, `izohyeta`],
+      correct: 0
+    },
+    {
+      q: `Jak se nazývá malířská technika jemných mlhavých přechodů mezi tóny?`,
+      opts: [`pointilismus`, `šrafování`, `sfumato`, `koláž`],
+      correct: 2
+    }
+  ];
+
+  const verdicts = [
+    { min: 0, max: 3, text: `Tentokrát to nevyšlo, ale nic se neděje. Tyhle otázky mířily hluboko pod povrch a i leckterý mladík by na nich pohořel víc než vy. Pár témat si zopakujte a příště bude výsledek jiný.` },
+    { min: 4, max: 6, text: `Slušný výkon přesně na hranici, kde končí běžný přehled a začíná ten opravdový. Většina lidí by na tom byla podobně, takže patříte do dobré společnosti. Kousek vás dělí od skutečné špičky.` },
+    { min: 7, max: 9, text: `Výborně. Tohle už není znalost z novin ani z televize, ale poctivě nasbíraný rozhled napříč obory. Málokterý dvacátník by se vám vyrovnal a vy to víte.` },
+    { min: 10, max: 10, text: `Naprostá bezchybnost. Máte v hlavě encyklopedii, kterou většina lidí, mladých i starých, nikdy mít nebude. Před takovým výkonem se sluší jen smeknout.` }
+  ];
+
+  const letters = [`a`, `b`, `c`, `d`];
+  const answers = new Array(questions.length).fill(null);
+  let evaluated = false;
+
+  document.getElementById(`title`).textContent = titleText;
+  document.getElementById(`perex`).textContent = perexText;
+
+  const quizEl = document.getElementById(`quiz`);
+  const evalBtn = document.getElementById(`evaluate`);
+  const resultZone = document.getElementById(`resultZone`);
+  const toastEl = document.getElementById(`toast`);
+  let toastTimer = null;
+
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add(`show`);
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove(`show`); }, 2600);
+  }
+
+  function updateEvalState() {
+    const allAnswered = answers.every(function (a) { return a !== null; });
+    evalBtn.disabled = !allAnswered;
+  }
+
+  function buildQuiz() {
+    quizEl.innerHTML = ``;
+    questions.forEach(function (item, qi) {
+      const box = document.createElement(`div`);
+      box.className = `q-box`;
+
+      const qText = document.createElement(`p`);
+      qText.className = `q-text`;
+      qText.textContent = (qi + 1) + `. ` + item.q;
+      box.appendChild(qText);
+
+      item.opts.forEach(function (optText, oi) {
+        const btn = document.createElement(`button`);
+        btn.type = `button`;
+        btn.className = `opt`;
+        btn.textContent = letters[oi] + `) ` + optText;
+        btn.dataset.qi = qi;
+        btn.dataset.oi = oi;
+        btn.addEventListener(`click`, function () {
+          if (evaluated) return;
+          answers[qi] = oi;
+          const siblings = box.querySelectorAll(`.opt`);
+          siblings.forEach(function (s) { s.classList.remove(`selected`); });
+          btn.classList.add(`selected`);
+          updateEvalState();
+        });
+        box.appendChild(btn);
+      });
+
+      quizEl.appendChild(box);
+    });
+  }
+
+  function evaluate() {
+    if (evaluated) return;
+    const allAnswered = answers.every(function (a) { return a !== null; });
+    if (!allAnswered) {
+      showToast(`Odpovězte prosím na všechny otázky`);
+      return;
+    }
+    evaluated = true;
+    evalBtn.disabled = true;
+
+    let score = 0;
+    const boxes = quizEl.querySelectorAll(`.q-box`);
+    boxes.forEach(function (box, qi) {
+      const correctIdx = questions[qi].correct;
+      const chosen = answers[qi];
+      const opts = box.querySelectorAll(`.opt`);
+      opts.forEach(function (opt, oi) {
+        opt.disabled = true;
+        opt.classList.remove(`selected`);
+        if (oi === correctIdx) {
+          opt.classList.add(`correct`);
+        } else if (oi === chosen) {
+          opt.classList.add(`wrong`);
+        }
+      });
+      if (chosen === correctIdx) {
+        score++;
+      } else {
+        const reveal = document.createElement(`p`);
+        reveal.className = `reveal`;
+        reveal.textContent = `Správná odpověď: ` + letters[correctIdx] + `) ` + questions[qi].opts[correctIdx];
+        box.appendChild(reveal);
+      }
+    });
+
+    let verdictText = ``;
+    for (let i = 0; i < verdicts.length; i++) {
+      if (score >= verdicts[i].min && score <= verdicts[i].max) {
+        verdictText = verdicts[i].text;
+        break;
+      }
+    }
+
+    const result = document.createElement(`div`);
+    result.className = `result`;
+    const scoreEl = document.createElement(`p`);
+    scoreEl.className = `score`;
+    scoreEl.textContent = score + ` z ` + questions.length;
+    const verdictEl = document.createElement(`p`);
+    verdictEl.className = `verdict`;
+    verdictEl.textContent = verdictText;
+    result.appendChild(scoreEl);
+    result.appendChild(verdictEl);
+
+    const retryBtn = document.createElement(`button`);
+    retryBtn.type = `button`;
+    retryBtn.id = `retry`;
+    retryBtn.textContent = `Zkusit znovu`;
+    retryBtn.addEventListener(`click`, resetQuiz);
+
+    resultZone.appendChild(result);
+    resultZone.appendChild(retryBtn);
+
+    result.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function resetQuiz() {
+    evaluated = false;
+    for (let i = 0; i < answers.length; i++) answers[i] = null;
+    resultZone.innerHTML = ``;
+    buildQuiz();
+    evalBtn.disabled = true;
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evalBtn.addEventListener(`click`, evaluate);
+  buildQuiz();
+})();
+</script>
+</body>
+</html>
