@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz slovenských slov, kterým mladí Češi často nerozumí</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 16px;
+    line-height: 1.5;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.25;
+    color: #2c2c2c;
+    margin: 0 0 20px;
+  }
+  .perex {
+    font-size: 1.1rem;
+    color: #4a4a4a;
+    margin: 0 0 32px;
+  }
+  .question {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin: 0 0 18px;
+  }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #3a3a3a;
+    margin-bottom: 12px;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover:not(:disabled) { background: #ede8e1; }
+  .option.selected {
+    background: #dcd3c7;
+    border: 1px solid #a89e92;
+    font-weight: bold;
+  }
+  .option.correct {
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    color: #1e5631;
+  }
+  .option.incorrect {
+    background: #f8d7da;
+    border: 1px solid #d4848a;
+    color: #721c24;
+  }
+  .option:disabled { cursor: default; }
+  #evaluate {
+    background: #5b7e5f;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+  }
+  #evaluate:hover:not(:disabled) { background: #4a6b4e; }
+  #evaluate:disabled {
+    background: #b5b5b5;
+    cursor: not-allowed;
+  }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-top: 24px;
+  }
+  .score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    text-align: center;
+    margin: 0 0 12px;
+  }
+  .verdict {
+    font-size: 1rem;
+    color: #4a4a4a;
+    text-align: center;
+    margin: 0;
+  }
+  #retry {
+    background: #8c7b6b;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 24px auto 0;
+  }
+  #retry:hover { background: #756658; }
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%);
+    background: #2c2c2c;
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 100;
+  }
+  .toast.show { opacity: 1; }
+  @media (max-width: 600px) {
+    body { padding: 24px 16px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="quiz-title"></h1>
+  <p class="perex" id="quiz-perex"></p>
+  <div id="questions"></div>
+  <button id="evaluate" disabled></button>
+  <div id="result" style="display:none;">
+    <div class="score" id="score"></div>
+    <p class="verdict" id="verdict"></p>
+    <button id="retry"></button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const title = `Kvíz slovenských slov, kterým mladí Češi často nerozumí. Zvládnete 10/10 bez slovníku?`;
+  const perex = `Vyrostli jste až po rozpadu Československa a slovenština vám dnes zní skoro jako cizí jazyk. Deset slov, která starší generace bere jako samozřejmost, mladé Čechy pořádně potrápí. Kolik jich dáte bez slovníku?`;
+
+  const questions = [
+    {
+      q: `1. Co znamená slovenské slovo „lienka"?`,
+      options: [`vážka`, `kobylka`, `beruška`, `můra`],
+      correct: 2
+    },
+    {
+      q: `2. Co jsou ve slovenštině „obličky"?`,
+      options: [`játra`, `ledviny`, `slinivka`, `žaludek`],
+      correct: 1
+    },
+    {
+      q: `3. Co označuje slovenské slovo „žihľava"?`,
+      options: [`kopřiva`, `bodlák`, `lopuch`, `přeslička`],
+      correct: 0
+    },
+    {
+      q: `4. Co je ve slovenštině „tekvica"?`,
+      options: [`cuketa`, `meloun`, `patizon`, `dýně`],
+      correct: 3
+    },
+    {
+      q: `5. Co znamená slovenské slovo „plachta"?`,
+      options: [`deka`, `ubrus`, `prostěradlo`, `ručník`],
+      correct: 2
+    },
+    {
+      q: `6. Co je ve slovenštině „čiapka"?`,
+      options: [`čepice`, `klobouk`, `šátek`, `kapuce`],
+      correct: 0
+    },
+    {
+      q: `7. Co označuje slovenské slovo „hmla"?`,
+      options: [`jinovatka`, `mlha`, `rosa`, `kroupy`],
+      correct: 1
+    },
+    {
+      q: `8. Co si Slovák představí pod slovem „pivnica"?`,
+      options: [`hospoda`, `spíž`, `půda`, `sklep`],
+      correct: 3
+    },
+    {
+      q: `9. Co je ve slovenštině „šošovica"?`,
+      options: [`čočka`, `hrách`, `fazole`, `cizrna`],
+      correct: 0
+    },
+    {
+      q: `10. Co znamená slovenské slovo „gombík"?`,
+      options: [`zip`, `přezka`, `knoflík`, `patentka`],
+      correct: 2
+    }
+  ];
+
+  const verdicts = [
+    { min: 0, max: 3, text: `Slovenština je pro vás vážně cizí řeč. Federaci znáte jen z učebnic dějepisu a slovenské slovo vás spolehlivě zaskočí. Zkuste si pustit slovenský seriál, něco se možná začne vracet.` },
+    { min: 4, max: 6, text: `Slušný základ. Něco jste pochytili z televize, od babičky nebo od kamaráda ze Slovenska. Pár zrádných slov vás ale pěkně nachytalo a slovník by se občas hodil.` },
+    { min: 7, max: 9, text: `Na svůj věk slovenštinu ovládáte nadprůměrně. Většinu slov jste trefili bez váhání a falešní přátelé vás skoro nedostali.` },
+    { min: 10, max: 10, text: `Klobúk dole. Slovenčinu máte v malíčku, jako byste vyrůstali na obou stranách řeky Moravy. Žiadne slovo vás neprekvapí.` }
+  ];
+
+  const answers = new Array(questions.length).fill(null);
+  let evaluated = false;
+
+  document.getElementById(`quiz-title`).textContent = title;
+  document.getElementById(`quiz-perex`).textContent = perex;
+
+  const questionsEl = document.getElementById(`questions`);
+  const evaluateBtn = document.getElementById(`evaluate`);
+  const retryBtn = document.getElementById(`retry`);
+  const resultEl = document.getElementById(`result`);
+  const scoreEl = document.getElementById(`score`);
+  const verdictEl = document.getElementById(`verdict`);
+  const toastEl = document.getElementById(`toast`);
+
+  evaluateBtn.textContent = `Vyhodnotit`;
+  retryBtn.textContent = `Zkusit znovu`;
+
+  let toastTimer = null;
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add(`show`);
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastEl.classList.remove(`show`);
+    }, 2600);
+  }
+
+  function updateEvaluateState() {
+    const allAnswered = answers.every(function (a) { return a !== null; });
+    evaluateBtn.disabled = !allAnswered;
+  }
+
+  function buildQuestions() {
+    questionsEl.innerHTML = ``;
+    questions.forEach(function (item, qIndex) {
+      const box = document.createElement(`div`);
+      box.className = `question`;
+
+      const qText = document.createElement(`p`);
+      qText.className = `q-text`;
+      qText.textContent = item.q;
+      box.appendChild(qText);
+
+      item.options.forEach(function (optText, oIndex) {
+        const btn = document.createElement(`button`);
+        btn.type = `button`;
+        btn.className = `option`;
+        btn.textContent = optText;
+        btn.addEventListener(`click`, function () {
+          if (evaluated) return;
+          answers[qIndex] = oIndex;
+          const optionButtons = box.querySelectorAll(`.option`);
+          optionButtons.forEach(function (b) { b.classList.remove(`selected`); });
+          btn.classList.add(`selected`);
+          updateEvaluateState();
+        });
+        box.appendChild(btn);
+      });
+
+      questionsEl.appendChild(box);
+    });
+  }
+
+  function evaluate() {
+    if (evaluated) return;
+    const allAnswered = answers.every(function (a) { return a !== null; });
+    if (!allAnswered) {
+      showToast(`Odpovězte prosím na všechny otázky`);
+      return;
+    }
+
+    evaluated = true;
+    let score = 0;
+
+    const boxes = questionsEl.querySelectorAll(`.question`);
+    boxes.forEach(function (box, qIndex) {
+      const optionButtons = box.querySelectorAll(`.option`);
+      const correctIndex = questions[qIndex].correct;
+      const chosen = answers[qIndex];
+
+      optionButtons.forEach(function (btn, oIndex) {
+        btn.disabled = true;
+        btn.classList.remove(`selected`);
+        if (oIndex === correctIndex) {
+          btn.classList.add(`correct`);
+        } else if (oIndex === chosen) {
+          btn.classList.add(`incorrect`);
+        }
+      });
+
+      if (chosen === correctIndex) score++;
+    });
+
+    scoreEl.textContent = score + ` z ` + questions.length;
+    let verdictText = ``;
+    for (let i = 0; i < verdicts.length; i++) {
+      if (score >= verdicts[i].min && score <= verdicts[i].max) {
+        verdictText = verdicts[i].text;
+        break;
+      }
+    }
+    verdictEl.textContent = verdictText;
+
+    evaluateBtn.disabled = true;
+    resultEl.style.display = `block`;
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function reset() {
+    for (let i = 0; i < answers.length; i++) answers[i] = null;
+    evaluated = false;
+    resultEl.style.display = `none`;
+    buildQuestions();
+    updateEvaluateState();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evaluateBtn.addEventListener(`click`, evaluate);
+  retryBtn.addEventListener(`click`, reset);
+
+  buildQuestions();
+  updateEvaluateState();
+})();
+</script>
+</body>
+</html>
