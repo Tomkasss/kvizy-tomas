@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Všeobecný kvíz pro každého: zvládnete 7/10 a potvrdíte, že máte slušný rozhled?</title>
+<style>
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 16px 80px;
+    line-height: 1.5;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.3;
+    color: #2c2c2c;
+    margin: 0 0 20px;
+  }
+  .perex {
+    font-size: 1.1rem;
+    color: #4a4a4a;
+    margin: 0 0 36px;
+  }
+  .question {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin: 0 0 18px;
+  }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 12px;
+    transition: background 0.15s ease;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover:not(.locked) { background: #ede8e1; }
+  .option.selected {
+    background: #dcd3c7;
+    border: 1px solid #a89e92;
+    font-weight: bold;
+  }
+  .option.locked { cursor: default; }
+  .option.correct {
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    color: #1e5631;
+  }
+  .option.wrong {
+    background: #f8d7da;
+    border: 1px solid #d4848a;
+    color: #721c24;
+  }
+  .option:focus-visible {
+    outline: 3px solid #5b7e5f;
+    outline-offset: 2px;
+  }
+  #evaluateBtn, #resetBtn {
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+  }
+  #evaluateBtn { background: #5b7e5f; }
+  #evaluateBtn:hover:not(:disabled) { background: #4a6b4e; }
+  #evaluateBtn:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #resetBtn { background: #8c7b6b; }
+  #resetBtn:hover { background: #756658; }
+  .result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 32px;
+  }
+  .score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    text-align: center;
+    margin: 0 0 12px;
+  }
+  .verdict {
+    font-size: 1rem;
+    color: #4a4a4a;
+    text-align: center;
+    margin: 0;
+  }
+  .hidden { display: none; }
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%) translateY(20px);
+    background: #2c2c2c;
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 100;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  @media (max-width: 600px) {
+    h1 { font-size: 1.55rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Všeobecný kvíz pro každého: zvládnete 7/10 a potvrdíte, že máte slušný rozhled?</h1>
+  <p class="perex">Deset otázek napříč obory, od přírody a vědy až po hudbu a sport. Žádné chytáky, jen poctivý rozhled. Kdo posbírá sedm správných odpovědí a víc, může si právem říkat, že se ve světě vyzná.</p>
+
+  <div id="quiz"></div>
+
+  <button id="evaluateBtn" type="button" disabled>Vyhodnotit</button>
+
+  <div id="result" class="result hidden">
+    <div class="score" id="scoreText"></div>
+    <p class="verdict" id="verdictText"></p>
+    <button id="resetBtn" type="button">Zkusit znovu</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const questions = [
+    {
+      q: `1. Který pták je nejmenší na světě?`,
+      options: [`kolibřík`, `střízlík obecný`, `králíček obecný`, `sýkora modřinka`],
+      correct: 0
+    },
+    {
+      q: `2. Kolik kláves má standardní klavír?`,
+      options: [`76`, `88`, `96`, `72`],
+      correct: 1
+    },
+    {
+      q: `3. Jakou přibližnou rychlostí se ve vakuu šíří světlo?`,
+      options: [`30 000 km/s`, `150 000 km/s`, `300 000 km/s`, `3 000 km/s`],
+      correct: 2
+    },
+    {
+      q: `4. Který jazyk má na světě nejvíce rodilých mluvčích?`,
+      options: [`angličtina`, `španělština`, `hindština`, `čínština`],
+      correct: 3
+    },
+    {
+      q: `5. Který plyn ve vyšších vrstvách atmosféry pohlcuje většinu ultrafialového záření ze Slunce?`,
+      options: [`ozon`, `dusík`, `oxid uhličitý`, `metan`],
+      correct: 0
+    },
+    {
+      q: `6. Z kůry kterého stromu byla původně získávána látka, z níž byl vyvinut aspirin?`,
+      options: [`z dubu`, `z vrby`, `z břízy`, `z lípy`],
+      correct: 1
+    },
+    {
+      q: `7. Které náboženství má na světě nejvíce věřících?`,
+      options: [`islám`, `buddhismus`, `křesťanství`, `hinduismus`],
+      correct: 2
+    },
+    {
+      q: `8. Který orgán uložený vlevo pod bránicí filtruje krev a slouží jako její zásobárna?`,
+      options: [`ledvina`, `slinivka břišní`, `játra`, `slezina`],
+      correct: 3
+    },
+    {
+      q: `9. Kolik hráčů jednoho družstva je při basketbalu současně na hřišti?`,
+      options: [`pět`, `šest`, `čtyři`, `sedm`],
+      correct: 0
+    },
+    {
+      q: `10. Který světadíl je největší svou rozlohou?`,
+      options: [`Afrika`, `Asie`, `Severní Amerika`, `Antarktida`],
+      correct: 1
+    }
+  ];
+
+  const verdicts = [
+    { min: 0, max: 3, text: `Rozhled má u vás pár slabých míst, ale to se dá napravit. Každá otázka, nad kterou jste zaváhali, je něco nového do hlavy. Příště to bude lepší.` },
+    { min: 4, max: 6, text: `Solidní průměr, kam dosáhne většina lidí. Základ máte dobrý, jen tu a tam něco proklouzlo. Ke slibovaným sedmi bodům vám chybělo málo.` },
+    { min: 7, max: 9, text: `Výborně. Sedmibodovou hranici jste zvládli a potvrdili, že váš všeobecný rozhled je opravdu slušný. Ve společnosti u stolu se rozhodně neztratíte.` },
+    { min: 10, max: 10, text: `Bezchybný výkon. Příroda, věda, hudba i sport, to všechno máte v hlavě a funguje to spolehlivě. Klobouk dolů.` }
+  ];
+
+  const answers = new Array(questions.length).fill(null);
+  let evaluated = false;
+
+  const quizEl = document.getElementById(`quiz`);
+  const evaluateBtn = document.getElementById(`evaluateBtn`);
+  const resultEl = document.getElementById(`result`);
+  const scoreText = document.getElementById(`scoreText`);
+  const verdictText = document.getElementById(`verdictText`);
+  const resetBtn = document.getElementById(`resetBtn`);
+  const toast = document.getElementById(`toast`);
+
+  let toastTimer = null;
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add(`show`);
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toast.classList.remove(`show`);
+    }, 2600);
+  }
+
+  function buildQuiz() {
+    quizEl.innerHTML = ``;
+    questions.forEach(function (item, qi) {
+      const box = document.createElement(`div`);
+      box.className = `question`;
+
+      const qText = document.createElement(`p`);
+      qText.className = `q-text`;
+      qText.textContent = item.q;
+      box.appendChild(qText);
+
+      item.options.forEach(function (optText, oi) {
+        const btn = document.createElement(`button`);
+        btn.type = `button`;
+        btn.className = `option`;
+        btn.textContent = optText;
+        btn.setAttribute(`data-q`, String(qi));
+        btn.setAttribute(`data-o`, String(oi));
+        btn.addEventListener(`click`, function () {
+          if (evaluated) return;
+          answers[qi] = oi;
+          const siblings = box.querySelectorAll(`.option`);
+          siblings.forEach(function (s) { s.classList.remove(`selected`); });
+          btn.classList.add(`selected`);
+          updateEvaluateState();
+        });
+        box.appendChild(btn);
+      });
+
+      quizEl.appendChild(box);
+    });
+  }
+
+  function allAnswered() {
+    return answers.every(function (a) { return a !== null; });
+  }
+
+  function updateEvaluateState() {
+    evaluateBtn.disabled = !allAnswered();
+  }
+
+  function evaluate() {
+    if (!allAnswered()) {
+      showToast(`Odpovězte prosím na všechny otázky`);
+      return;
+    }
+    evaluated = true;
+    let score = 0;
+
+    const boxes = quizEl.querySelectorAll(`.question`);
+    boxes.forEach(function (box, qi) {
+      const correctIdx = questions[qi].correct;
+      const chosen = answers[qi];
+      if (chosen === correctIdx) score++;
+
+      const opts = box.querySelectorAll(`.option`);
+      opts.forEach(function (opt, oi) {
+        opt.classList.add(`locked`);
+        opt.classList.remove(`selected`);
+        opt.disabled = true;
+        if (oi === correctIdx) {
+          opt.classList.add(`correct`);
+        } else if (oi === chosen) {
+          opt.classList.add(`wrong`);
+        }
+      });
+    });
+
+    scoreText.textContent = score + ` z ` + questions.length;
+    let v = verdicts[verdicts.length - 1].text;
+    for (let i = 0; i < verdicts.length; i++) {
+      if (score >= verdicts[i].min && score <= verdicts[i].max) {
+        v = verdicts[i].text;
+        break;
+      }
+    }
+    verdictText.textContent = v;
+
+    evaluateBtn.classList.add(`hidden`);
+    resultEl.classList.remove(`hidden`);
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function reset() {
+    evaluated = false;
+    for (let i = 0; i < answers.length; i++) answers[i] = null;
+    buildQuiz();
+    resultEl.classList.add(`hidden`);
+    evaluateBtn.classList.remove(`hidden`);
+    evaluateBtn.disabled = true;
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evaluateBtn.addEventListener(`click`, evaluate);
+  resetBtn.addEventListener(`click`, reset);
+
+  buildQuiz();
+  updateEvaluateState();
+})();
+</script>
+</body>
+</html>
