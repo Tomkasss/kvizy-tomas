@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro ročníky kolem roku 1970</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 16px;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.3;
+    color: #2c2c2c;
+    margin: 0 0 20px;
+  }
+  .perex {
+    font-size: 1.1rem;
+    color: #4a4a4a;
+    margin: 0 0 36px;
+  }
+  .question {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin: 0 0 18px;
+  }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    transition: background 0.15s ease;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover:not(:disabled) { background: #ede8e1; }
+  .option.selected {
+    background: #dcd3c7;
+    border: 1px solid #a89e92;
+    font-weight: bold;
+  }
+  .option.correct {
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    color: #1e5631;
+  }
+  .option.incorrect {
+    background: #f8d7da;
+    border: 1px solid #d4848a;
+    color: #721c24;
+  }
+  .option:disabled { cursor: default; }
+  #evaluate {
+    background: #5b7e5f;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    transition: background 0.15s ease;
+  }
+  #evaluate:hover:not(:disabled) { background: #4a6b4e; }
+  #evaluate:disabled {
+    background: #b5b5b5;
+    cursor: not-allowed;
+  }
+  #result {
+    background: #fefcf9;
+    border-radius: 12px;
+    border-top: 4px solid #5b7e5f;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-top: 24px;
+    text-align: center;
+  }
+  #result.hidden { display: none; }
+  .score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    margin: 0 0 12px;
+  }
+  .verdict {
+    font-size: 1rem;
+    color: #4a4a4a;
+    margin: 0;
+  }
+  #retry {
+    background: #8c7b6b;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    transition: background 0.15s ease;
+  }
+  #retry:hover { background: #756658; }
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%) translateY(20px);
+    background: #2c2c2c;
+    color: #ffffff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 100;
+  }
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="quiz-title"></h1>
+  <p class="perex" id="quiz-perex"></p>
+  <div id="questions"></div>
+  <button id="evaluate" disabled>Vyhodnotit</button>
+  <div id="result" class="hidden">
+    <div class="score" id="score"></div>
+    <p class="verdict" id="verdict"></p>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+(function () {
+  const title = `Kvíz pro ročníky kolem roku 1970. Mladší generace mají problém dát aspoň 6/10`;
+  const perex = `Rubikova kostka, Kofola z výčepu, kolo s berany i penalta z Bělehradu. Vy, kdo jste se narodili kolem roku 1970, tohle máte v malíku. Mladší ročníky nad půlkou otázek jen bezradně kroutí hlavou. Kolik dáte z deseti vy?`;
+
+  const questions = [
+    {
+      q: `Pod jakým názvem uvedl Ernő Rubik svůj hlavolam na maďarský trh, než dostal jméno Rubikova kostka?`,
+      options: [`Magická kostka`, `Logická kostka`, `Skládací kostka`, `Barevná kostka`],
+      correct: 0
+    },
+    {
+      q: `Na které hradní zřícenině se natáčel film Ať žijí duchové?`,
+      options: [`Okoř`, `Kokořín`, `Rabí`, `Krakovec`],
+      correct: 3
+    },
+    {
+      q: `Ve kterém městě se rozběhla velkovýroba sirupu Kofo pro nápoj Kofola?`,
+      options: [`Krnov`, `Opava`, `Olomouc`, `Praha`],
+      correct: 1
+    },
+    {
+      q: `Který hokejista vstřelil hattrick ve finále mistrovství světa v ledním hokeji 1985?`,
+      options: [`Vladimír Růžička`, `Jiří Lála`, `Jiří Šejba`, `Dárius Rusnák`],
+      correct: 2
+    },
+    {
+      q: `Ve kterém městě se vyráběla jízdní kola značky Favorit?`,
+      options: [`Cheb`, `Rakovník`, `Mělník`, `Rokycany`],
+      correct: 3
+    },
+    {
+      q: `Z jakého materiálu byla vyrobena karoserie automobilu Trabant?`,
+      options: [`duroplast`, `sklolaminát`, `bakelit`, `pozinkovaný plech`],
+      correct: 0
+    },
+    {
+      q: `Čí pečeť zdobila původní obal čokolády Studentská pečeť?`,
+      options: [`Univerzity Palackého`, `Univerzity Karlovy`, `města Olomouce`, `Vysoké školy chemicko-technologické`],
+      correct: 1
+    },
+    {
+      q: `Pod jakým názvem vystupovala rocková skupina Katapult předtím, než se přejmenovala?`,
+      options: [`Citron`, `Turbo`, `Kern`, `Mahagon`],
+      correct: 3
+    },
+    {
+      q: `Který básník založil dětský časopis Mateřídouška a stal se jeho prvním šéfredaktorem?`,
+      options: [`Jaroslav Seifert`, `František Halas`, `František Hrubín`, `Jiří Žáček`],
+      correct: 2
+    },
+    {
+      q: `Brankáře které reprezentace překonal Antonín Panenka svým slavným dloubákem ve finále mistrovství Evropy 1976?`,
+      options: [`Nizozemska`, `Německa`, `Jugoslávie`, `Sovětského svazu`],
+      correct: 1
+    }
+  ];
+
+  const verdicts = [
+    { min: 0, max: 3, text: `Tohle nebyla vaše doba. Buď jste se narodili o dost později, nebo vám retro reálie prostě nikdy nešly pod kůži. Nevadí, aspoň víte, na co se zeptat rodičů.` },
+    { min: 4, max: 6, text: `Slušný základ. Něco jste zažili, něco pochytili, ale detaily vám občas utíkají. Na pravého pamětníka ročníku sedmdesát to ještě o chlup nestačí.` },
+    { min: 7, max: 9, text: `Výborně. Tohle je výkon někoho, kdo tu dobu skutečně prožil. Kolo Favorit, Kofolu i bělehradskou penaltu máte pevně uložené v paměti.` },
+    { min: 10, max: 10, text: `Naprostá bezchybnost. Vy jste ročník kolem sedmdesátky jako když vyšije. Mladší generace před vámi můžou jen tiše smeknout.` }
+  ];
+
+  const letters = [`a`, `b`, `c`, `d`];
+  const answers = new Array(questions.length).fill(null);
+  let evaluated = false;
+
+  document.getElementById(`quiz-title`).textContent = title;
+  document.getElementById(`quiz-perex`).textContent = perex;
+
+  const questionsEl = document.getElementById(`questions`);
+  const evaluateBtn = document.getElementById(`evaluate`);
+  const resultEl = document.getElementById(`result`);
+  const scoreEl = document.getElementById(`score`);
+  const verdictEl = document.getElementById(`verdict`);
+  const retryBtn = document.getElementById(`retry`);
+  const toastEl = document.getElementById(`toast`);
+
+  function buildQuestions() {
+    questions.forEach(function (item, qIndex) {
+      const box = document.createElement(`div`);
+      box.className = `question`;
+
+      const qText = document.createElement(`p`);
+      qText.className = `q-text`;
+      qText.textContent = (qIndex + 1) + `. ` + item.q;
+      box.appendChild(qText);
+
+      item.options.forEach(function (opt, oIndex) {
+        const btn = document.createElement(`button`);
+        btn.className = `option`;
+        btn.type = `button`;
+        btn.textContent = letters[oIndex] + `) ` + opt;
+        btn.addEventListener(`click`, function () {
+          if (evaluated) return;
+          answers[qIndex] = oIndex;
+          const siblings = box.querySelectorAll(`.option`);
+          siblings.forEach(function (s) { s.classList.remove(`selected`); });
+          btn.classList.add(`selected`);
+          updateEvaluateState();
+        });
+        box.appendChild(btn);
+      });
+
+      questionsEl.appendChild(box);
+    });
+  }
+
+  function updateEvaluateState() {
+    const allAnswered = answers.every(function (a) { return a !== null; });
+    evaluateBtn.disabled = !allAnswered;
+  }
+
+  let toastTimer = null;
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add(`show`);
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastEl.classList.remove(`show`);
+    }, 2600);
+  }
+
+  function evaluate() {
+    if (answers.some(function (a) { return a === null; })) {
+      showToast(`Odpovězte prosím na všechny otázky`);
+      return;
+    }
+
+    evaluated = true;
+    let score = 0;
+
+    const boxes = questionsEl.querySelectorAll(`.question`);
+    boxes.forEach(function (box, qIndex) {
+      const opts = box.querySelectorAll(`.option`);
+      const correctIndex = questions[qIndex].correct;
+      const chosen = answers[qIndex];
+      if (chosen === correctIndex) score++;
+
+      opts.forEach(function (btn, oIndex) {
+        btn.disabled = true;
+        btn.classList.remove(`selected`);
+        if (oIndex === correctIndex) {
+          btn.classList.add(`correct`);
+        } else if (oIndex === chosen) {
+          btn.classList.add(`incorrect`);
+        }
+      });
+    });
+
+    scoreEl.textContent = score + ` z ` + questions.length;
+    const v = verdicts.find(function (r) { return score >= r.min && score <= r.max; });
+    verdictEl.textContent = v ? v.text : ``;
+
+    evaluateBtn.style.display = `none`;
+    resultEl.classList.remove(`hidden`);
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function reset() {
+    evaluated = false;
+    for (let i = 0; i < answers.length; i++) answers[i] = null;
+
+    const opts = questionsEl.querySelectorAll(`.option`);
+    opts.forEach(function (btn) {
+      btn.disabled = false;
+      btn.classList.remove(`selected`, `correct`, `incorrect`);
+    });
+
+    resultEl.classList.add(`hidden`);
+    evaluateBtn.style.display = `block`;
+    evaluateBtn.disabled = true;
+
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  buildQuestions();
+  evaluateBtn.addEventListener(`click`, evaluate);
+  retryBtn.addEventListener(`click`, reset);
+})();
+</script>
+</body>
+</html>
