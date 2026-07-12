@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retro kvíz pro Husákovy děti: pamatujete si všechny věci z dob ČSSR?</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 16px;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.3;
+    color: #2c2c2c;
+    margin: 0 0 20px;
+  }
+  .perex {
+    font-size: 1.1rem;
+    color: #4a4a4a;
+    margin: 0 0 36px;
+  }
+  .question {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin: 0 0 18px;
+  }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    transition: background 0.15s ease;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover:not(:disabled) { background: #ede8e1; }
+  .option.selected {
+    background: #dcd3c7;
+    border: 1px solid #a89e92;
+    font-weight: bold;
+  }
+  .option.correct {
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    color: #1e5631;
+  }
+  .option.incorrect {
+    background: #f8d7da;
+    border: 1px solid #d4848a;
+    color: #721c24;
+  }
+  .option:disabled { cursor: default; }
+  .text-answer {
+    width: 100%;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+  }
+  .reveal {
+    margin-top: 12px;
+    font-size: 0.95rem;
+    color: #1e5631;
+    font-weight: bold;
+  }
+  #evaluateBtn {
+    background: #5b7e5f;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    transition: background 0.15s ease;
+  }
+  #evaluateBtn:hover:not(:disabled) { background: #4a6b4e; }
+  #evaluateBtn:disabled {
+    background: #b5b5b5;
+    cursor: not-allowed;
+  }
+  #result {
+    background: #fefcf9;
+    border-radius: 12px;
+    border-top: 4px solid #5b7e5f;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-top: 24px;
+  }
+  .score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    text-align: center;
+    margin: 0 0 12px;
+  }
+  .verdict {
+    font-size: 1rem;
+    color: #4a4a4a;
+    text-align: center;
+    margin: 0;
+  }
+  #retryBtn {
+    background: #8c7b6b;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    transition: background 0.15s ease;
+  }
+  #retryBtn:hover { background: #756658; }
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%) translateY(20px);
+    background: #2c2c2c;
+    color: #ffffff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 100;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  @media (max-width: 600px) {
+    body { padding: 24px 16px; }
+    h1 { font-size: 1.55rem; }
+    .question, #result { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Retro kvíz pro Husákovy děti: pamatujete si všechny věci z dob ČSSR?</h1>
+  <p class="perex">Sáčkové polévky, nedělní ranní pohádky a barevné filmy do foťáku. Husákovy děti to všechno znají z první ruky. Deset otázek prověří, kolik detailů z dob ČSSR vám po tolika letech ještě zůstalo v paměti.</p>
+
+  <div id="quiz"></div>
+
+  <button id="evaluateBtn" disabled>Vyhodnotit</button>
+
+  <div id="result" style="display:none;">
+    <div class="score" id="scoreText"></div>
+    <p class="verdict" id="verdictText"></p>
+    <button id="retryBtn">Zkusit znovu</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">Odpovězte prosím na všechny otázky</div>
+
+<script>
+(function () {
+  const questions = [
+    {
+      q: `1. Ve kterém městě se v roce 1950 rozjela průmyslová výroba syntetického vlákna silon?`,
+      options: [`a) Zlín`, `b) Varnsdorf`, `c) Planá nad Lužnicí`, `d) Otrokovice`],
+      correct: 2
+    },
+    {
+      q: `2. Z které země pocházel fotografický film značky ORWO?`,
+      options: [`a) Německá demokratická republika`, `b) Sovětský svaz`, `c) Polsko`, `d) Maďarsko`],
+      correct: 0
+    },
+    {
+      q: `3. Jakou večerní školu si musel v komedii Marečku, podejte mi pero! dodělat mistr Kroupa?`,
+      options: [`a) gymnázium`, `b) průmyslovku`, `c) obchodní akademii`, `d) zdravotnickou školu`],
+      correct: 1
+    },
+    {
+      q: `4. Jakou zvláštností se vyznačovala mluva loutek Jů a Hele ze Studia Kamarád?`,
+      options: [`a) mluvily zásadně šeptem`, `b) každá z nich mluvila jiným jazykem`, `c) mluvily pozpátku`, `d) navzájem se oslovovaly ve středním rodě`],
+      correct: 3
+    },
+    {
+      q: `5. V kterém roce vybojovali českoslovenští hokejisté svůj poslední titul mistrů světa?`,
+      options: [`a) 1976`, `b) 1977`, `c) 1985`, `d) 1990`],
+      correct: 2
+    },
+    {
+      q: `6. Které československé zpěvačce zakázal komunistický režim v roce 1970 na téměř dvacet let vystupovat?`,
+      options: [`a) Marta Kubišová`, `b) Helena Vondráčková`, `c) Eva Pilarová`, `d) Hana Hegerová`],
+      correct: 0
+    },
+    {
+      q: `7. Který básník založil nejstarší dodnes vycházející český dětský časopis Mateřídouška?`,
+      options: [`a) Jaroslav Seifert`, `b) František Hrubín`, `c) Ondřej Sekora`, `d) Josef Lada`],
+      correct: 1
+    },
+    {
+      q: `8. Výrobou jakých předmětů se proslavil dačický podnik Centropen?`,
+      options: [`a) školních sešitů`, `b) pastelek a voskovek`, `c) temperových barev`, `d) popisovačů a per`],
+      correct: 3
+    },
+    {
+      q: `9. Pod jakým názvem vyrábí značka Vitana svou tradiční bujónovou kostku?`,
+      options: [`a) Masox`, `b) Bujonka`, `c) Maggi`, `d) Vývar`],
+      correct: 0
+    },
+    {
+      q: `10. Kdo režíroval populární večerníček o kutilech Patovi a Matovi?`,
+      options: [`a) Zdeněk Miler`, `b) Lubomír Beneš`, `c) Václav Bedřich`, `d) Břetislav Pojar`],
+      correct: 1
+    }
+  ];
+
+  const verdicts = [
+    { min: 0, max: 3, text: `ČSSR jste buď nezažili, nebo vám tehdy stačilo, že v obchodě jsou lentilky. Zbytek už se v paměti rozplynul. Nevadí, pamětníky doma se klidně vyptejte, rádi zavzpomínají.` },
+    { min: 4, max: 6, text: `Typický výsledek Husákova dítěte, které dobu prožilo, ale detaily už léta neoprašovalo. Sáčkovou polévku i nedělní ráno u televize máte v paměti, pár podrobností se ale ztratilo.` },
+    { min: 7, max: 9, text: `Výborně. Tohle je výkon člověka, který ČSSR nejen zažil, ale i pozorně vnímal. Značky, seriály i drobnosti všedního dne vám sedí skoro bez zaváhání.` },
+    { min: 10, max: 10, text: `Bezchybně. Vy jste živá kronika normalizačního dětství. Od silonu přes Masox až po Pata a Mata máte celé Československo v malíčku.` }
+  ];
+
+  const selected = new Array(questions.length).fill(null);
+  let locked = false;
+
+  const quizEl = document.getElementById(`quiz`);
+  const evaluateBtn = document.getElementById(`evaluateBtn`);
+  const resultEl = document.getElementById(`result`);
+  const scoreEl = document.getElementById(`scoreText`);
+  const verdictEl = document.getElementById(`verdictText`);
+  const retryBtn = document.getElementById(`retryBtn`);
+  const toast = document.getElementById(`toast`);
+  let toastTimer = null;
+
+  function buildQuiz() {
+    quizEl.innerHTML = ``;
+    questions.forEach((item, qi) => {
+      const box = document.createElement(`div`);
+      box.className = `question`;
+
+      const qText = document.createElement(`p`);
+      qText.className = `q-text`;
+      qText.textContent = item.q;
+      box.appendChild(qText);
+
+      item.options.forEach((opt, oi) => {
+        const btn = document.createElement(`button`);
+        btn.className = `option`;
+        btn.type = `button`;
+        btn.textContent = opt;
+        btn.setAttribute(`data-q`, qi);
+        btn.setAttribute(`data-o`, oi);
+        btn.addEventListener(`click`, function () {
+          if (locked) return;
+          selected[qi] = oi;
+          const siblings = box.querySelectorAll(`.option`);
+          siblings.forEach(s => s.classList.remove(`selected`));
+          btn.classList.add(`selected`);
+          updateEvaluateState();
+        });
+        box.appendChild(btn);
+      });
+
+      quizEl.appendChild(box);
+    });
+  }
+
+  function updateEvaluateState() {
+    const allAnswered = selected.every(s => s !== null);
+    evaluateBtn.disabled = !allAnswered;
+  }
+
+  function showToast() {
+    toast.classList.add(`show`);
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove(`show`), 2500);
+  }
+
+  function evaluate() {
+    if (selected.some(s => s === null)) {
+      showToast();
+      return;
+    }
+    locked = true;
+    let score = 0;
+
+    const boxes = quizEl.querySelectorAll(`.question`);
+    boxes.forEach((box, qi) => {
+      const opts = box.querySelectorAll(`.option`);
+      const correctIndex = questions[qi].correct;
+      const chosen = selected[qi];
+
+      opts.forEach((btn, oi) => {
+        btn.disabled = true;
+        btn.classList.remove(`selected`);
+        if (oi === correctIndex) {
+          btn.classList.add(`correct`);
+        }
+        if (oi === chosen && chosen !== correctIndex) {
+          btn.classList.add(`incorrect`);
+        }
+      });
+
+      if (chosen === correctIndex) {
+        score++;
+      } else {
+        const reveal = document.createElement(`p`);
+        reveal.className = `reveal`;
+        reveal.textContent = `Správná odpověď: ` + questions[qi].options[correctIndex];
+        box.appendChild(reveal);
+      }
+    });
+
+    evaluateBtn.style.display = `none`;
+
+    const verdict = verdicts.find(v => score >= v.min && score <= v.max);
+    scoreEl.textContent = score + ` z ` + questions.length;
+    verdictEl.textContent = verdict ? verdict.text : ``;
+    resultEl.style.display = `block`;
+
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function reset() {
+    locked = false;
+    for (let i = 0; i < selected.length; i++) selected[i] = null;
+    resultEl.style.display = `none`;
+    evaluateBtn.style.display = `block`;
+    evaluateBtn.disabled = true;
+    buildQuiz();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evaluateBtn.addEventListener(`click`, evaluate);
+  retryBtn.addEventListener(`click`, reset);
+
+  buildQuiz();
+})();
+</script>
+</body>
+</html>
