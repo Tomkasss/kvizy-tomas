@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dějepisný kvíz pro babičky a dědečky: kdo dá 9 z 10, zahanbí i vystudované vnuky</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 16px;
+    color: #2c2c2c;
+    line-height: 1.5;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.3;
+    color: #2c2c2c;
+    margin: 0 0 20px;
+  }
+  .perex {
+    font-size: 1.05rem;
+    color: #4a4a4a;
+    margin: 0 0 32px;
+  }
+  .question {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin: 0 0 18px;
+  }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 12px;
+    transition: background 0.15s;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover { background: #ede8e1; }
+  .option.selected {
+    background: #dcd3c7;
+    border: 1px solid #a89e92;
+    font-weight: bold;
+  }
+  .option.correct {
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    color: #1e5631;
+  }
+  .option.wrong {
+    background: #f8d7da;
+    border: 1px solid #d4848a;
+    color: #721c24;
+  }
+  .option.locked { cursor: default; }
+  .reveal {
+    margin-top: 14px;
+    font-size: 0.98rem;
+    color: #1e5631;
+  }
+  .btn-evaluate {
+    background: #5b7e5f;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+  }
+  .btn-evaluate:hover { background: #4a6b4e; }
+  .btn-evaluate:disabled {
+    background: #b5b5b5;
+    cursor: not-allowed;
+  }
+  .btn-retry {
+    background: #8c7b6b;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+  }
+  .btn-retry:hover { background: #756658; }
+  .result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 40px;
+  }
+  .score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    text-align: center;
+    margin: 0 0 16px;
+  }
+  .verdict {
+    font-size: 1rem;
+    color: #4a4a4a;
+    text-align: center;
+    margin: 0;
+  }
+  .hidden { display: none; }
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%);
+    background: #2c2c2c;
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 100;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Dějepisný kvíz pro babičky a dědečky: kdo dá 9 z 10, zahanbí i vystudované vnuky</h1>
+  <p class="perex">Marie Terezie, Karel IV. i turecké obléhání Vídně. Deset otázek z dějepisu, který se kdysi bral vážně. Babičky a dědečkové, kdo z vás zvládne devět z deseti, zahanbí i vystudované vnuky.</p>
+
+  <div id="quiz"></div>
+
+  <button id="evaluateBtn" class="btn-evaluate" disabled>Vyhodnotit</button>
+
+  <div id="result" class="result hidden">
+    <div id="score" class="score"></div>
+    <p id="verdict" class="verdict"></p>
+  </div>
+
+  <button id="retryBtn" class="btn-retry hidden">Zkusit znovu</button>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+(function () {
+  const questions = [
+    {
+      text: `1. Kolik dětí porodila Marie Terezie?`,
+      options: [`a) deset`, `b) třináct`, `c) šestnáct`, `d) devatenáct`],
+      correct: 2
+    },
+    {
+      text: `2. Ve kterém městě přijal Karel IV. císařskou korunu?`,
+      options: [`a) v Cáchách`, `b) v Praze`, `c) v Norimberku`, `d) v Římě`],
+      correct: 3
+    },
+    {
+      text: `3. Kdo byla matkou císaře Karla IV.?`,
+      options: [`a) Blanka z Valois`, `b) Eliška Přemyslovna`, `c) Anna Svídnická`, `d) Alžběta Pomořanská`],
+      correct: 1
+    },
+    {
+      text: `4. V které obci byla založena Jednota bratrská?`,
+      options: [`a) v Kunvaldu`, `b) v Litomyšli`, `c) v Ivančicích`, `d) ve Lhotce u Rychnova`],
+      correct: 0
+    },
+    {
+      text: `5. Který ruský panovník se roku 1547 nechal jako první korunovat carem?`,
+      options: [`a) Petr I. Veliký`, `b) Ivan III.`, `c) Ivan IV. Hrozný`, `d) Boris Godunov`],
+      correct: 2
+    },
+    {
+      text: `6. Který osmanský sultán vedl roku 1529 první turecké obléhání Vídně?`,
+      options: [`a) Mehmed II.`, `b) Sulejman I. Nádherný`, `c) Selim I.`, `d) Bajezid II.`],
+      correct: 1
+    },
+    {
+      text: `7. Za vlády které anglické panovnice byla odražena španělská Armada?`,
+      options: [`a) Marie I. Tudorovna`, `b) Viktorie`, `c) Anna Stuartovna`, `d) Alžběta I.`],
+      correct: 3
+    },
+    {
+      text: `8. Dobytím kterého města dovršili roku 1492 španělští panovníci znovudobývání Pyrenejského poloostrova?`,
+      options: [`a) Granady`, `b) Córdoby`, `c) Sevilly`, `d) Toleda`],
+      correct: 0
+    },
+    {
+      text: `9. Který panovník byl na Vánoce roku 800 korunován císařem?`,
+      options: [`a) Chlodvík I.`, `b) Karel Veliký`, `c) Ota I.`, `d) Justinián I.`],
+      correct: 1
+    },
+    {
+      text: `10. Který dánský astronom působil na dvoře císaře Rudolfa II. a zemřel roku 1601 v Praze?`,
+      options: [`a) Johannes Kepler`, `b) Galileo Galilei`, `c) Mikuláš Koperník`, `d) Tycho Brahe`],
+      correct: 3
+    }
+  ];
+
+  const verdicts = [
+    { min: 0, max: 3, text: `Letopočty a jména vám za ta léta trochu splynula do jednoho obrazu. Nevadí, dějiny jsou nejlepší tím, že se k nim člověk může kdykoli vrátit. Vezměte vnuky na výlet na hrad a uvidíte, co všechno se vám vybaví.` },
+    { min: 4, max: 6, text: `Slušný výsledek, přesně v pásmu, kde končí většina lidí. Hlavní milníky máte pevně v hlavě, u méně známých panovníků a událostí to zaskřípalo. Základ, na kterém se dá dál stavět.` },
+    { min: 7, max: 9, text: `Výborně. Tohle už není školní přehled, ale znalost s přesahem. Orientujete se v českých i evropských dějinách líp než leckterý vysokoškolák a nejednoho vystudovaného vnuka byste zahanbili.` },
+    { min: 10, max: 10, text: `Bezchybně. Od Marie Terezie po Tychona Braha vám nic neuniklo. Takové znalosti dnes potká člověk vzácně a vnuci s diplomem by měli pozorně naslouchat.` }
+  ];
+
+  const answers = new Array(questions.length).fill(null);
+  let evaluated = false;
+
+  const quizEl = document.getElementById(`quiz`);
+  const evaluateBtn = document.getElementById(`evaluateBtn`);
+  const retryBtn = document.getElementById(`retryBtn`);
+  const resultEl = document.getElementById(`result`);
+  const scoreEl = document.getElementById(`score`);
+  const verdictEl = document.getElementById(`verdict`);
+  const toastEl = document.getElementById(`toast`);
+
+  let toastTimer = null;
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add(`show`);
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastEl.classList.remove(`show`);
+    }, 2500);
+  }
+
+  function updateEvaluateState() {
+    const allAnswered = answers.every(function (a) { return a !== null; });
+    evaluateBtn.disabled = !allAnswered;
+  }
+
+  function render() {
+    quizEl.innerHTML = ``;
+    questions.forEach(function (q, qi) {
+      const box = document.createElement(`div`);
+      box.className = `question`;
+
+      const qText = document.createElement(`p`);
+      qText.className = `q-text`;
+      qText.textContent = q.text;
+      box.appendChild(qText);
+
+      q.options.forEach(function (optText, oi) {
+        const btn = document.createElement(`button`);
+        btn.className = `option`;
+        btn.textContent = optText;
+        btn.setAttribute(`type`, `button`);
+        if (answers[qi] === oi) btn.classList.add(`selected`);
+        btn.addEventListener(`click`, function () {
+          if (evaluated) return;
+          answers[qi] = oi;
+          Array.prototype.forEach.call(box.querySelectorAll(`.option`), function (b) {
+            b.classList.remove(`selected`);
+          });
+          btn.classList.add(`selected`);
+          updateEvaluateState();
+        });
+        box.appendChild(btn);
+      });
+
+      quizEl.appendChild(box);
+    });
+  }
+
+  function evaluate() {
+    if (answers.some(function (a) { return a === null; })) {
+      showToast(`Odpovězte prosím na všechny otázky`);
+      return;
+    }
+    evaluated = true;
+    let score = 0;
+
+    const boxes = quizEl.querySelectorAll(`.question`);
+    questions.forEach(function (q, qi) {
+      const box = boxes[qi];
+      const optionBtns = box.querySelectorAll(`.option`);
+      if (answers[qi] === q.correct) score++;
+
+      Array.prototype.forEach.call(optionBtns, function (b, oi) {
+        b.classList.add(`locked`);
+        b.classList.remove(`selected`);
+        if (oi === q.correct) {
+          b.classList.add(`correct`);
+        } else if (oi === answers[qi]) {
+          b.classList.add(`wrong`);
+        }
+      });
+
+      if (answers[qi] !== q.correct) {
+        const reveal = document.createElement(`div`);
+        reveal.className = `reveal`;
+        reveal.textContent = `Správná odpověď: ` + q.options[q.correct];
+        box.appendChild(reveal);
+      }
+    });
+
+    evaluateBtn.classList.add(`hidden`);
+    scoreEl.textContent = score + ` z ` + questions.length;
+    const v = verdicts.find(function (vv) { return score >= vv.min && score <= vv.max; });
+    verdictEl.textContent = v ? v.text : ``;
+    resultEl.classList.remove(`hidden`);
+    retryBtn.classList.remove(`hidden`);
+
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function reset() {
+    for (let i = 0; i < answers.length; i++) answers[i] = null;
+    evaluated = false;
+    resultEl.classList.add(`hidden`);
+    retryBtn.classList.add(`hidden`);
+    evaluateBtn.classList.remove(`hidden`);
+    evaluateBtn.disabled = true;
+    render();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evaluateBtn.addEventListener(`click`, evaluate);
+  retryBtn.addEventListener(`click`, reset);
+
+  render();
+  updateEvaluateState();
+})();
+</script>
+</body>
+</html>
