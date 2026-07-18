@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Středně náročný kvíz pro seniory: kdo v něm dá aspoň 7/10, myslí jako průměrný třicátník</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 16px 80px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 40px; }
+  .question {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover:not(.locked) { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .opt.locked { cursor: default; }
+  .opt:focus-visible { outline: 2px solid #5b7e5f; outline-offset: 2px; }
+  #evaluate {
+    background: #5b7e5f;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+  }
+  #evaluate:hover { background: #4a6b4e; }
+  #evaluate.disabled { background: #b5b5b5; cursor: not-allowed; }
+  #reset {
+    background: #8c7b6b;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+  }
+  #reset:hover { background: #756658; }
+  #result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-top: 40px;
+    border-top: 4px solid #5b7e5f;
+    display: none;
+  }
+  .score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+  .verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%);
+    background: #3a3a3a;
+    color: #ffffff;
+    padding: 14px 22px;
+    border-radius: 8px;
+    font-size: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+    z-index: 10;
+  }
+  #toast.show { opacity: 1; }
+  @media (max-width: 600px) {
+    h1 { font-size: 1.5rem; }
+    .question, #result { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Středně náročný kvíz pro seniory: kdo v něm dá aspoň 7/10, myslí jako průměrný třicátník</h1>
+  <p class="perex">Deset otázek napříč obory prověří, jestli vaše hlava pracuje pořád tak svižně jako ta třicetiletá. Sedm správných odpovědí a víc znamená, že se za mladšími rozhodně nemusíte ohlížet.</p>
+  <div id="quiz"></div>
+  <button id="evaluate" class="disabled" type="button">Vyhodnotit</button>
+  <div id="result">
+    <div class="score" id="score"></div>
+    <div class="verdict" id="verdict"></div>
+    <button id="reset" type="button">Zkusit znovu</button>
+  </div>
+</div>
+<div id="toast">Odpovězte prosím na všechny otázky</div>
+<script>
+(function () {
+  var questions = [
+    {
+      q: `1. Za jak dlouho urazí světlo cestu ze Slunce k Zemi?`,
+      options: [`a) za 8 sekund`, `b) za 8 minut`, `c) za 8 hodin`, `d) za 38 minut`],
+      correct: 1
+    },
+    {
+      q: `2. Kolik hráčů má baseballové mužstvo v poli?`,
+      options: [`a) šest`, `b) sedm`, `c) osm`, `d) devět`],
+      correct: 3
+    },
+    {
+      q: `3. Jak se nazývá přirozené číslo větší než jedna, které je beze zbytku dělitelné pouze jedničkou a samo sebou?`,
+      options: [`a) prvočíslo`, `b) složené číslo`, `c) soudělné číslo`, `d) druhá mocnina`],
+      correct: 0
+    },
+    {
+      q: `4. Které řecké bohyni přiřkl Paris zlaté jablko?`,
+      options: [`a) Héře`, `b) Artemidě`, `c) Afrodíté`, `d) Athéně`],
+      correct: 2
+    },
+    {
+      q: `5. Která durová tónina nemá v předznamenání ani křížek, ani béčko?`,
+      options: [`a) C dur`, `b) G dur`, `c) F dur`, `d) D dur`],
+      correct: 0
+    },
+    {
+      q: `6. Z jaké suroviny se vyrábí japonské sake?`,
+      options: [`a) z ječmene`, `b) z batátů`, `c) z rýže`, `d) z prosa`],
+      correct: 2
+    },
+    {
+      q: `7. Ve kterém roce se Havaj stala padesátým státem USA?`,
+      options: [`a) 1912`, `b) 1945`, `c) 1953`, `d) 1959`],
+      correct: 3
+    },
+    {
+      q: `8. Ve kterém náboženství vedle hinduismu platí kráva za posvátné zvíře?`,
+      options: [`a) v sikhismu`, `b) v džinismu`, `c) v islámu`, `d) v šintoismu`],
+      correct: 1
+    },
+    {
+      q: `9. Kterému legendárnímu králi sloužili rytíři Kulatého stolu?`,
+      options: [`a) Artušovi`, `b) Richardovi Lví srdce`, `c) Vilému Dobyvateli`, `d) Karlu Velikému`],
+      correct: 0
+    },
+    {
+      q: `10. Jak se nazývá částice, která vznikla z atomu přijetím elektronů?`,
+      options: [`a) kation`, `b) anion`, `c) proton`, `d) neutron`],
+      correct: 1
+    }
+  ];
+
+  var verdicts = [
+    { min: 0, max: 3, text: `Tenhle kvíz vám dnes moc nesedl. Otázky mířily do deseti různých oborů a to je poctivá výzva pro každého. Zkuste to znovu, mnohé z toho ve vás dřímá.` },
+    { min: 4, max: 6, text: `Solidní průměr, který zvládne většina dospělých. Základní přehled máte, ale detaily z mytologie, chemie nebo hudební nauky vám část bodů odnesly.` },
+    { min: 7, max: 9, text: `Přesně o tomhle výsledku byla řeč v nadpisu. Vaše hlava kombinuje obory rychle a spolehlivě, s třicátníkem byste si v takovém souboji hravě poradili.` },
+    { min: 10, max: 10, text: `Plný počet napříč deseti obory není náhoda. Tohle je výkon člověka, který se celý život zajímal o svět kolem sebe a pořád v tom pokračuje.` }
+  ];
+
+  var answers = new Array(questions.length).fill(null);
+  var evaluated = false;
+
+  var quizEl = document.getElementById(`quiz`);
+  var evalBtn = document.getElementById(`evaluate`);
+  var resetBtn = document.getElementById(`reset`);
+  var resultEl = document.getElementById(`result`);
+  var scoreEl = document.getElementById(`score`);
+  var verdictEl = document.getElementById(`verdict`);
+  var toastEl = document.getElementById(`toast`);
+  var toastTimer = null;
+
+  function build() {
+    quizEl.innerHTML = ``;
+    questions.forEach(function (item, qi) {
+      var box = document.createElement(`div`);
+      box.className = `question`;
+
+      var qt = document.createElement(`div`);
+      qt.className = `qtext`;
+      qt.textContent = item.q;
+      box.appendChild(qt);
+
+      item.options.forEach(function (opt, oi) {
+        var btn = document.createElement(`button`);
+        btn.type = `button`;
+        btn.className = `opt`;
+        btn.textContent = opt;
+        btn.setAttribute(`data-q`, String(qi));
+        btn.setAttribute(`data-o`, String(oi));
+        btn.addEventListener(`click`, function () {
+          if (evaluated) { return; }
+          answers[qi] = oi;
+          var siblings = box.querySelectorAll(`.opt`);
+          for (var i = 0; i < siblings.length; i++) {
+            siblings[i].classList.remove(`selected`);
+          }
+          btn.classList.add(`selected`);
+          refreshEvalState();
+        });
+        box.appendChild(btn);
+      });
+
+      quizEl.appendChild(box);
+    });
+  }
+
+  function allAnswered() {
+    return answers.every(function (a) { return a !== null; });
+  }
+
+  function refreshEvalState() {
+    if (allAnswered()) {
+      evalBtn.classList.remove(`disabled`);
+    } else {
+      evalBtn.classList.add(`disabled`);
+    }
+  }
+
+  function showToast() {
+    toastEl.classList.add(`show`);
+    if (toastTimer) { clearTimeout(toastTimer); }
+    toastTimer = setTimeout(function () {
+      toastEl.classList.remove(`show`);
+    }, 2500);
+  }
+
+  function evaluate() {
+    if (!allAnswered()) {
+      showToast();
+      return;
+    }
+    evaluated = true;
+    var score = 0;
+    var boxes = quizEl.querySelectorAll(`.question`);
+
+    questions.forEach(function (item, qi) {
+      var opts = boxes[qi].querySelectorAll(`.opt`);
+      for (var i = 0; i < opts.length; i++) {
+        opts[i].classList.add(`locked`);
+        opts[i].classList.remove(`selected`);
+      }
+      if (answers[qi] === item.correct) {
+        score++;
+        opts[answers[qi]].classList.add(`correct`);
+      } else {
+        opts[answers[qi]].classList.add(`wrong`);
+        opts[item.correct].classList.add(`correct`);
+      }
+    });
+
+    scoreEl.textContent = score + ` z ` + questions.length;
+    var v = verdicts.find(function (r) { return score >= r.min && score <= r.max; });
+    verdictEl.textContent = v ? v.text : ``;
+    resultEl.style.display = `block`;
+    evalBtn.style.display = `none`;
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function reset() {
+    answers = new Array(questions.length).fill(null);
+    evaluated = false;
+    resultEl.style.display = `none`;
+    evalBtn.style.display = `block`;
+    build();
+    refreshEvalState();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evalBtn.addEventListener(`click`, evaluate);
+  resetBtn.addEventListener(`click`, reset);
+
+  build();
+  refreshEvalState();
+})();
+</script>
+</body>
+</html>
