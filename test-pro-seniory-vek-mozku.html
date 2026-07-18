@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test pro seniory: jaký je věk vašeho mozku? Zkuste si odpovědět na 10 otázek</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 18px; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 36px; }
+  .question {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    line-height: 1.45;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover:not(:disabled) { background: #ede8e1; }
+  .option.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .option:disabled { cursor: default; }
+  .option:focus-visible { outline: 2px solid #5b7e5f; outline-offset: 2px; }
+  #evaluate, #reset {
+    background: #5b7e5f;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+  }
+  #evaluate:hover:not(.disabled) { background: #4a6b4e; }
+  #evaluate.disabled { background: #b5b5b5; cursor: not-allowed; }
+  #reset { background: #8c7b6b; }
+  #reset:hover { background: #756658; }
+  #result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-top: 40px;
+    border-top: 4px solid #5b7e5f;
+  }
+  #result h2 { text-align: center; font-size: 1.6rem; color: #5b7e5f; margin: 0 0 6px; }
+  .letter { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 8px; }
+  .verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0 0 18px; }
+  .verdict:last-child { margin-bottom: 0; }
+  .tie-note { font-size: 0.95rem; color: #6a6a6a; text-align: center; font-style: italic; margin: 0 0 20px; }
+  .hidden { display: none; }
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%);
+    background: #3a3a3a;
+    color: #ffffff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+    max-width: 90%;
+    text-align: center;
+  }
+  #toast.show { opacity: 1; }
+  @media (max-width: 600px) {
+    body { padding: 24px 16px; }
+    h1 { font-size: 1.5rem; }
+    .question { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test pro seniory: jaký je věk vašeho mozku? Zkuste si odpovědět na 10 otázek</h1>
+  <p class="perex">Věk mozku nepoznáte podle občanky, ale podle toho, jak vám slouží postřeh, ruce i chuť do debaty. Milí senioři, odpovězte na deset otázek a dozvíte se, na kolik let se vaše hlava chová.</p>
+
+  <div id="quiz"></div>
+
+  <button id="evaluate" class="disabled" type="button">Vyhodnotit</button>
+
+  <div id="result" class="hidden"></div>
+  <button id="reset" class="hidden" type="button">Zkusit znovu</button>
+</div>
+<div id="toast"></div>
+
+<script>
+(function () {
+  const questions = [
+    {
+      q: `1. Jak se cítíte v prvních chvílích po probuzení?`,
+      options: [
+        `vyskočíte z postele a hned se vám chce do dne`,
+        `rozjedete se během pár minut a máte jasný plán`,
+        `potřebujete chvilku a šálek čaje, než se rozehřejete`,
+        `vstáváte pomalu a den si rozjíždíte postupně`
+      ]
+    },
+    {
+      q: `2. Jak vám jde čtení delšího článku nebo knihy?`,
+      options: [
+        `přečtete to jedním dechem a hned sháníte další`,
+        `vytáhnete si to podstatné a zbytek prolétnete`,
+        `čtete po kouskách a s chutí se k tomu vracíte`,
+        `čtete pomalu a nejradši to, co už dobře znáte`
+      ]
+    },
+    {
+      q: `3. Jak si všímáte změn ve svém okolí?`,
+      options: [
+        `postřehnete i drobnost, které si nikdo jiný nevšimne`,
+        `nový obchod nebo lavičku zaznamenáte cestou kolem`,
+        `změny objevíte, až když se u nich chvíli zastavíte`,
+        `máte oči hlavně pro místa, která důvěrně znáte`
+      ]
+    },
+    {
+      q: `4. Jak vám jde drobná práce, která vyžaduje šikovné ruce?`,
+      options: [
+        `navlečete nit nebo utáhnete drobný šroubek bez zaváhání`,
+        `zvládnete ji svižně, jen si pořádně posvítíte`,
+        `dáte si na čas a vyjde to přesně tak, jak chcete`,
+        `rozložíte si ji na víc dní a berete ji po troškách`
+      ]
+    },
+    {
+      q: `5. Jak reagujete, když v rádiu zazní hudba k tanci?`,
+      options: [
+        `pustíte se do tance, ať jste kdekoli`,
+        `chytíte rytmus a podupáváte si u toho, co zrovna děláte`,
+        `posadíte se a v klidu si melodii vychutnáte`,
+        `vybavíte si, kde a s kým jste tu písničku slýchali`
+      ]
+    },
+    {
+      q: `6. Co uděláte, když narazíte na neznámé cizí slovo?`,
+      options: [
+        `vyhledáte si ho a rovnou ho zkoušíte použít`,
+        `odhadnete význam ze souvislosti a jdete dál`,
+        `zeptáte se někoho blízkého, co to znamená`,
+        `přejdete ho a vystačíte si s češtinou`
+      ]
+    },
+    {
+      q: `7. Jak se stavíte k vyplňování formulářů a úředních papírů?`,
+      options: [
+        `vyplníte je sami a ještě poradíte ostatním`,
+        `projdete je rychle a odešlete bez otálení`,
+        `pročtete si každou kolonku a postupujete opatrně`,
+        `necháte si s nimi pomoci od rodiny nebo na přepážce`
+      ]
+    },
+    {
+      q: `8. Co uděláte, když se doma porouchá spotřebič?`,
+      options: [
+        `pustíte se do opravy a přijdete té závadě na kloub`,
+        `najdete návod a zkusíte to podle něj`,
+        `poptáte se známých, jak na to, a pak se rozhodnete`,
+        `rovnou zavoláte opraváře a spolehnete se na něj`
+      ]
+    },
+    {
+      q: `9. Jak se stavíte k hovoru s někým, kdo má úplně jiný názor?`,
+      options: [
+        `pustíte se do debaty a baví vás hledat protiargumenty`,
+        `řeknete své a rychle najdete společnou řeč`,
+        `posloucháte a v klidu zvažujete, co na tom je`,
+        `hovor raději stočíte jinam a spor nevyhledáváte`
+      ]
+    },
+    {
+      q: `10. Jak zvládáte dny, kdy se na vás nahrne víc starostí?`,
+      options: [
+        `vezmete je útokem a jednu po druhé je rozpustíte`,
+        `rozdělíte si je a rychle ubíráte, co jde vyřešit hned`,
+        `dáte si čas a necháte to v hlavě uležet`,
+        `svěříte se blízkým a hledáte oporu u nich`
+      ]
+    }
+  ];
+
+  const letters = [`A`, `B`, `C`, `D`];
+
+  const profiles = {
+    A: {
+      title: `Mozek na startovní čáře`,
+      text: `Vaše hlava má chuť do všeho a nic ji nezaskočí, ať jde o drobnou práci, cizí slovo nebo pořádnou debatu. Postřeh máte bystrý a energie vám vydrží od rána do večera. Váš mozek se chová, jako by mu bylo kolem pětatřiceti.`
+    },
+    B: {
+      title: `Mozek v plném tempu`,
+      text: `Jdete rovnou k jádru věci, zbytečně se nezdržujete a poradíte si i tam, kde ostatní tápou. Umíte odhadnout, co stojí za pozornost, a to je znak hlavy kolem pětačtyřiceti. Praktičnost je vaše největší přednost.`
+    },
+    C: {
+      title: `Mozek s vyladěným rytmem`,
+      text: `Nic neuspěcháte, zato vám nic neuteče, protože každé věci dáte tolik času, kolik potřebuje. Vaše hlava pracuje vyrovnaně a jistě jako kolem pětapadesáti. Klid a pečlivost vám vynášejí víc než rychlost.`
+    },
+    D: {
+      title: `Mozek s hlubokými kořeny`,
+      text: `Držíte se toho, co znáte a co se vám osvědčilo, a v tom je vaše síla. Vaše hlava stojí na letech prožitého, umí si vybavit souvislosti a nenechá se strhnout každou novinkou. Máte kolem sebe lidi, na které se můžete opřít, a to je bohatství samo o sobě.`
+    }
+  };
+
+  const answers = new Array(questions.length).fill(null);
+  let evaluated = false;
+
+  const quizEl = document.getElementById(`quiz`);
+  const evaluateBtn = document.getElementById(`evaluate`);
+  const resetBtn = document.getElementById(`reset`);
+  const resultEl = document.getElementById(`result`);
+  const toastEl = document.getElementById(`toast`);
+  let toastTimer = null;
+
+  function showToast(message) {
+    toastEl.textContent = message;
+    toastEl.classList.add(`show`);
+    if (toastTimer) { clearTimeout(toastTimer); }
+    toastTimer = setTimeout(function () { toastEl.classList.remove(`show`); }, 2600);
+  }
+
+  function buildQuiz() {
+    quizEl.textContent = ``;
+    questions.forEach(function (item, qi) {
+      const box = document.createElement(`div`);
+      box.className = `question`;
+
+      const heading = document.createElement(`p`);
+      heading.className = `q-text`;
+      heading.textContent = item.q;
+      box.appendChild(heading);
+
+      item.options.forEach(function (optText, oi) {
+        const btn = document.createElement(`button`);
+        btn.type = `button`;
+        btn.className = `option`;
+        btn.textContent = letters[oi].toLowerCase() + `) ` + optText;
+        btn.setAttribute(`data-q`, String(qi));
+        btn.setAttribute(`data-o`, String(oi));
+        btn.addEventListener(`click`, onOptionClick);
+        box.appendChild(btn);
+      });
+
+      quizEl.appendChild(box);
+    });
+  }
+
+  function onOptionClick(event) {
+    if (evaluated) { return; }
+    const btn = event.currentTarget;
+    const qi = parseInt(btn.getAttribute(`data-q`), 10);
+    const oi = parseInt(btn.getAttribute(`data-o`), 10);
+
+    const siblings = quizEl.querySelectorAll(`.option[data-q="` + qi + `"]`);
+    siblings.forEach(function (el) { el.classList.remove(`selected`); });
+    btn.classList.add(`selected`);
+    answers[qi] = oi;
+    updateEvaluateState();
+  }
+
+  function allAnswered() {
+    return answers.every(function (a) { return a !== null; });
+  }
+
+  function updateEvaluateState() {
+    if (allAnswered()) {
+      evaluateBtn.classList.remove(`disabled`);
+    } else {
+      evaluateBtn.classList.add(`disabled`);
+    }
+  }
+
+  function evaluate() {
+    if (!allAnswered()) {
+      showToast(`Odpovězte prosím na všechny otázky`);
+      return;
+    }
+    evaluated = true;
+
+    quizEl.querySelectorAll(`.option`).forEach(function (el) { el.disabled = true; });
+    evaluateBtn.classList.add(`hidden`);
+
+    const counts = { A: 0, B: 0, C: 0, D: 0 };
+    answers.forEach(function (oi) { counts[letters[oi]] += 1; });
+
+    let max = 0;
+    letters.forEach(function (l) { if (counts[l] > max) { max = counts[l]; } });
+    const winners = letters.filter(function (l) { return counts[l] === max; });
+
+    resultEl.textContent = ``;
+
+    const letterEl = document.createElement(`p`);
+    letterEl.className = `letter`;
+    letterEl.textContent = winners.join(` + `);
+    resultEl.appendChild(letterEl);
+
+    if (winners.length > 1) {
+      const note = document.createElement(`p`);
+      note.className = `tie-note`;
+      note.textContent = `Vaše odpovědi se dělí rovnoměrně mezi několik typů — ve vaší hlavě se potkává víc povah najednou. Přečtěte si všechny výsledky, každý o vás něco vypovídá.`;
+      resultEl.appendChild(note);
+    }
+
+    winners.forEach(function (l) {
+      const h2 = document.createElement(`h2`);
+      h2.textContent = `Převaha odpovědí ` + l + `: ` + profiles[l].title;
+      resultEl.appendChild(h2);
+
+      const p = document.createElement(`p`);
+      p.className = `verdict`;
+      p.textContent = profiles[l].text;
+      resultEl.appendChild(p);
+    });
+
+    resultEl.classList.remove(`hidden`);
+    resetBtn.classList.remove(`hidden`);
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function reset() {
+    evaluated = false;
+    for (let i = 0; i < answers.length; i += 1) { answers[i] = null; }
+    resultEl.classList.add(`hidden`);
+    resultEl.textContent = ``;
+    resetBtn.classList.add(`hidden`);
+    evaluateBtn.classList.remove(`hidden`);
+    buildQuiz();
+    updateEvaluateState();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evaluateBtn.addEventListener(`click`, evaluate);
+  resetBtn.addEventListener(`click`, reset);
+
+  buildQuiz();
+  updateEvaluateState();
+})();
+</script>
+</body>
+</html>
