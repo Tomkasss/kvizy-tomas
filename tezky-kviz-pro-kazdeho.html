@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Těžký kvíz pro každého. Kdo v něm dá víc než 7/10, je jasný nadprůměr</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 16px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 18px; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 36px; }
+  .question {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover:not(:disabled) { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .opt:disabled { cursor: default; }
+  #evaluate, #reset {
+    background: #5b7e5f;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+  }
+  #evaluate:hover:not(.disabled) { background: #4a6b4e; }
+  #evaluate.disabled { background: #b5b5b5; cursor: not-allowed; }
+  #reset { background: #8c7b6b; }
+  #reset:hover { background: #756658; }
+  #result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    border-top: 4px solid #5b7e5f;
+    margin-top: 40px;
+    display: none;
+  }
+  .score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+  .verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%);
+    background: #3a3a3a;
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 10;
+  }
+  #toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Těžký kvíz pro každého. Kdo v něm dá víc než 7/10, je jasný nadprůměr</h1>
+  <p class="perex">Deset otázek z fyziky, historie, jazyků, gastronomie i meteorologie. Žádná není chyták, ale žádná se ani neptá na samozřejmost. Sedm a víc správných odpovědí zvládne opravdu jen menšina lidí. Zkuste, kam se zařadíte vy.</p>
+  <div id="quiz"></div>
+  <button id="evaluate" class="disabled">Vyhodnotit</button>
+  <div id="result">
+    <div class="score" id="score"></div>
+    <p class="verdict" id="verdict"></p>
+    <button id="reset">Zkusit znovu</button>
+  </div>
+</div>
+<div id="toast">Odpovězte prosím na všechny otázky</div>
+<script>
+(function () {
+  var questions = [
+    {
+      q: `1. Jak se nazývá veličina vyjadřující poměr rychlosti tělesa k rychlosti zvuku v daném prostředí?`,
+      options: [`a) Reynoldsovo číslo`, `b) Machovo číslo`, `c) Froudovo číslo`, `d) Dopplerův součinitel`],
+      correct: 1
+    },
+    {
+      q: `2. Mezi kterými dvěma státy proběhla nejkratší válka v dějinách?`,
+      options: [`a) Španělsko a Maroko`, `b) Francie a Mexiko`, `c) Velká Británie a Zanzibar`, `d) Portugalsko a Indie`],
+      correct: 2
+    },
+    {
+      q: `3. Kolik je nula faktoriál?`,
+      options: [`a) 1`, `b) 0`, `c) nekonečno`, `d) není definováno`],
+      correct: 0
+    },
+    {
+      q: `4. Jakou funkci zastával muž, podle jehož jména vzniklo slovo bojkot?`,
+      options: [`a) kapitán obchodní lodi`, `b) poslanec britského parlamentu`, `c) ředitel textilní továrny`, `d) správce pozemkového velkostatku`],
+      correct: 3
+    },
+    {
+      q: `5. Jak se nazývá písmo, kterým se zapisuje korejština?`,
+      options: [`a) hangul`, `b) katakana`, `c) kandži`, `d) hiragana`],
+      correct: 0
+    },
+    {
+      q: `6. Z mléka kterého zvířete se vyrábí mozzarella s chráněným označením původu z Kampánie?`,
+      options: [`a) kozy`, `b) buvolice`, `c) ovce`, `d) krávy`],
+      correct: 1
+    },
+    {
+      q: `7. Jak se v bowlingu označuje situace, kdy hráč porazí všechny kuželky až druhým hodem?`,
+      options: [`a) strike`, `b) split`, `c) spare`, `d) double`],
+      correct: 2
+    },
+    {
+      q: `8. Ve které zemi se platí měnou lari?`,
+      options: [`a) Arménie`, `b) Moldavsko`, `c) Ázerbájdžán`, `d) Gruzie`],
+      correct: 3
+    },
+    {
+      q: `9. Který přírodní jev se hodnotí Fujitovou stupnicí?`,
+      options: [`a) tornádo`, `b) zemětřesení`, `c) sopečná erupce`, `d) sněhová lavina`],
+      correct: 0
+    },
+    {
+      q: `10. Jak se nazývá výtvarná technika, při níž se drobná barevná skla skládají do olověných pásků?`,
+      options: [`a) sgrafito`, `b) intarzie`, `c) vitráž`, `d) tempera`],
+      correct: 2
+    }
+  ];
+
+  var verdicts = [
+    { min: 0, max: 3, text: `Většina otázek vás zaskočila a to je v pořádku, protože žádná z nich nepatří mezi školní samozřejmosti. Berte kvíz jako inspiraci, kam se příště podívat.` },
+    { min: 4, max: 6, text: `Pohybujete se přesně tam, kde končí většina lidí. Máte slušný přehled napříč obory, jen u specializovaných detailů vám chyběla poslední jistota.` },
+    { min: 7, max: 9, text: `Tady už začíná nadprůměr. Kombinujete znalosti z oborů, které spolu na první pohled nesouvisejí, a to umí málokdo.` },
+    { min: 10, max: 10, text: `Naprosto výjimečný výsledek. Deset správných odpovědí z deseti oborů znamená, že vaše obecné vzdělání sahá hluboko pod povrch.` }
+  ];
+
+  var answers = [];
+  var evaluated = false;
+  var quizEl = document.getElementById(`quiz`);
+  var evalBtn = document.getElementById(`evaluate`);
+  var resetBtn = document.getElementById(`reset`);
+  var resultEl = document.getElementById(`result`);
+  var scoreEl = document.getElementById(`score`);
+  var verdictEl = document.getElementById(`verdict`);
+  var toastEl = document.getElementById(`toast`);
+  var toastTimer = null;
+
+  function showToast() {
+    toastEl.classList.add(`show`);
+    if (toastTimer) { clearTimeout(toastTimer); }
+    toastTimer = setTimeout(function () { toastEl.classList.remove(`show`); }, 2500);
+  }
+
+  function build() {
+    quizEl.innerHTML = ``;
+    questions.forEach(function (item, qi) {
+      var box = document.createElement(`div`);
+      box.className = `question`;
+      var t = document.createElement(`div`);
+      t.className = `q-text`;
+      t.textContent = item.q;
+      box.appendChild(t);
+      item.options.forEach(function (opt, oi) {
+        var b = document.createElement(`button`);
+        b.type = `button`;
+        b.className = `opt`;
+        b.textContent = opt;
+        b.addEventListener(`click`, function () {
+          if (evaluated) { return; }
+          answers[qi] = oi;
+          var siblings = box.querySelectorAll(`.opt`);
+          for (var i = 0; i < siblings.length; i++) {
+            siblings[i].classList.remove(`selected`);
+          }
+          b.classList.add(`selected`);
+          updateButton();
+        });
+        box.appendChild(b);
+      });
+      quizEl.appendChild(box);
+    });
+  }
+
+  function allAnswered() {
+    for (var i = 0; i < questions.length; i++) {
+      if (typeof answers[i] !== `number`) { return false; }
+    }
+    return true;
+  }
+
+  function updateButton() {
+    if (allAnswered()) {
+      evalBtn.classList.remove(`disabled`);
+    } else {
+      evalBtn.classList.add(`disabled`);
+    }
+  }
+
+  evalBtn.addEventListener(`click`, function () {
+    if (evaluated) { return; }
+    if (!allAnswered()) { showToast(); return; }
+    evaluated = true;
+    var score = 0;
+    var boxes = quizEl.querySelectorAll(`.question`);
+    for (var qi = 0; qi < questions.length; qi++) {
+      var opts = boxes[qi].querySelectorAll(`.opt`);
+      var chosen = answers[qi];
+      var corr = questions[qi].correct;
+      if (chosen === corr) { score++; }
+      for (var oi = 0; oi < opts.length; oi++) {
+        opts[oi].disabled = true;
+        opts[oi].classList.remove(`selected`);
+        if (oi === corr) {
+          opts[oi].classList.add(`correct`);
+        } else if (oi === chosen) {
+          opts[oi].classList.add(`wrong`);
+        }
+      }
+    }
+    scoreEl.textContent = score + ` z ` + questions.length;
+    var text = ``;
+    for (var v = 0; v < verdicts.length; v++) {
+      if (score >= verdicts[v].min && score <= verdicts[v].max) { text = verdicts[v].text; }
+    }
+    verdictEl.textContent = text;
+    evalBtn.classList.add(`disabled`);
+    resultEl.style.display = `block`;
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  });
+
+  resetBtn.addEventListener(`click`, function () {
+    answers = [];
+    evaluated = false;
+    resultEl.style.display = `none`;
+    build();
+    updateButton();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  });
+
+  build();
+  updateButton();
+})();
+</script>
+</body>
+</html>
