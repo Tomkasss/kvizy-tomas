@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lehoučký kvíz pro seniory: 10/10 v něm zvládnete během 5 minut</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 16px 80px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; margin: 0 0 18px; color: #2c2c2c; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 36px; }
+  .question {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .locked .opt { cursor: default; }
+  .locked .opt:hover { background: #f7f4f0; }
+  .locked .opt.selected:hover { background: #dcd3c7; }
+  .locked .opt.correct:hover { background: #d4edda; }
+  .locked .opt.wrong:hover { background: #f8d7da; }
+  .reveal { margin: 14px 0 0; font-size: 0.98rem; color: #721c24; }
+  button.action {
+    background: #5b7e5f;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+  }
+  button.action:hover { background: #4a6b4e; }
+  button.action.disabled { background: #b5b5b5; cursor: not-allowed; }
+  button.action.disabled:hover { background: #b5b5b5; }
+  #retry { background: #8c7b6b; }
+  #retry:hover { background: #756658; }
+  #result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    border-top: 4px solid #5b7e5f;
+    margin-top: 40px;
+    display: none;
+  }
+  .score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  .verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%);
+    background: #3a3a3a;
+    color: #fff;
+    padding: 14px 22px;
+    border-radius: 8px;
+    font-size: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 10;
+  }
+  #toast.show { opacity: 1; }
+  @media (max-width: 600px) {
+    h1 { font-size: 1.55rem; }
+    .question { padding: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Lehoučký kvíz pro seniory: 10/10 v něm zvládnete během 5 minut</h1>
+  <p class="perex">Deset otázek z přírody, hudby, sportu i běžného života, u kterých senioři nepotřebují nápovědu. Nic záludného, jen věci, které máte roky v hlavě. Dejte si pět minut a užijte si plný počet.</p>
+
+  <div id="quiz"></div>
+
+  <button id="evaluate" class="action disabled" type="button">Vyhodnotit</button>
+
+  <div id="result">
+    <p class="score" id="score"></p>
+    <p class="verdict" id="verdict"></p>
+    <button id="retry" class="action" type="button">Zkusit znovu</button>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+(function () {
+  var questions = [
+    {
+      q: `Který plyn ze vzduchu potřebuje oheň, aby mohl hořet?`,
+      options: [`dusík`, `kyslík`, `oxid uhličitý`, `vodní pára`],
+      correct: 1
+    },
+    {
+      q: `Jak se nazývá posuvka, která v notovém zápisu zvyšuje tón o půl tónu?`,
+      options: [`odrážka`, `béčko`, `křížek`, `koruna`],
+      correct: 2
+    },
+    {
+      q: `Podle čeho se na příčném řezu kmenem určuje stáří stromu?`,
+      options: [`podle letokruhů`, `podle tloušťky kůry`, `podle počtu suků`, `podle barvy dřeně`],
+      correct: 0
+    },
+    {
+      q: `Kolik metrů čtverečních má jeden ar?`,
+      options: [`10`, `1 000`, `10 000`, `100`],
+      correct: 3
+    },
+    {
+      q: `Kolik párů křídel má včela medonosná?`,
+      options: [`jeden`, `dva`, `tři`, `čtyři`],
+      correct: 1
+    },
+    {
+      q: `Kolik stálých přirozených měsíců obíhá kolem naší Země?`,
+      options: [`jeden`, `žádný`, `dva`, `čtyři`],
+      correct: 0
+    },
+    {
+      q: `Jakou nejvyšší rychlostí smí řidič osobního auta jet v obci, pokud značka neurčuje jinak?`,
+      options: [`40 km/h`, `45 km/h`, `50 km/h`, `60 km/h`],
+      correct: 2
+    },
+    {
+      q: `Kolik minut čistého času trvá jedna třetina v ledním hokeji?`,
+      options: [`10`, `15`, `25`, `20`],
+      correct: 3
+    },
+    {
+      q: `Které pohoří tvoří přirozenou hranici mezi Španělskem a Francií?`,
+      options: [`Alpy`, `Pyreneje`, `Apeniny`, `Karpaty`],
+      correct: 1
+    },
+    {
+      q: `Při jaké teplotě vře voda za normálního atmosférického tlaku?`,
+      options: [`80 °C`, `90 °C`, `100 °C`, `120 °C`],
+      correct: 2
+    }
+  ];
+
+  var verdicts = [
+    { min: 0, max: 3, text: `Tentokrát to nevyšlo podle představ, ale nevadí. I zdánlivě snadná otázka umí na chvilku zamotat hlavu. Dejte si pauzu, kávu a zkuste to znovu. Uvidíte, že to půjde samo.` },
+    { min: 4, max: 6, text: `Slušný základ máte pevně v hlavě. Půlka otázek vám padla bez zaváhání, u zbytku vás nachytala lákavá varianta. K plnému počtu vám chybí jen kousek pozornosti.` },
+    { min: 7, max: 9, text: `Výborně. Přehled z přírody, hudby i sportu se u vás za ta léta pěkně usadil a je to znát. Jen drobnost vám unikla, jinak čistá práce.` },
+    { min: 10, max: 10, text: `Plný počet přesně podle zadání. Tenhle kvíz pro vás byl procházka a pět minut jste ani nepotřebovali. Klobouk dolů, takhle to má vypadat.` }
+  ];
+
+  var letters = [`a)`, `b)`, `c)`, `d)`];
+  var answers = new Array(questions.length).fill(null);
+  var evaluated = false;
+
+  var quizEl = document.getElementById(`quiz`);
+  var evalBtn = document.getElementById(`evaluate`);
+  var retryBtn = document.getElementById(`retry`);
+  var resultEl = document.getElementById(`result`);
+  var scoreEl = document.getElementById(`score`);
+  var verdictEl = document.getElementById(`verdict`);
+  var toastEl = document.getElementById(`toast`);
+  var toastTimer = null;
+
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add(`show`);
+    if (toastTimer) { clearTimeout(toastTimer); }
+    toastTimer = setTimeout(function () { toastEl.classList.remove(`show`); }, 2600);
+  }
+
+  function build() {
+    quizEl.innerHTML = ``;
+    questions.forEach(function (item, qi) {
+      var box = document.createElement(`div`);
+      box.className = `question`;
+
+      var title = document.createElement(`p`);
+      title.className = `q-text`;
+      title.textContent = (qi + 1) + `. ` + item.q;
+      box.appendChild(title);
+
+      item.options.forEach(function (opt, oi) {
+        var btn = document.createElement(`button`);
+        btn.type = `button`;
+        btn.className = `opt`;
+        btn.textContent = letters[oi] + ` ` + opt;
+        btn.addEventListener(`click`, function () {
+          if (evaluated) { return; }
+          answers[qi] = oi;
+          var siblings = box.querySelectorAll(`.opt`);
+          for (var i = 0; i < siblings.length; i++) {
+            siblings[i].classList.remove(`selected`);
+          }
+          btn.classList.add(`selected`);
+          updateEvalState();
+        });
+        box.appendChild(btn);
+      });
+
+      quizEl.appendChild(box);
+    });
+  }
+
+  function updateEvalState() {
+    var complete = answers.every(function (a) { return a !== null; });
+    if (complete) {
+      evalBtn.classList.remove(`disabled`);
+    } else {
+      evalBtn.classList.add(`disabled`);
+    }
+  }
+
+  function evaluate() {
+    var complete = answers.every(function (a) { return a !== null; });
+    if (!complete) {
+      showToast(`Odpovězte prosím na všechny otázky`);
+      return;
+    }
+    evaluated = true;
+    var score = 0;
+    var boxes = quizEl.querySelectorAll(`.question`);
+
+    questions.forEach(function (item, qi) {
+      var box = boxes[qi];
+      box.classList.add(`locked`);
+      var opts = box.querySelectorAll(`.opt`);
+      var chosen = answers[qi];
+
+      for (var i = 0; i < opts.length; i++) {
+        opts[i].classList.remove(`selected`);
+      }
+
+      if (chosen === item.correct) {
+        score++;
+        opts[chosen].classList.add(`correct`);
+      } else {
+        opts[chosen].classList.add(`wrong`);
+        opts[item.correct].classList.add(`correct`);
+        var reveal = document.createElement(`p`);
+        reveal.className = `reveal`;
+        reveal.textContent = `Správná odpověď: ` + letters[item.correct] + ` ` + item.options[item.correct];
+        box.appendChild(reveal);
+      }
+    });
+
+    evalBtn.style.display = `none`;
+    scoreEl.textContent = score + ` z ` + questions.length;
+    var v = verdicts.find(function (r) { return score >= r.min && score <= r.max; });
+    verdictEl.textContent = v ? v.text : ``;
+    resultEl.style.display = `block`;
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function reset() {
+    evaluated = false;
+    answers = new Array(questions.length).fill(null);
+    resultEl.style.display = `none`;
+    evalBtn.style.display = `block`;
+    evalBtn.classList.add(`disabled`);
+    build();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evalBtn.addEventListener(`click`, evaluate);
+  retryBtn.addEventListener(`click`, reset);
+
+  build();
+  updateEvalState();
+})();
+</script>
+</body>
+</html>
