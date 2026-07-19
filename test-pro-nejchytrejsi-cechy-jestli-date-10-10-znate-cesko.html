@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test pro nejchytřejší Čechy. Jestli dáte 10/10, znáte Česko jako svoje boty</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 40px 16px;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.25; color: #2c2c2c; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin-bottom: 32px; }
+.q-box {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  cursor: pointer;
+  font-family: inherit;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+#eval-btn {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#eval-btn:hover { background: #4a6b4e; }
+#eval-btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+.warn { text-align: center; color: #8a5a2b; margin-top: 12px; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+}
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0; }
+.verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin-top: 12px; }
+#retry-btn {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 24px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#retry-btn:hover { background: #756658; }
+.hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test pro nejchytřejší Čechy. Jestli dáte 10/10, znáte Česko jako svoje boty</h1>
+<p class="perex">Zapomeňte na Vltavu a Prahu coby hlavní město. Tenhle test míří na skutečné znalce Česka: řeky, vrcholy, letopočty, vynálezce i osobnosti, které běžný Čech nezná. Deset otázek, u kterých plný počet dá jen málokdo. Zvládnete to?</p>
+<div id="quiz"></div>
+<button id="eval-btn" disabled>Vyhodnotit</button>
+<p id="warn" class="warn hidden">Odpovězte prosím na všechny otázky</p>
+<div id="result" class="hidden">
+  <p class="score" id="score"></p>
+  <p class="verdict" id="verdict"></p>
+  <button id="retry-btn">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  { q: `Ve kterém roce byl Karel IV. korunován českým králem?`, opts: [`1347`, `1346`, `1355`, `1348`], correct: 0 },
+  { q: `Kterému panovníkovi zaručila Zlatá bula sicilská dědičný královský titul?`, opts: [`Vratislavovi II.`, `Vladislavovi II.`, `Přemyslu Otakarovi I.`, `Přemyslu Otakarovi II.`], correct: 2 },
+  { q: `Kdo je vynálezcem lodního šroubu?`, opts: [`Prokop Diviš`, `Josef Ressel`, `František Křižík`, `Viktor Kaplan`], correct: 1 },
+  { q: `Kolik zlatých olympijských medailí získal Emil Zátopek na hrách v Helsinkách roku 1952?`, opts: [`2`, `5`, `4`, `3`], correct: 3 },
+  { q: `Který vrchol je nejvyšší horou české části Šumavy?`, opts: [`Plechý`, `Boubín`, `Poledník`, `Ostrý`], correct: 0 },
+  { q: `Která řeka pramení na Kralickém Sněžníku?`, opts: [`Odra`, `Opava`, `Morava`, `Bečva`], correct: 2 },
+  { q: `Která přehradní nádrž má největší rozlohu vodní hladiny v České republice?`, opts: [`Orlík`, `Lipno`, `Nechranice`, `Rozkoš`], correct: 1 },
+  { q: `Kdo v roce 1907 rozpoznal čtyři základní krevní skupiny?`, opts: [`Jan Evangelista Purkyně`, `Otto Wichterle`, `Antonín Holý`, `Jan Janský`], correct: 3 },
+  { q: `Kdo je autorem opery Její pastorkyňa?`, opts: [`Bohuslav Martinů`, `Antonín Dvořák`, `Leoš Janáček`, `Zdeněk Fibich`], correct: 2 },
+  { q: `Ve kterém roce proběhla první pražská defenestrace?`, opts: [`1419`, `1415`, `1420`, `1483`], correct: 0 }
+];
+
+const evalRanges = [
+  { min: 0, max: 3, text: `Česko zatím znáte spíš z pohlednic než z map a učebnic. Základní jména a letopočty se vám pletou a těžší reálie vás zaskočily. Do party skutečných znalců vás to ještě nepasuje, ale máte co objevovat.` },
+  { min: 4, max: 6, text: `Průměrný výsledek běžného Čecha. Orientujete se v hlavních faktech, jenže na méně známé vrcholy, řeky a osobnosti už znalosti nestačí. K titulu nejchytřejšího Čecha zbývá pořádný kus cesty.` },
+  { min: 7, max: 9, text: `Výborně, patříte mezi skutečné znalce Česka. Historie, zeměpis i kultura pro vás nejsou španělská vesnice a chybí vám opravdu jen pár detailů. Na tuhle metu dosáhne málokdo.` },
+  { min: 10, max: 10, text: `Absolutní vítězství. Znáte Česko jako svoje boty, od dědičného královského titulu přes vynálezce lodního šroubu až po nejvyšší vrchol české Šumavy. Takhle dokonalý přehled o naší zemi má jen hrstka nejchytřejších.` }
+];
+
+const letters = ['a) ', 'b) ', 'c) ', 'd) '];
+const quizEl = document.getElementById('quiz');
+const evalBtn = document.getElementById('eval-btn');
+const warnEl = document.getElementById('warn');
+const resultEl = document.getElementById('result');
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+questions.forEach((item, i) => {
+  const box = document.createElement('div');
+  box.className = 'q-box';
+  const qt = document.createElement('div');
+  qt.className = 'q-text';
+  qt.textContent = (i + 1) + '. ' + item.q;
+  box.appendChild(qt);
+  item.opts.forEach((opt, j) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.textContent = letters[j] + opt;
+    btn.dataset.q = i;
+    btn.dataset.o = j;
+    btn.addEventListener('click', () => {
+      if (locked) return;
+      answers[i] = j;
+      box.querySelectorAll('.opt').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      checkAll();
+    });
+    box.appendChild(btn);
+  });
+  quizEl.appendChild(box);
+});
+
+function checkAll() {
+  const allAnswered = answers.every(a => a !== null);
+  evalBtn.disabled = !allAnswered;
+  if (allAnswered) warnEl.classList.add('hidden');
+}
+
+evalBtn.addEventListener('click', () => {
+  if (evalBtn.disabled || locked) { warnEl.classList.remove('hidden'); return; }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll('.q-box');
+  boxes.forEach((box, i) => {
+    const opts = box.querySelectorAll('.opt');
+    opts.forEach(o => o.disabled = true);
+    const chosen = answers[i];
+    const correct = questions[i].correct;
+    if (chosen === correct) {
+      score++;
+      opts[chosen].classList.remove('selected');
+      opts[chosen].classList.add('correct');
+    } else {
+      opts[chosen].classList.remove('selected');
+      opts[chosen].classList.add('wrong');
+      opts[correct].classList.add('correct');
+    }
+  });
+  document.getElementById('score').textContent = score + ' z 10';
+  const range = evalRanges.find(r => score >= r.min && score <= r.max);
+  document.getElementById('verdict').textContent = range ? range.text : '';
+  resultEl.classList.remove('hidden');
+  evalBtn.disabled = true;
+  resultEl.scrollIntoView({ behavior: 'smooth' });
+});
+
+document.getElementById('retry-btn').addEventListener('click', () => {
+  locked = false;
+  answers.fill(null);
+  quizEl.querySelectorAll('.opt').forEach(o => {
+    o.disabled = false;
+    o.classList.remove('selected', 'correct', 'wrong');
+  });
+  resultEl.classList.add('hidden');
+  evalBtn.disabled = true;
+  warnEl.classList.add('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+</script>
+</body>
+</html>
