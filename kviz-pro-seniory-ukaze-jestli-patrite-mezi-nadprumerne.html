@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro seniory: ukáže, jestli patříte mezi nadprůměrně bystré důchodce, nebo do zlatého středu</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 24px 16px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.8rem; line-height: 1.25; color: #2c2c2c; margin: 0 0 16px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 16px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    margin-bottom: 12px;
+    cursor: pointer;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  input[type="text"] {
+    width: 100%;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+  }
+  input[type="text"].correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  input[type="text"].wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .solution { margin-top: 12px; font-size: 1rem; color: #1e5631; }
+  #evaluate {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    font-family: inherit;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+  }
+  #evaluate:hover { background: #4a6b4e; }
+  #evaluate:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint { text-align: center; color: #8c6b5f; margin-top: 12px; min-height: 1.2em; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 24px;
+    display: none;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #retry {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    font-family: inherit;
+    display: block;
+    margin: 24px auto 0;
+    cursor: pointer;
+  }
+  #retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz pro seniory: ukáže, jestli patříte mezi nadprůměrně bystré důchodce, nebo do zlatého středu</h1>
+  <p class="perex">Deset otázek na logiku, slovní pohotovost a počítání z hlavy. Žádná historická data ani zeměpis, jen svěžest vašeho úsudku. Průměrný senior dá pět až šest. Kdo zvládne osm a víc, patří mezi nadprůměrně bystré důchodce.</p>
+  <div id="quiz"></div>
+  <button id="evaluate" disabled>Vyhodnotit</button>
+  <div class="hint" id="hint"></div>
+  <div id="result">
+    <div id="score"></div>
+    <p id="verdict"></p>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+const questions = [
+  { text: `1. Jaké číslo logicky patří na konec řady 3, 6, 11, 18, 27, ?`, type: `choice`, options: [`36`, `37`, `38`, `40`], correct: 2 },
+  { text: `2. Autor je ke knize jako skladatel k čemu?`, type: `choice`, options: [`skladba`, `noty`, `orchestr`, `nástroj`], correct: 0 },
+  { text: `3. Co znamená slovo „obezřetný"?`, type: `choice`, options: [`odvážný`, `zvědavý`, `lhostejný`, `opatrný`], correct: 3 },
+  { text: `4. Kolik je 18 × 24?`, type: `text`, answers: [`432`] },
+  { text: `5. Co znamená „zevrubný popis"?`, type: `choice`, options: [`povrchní`, `podrobný`, `stručný`, `nepřesný`], correct: 1 },
+  { text: `6. Dnes je úterý. Jaký den v týdnu bude za 100 dní?`, type: `choice`, options: [`středa`, `pátek`, `čtvrtek`, `sobota`], correct: 2 },
+  { text: `7. Ostrov je k moři jako oáza k čemu?`, type: `choice`, options: [`voda`, `step`, `písek`, `poušť`], correct: 3 },
+  { text: `8. Jaké číslo logicky patří na konec řady 2, 3, 5, 9, 17, ?`, type: `text`, answers: [`33`] },
+  { text: `9. Kolik je 15 % z 240, když k výsledku přičtete 18 a součet vydělíte šesti?`, type: `text`, answers: [`9`] },
+  { text: `10. Adam, Bořek a Cyril mají každý jiné povolání: lékař, učitel a právník. Adam není lékař, Bořek není ani lékař, ani učitel. Jaké povolání má Cyril?`, type: `choice`, options: [`lékař`, `učitel`, `právník`, `nelze určit`], correct: 0 }
+];
+
+const evaluations = [
+  { min: 0, max: 3, text: `Zatím vás kvíz zastavil pod pomyslným středem. Rychlé úsudky, slovní pohotovost i počítání z hlavy dnes trochu vázly a pár otázek vás nachytalo dřív, než jste je dořešili. Nic ztraceného, bystrost není daná jednou provždy. Luštěte, počítejte v hlavě a nespěchejte na první odpověď, příště se skóre posune nahoru.` },
+  { min: 4, max: 6, text: `Přesně tady leží zlatý střed. Půlku otázek jste zvládli s jistotou, u zbytku jste chvíli tápali nebo se nechali strhnout tou lákavější variantou. Uvažujete solidně a vyrovnaně, což je základ, na kterém se dá dál stavět. K nadprůměru vám chybělo jen kousek klidu u těžších úloh.` },
+  { min: 7, max: 9, text: `Nadprůměrně bystrý důchodce, o tom není pochyb. Logické řady, slovní vztahy i počítání z hlavy vám jdou svižně a chytáky vás jen tak neoblafnou. Do tohoto pásma se u takto stavěných otázek dostane jen menšina a vy mezi ni patříte. K plnému počtu chybělo opravdu málo.` },
+  { min: 10, max: 10, text: `Špička mezi bystrými hlavami. Ani jedna past vás nezastavila, poradili jste si s číselnými řadami, počítáním i logickou úvahou bez jediného zaváhání. Takhle svěže uvažuje jen zlomek řešitelů. Jednoznačně patříte mezi nadprůměrně bystré důchodce a mnohého mladšího strčíte do kapsy.` }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+function normalize(s) {
+  return s.trim().toLowerCase().normalize(`NFD`).replace(/[̀-ͯ]/g, ``).replace(/\s+/g, ` `);
+}
+
+const quizEl = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`evaluate`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((q, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const t = document.createElement(`p`);
+    t.className = `q-text`;
+    t.textContent = q.text;
+    box.appendChild(t);
+
+    if (q.type === `choice`) {
+      q.options.forEach((opt, oi) => {
+        const b = document.createElement(`button`);
+        b.className = `opt`;
+        b.textContent = String.fromCharCode(97 + oi) + `) ` + opt;
+        b.addEventListener(`click`, () => {
+          if (locked) return;
+          answers[qi] = oi;
+          Array.from(box.querySelectorAll(`.opt`)).forEach(x => x.classList.remove(`selected`));
+          b.classList.add(`selected`);
+          updateEvalState();
+        });
+        box.appendChild(b);
+      });
+    } else {
+      const inp = document.createElement(`input`);
+      inp.type = `text`;
+      inp.setAttribute(`inputmode`, `numeric`);
+      inp.addEventListener(`input`, () => {
+        if (locked) return;
+        answers[qi] = inp.value.trim() === `` ? null : inp.value;
+        updateEvalState();
+      });
+      box.appendChild(inp);
+    }
+    quizEl.appendChild(box);
+  });
+}
+
+function allAnswered() {
+  return answers.every(a => a !== null && a !== ``);
+}
+
+function updateEvalState() {
+  if (allAnswered()) {
+    evalBtn.disabled = false;
+    hintEl.textContent = ``;
+  } else {
+    evalBtn.disabled = true;
+  }
+}
+
+function evaluate() {
+  if (!allAnswered()) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  questions.forEach((q, qi) => {
+    const box = boxes[qi];
+    if (q.type === `choice`) {
+      const opts = box.querySelectorAll(`.opt`);
+      const chosen = answers[qi];
+      const isCorrect = chosen === q.correct;
+      if (isCorrect) score++;
+      opts.forEach((o, oi) => {
+        o.classList.remove(`selected`);
+        if (oi === q.correct) o.classList.add(`correct`);
+        else if (oi === chosen) o.classList.add(`wrong`);
+      });
+    } else {
+      const inp = box.querySelector(`input`);
+      const ok = q.answers.some(a => normalize(a) === normalize(String(answers[qi])));
+      if (ok) score++;
+      inp.classList.add(ok ? `correct` : `wrong`);
+      inp.disabled = true;
+      if (!ok) {
+        const sol = document.createElement(`div`);
+        sol.className = `solution`;
+        sol.textContent = `Správně: ` + q.answers[0];
+        box.appendChild(sol);
+      }
+    }
+  });
+
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  const ev = evaluations.find(e => score >= e.min && score <= e.max);
+  document.getElementById(`verdict`).textContent = ev ? ev.text : ``;
+  resultEl.style.display = `block`;
+  evalBtn.disabled = true;
+  hintEl.textContent = ``;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function retry() {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  resultEl.style.display = `none`;
+  render();
+  updateEvalState();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+evalBtn.addEventListener(`click`, evaluate);
+document.getElementById(`retry`).addEventListener(`click`, retry);
+render();
+updateEvalState();
+</script>
+</body>
+</html>
