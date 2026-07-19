@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz na krásná česká slova: kdo pozná všech 10 významů, má slovník bohatší než většina lidí</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 24px 16px;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.8rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 16px; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+#submit, #retry {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  color: #fff;
+  cursor: pointer;
+}
+#submit { background: #5b7e5f; }
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry { background: #8c7b6b; }
+#retry:hover { background: #756658; }
+.warn { text-align: center; color: #a04040; margin-top: 14px; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz na krásná česká slova: kdo pozná všech 10 významů, má slovník bohatší než většina lidí</h1>
+<p class="perex">Čeština ukrývá slova, která znějí krásně, ale jejich přesný význam už mnohým unikl. Otestujte se na deseti méně známých výrazech. Kdo pozná všech deset, má slovník opravdu bohatší než většina lidí.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<div class="warn" id="warn"></div>
+<div id="result" style="display:none;">
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  { q: `Co znamená slovo „luh"?`, options: [`rašeliniště s kyselou půdou hustě porostlé mechem`, `úzký pruh neposečené trávy ponechaný na mezi`, `vlhká louka nebo les v pásu podél řeky`, `kamenitá holina nad horní hranicí lesa`], correct: 2 },
+  { q: `Co znamená slovo „úval"?`, options: [`široké údolí s plochým dnem a mírnými svahy`, `skalní brána vzniklá dlouhým zvětráváním okolní horniny`, `uměle navršený násep chránící pole před vodou`, `hluboká propast nebo rozlehlá jeskynní prostora`], correct: 0 },
+  { q: `Co znamená slovo „verpánek"?`, options: [`dřevěný rám, na němž se napínala kůže k vydělávání`, `malá kovadlinka na kování podkov`, `truhlík s nářadím, který si tovaryš nosil na vandr`, `nízká trojnohá ševcovská stolička s pracovní deskou`], correct: 3 },
+  { q: `Co znamená slovo „ponrava"?`, options: [`housenka běláska, která ožírá listy hlávkového zelí`, `tlustá bílá larva chrousta žijící v půdě`, `žížala, která si vtahuje listí do své nory`, `slepýš, tedy beznohá ještěrka žijící pod kameny`], correct: 1 },
+  { q: `Co znamená slovo „máry"?`, options: [`pohřební nosítka, na nichž spočívá rakev s nebožtíkem`, `dřevěné kozy, na které se pokládá poražené prase`, `žebřiny nasazované na vůz při svážení sena z pole`, `smuteční prapory nesené v čele pohřebního průvodu`], correct: 0 },
+  { q: `Co znamená slovo „tlumok"?`, options: [`silný provaz, kterým se utahoval náklad na voze`, `plstěná podložka kladená koni pod sedlo`, `hliněný džbán omotaný proutím na uchování vody`, `cestovní vak nebo ranec nošený na zádech`], correct: 3 },
+  { q: `Co znamená slovo „úhor"?`, options: [`protáhlá sladkovodní ryba s hadovitým tělem`, `hluboká brázda vyoraná pluhem po obvodu pole`, `pole dočasně ponechané ladem, aby si půda odpočinula`, `hromada hnoje uležená k pozdějšímu vyvezení na pole`], correct: 2 },
+  { q: `Co znamená slovo „šatlava"?`, options: [`mýtná budka u městské brány, kde se vybíralo clo`, `temný městský žalář, kam se zavírali provinilci`, `skladiště zabaveného zboží a majetku`, `šatna a předsíň v panském domě`], correct: 1 },
+  { q: `Co znamená slovo „blankyt"?`, options: [`jemná bílá tkanina užívaná na sváteční košile`, `tenký led, který na podzim pokrývá kaluže`, `bledě žlutý odstín podzimního spadaného listí`, `jasně modrá barva bezmračné letní oblohy`], correct: 3 },
+  { q: `Co znamená slovo „jizba"?`, options: [`prostá obytná místnost, světnice ve venkovském stavení`, `klenutý sklep pod domem na uchování brambor a zelí`, `úzká chodba spojující dvůr se stodolou`, `vyvýšené lože s nebesy v panské ložnici`], correct: 0 }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit`);
+const warnEl = document.getElementById(`warn`);
+const resultEl = document.getElementById(`result`);
+
+function letter(i) { return [`a`, `b`, `c`, `d`][i]; }
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const qt = document.createElement(`div`);
+    qt.className = `q-text`;
+    qt.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    item.options.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.textContent = letter(oi) + `) ` + opt;
+      if (answers[qi] === oi) btn.classList.add(`selected`);
+      btn.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        render();
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  const done = answers.every(a => a !== null);
+  submitBtn.disabled = !done;
+  if (done) warnEl.textContent = ``;
+}
+
+function evaluate() {
+  if (!answers.every(a => a !== null)) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  questions.forEach((item, qi) => {
+    const opts = boxes[qi].querySelectorAll(`.opt`);
+    opts.forEach((btn, oi) => {
+      btn.classList.remove(`selected`);
+      if (oi === item.correct) btn.classList.add(`correct`);
+      else if (oi === answers[qi]) btn.classList.add(`wrong`);
+    });
+    if (answers[qi] === item.correct) score++;
+  });
+  submitBtn.disabled = true;
+  showResult(score);
+}
+
+function verdictText(s) {
+  if (s <= 3) return `Tahle krásná slova vám zatím unikají. Váš slovník vystačí na běžný den, ale poklady starší češtiny na vás ještě čekají. Zkuste sáhnout po starší knize, spousta z těchto výrazů v ní ožije.`;
+  if (s <= 6) return `Slovník jako většina lidí. Část těchto slov znáte přesně, u jiných jste volili podle citu. Solidní průměr, na kterém se dá pěkně stavět.`;
+  if (s <= 9) return `Nadprůměrně bohatý slovník. Krásná a méně známá česká slova vám nejsou cizí a významové jemnosti vnímáte lépe než většina. O plný počet vám utekl jen kousek.`;
+  return `Mimořádně bohatý slovník. Poznal jste všech deset, a to se povede opravdu jen menšině. Krásná čeština je u vás v těch nejlepších rukou.`;
+}
+
+function showResult(score) {
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  document.getElementById(`verdict`).textContent = verdictText(score);
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+}
+
+function reset() {
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  locked = false;
+  resultEl.style.display = `none`;
+  warnEl.textContent = ``;
+  submitBtn.disabled = true;
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitBtn.addEventListener(`click`, evaluate);
+document.getElementById(`retry`).addEventListener(`click`, reset);
+render();
+</script>
+</body>
+</html>
