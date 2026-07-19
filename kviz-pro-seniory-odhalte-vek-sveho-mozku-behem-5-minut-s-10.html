@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro seniory: odhalte věk svého mozku během 5 minut s 10 otázkami</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 24px 16px;
+  line-height: 1.5;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.8rem; line-height: 1.25; color: #2c2c2c; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin-bottom: 8px; }
+.q-box {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.text-input {
+  width: 100%;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+}
+.text-input.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.text-input.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.solution { margin-top: 12px; font-size: .98rem; color: #1e5631; font-weight: bold; }
+#evaluate {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#evaluate:hover { background: #4a6b4e; }
+#evaluate:disabled { background: #b5b5b5; cursor: not-allowed; }
+.warn { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+  display: none;
+}
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+.verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 24px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro seniory: odhalte věk svého mozku během 5 minut s 10 otázkami</h1>
+<p class="perex">Deset otázek na dobu vašeho mládí i všeobecný přehled. Kofola, Popelka, první žena ve vesmíru nebo trabant. Za pět minut zjistíte, jak svěží váš mozek zůstal. Čím víc trefíte, tím mladší věk mozku vám vyjde.</p>
+<div id="quiz"></div>
+<button id="evaluate" disabled>Vyhodnotit</button>
+<p class="warn" id="warn"></p>
+<div id="result">
+  <p class="score" id="score"></p>
+  <p class="verdict" id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  { q: `Ve kterém roce se v Československu začala vyrábět limonáda Kofola?`, type: `choice`, options: [`1955`, `1958`, `1960`, `1968`], answer: 2 },
+  { q: `Kdo složil symfonii Z nového světa?`, type: `choice`, options: [`Antonín Dvořák`, `Bedřich Smetana`, `Leoš Janáček`, `Josef Suk`], answer: 0 },
+  { q: `Kdo byl posledním komunistickým prezidentem Československa?`, type: `choice`, options: [`Antonín Novotný`, `Gustáv Husák`, `Ludvík Svoboda`, `Antonín Zápotocký`], answer: 1 },
+  { q: `Kdo byla první ženou ve vesmíru?`, type: `choice`, options: [`Sally Rideová`, `Světlana Savická`, `Kathryn Sullivanová`, `Valentina Těreškovová`], answer: 3 },
+  { q: `Ve kterém roce měla premiéru filmová pohádka Tři oříšky pro Popelku?`, type: `choice`, options: [`1969`, `1973`, `1976`, `1981`], answer: 1 },
+  { q: `Kdo vynalezl lodní šroub?`, type: `choice`, options: [`Josef Božek`, `František Křižík`, `Josef Ressel`, `Prokop Diviš`], answer: 2 },
+  { q: `Kdo je autorem obrazového cyklu Slovanská epopej?`, type: `choice`, options: [`Alfons Mucha`, `Mikoláš Aleš`, `Max Švabinský`, `Josef Mánes`], answer: 0 },
+  { q: `Kdo složil hudbu k polce Škoda lásky?`, type: `choice`, options: [`Karel Hašler`, `Karel Vacek`, `Jaroslav Ježek`, `Jaromír Vejvoda`], answer: 3 },
+  { q: `Ve které zemi se vyráběl automobil Trabant?`, type: `choice`, options: [`Polsko`, `Sovětský svaz`, `Východní Německo`, `Maďarsko`], answer: 2 },
+  { q: `Jaké číslo logicky patří na konec řady 1, 1, 2, 3, 5, 8?`, type: `text`, answer: [`13`] }
+];
+
+const ranges = [
+  { min: 0, max: 3, text: `Věk mozku máte dnes o něco vyšší, než by odpovídalo kalendáři. Nevadí, paměť se dá trénovat. Zkuste luštit křížovky, číst a vzpomínat na staré časy, a příště to půjde znatelně líp.` },
+  { min: 4, max: 6, text: `Solidní střed a věk mozku zhruba na úrovni vašich vrstevníků. Půlku otázek jste trefili s jistotou, u zbytku jste chvíli lovili v paměti. Přesně tak to obvykle chodí a je na čem stavět.` },
+  { min: 7, max: 9, text: `Výborný výkon a mozek o poznání mladší, než ukazuje občanka. Události, jména i letopočty vám naskakují svižně. Takovou svěžest mnozí mladší jen tiše závidí.` },
+  { min: 10, max: 10, text: `Plný počet a mozek ve špičkové kondici. Věk mozku máte hluboko pod svým skutečným a v přehledu i paměti strčíte do kapsy leckterého třicátníka. Klobouk dolů.` }
+];
+
+const state = new Array(questions.length).fill(null);
+let locked = false;
+const quizEl = document.getElementById('quiz');
+const evalBtn = document.getElementById('evaluate');
+const warnEl = document.getElementById('warn');
+
+function norm(s) {
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function build() {
+  quizEl.innerHTML = '';
+  questions.forEach((item, qi) => {
+    const box = document.createElement('div');
+    box.className = 'q-box';
+    const qt = document.createElement('div');
+    qt.className = 'q-text';
+    qt.textContent = (qi + 1) + '. ' + item.q;
+    box.appendChild(qt);
+    if (item.type === 'choice') {
+      item.options.forEach((opt, oi) => {
+        const b = document.createElement('button');
+        b.className = 'opt';
+        b.textContent = String.fromCharCode(97 + oi) + ') ' + opt;
+        b.addEventListener('click', () => {
+          if (locked) return;
+          state[qi] = oi;
+          Array.from(box.querySelectorAll('.opt')).forEach(x => x.classList.remove('selected'));
+          b.classList.add('selected');
+          updateBtn();
+        });
+        box.appendChild(b);
+      });
+    } else {
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.className = 'text-input';
+      inp.addEventListener('input', () => {
+        if (locked) return;
+        state[qi] = inp.value.trim() === '' ? null : inp.value;
+        updateBtn();
+      });
+      box.appendChild(inp);
+    }
+    quizEl.appendChild(box);
+  });
+}
+
+function updateBtn() {
+  const done = state.every(v => v !== null);
+  evalBtn.disabled = !done;
+  if (done) warnEl.textContent = '';
+}
+
+evalBtn.addEventListener('click', () => {
+  if (evalBtn.disabled) { warnEl.textContent = 'Odpovězte prosím na všechny otázky'; return; }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll('.q-box');
+  questions.forEach((item, qi) => {
+    const box = boxes[qi];
+    if (item.type === 'choice') {
+      const opts = box.querySelectorAll('.opt');
+      opts.forEach((o, oi) => {
+        o.classList.remove('selected');
+        if (oi === item.answer) o.classList.add('correct');
+        else if (oi === state[qi]) o.classList.add('wrong');
+      });
+      if (state[qi] === item.answer) score++;
+    } else {
+      const inp = box.querySelector('.text-input');
+      const ok = item.answer.some(a => norm(a) === norm(String(state[qi] || '')));
+      if (ok) { inp.classList.add('correct'); score++; }
+      else {
+        inp.classList.add('wrong');
+        const sol = document.createElement('div');
+        sol.className = 'solution';
+        sol.textContent = 'Správně: ' + item.answer[0];
+        box.appendChild(sol);
+      }
+    }
+  });
+  const r = ranges.find(x => score >= x.min && score <= x.max);
+  document.getElementById('score').textContent = score + ' z ' + questions.length;
+  document.getElementById('verdict').textContent = r ? r.text : '';
+  const res = document.getElementById('result');
+  res.style.display = 'block';
+  evalBtn.disabled = true;
+  warnEl.textContent = '';
+  res.scrollIntoView({ behavior: 'smooth' });
+});
+
+document.getElementById('retry').addEventListener('click', () => {
+  locked = false;
+  state.fill(null);
+  document.getElementById('result').style.display = 'none';
+  warnEl.textContent = '';
+  build();
+  updateBtn();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+build();
+updateBtn();
+</script>
+</body>
+</html>
