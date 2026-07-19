@@ -1,0 +1,263 @@
+```html
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Těžký kvíz pro lidi 60+: kdo v něm dá aspoň 8/10, porazí i mladou generaci</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 24px 16px;
+    line-height: 1.55;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1.title { font-size: 1.7rem; line-height: 1.3; margin: 0 0 16px; color: #2c2c2c; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+  .question {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #3a3a3a;
+    margin-bottom: 12px;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover { background: #ede8e1; }
+  .option.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .option.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .option.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .option.locked { cursor: default; }
+  input.open-answer {
+    width: 100%;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #3a3a3a;
+  }
+  #submit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .warn { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.2em; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-top: 28px;
+    display: none;
+  }
+  .score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  .verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #retry {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 24px auto 0;
+    font-family: inherit;
+  }
+  #retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 class="title" id="quiz-title"></h1>
+  <p class="perex" id="quiz-perex"></p>
+  <div id="questions"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <div class="warn" id="warn"></div>
+  <div id="result">
+    <div class="score" id="score"></div>
+    <p class="verdict" id="verdict"></p>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+  const TITLE = `Těžký kvíz pro lidi 60+: kdo v něm dá aspoň 8/10, porazí i mladou generaci`;
+  const PEREX = `Deset pořádně těžkých otázek z časů vašeho mládí a nejlepších let. Slavné penalty, kultovní seriály, tuzemská auta i velké vynálezy. Šedesátníci a starší mají navrch. Kdo dá aspoň osm z deseti, může mladou generaci s klidem přebít.`;
+
+  const QUESTIONS = [
+    { q: `Kdo v penaltovém rozstřelu proměnil rozhodující pokutový kop ve finále mistrovství Evropy ve fotbale roku 1976?`,
+      options: [`Zdeněk Nehoda`, `Antonín Panenka`, `Marián Masný`, `Ján Švehlík`], correct: 1 },
+    { q: `Který herec ztvárnil primáře Sovu v seriálu Nemocnice na kraji města?`,
+      options: [`Ladislav Chudík`, `Josef Abrhám`, `Miloš Kopecký`, `Eduard Cupák`], correct: 0 },
+    { q: `Kdo režíroval film Ostře sledované vlaky oceněný Oscarem?`,
+      options: [`Miloš Forman`, `Ján Kadár`, `Jiří Menzel`, `Věra Chytilová`], correct: 2 },
+    { q: `Kdo zvítězil v úplně prvním ročníku ankety Zlatý slavík v roce 1962?`,
+      options: [`Karel Gott`, `Milan Chladil`, `Jiří Suchý`, `Waldemar Matuška`], correct: 3 },
+    { q: `Ve kterém závodě se vyrábělo sportovní kupé Škoda 110 R?`,
+      options: [`Kvasiny`, `Mladá Boleslav`, `Vrchlabí`, `Kopřivnice`], correct: 0 },
+    { q: `Čím se do světových dějin vědy zapsal chemik Otto Wichterle?`,
+      options: [`inzulinem`, `měkkými kontaktními čočkami`, `polarografem`, `plexisklem`], correct: 1 },
+    { q: `Ve kterém městě se vyráběly legendární sportovní boty Botas?`,
+      options: [`Partizánske`, `Gottwaldov`, `Skuteč`, `Zruč nad Sázavou`], correct: 2 },
+    { q: `Které severočeské město bylo od konce 60. let postupně zbořeno kvůli těžbě hnědého uhlí a vystavěno nově opodál?`,
+      options: [`Most`, `Chomutov`, `Teplice`, `Litvínov`], correct: 0 },
+    { q: `Která tuzemská bigbítová skupina proslula písní Želva z roku 1968?`,
+      options: [`The Matadors`, `Flamengo`, `The Rebels`, `Olympic`], correct: 3 },
+    { q: `Kolik zlatých olympijských medailí získala gymnastka Věra Čáslavská celkem na hrách v Tokiu 1964 a Mexiku 1968?`,
+      options: [`čtyři`, `pět`, `sedm`, `devět`], correct: 2 }
+  ];
+
+  const LETTERS = [`a`, `b`, `c`, `d`];
+  const selected = new Array(QUESTIONS.length).fill(-1);
+  let locked = false;
+
+  const titleEl = document.getElementById(`quiz-title`);
+  const perexEl = document.getElementById(`quiz-perex`);
+  const questionsEl = document.getElementById(`questions`);
+  const submitBtn = document.getElementById(`submit`);
+  const warnEl = document.getElementById(`warn`);
+  const resultEl = document.getElementById(`result`);
+  const scoreEl = document.getElementById(`score`);
+  const verdictEl = document.getElementById(`verdict`);
+  const retryBtn = document.getElementById(`retry`);
+
+  titleEl.textContent = TITLE;
+  perexEl.textContent = PEREX;
+
+  function updateSubmitState() {
+    const allAnswered = selected.every(function (s) { return s !== -1; });
+    submitBtn.disabled = !allAnswered;
+    if (allAnswered) warnEl.textContent = ``;
+  }
+
+  function buildQuiz() {
+    questionsEl.innerHTML = ``;
+    for (let i = 0; i < QUESTIONS.length; i++) {
+      const item = QUESTIONS[i];
+      const box = document.createElement(`div`);
+      box.className = `question`;
+
+      const qText = document.createElement(`div`);
+      qText.className = `q-text`;
+      qText.textContent = (i + 1) + `. ` + item.q;
+      box.appendChild(qText);
+
+      for (let j = 0; j < item.options.length; j++) {
+        const btn = document.createElement(`button`);
+        btn.className = `option`;
+        btn.type = `button`;
+        btn.textContent = LETTERS[j] + `) ` + item.options[j];
+        btn.setAttribute(`data-q`, i);
+        btn.setAttribute(`data-o`, j);
+        btn.addEventListener(`click`, function () {
+          if (locked) return;
+          selected[i] = j;
+          const siblings = box.querySelectorAll(`.option`);
+          siblings.forEach(function (s) { s.classList.remove(`selected`); });
+          btn.classList.add(`selected`);
+          updateSubmitState();
+        });
+        box.appendChild(btn);
+      }
+      questionsEl.appendChild(box);
+    }
+  }
+
+  function evaluate() {
+    if (submitBtn.disabled) {
+      warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+      return;
+    }
+    locked = true;
+    let score = 0;
+    const boxes = questionsEl.querySelectorAll(`.question`);
+    for (let i = 0; i < QUESTIONS.length; i++) {
+      const correct = QUESTIONS[i].correct;
+      const chosen = selected[i];
+      if (chosen === correct) score++;
+      const opts = boxes[i].querySelectorAll(`.option`);
+      opts.forEach(function (o) {
+        o.classList.add(`locked`);
+        o.classList.remove(`selected`);
+        const oi = parseInt(o.getAttribute(`data-o`), 10);
+        if (oi === correct) {
+          o.classList.add(`correct`);
+        } else if (oi === chosen) {
+          o.classList.add(`wrong`);
+        }
+      });
+    }
+    showResult(score);
+  }
+
+  function verdictText(score) {
+    if (score <= 3) {
+      return `Tenhle kvíz vás zatím moc nectí. Možná jste tehdejší roky prožili s jinými zájmy nebo vám detaily z paměti vyprchaly. Zkuste zalistovat starými fotkami a časopisy, ledacos se vám hned vybaví.`;
+    } else if (score <= 6) {
+      return `Poctivý střed. Půlku otázek jste trefili s jistotou, u zbytku jste chvíli tápali. Slušný základ, na kterém se dá stavět, mladí by na stejných otázkách pohořeli mnohem víc.`;
+    } else if (score <= 9) {
+      return `Výborný výkon. Svou dobu máte v malíku, od fotbalového finále přes obrazovku až po tuzemské výrobky. Tohle skóre už mladé generaci ukazuje záda.`;
+    }
+    return `Plný počet a naprostá dominance. Znáte svou éru do posledního detailu a v přímém souboji s dvacátníky nemáte konkurenci. Klobouk dolů, tohle je mistrovská paměť.`;
+  }
+
+  function showResult(score) {
+    submitBtn.disabled = true;
+    warnEl.textContent = ``;
+    scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+    verdictEl.textContent = verdictText(score);
+    resultEl.style.display = `block`;
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function reset() {
+    locked = false;
+    for (let i = 0; i < selected.length; i++) selected[i] = -1;
+    resultEl.style.display = `none`;
+    warnEl.textContent = ``;
+    buildQuiz();
+    updateSubmitState();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  submitBtn.addEventListener(`click`, evaluate);
+  retryBtn.addEventListener(`click`, reset);
+
+  buildQuiz();
+  updateSubmitState();
+</script>
+</body>
+</html>
+```
