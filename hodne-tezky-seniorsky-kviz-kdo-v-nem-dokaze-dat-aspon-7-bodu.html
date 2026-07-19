@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hodně těžký seniorský kvíz: kdo v něm dokáže dát aspoň 7 bodů, patří k nadprůměru populace</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 24px 16px;
+  line-height: 1.55;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.8rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 18px; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+.q-box {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1rem;
+  color: #3a3a3a;
+  cursor: pointer;
+  transition: background .15s;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+.txt-input {
+  width: 100%;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1rem;
+  color: #3a3a3a;
+}
+.txt-input.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.txt-input.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.reveal { margin-top: 12px; font-size: .98rem; color: #1e5631; }
+.reveal.bad { color: #721c24; }
+#submit {
+  display: block;
+  margin: 40px auto 0;
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hint { text-align: center; color: #8a7f72; margin-top: 14px; font-size: .95rem; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+  display: none;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#retry {
+  display: block;
+  margin: 28px auto 0;
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+#retry:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  .q-box { padding: 20px; }
+  h1 { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Hodně těžký seniorský kvíz: kdo v něm dokáže dát aspoň 7 bodů, patří k nadprůměru populace</h1>
+<p class="perex">Deset tvrdých otázek z dějin, umění, vědy i zeměpisu. Žádné vzpomínky na mládí, jen fakta, která zná málokdo. Běžný člověk tu dá čtyři až šest správně. Kdo zvládne aspoň sedm bodů, patří k nadprůměru populace.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<div class="hint" id="hint"></div>
+<div id="result">
+  <div id="score"></div>
+  <p id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  { q: `1. Co v knižní kultuře označuje pojem palimpsest?`, type: `choice`,
+    options: [`rukopis psaný na pergamenu, z něhož byl seškrabán starší text`, `ozdobně vyvedená první stránka středověkého rukopisu`, `soupis knih uložených v klášterní knihovně`, `tajné písmo užívané středověkými písaři`], correct: 0 },
+  { q: `2. Kdo je autorem realistického dramatu Naši furianti?`, type: `choice`,
+    options: [`Ladislav Stroupežnický`, `Alois Jirásek`, `Gabriela Preissová`, `Josef Kajetán Tyl`], correct: 0 },
+  { q: `3. Který malíř vytvořil dnešní oponu Národního divadla v Praze?`, type: `choice`,
+    options: [`Mikoláš Aleš`, `Vojtěch Hynais`, `František Ženíšek`, `Julius Mařák`], correct: 1 },
+  { q: `4. Který skladatel složil hudbu k první německé romantické opeře Čarostřelec?`, type: `choice`,
+    options: [`Heinrich Marschner`, `Richard Wagner`, `Carl Maria von Weber`, `Albert Lortzing`], correct: 2 },
+  { q: `5. Které město je hlavním městem Kazachstánu?`, type: `choice`,
+    options: [`Almaty`, `Šymkent`, `Karagandy`, `Astana`], correct: 3 },
+  { q: `6. Který prvek je podle hmotnosti nejrozšířenější v zemské kůře?`, type: `choice`,
+    options: [`křemík`, `kyslík`, `hliník`, `železo`], correct: 1 },
+  { q: `7. Která planeta Sluneční soustavy se otočí kolem své osy nejrychleji?`, type: `choice`,
+    options: [`Saturn`, `Země`, `Jupiter`, `Neptun`], correct: 2 },
+  { q: `8. Ve kterém roce byla svedena bitva na Moravském poli?`, type: `text`,
+    accept: [`1278`] },
+  { q: `9. Který Habsburk vydal roku 1713 pragmatickou sankci?`, type: `choice`,
+    options: [`Karel VI.`, `Leopold I.`, `Josef I.`, `Karel V.`], correct: 0 },
+  { q: `10. Který panovník usedl na anglický trůn jako první z rodu Tudorovců?`, type: `choice`,
+    options: [`Richard III.`, `Eduard IV.`, `Jindřich VI.`, `Jindřich VII.`], correct: 3 }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+const scoreEl = document.getElementById(`score`);
+const verdictEl = document.getElementById(`verdict`);
+const retryBtn = document.getElementById(`retry`);
+
+function norm(s) {
+  return s.toString().trim().toLowerCase().normalize(`NFD`).replace(/[̀-ͯ]/g, ``).replace(/\s+/g, ` `);
+}
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q-box`;
+    const qt = document.createElement(`div`);
+    qt.className = `q-text`;
+    qt.textContent = item.q;
+    box.appendChild(qt);
+
+    if (item.type === `choice`) {
+      item.options.forEach((opt, oi) => {
+        const b = document.createElement(`button`);
+        b.className = `opt`;
+        b.type = `button`;
+        b.textContent = String.fromCharCode(97 + oi) + `) ` + opt;
+        b.addEventListener(`click`, () => {
+          if (locked) return;
+          answers[qi] = oi;
+          Array.from(box.querySelectorAll(`.opt`)).forEach(x => x.classList.remove(`selected`));
+          b.classList.add(`selected`);
+          updateSubmit();
+        });
+        box.appendChild(b);
+      });
+    } else {
+      const inp = document.createElement(`input`);
+      inp.className = `txt-input`;
+      inp.type = `text`;
+      inp.setAttribute(`inputmode`, `numeric`);
+      inp.placeholder = `Napište odpověď`;
+      inp.addEventListener(`input`, () => {
+        if (locked) return;
+        answers[qi] = inp.value.trim() === `` ? null : inp.value;
+        updateSubmit();
+      });
+      box.appendChild(inp);
+    }
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  const allDone = answers.every(a => a !== null);
+  submitBtn.disabled = !allDone;
+  hintEl.textContent = ``;
+}
+
+submitBtn.addEventListener(`click`, () => {
+  if (submitBtn.disabled) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  evaluate();
+});
+
+function evaluate() {
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q-box`);
+  questions.forEach((item, qi) => {
+    const box = boxes[qi];
+    if (item.type === `choice`) {
+      const opts = box.querySelectorAll(`.opt`);
+      opts.forEach((b, oi) => {
+        b.disabled = true;
+        if (oi === item.correct) b.classList.add(`correct`);
+        if (oi === answers[qi] && answers[qi] !== item.correct) b.classList.add(`wrong`);
+      });
+      if (answers[qi] === item.correct) score++;
+    } else {
+      const inp = box.querySelector(`.txt-input`);
+      inp.disabled = true;
+      const ok = item.accept.some(a => norm(a) === norm(answers[qi] || ``));
+      if (ok) { inp.classList.add(`correct`); score++; }
+      else {
+        inp.classList.add(`wrong`);
+        const rev = document.createElement(`div`);
+        rev.className = `reveal`;
+        rev.textContent = `Správná odpověď: ` + item.accept[0];
+        box.appendChild(rev);
+      }
+    }
+  });
+
+  submitBtn.style.display = `none`;
+  scoreEl.textContent = score + ` z ` + questions.length;
+  verdictEl.textContent = verdictText(score);
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function verdictText(s) {
+  if (s <= 3) return `Tenhle test byl nastavený opravdu tvrdě a zatím vás přemohl. S tímto skóre se pohybujete pod hranicí, kterou překoná většina lidí. Nic ztraceného, řada otázek mířila na fakta, která běžně nosí v hlavě jen málokdo.`;
+  if (s <= 6) return `Přesně tady, v tomto pásmu, končí většina populace. Půlku otázek jste zvládli s jistotou, u zbytku jste váhali nebo tipovali. Solidní střed, ale na deklarovaný nadprůměr to ještě o kousek nestačí.`;
+  if (s <= 9) return `Nadprůměr, a to jasný. Do tohoto pásma se u takto těžkých otázek dostane jen menšina lidí. Máte široký rozhled napříč obory a přehled, kterým převýšíte většinu okolí bez ohledu na věk.`;
+  return `Naprostá špička. Plný počet u kvízu tohoto kalibru zvládne jen zlomek populace a vy do něj patříte. Takový záběr znalostí od dějin přes umění až po vědu není náhoda, ale výsledek celoživotní zvídavosti.`;
+}
+
+retryBtn.addEventListener(`click`, () => {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  resultEl.style.display = `none`;
+  submitBtn.style.display = `block`;
+  submitBtn.disabled = true;
+  hintEl.textContent = ``;
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+render();
+</script>
+</body>
+</html>
