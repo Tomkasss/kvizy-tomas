@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Přírodovědný kvíz pro seniory: jestli dáte aspoň 7/10, trumfnete i mladou generaci</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 16px;
+    line-height: 1.55;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.3;
+    color: #2c2c2c;
+    margin: 0 0 18px;
+  }
+  .perex {
+    font-size: 1.1rem;
+    color: #4a4a4a;
+    margin: 0 0 36px;
+  }
+  .question {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin: 0 0 18px;
+  }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #3a3a3a;
+    margin-bottom: 12px;
+    transition: background 0.15s ease;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover:not(.locked) { background: #ede8e1; }
+  .option.selected {
+    background: #dcd3c7;
+    border: 1px solid #a89e92;
+    font-weight: bold;
+  }
+  .option.locked { cursor: default; }
+  .option.correct {
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    color: #1e5631;
+  }
+  .option.wrong {
+    background: #f8d7da;
+    border: 1px solid #d4848a;
+    color: #721c24;
+  }
+  .reveal {
+    margin-top: 14px;
+    font-size: 0.98rem;
+    color: #1e5631;
+  }
+  .btn-eval {
+    background: #5b7e5f;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    transition: background 0.15s ease;
+  }
+  .btn-eval:hover:not(:disabled) { background: #4a6b4e; }
+  .btn-eval:disabled {
+    background: #b5b5b5;
+    cursor: not-allowed;
+  }
+  .result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 24px;
+    display: none;
+  }
+  .score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    text-align: center;
+    margin: 0 0 12px;
+  }
+  .verdict {
+    font-size: 1rem;
+    color: #4a4a4a;
+    text-align: center;
+    margin: 0;
+  }
+  .btn-reset {
+    background: #8c7b6b;
+    color: #ffffff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 24px auto 0;
+    font-family: inherit;
+    transition: background 0.15s ease;
+  }
+  .btn-reset:hover { background: #756658; }
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%) translateY(20px);
+    background: #2c2c2c;
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 10;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Přírodovědný kvíz pro seniory: jestli dáte aspoň 7/10, trumfnete i mladou generaci</h1>
+  <p class="perex">Vesmír, fyzika, chemie i příroda kolem nás. Deset otázek pro seniory, u kterých obstojí jen ten, kdo přírodovědě rozumí do hloubky. Kdo dá aspoň sedm z deseti, klidně předčí i dnešní mladou generaci.</p>
+
+  <div id="quiz"></div>
+
+  <button id="evalBtn" class="btn-eval" disabled>Vyhodnotit</button>
+
+  <div id="result" class="result">
+    <div id="score" class="score"></div>
+    <p id="verdict" class="verdict"></p>
+    <button id="resetBtn" class="btn-reset">Zkusit znovu</button>
+  </div>
+</div>
+
+<div id="toast" class="toast">Odpovězte prosím na všechny otázky</div>
+
+<script>
+(function () {
+  const questions = [
+    {
+      q: `1. Proč vidíme ze Země stále jen jednu stranu Měsíce?`,
+      options: [
+        `Měsíc se otočí kolem své osy za stejnou dobu, za jakou oběhne Zemi`,
+        `Měsíc se kolem své osy vůbec neotáčí`,
+        `Měsíc obíhá Zemi mnohem rychleji, než se sám otáčí`,
+        `zemská atmosféra jeho odvrácenou stranu opticky zakrývá`
+      ],
+      correct: 0
+    },
+    {
+      q: `2. V jakém prostředí se zvuk šíří nejrychleji?`,
+      options: [
+        `ve vakuu`,
+        `ve vzduchu`,
+        `ve vodě`,
+        `v oceli`
+      ],
+      correct: 3
+    },
+    {
+      q: `3. Který chemický prvek tvoří hmotnostně největší část lidského těla?`,
+      options: [
+        `uhlík`,
+        `kyslík`,
+        `vodík`,
+        `dusík`
+      ],
+      correct: 1
+    },
+    {
+      q: `4. Ze které části květu se po opylení vyvíjí plod?`,
+      options: [
+        `z tyčinky`,
+        `z okvětních lístků`,
+        `ze semeníku`,
+        `z kalicha`
+      ],
+      correct: 2
+    },
+    {
+      q: `5. Ve které části Země vzniká zemské magnetické pole?`,
+      options: [
+        `ve vnějším tekutém jádře`,
+        `v zemské kůře`,
+        `v zemském plášti`,
+        `ve vnitřním pevném jádře`
+      ],
+      correct: 0
+    },
+    {
+      q: `6. Který kov je nejrozšířenější v zemské kůře?`,
+      options: [
+        `železo`,
+        `měď`,
+        `hořčík`,
+        `hliník`
+      ],
+      correct: 3
+    },
+    {
+      q: `7. Kolik párů žeber má zpravidla dospělý člověk?`,
+      options: [
+        `10 párů`,
+        `12 párů`,
+        `11 párů`,
+        `14 párů`
+      ],
+      correct: 1
+    },
+    {
+      q: `8. Jak se nazývá řídká vnější atmosféra Slunce, kterou lze spatřit jako svatozář při úplném zatmění Slunce?`,
+      options: [
+        `fotosféra`,
+        `chromosféra`,
+        `koróna`,
+        `protuberance`
+      ],
+      correct: 2
+    },
+    {
+      q: `9. Jak se nazývá jev, při kterém kapalina samovolně stoupá úzkou trubicí proti gravitaci?`,
+      options: [
+        `kapilarita`,
+        `osmóza`,
+        `difúze`,
+        `kondenzace`
+      ],
+      correct: 0
+    },
+    {
+      q: `10. Do které skupiny živočichů patří korál?`,
+      options: [
+        `měkkýši`,
+        `ostnokožci`,
+        `mořské houby`,
+        `žahavci`
+      ],
+      correct: 3
+    }
+  ];
+
+  const verdicts = [
+    { min: 0, max: 3, text: `Přírodověda vás tentokrát zaskočila. Nevadí, řada těchto otázek míří na detaily, které člověk denně nepotřebuje. Zvídavost je ale nakažlivá a příště jich zvládnete víc.` },
+    { min: 4, max: 6, text: `Solidní výsledek, přesně na úrovni většiny dospělých. Základ máte pevný, jen pár chytáků z hlubších znalostí vás připravilo o body.` },
+    { min: 7, max: 9, text: `Výborně. Tolik správných odpovědí nedá zdaleka každý. Přírodovědě rozumíte líp než většina lidí a mladou generaci máte čím zaskočit.` },
+    { min: 10, max: 10, text: `Bezchybný výkon. Vesmír, fyzika, chemie i příroda pro vás nemají tajemství. Takový přehled by vám leckterý čerstvý absolvent jen tiše záviděl.` }
+  ];
+
+  const answers = new Array(questions.length).fill(null);
+  let evaluated = false;
+
+  const quizEl = document.getElementById(`quiz`);
+  const evalBtn = document.getElementById(`evalBtn`);
+  const resultEl = document.getElementById(`result`);
+  const scoreEl = document.getElementById(`score`);
+  const verdictEl = document.getElementById(`verdict`);
+  const resetBtn = document.getElementById(`resetBtn`);
+  const toast = document.getElementById(`toast`);
+  let toastTimer = null;
+
+  function buildQuiz() {
+    questions.forEach(function (item, qi) {
+      const box = document.createElement(`div`);
+      box.className = `question`;
+
+      const qText = document.createElement(`p`);
+      qText.className = `q-text`;
+      qText.textContent = item.q;
+      box.appendChild(qText);
+
+      item.options.forEach(function (opt, oi) {
+        const btn = document.createElement(`button`);
+        btn.className = `option`;
+        btn.type = `button`;
+        btn.textContent = opt;
+        btn.setAttribute(`data-q`, qi);
+        btn.setAttribute(`data-o`, oi);
+        btn.addEventListener(`click`, function () {
+          if (evaluated) return;
+          answers[qi] = oi;
+          const siblings = box.querySelectorAll(`.option`);
+          siblings.forEach(function (s) { s.classList.remove(`selected`); });
+          btn.classList.add(`selected`);
+          updateEvalState();
+        });
+        box.appendChild(btn);
+      });
+
+      const reveal = document.createElement(`div`);
+      reveal.className = `reveal`;
+      reveal.style.display = `none`;
+      box.appendChild(reveal);
+
+      quizEl.appendChild(box);
+    });
+  }
+
+  function updateEvalState() {
+    const allAnswered = answers.every(function (a) { return a !== null; });
+    evalBtn.disabled = !allAnswered;
+  }
+
+  function showToast() {
+    toast.classList.add(`show`);
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toast.classList.remove(`show`);
+    }, 2600);
+  }
+
+  function evaluate() {
+    const allAnswered = answers.every(function (a) { return a !== null; });
+    if (!allAnswered) {
+      showToast();
+      return;
+    }
+    evaluated = true;
+    let score = 0;
+
+    const boxes = quizEl.querySelectorAll(`.question`);
+    boxes.forEach(function (box, qi) {
+      const opts = box.querySelectorAll(`.option`);
+      const correctIdx = questions[qi].correct;
+      const chosen = answers[qi];
+
+      opts.forEach(function (opt, oi) {
+        opt.classList.add(`locked`);
+        opt.classList.remove(`selected`);
+        if (oi === correctIdx) {
+          opt.classList.add(`correct`);
+        } else if (oi === chosen) {
+          opt.classList.add(`wrong`);
+        }
+      });
+
+      if (chosen === correctIdx) {
+        score++;
+      } else {
+        const reveal = box.querySelector(`.reveal`);
+        reveal.textContent = `Správná odpověď: ` + questions[qi].options[correctIdx];
+        reveal.style.display = `block`;
+      }
+    });
+
+    scoreEl.textContent = score + ` z ` + questions.length;
+    let verdictText = ``;
+    verdicts.forEach(function (v) {
+      if (score >= v.min && score <= v.max) verdictText = v.text;
+    });
+    verdictEl.textContent = verdictText;
+
+    evalBtn.style.display = `none`;
+    resultEl.style.display = `block`;
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function reset() {
+    evaluated = false;
+    for (let i = 0; i < answers.length; i++) answers[i] = null;
+
+    const boxes = quizEl.querySelectorAll(`.question`);
+    boxes.forEach(function (box) {
+      const opts = box.querySelectorAll(`.option`);
+      opts.forEach(function (opt) {
+        opt.classList.remove(`locked`, `selected`, `correct`, `wrong`);
+      });
+      const reveal = box.querySelector(`.reveal`);
+      reveal.textContent = ``;
+      reveal.style.display = `none`;
+    });
+
+    resultEl.style.display = `none`;
+    evalBtn.style.display = `block`;
+    evalBtn.disabled = true;
+
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evalBtn.addEventListener(`click`, evaluate);
+  resetBtn.addEventListener(`click`, reset);
+
+  buildQuiz();
+})();
+</script>
+</body>
+</html>
