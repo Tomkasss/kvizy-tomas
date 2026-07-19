@@ -87,7 +87,7 @@ h1 { font-size: 1.9rem; line-height: 1.25; color: #2c2c2c; }
 <body>
 <div class="wrap">
 <h1>Test počítání z hlavy pro lidi 60+: kdo dá 10/10 do 5 minut, tomu to pálí i v důchodu</h1>
-<p class="perex">Deset příkladů a tužku nechte ležet. Sčítání, násobení, procenta i pár slovních úloh, všechno se dá spočítat z hlavy. Kdo dá všech deset správně do pěti minut, tomu to i po šedesátce myslí rychle a jasně. Zvládnete to?</p>
+<p class="perex">Deset příkladů a žádná tužka. Dvojciferné násobení, procenta, mocniny i číselné řady, všechno se počítá jen z hlavy. Kdo dá všech deset správně a rychle, má i po šedesátce bystrou a přesnou hlavu. Troufnete si?</p>
 <div id="quiz"></div>
 <button id="eval-btn" disabled>Vyhodnotit</button>
 <p id="warn" class="warn hidden">Odpovězte prosím na všechny otázky</p>
@@ -99,16 +99,16 @@ h1 { font-size: 1.9rem; line-height: 1.25; color: #2c2c2c; }
 </div>
 <script>
 const questions = [
-  { q: `Kolik je 15 % z 240?`, a: [`36`] },
-  { q: `Kolik je 24 × 15?`, a: [`360`] },
-  { q: `Ve skladu bylo 850 kusů zboží. Během dne jich 265 vydali a 120 nových přijali. Kolik kusů zboží je na skladě teď?`, a: [`705`] },
-  { q: `Kolik je 17 × 6 − 13?`, a: [`89`] },
-  { q: `Jaké číslo pokračuje v řadě 2, 6, 12, 20, 30, ?`, a: [`42`] },
-  { q: `Kabát stál 1 800 korun a zlevnili ho o 15 %. Kolik korun stojí teď?`, a: [`1530`, `1 530`] },
-  { q: `Myslím si číslo. Když k němu přičtu 48, dostanu 132. Jaké je to číslo?`, a: [`84`] },
-  { q: `Do jednoho autobusu se vejde 48 cestujících. Kolik autobusů je potřeba, aby se svezlo 192 lidí?`, a: [`4`] },
-  { q: `Kolik minut uplynulo od 9:40 do 12:25?`, a: [`165`] },
-  { q: `Zahradník má 60 sazenic a zasadí dvě třetiny z nich. Kolik sazenic mu zůstane?`, a: [`20`] }
+  { q: `Kolik je 17 × 23?`, a: [`391`] },
+  { q: `Vynásobte 15 sedmi, od výsledku odečtěte 48 a k rozdílu přičtěte 19. Jaké číslo dostanete?`, a: [`76`] },
+  { q: `Kolik je 16 % z 275?`, a: [`44`] },
+  { q: `Kolik je 448 ÷ 14?`, a: [`32`] },
+  { q: `Kolik je 12 na druhou plus 8 na druhou?`, a: [`208`] },
+  { q: `Kolik jsou tři sedminy z 91?`, a: [`39`] },
+  { q: `Jaké číslo logicky pokračuje v řadě 3, 4, 7, 11, 18, ?`, a: [`29`] },
+  { q: `Ve skladu je 1 250 kusů zboží. Každý den z něj odeberou 180 kusů. Kolik kusů zůstane po 6 dnech?`, a: [`170`] },
+  { q: `Kolik je 27 × 13?`, a: [`351`] },
+  { q: `Výrobek stál 640 korun a jeho cena vzrostla o 45 %. Kolik korun stojí po zdražení?`, a: [`928`] }
 ];
 
 const evalRanges = [
