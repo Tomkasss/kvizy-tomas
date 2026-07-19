@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extrémně těžký kvíz všeobecných znalostí: 9 bodů z 10 dá jen skutečný všeuměl</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 24px 16px;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.8rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 16px; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+#submit, #retry {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  color: #fff;
+  cursor: pointer;
+}
+#submit { background: #5b7e5f; }
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry { background: #8c7b6b; }
+#retry:hover { background: #756658; }
+.warn { text-align: center; color: #a04040; margin-top: 14px; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Extrémně těžký kvíz všeobecných znalostí: 9 bodů z 10 dá jen skutečný všeuměl</h1>
+<p class="perex">Extrémně těžká desítka napříč obory: dějiny, věda, zeměpis, umění, literatura i příroda. Skoro každá otázka má chytlavou past, kde se nabízí odpověď, která je špatně. Devět a víc bodů z deseti tu dá jen skutečný všeuměl. Kolik zvládnete vy?</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<div class="warn" id="warn"></div>
+<div id="result" style="display:none;">
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  { q: `Které město je hlavním městem Austrálie?`, options: [`Canberra`, `Sydney`, `Melbourne`, `Perth`], correct: 0 },
+  { q: `Kolik srdcí má chobotnice?`, options: [`jedno`, `dvě`, `tři`, `čtyři`], correct: 2 },
+  { q: `Kdo jako první dosáhl jižního pólu?`, options: [`Robert Falcon Scott`, `Ernest Shackleton`, `Richard Byrd`, `Roald Amundsen`], correct: 3 },
+  { q: `Která planeta Sluneční soustavy má nejvyšší povrchovou teplotu?`, options: [`Venuše`, `Merkur`, `Mars`, `Jupiter`], correct: 0 },
+  { q: `Který jazyk má na světě nejvíce rodilých mluvčích?`, options: [`angličtina`, `španělština`, `hindština`, `čínština`], correct: 3 },
+  { q: `Kdo je autorem básnické sbírky Květy zla?`, options: [`Arthur Rimbaud`, `Paul Verlaine`, `Charles Baudelaire`, `Stéphane Mallarmé`], correct: 2 },
+  { q: `Kdo je autorem sochy Myslitel?`, options: [`Camille Claudel`, `Auguste Rodin`, `Antoine Bourdelle`, `Aristide Maillol`], correct: 1 },
+  { q: `Kolik měsíců obíhá kolem planety Mars?`, options: [`dva`, `tři`, `čtyři`, `pět`], correct: 0 },
+  { q: `Ve kterém roce dobyli osmanští Turci Konstantinopol?`, options: [`1389`, `1453`, `1492`, `1526`], correct: 1 },
+  { q: `V kterém dramatu se poprvé objevilo slovo robot?`, options: [`Ze života hmyzu`, `R.U.R.`, `Bílá nemoc`, `Věc Makropulos`], correct: 1 }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit`);
+const warnEl = document.getElementById(`warn`);
+const resultEl = document.getElementById(`result`);
+
+function letter(i) { return [`a`, `b`, `c`, `d`][i]; }
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const qt = document.createElement(`div`);
+    qt.className = `q-text`;
+    qt.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    item.options.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.textContent = letter(oi) + `) ` + opt;
+      if (answers[qi] === oi) btn.classList.add(`selected`);
+      btn.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        render();
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  const done = answers.every(a => a !== null);
+  submitBtn.disabled = !done;
+  if (done) warnEl.textContent = ``;
+}
+
+function evaluate() {
+  if (!answers.every(a => a !== null)) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  questions.forEach((item, qi) => {
+    const opts = boxes[qi].querySelectorAll(`.opt`);
+    opts.forEach((btn, oi) => {
+      btn.classList.remove(`selected`);
+      if (oi === item.correct) btn.classList.add(`correct`);
+      else if (oi === answers[qi]) btn.classList.add(`wrong`);
+    });
+    if (answers[qi] === item.correct) score++;
+  });
+  submitBtn.disabled = true;
+  showResult(score);
+}
+
+function verdictText(s) {
+  if (s <= 3) return `Laťka byla nastavená opravdu vysoko a pasti si vás podaly. U většiny otázek se nabízela lákavá odpověď, která byla špatně, a tentokrát vedla vedle. K titulu všeuměl je odsud ještě pořádný kus cesty, ale to u kvízu tohoto kalibru nikoho nepřekvapí.`;
+  if (s <= 6) return `Tady končí většina řešitelů. Část chytáků jste prokoukli, jiné vás dostaly přesně tam, kam mířily. Solidní všeobecný přehled, jenže na deklarovaného všeuměla to ještě o kus nestačí.`;
+  if (s <= 9) return `Výborný výkon u extrémně těžkého kvízu. Máte široký záběr od dějin přes vědu až po umění a chytlavé pasti vás z velké části neošálily. Devět bodů je přesně ta hranice, za kterou začíná skutečný všeuměl, a vy se jí dotýkáte.`;
+  return `Naprostá špička. Plný počet u kvízu, kde skoro každá otázka svádí ke špatné odpovědi, zvládne jen zlomek lidí. Tohle není náhoda ani štěstí při tipování, ale záběr znalostí skutečného všeuměla. Smekáme.`;
+}
+
+function showResult(score) {
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  document.getElementById(`verdict`).textContent = verdictText(score);
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+}
+
+function reset() {
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  locked = false;
+  resultEl.style.display = `none`;
+  warnEl.textContent = ``;
+  submitBtn.disabled = true;
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitBtn.addEventListener(`click`, evaluate);
+document.getElementById(`retry`).addEventListener(`click`, reset);
+render();
+</script>
+</body>
+</html>
