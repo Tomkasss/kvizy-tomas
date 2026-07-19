@@ -262,9 +262,10 @@ DATA.forEach((r, i) => {
     `<td><span class="status s-check">…</span></td>`;
   const btn = tr.querySelector('button.copy');
   btn.addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText(iframeCode(r.soubor)); }
+    const code = iframeCode(r.soubor);
+    try { await navigator.clipboard.writeText(code); }
     catch(e) {
-      const ta=document.createElement('textarea'); ta.value=iframeCode(r.soubor);
+      const ta=document.createElement('textarea'); ta.value=code;
       document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
     }
     btn.textContent='Zkopírováno ✓'; btn.classList.add('done');
@@ -275,7 +276,6 @@ DATA.forEach((r, i) => {
   tb.appendChild(tr);
 });
 
-// Filtrování
 const q = document.getElementById('q');
 const counts = document.getElementById('counts');
 function refreshCounts() {
@@ -291,17 +291,26 @@ q.addEventListener('input', () => {
   refreshCounts();
 });
 
-// Živá kontrola statusu (funguje na Pages; u file:// může selhat → ČEKÁ)
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+async function isLive(url) {
+  try { const res=await fetch(url,{method:'HEAD',cache:'no-store'}); return res.ok; }
+  catch(e) { return false; }
+}
 async function checkAll() {
-  await Promise.all([...tb.children].map(async tr => {
-    let ok=false;
-    try {
-      const res=await fetch(tr._url, {method:'HEAD'});
-      ok=res.ok;
-    } catch(e) { ok=false; }
-    tr._status.className = 'status ' + (ok ? 's-live' : 's-wait');
-    tr._status.textContent = ok ? 'ŽIVÉ' : 'ČEKÁ';
-  }));
+  const rows=[...tb.children];
+  // 1. kolo
+  await Promise.all(rows.map(async tr => { tr._ok = await isLive(tr._url); }));
+  // retry na neúspěšné (studená CDN cache Pages občas vrátí 404 na první dotaz)
+  let fails = rows.filter(tr=>!tr._ok);
+  for (let attempt=0; attempt<2 && fails.length; attempt++) {
+    await sleep(2000);
+    await Promise.all(fails.map(async tr => { tr._ok = await isLive(tr._url); }));
+    fails = rows.filter(tr=>!tr._ok);
+  }
+  rows.forEach(tr => {
+    tr._status.className='status '+(tr._ok?'s-live':'s-wait');
+    tr._status.textContent = tr._ok ? 'ŽIVÉ' : 'ČEKÁ';
+  });
   refreshCounts();
 }
 refreshCounts();
