@@ -87,7 +87,7 @@ h1 { font-size: 1.9rem; line-height: 1.25; color: #2c2c2c; }
 <body>
 <div class="wrap">
 <h1>Rychlotest věku pro seniory: kdo dá 10 bodů z 10, ten má pořád mozek jako ve 30</h1>
-<p class="perex">Milí senioři, tady se nebifluje. Deset otázek prověří, jak rychle a jasně vám to myslí: logika, postřeh a počítání zpaměti. Za pár minut zjistíte, na kolik let se drží věk vašeho mozku. Čím víc trefíte, tím je mladší.</p>
+<p class="perex">Deset otázek prověří, jak rychle a přesně vám to myslí. Počítání z hlavy, číselné řady, logika a prostorová představivost, nic k memorování. Za pár minut se dozvíte, na kolik let se drží věk vašeho mozku. Čím vyšší skóre, tím nižší číslo.</p>
 <div id="quiz"></div>
 <button id="eval-btn" disabled>Vyhodnotit</button>
 <p id="warn" class="warn hidden">Odpovězte prosím na všechny otázky</p>
@@ -99,23 +99,23 @@ h1 { font-size: 1.9rem; line-height: 1.25; color: #2c2c2c; }
 </div>
 <script>
 const questions = [
-  { q: `Babička koupila tři rohlíky po čtyřech korunách a dva koláče po devíti korunách. Kolik korun zaplatila celkem?`, a: [`30`] },
-  { q: `Vezmete číslo 30, vydělíte ho jednou polovinou a k výsledku přičtete deset. Jaké číslo dostanete?`, a: [`70`] },
-  { q: `Kohout vyskočil na hřeben střechy a při západu slunce hlasitě zakokrhal. Kolik vajec do rána snesl?`, a: [`0`, `nula`, `zadne`, `žádné`] },
-  { q: `Doktor dal panu Novákovi tři prášky a nařídil vzít si jeden každou půlhodinu. Za kolik minut spořádá všechny tři?`, a: [`60`] },
-  { q: `Jaké číslo logicky patří na místo otazníku v řadě 1, 2, 4, 7, 11, 16, ?`, a: [`22`] },
-  { q: `Kolik hran má obyčejná krychle?`, a: [`12`] },
-  { q: `Jaké slovo dostanete, když přečtete slovo brk pozpátku?`, a: [`krb`] },
-  { q: `V řadě stojí šest sklenic, první tři jsou plné a poslední tři prázdné. S kolika sklenicemi musíte nejméně pohnout, aby se plné a prázdné pravidelně střídaly?`, a: [`1`, `jednou`, `jedna`] },
-  { q: `Kolikrát celkem odbijí kostelní hodiny za dvanáct hodin, když v jednu odbijí jednou, ve dvě dvakrát a tak dále až do dvanácti?`, a: [`78`] },
-  { q: `Doplňte poslední slovo přísloví: Kdo jinému jámu kopá, sám do ní ___?`, a: [`padá`] }
+  { q: `Vynásobte 13 číslem 14, od výsledku odečtěte 42 a rozdíl vydělte 10. Jaké číslo dostanete?`, a: [`14`] },
+  { q: `Kolik je 35 procent z čísla 240?`, a: [`84`] },
+  { q: `Jaké číslo logicky pokračuje v řadě 2, 5, 11, 23, 47, ?`, a: [`95`] },
+  { q: `Tři různá celá čísla od 1 do 9 mají součet 6. Jaký je rozdíl mezi největším a nejmenším z nich?`, a: [`2`] },
+  { q: `Bunda stála 1 200 korun a ve slevě zlevnila o 25 procent. Kolik korun stojí teď?`, a: [`900`, `900`] },
+  { q: `Kolik úhlopříček má šestiúhelník?`, a: [`9`] },
+  { q: `Krychle složená z menších krychlí do rozměru 3 × 3 × 3 se celá zvenku natře. Kolik malých krychlí má natřené právě dvě stěny?`, a: [`12`] },
+  { q: `Kolik minut uplyne mezi čtvrt na tři a tři čtvrtě na čtyři?`, a: [`90`] },
+  { q: `Šest dělníků postaví zeď za 12 dní. Za kolik dní postaví stejnou zeď devět stejně výkonných dělníků?`, a: [`8`] },
+  { q: `Součet pěti po sobě jdoucích celých čísel je 100. Jaké je prostřední z nich?`, a: [`20`] }
 ];
 
 const evalRanges = [
-  { min: 0, max: 3, text: `Věk vašeho mozku vychází kolem 70 let a výš. Dnes to jiskření trochu vázlo, ale hlava se dá probudit. Luštěte křížovky, počítejte drobné nákupy zpaměti a příště bude číslo znatelně nižší.` },
-  { min: 4, max: 6, text: `Věk vašeho mozku vychází zhruba na 55 až 65 let. Půlku otázek jste vyřešili svižně, u zbytku mozek chvíli zabíral. Solidní střed, na kterém se dá dobře stavět.` },
-  { min: 7, max: 9, text: `Věk vašeho mozku vychází kolem 40 až 50 let. Logika, postřeh i počítání vám naskakují rychle a chytáky vás skoro nezastaví. Takovou svěžest vám leckterý mladší jen tiše závidí.` },
-  { min: 10, max: 10, text: `Věk vašeho mozku vychází na skvělých 30 let. Plný počet, ani jedna past vás nedostala a hlava vám jede na plný plyn. Přesně jak slibuje titulek, mozek jako ve třiceti. Klobouk dolů.` }
+  { min: 0, max: 3, text: `Věk vašeho mozku vychází kolem 70 let a výš. Dnes to počítání a logika trochu vázly, ale to se dá rozhýbat. Pár minut denně nad čísly nebo hlavolamem a příště bude výsledek znatelně svěžejší.` },
+  { min: 4, max: 6, text: `Věk vašeho mozku vychází zhruba na 55 až 65 let. Polovinu úloh jste zvládli svižně, u zbytku hlava chvíli hledala cestu. Solidní střed, na kterém se dá dobře stavět.` },
+  { min: 7, max: 9, text: `Věk vašeho mozku vychází kolem 40 až 50 let. Počítání, řady i prostorová úvaha vám naskakují rychle a nachytat vás není snadné. Takovou svěžest vám leckdo mladší jen tiše závidí.` },
+  { min: 10, max: 10, text: `Věk vašeho mozku vychází na skvělých 30 let. Plný počet, žádná úloha vás nezastavila a hlava vám pracuje na plný výkon. Přesně jak slibuje titulek, mozek jako ve třiceti. Klobouk dolů.` }
 ];
 
 const quizEl = document.getElementById('quiz');
