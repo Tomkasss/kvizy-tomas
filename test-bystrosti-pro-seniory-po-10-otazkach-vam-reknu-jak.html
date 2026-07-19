@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test bystrosti pro seniory: po 10 otázkách vám řeknu, jak starý je ve skutečnosti váš mozek</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 24px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin-bottom: 8px; }
+  .question {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover { background: #ede8e1; }
+  .option.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .option.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .option.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .locked .option { cursor: default; }
+  input[type="text"] {
+    width: 100%;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+  }
+  input[type="text"].correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  input[type="text"].wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .solution { margin-top: 12px; font-size: .98rem; color: #1e5631; font-weight: bold; }
+  #evaluate {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #evaluate:hover { background: #4a6b4e; }
+  #evaluate:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #warning { text-align: center; color: #721c24; margin-top: 12px; min-height: 1.2em; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+    display: none;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+  #retry {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 24px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test bystrosti pro seniory: po 10 otázkách vám řeknu, jak starý je ve skutečnosti váš mozek</h1>
+<p class="perex">Deset otázek na bystrost a rychlost mysli, ne na paměť. Násobení a dělení z hlavy, procenta z nekulatého základu, záludná číselná řada, logické chytáky i slovní úloha. Průměr bývá čtyři až šest. Podle skóre vám na konci řeknu, jak starý je ve skutečnosti váš mozek.</p>
+<div id="quiz"></div>
+<button id="evaluate" disabled>Vyhodnotit</button>
+<div id="warning"></div>
+<div id="result">
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  { type: `open`, q: `1. Kolik je 28 × 23?`, answers: [`644`] },
+  { type: `choice`, q: `2. Které z čísel 130, 343, 216 a 125 nepatří mezi ostatní?`, options: [`130`, `343`, `216`, `125`], correct: 0 },
+  { type: `open`, q: `3. Kolik je 16 % z čísla 275?`, answers: [`44`] },
+  { type: `choice`, q: `4. Která z hodnot 5/8, 3/4, 0,7 a 71 % je největší?`, options: [`5/8`, `3/4`, `0,7`, `71 %`], correct: 1 },
+  { type: `open`, q: `5. Jaké číslo logicky pokračuje v řadě 2, 6, 12, 20, 30?`, answers: [`42`] },
+  { type: `choice`, q: `6. Co jistě plyne z toho, že všichni vesničané chovající včely mají zahradu a že Karel má zahradu?`, options: [`Karel chová včely`, `Karel včely nechová`, `o tom, zda Karel chová včely, nelze rozhodnout`, `každý, kdo má zahradu, chová včely`], correct: 2 },
+  { type: `open`, q: `7. Kolik je 12 × 8 + 72 ÷ 9?`, answers: [`104`] },
+  { type: `choice`, q: `8. Kdo je nejtěžší, víme-li, že Karel je těžší než Lukáš a že Martin je těžší než Lukáš?`, options: [`Karel`, `Martin`, `Lukáš`, `nelze určit`], correct: 3 },
+  { type: `open`, q: `9. Kolik je 391 ÷ 17?`, answers: [`23`] },
+  { type: `open`, q: `10. Postaví-li tři stejně výkonní dělníci zeď za osm dní, za kolik dní ji postaví čtyři takoví dělníci?`, answers: [`6`] }
+];
+
+const ranges = [
+  { min: 0, max: 3, text: `Věk vašeho mozku vychází kolem 68 let a výš. Násobení přes dvě cifry, procenta z nekulatého základu i logické chytáky vás dnes zaskočily a čísla se v hlavě rozutekla. Bystrost je ale sval jako každý jiný. Počítejte v duchu útraty, luštěte a hrajte s čísly, a příště bude výsledek nižší.` },
+  { min: 4, max: 6, text: `Věk vašeho mozku vychází zhruba na 52 až 62 let. To je pásmo, kde končí většina lidí. Půlku úloh jste rozlouskli s jistotou, u těžšího násobení, dělení nebo záludné řady jste chvíli tápali nebo se nechali nachytat. Pevný základ, na kterém se dá stavět.` },
+  { min: 7, max: 9, text: `Věk vašeho mozku vychází kolem 42 let. Počítáte z hlavy svižně, číselnou řadu i logickou úlohu rozeberete a na pasti s "nelze určit" vám nikdo nevyzraje. Takovou svěžest mnozí mladší jen tiše závidí.` },
+  { min: 10, max: 10, text: `Věk vašeho mozku vychází na skvělých 32 let. Plný počet u kvízu tohoto kalibru dá jen menšina. Násobení, dělení, procenta, záludná řada i logické chytáky padly bez zaváhání. Myšlení vám běží pořád jako po třicítce a v přímém souboji přeberete leckterého mladšího.` }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`evaluate`);
+const warning = document.getElementById(`warning`);
+const resultEl = document.getElementById(`result`);
+
+function norm(s) {
+  return s.toLowerCase().normalize(`NFD`).replace(/[̀-ͯ]/g, ``).replace(/\s+/g, ` `).trim();
+}
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `question`;
+    const qt = document.createElement(`div`);
+    qt.className = `q-text`;
+    qt.textContent = item.q;
+    box.appendChild(qt);
+    if (item.type === `choice`) {
+      item.options.forEach((opt, oi) => {
+        const btn = document.createElement(`button`);
+        btn.className = `option`;
+        btn.textContent = opt;
+        btn.addEventListener(`click`, () => {
+          if (locked) return;
+          answers[qi] = oi;
+          Array.from(box.querySelectorAll(`.option`)).forEach(b => b.classList.remove(`selected`));
+          btn.classList.add(`selected`);
+          updateEval();
+        });
+        box.appendChild(btn);
+      });
+    } else {
+      const inp = document.createElement(`input`);
+      inp.type = `text`;
+      inp.addEventListener(`input`, () => {
+        if (locked) return;
+        answers[qi] = inp.value.trim() === `` ? null : inp.value;
+        updateEval();
+      });
+      box.appendChild(inp);
+    }
+    quizEl.appendChild(box);
+  });
+}
+
+function allAnswered() {
+  return answers.every(a => a !== null && a !== ``);
+}
+
+function updateEval() {
+  evalBtn.disabled = !allAnswered();
+  if (allAnswered()) warning.textContent = ``;
+}
+
+evalBtn.addEventListener(`click`, () => {
+  if (!allAnswered()) {
+    warning.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.question`);
+  questions.forEach((item, qi) => {
+    const box = boxes[qi];
+    box.classList.add(`locked`);
+    if (item.type === `choice`) {
+      const opts = box.querySelectorAll(`.option`);
+      const chosen = answers[qi];
+      if (chosen === item.correct) score++;
+      opts.forEach((b, oi) => {
+        b.classList.remove(`selected`);
+        if (oi === item.correct) b.classList.add(`correct`);
+        else if (oi === chosen) b.classList.add(`wrong`);
+      });
+    } else {
+      const inp = box.querySelector(`input`);
+      inp.disabled = true;
+      const ok = item.answers.some(a => norm(a) === norm(String(answers[qi])));
+      if (ok) { score++; inp.classList.add(`correct`); }
+      else {
+        inp.classList.add(`wrong`);
+        const sol = document.createElement(`div`);
+        sol.className = `solution`;
+        sol.textContent = `Správná odpověď: ` + item.answers[0];
+        box.appendChild(sol);
+      }
+    }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  const r = ranges.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`verdict`).textContent = r ? r.text : ``;
+  evalBtn.style.display = `none`;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+});
+
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  locked = false;
+  answers.fill(null);
+  resultEl.style.display = `none`;
+  evalBtn.style.display = `block`;
+  evalBtn.disabled = true;
+  warning.textContent = ``;
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+render();
+</script>
+</body>
+</html>
