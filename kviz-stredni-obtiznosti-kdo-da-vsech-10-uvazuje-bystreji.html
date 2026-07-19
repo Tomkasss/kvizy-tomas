@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz střední obtížnosti: kdo dá všech 10, uvažuje bystřeji než většina lidí v produktivním věku</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 16px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .opt:disabled { cursor: default; }
+  input.text-answer {
+    width: 100%;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+  }
+  .feedback { margin-top: 12px; font-size: 1rem; }
+  .feedback.correct { color: #1e5631; }
+  .feedback.wrong { color: #721c24; }
+  #evaluate {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .15s;
+  }
+  #evaluate:hover { background: #4a6b4e; }
+  #evaluate:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #warn { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.2em; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+    display: none;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #eval-text { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #retry {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .15s;
+  }
+  #retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz střední obtížnosti: kdo dá všech 10, uvažuje bystřeji než většina lidí v produktivním věku</h1>
+  <p class="perex">Deset otázek střední obtížnosti, kde rychlá a sebejistá odpověď bývá ta špatná. Zeměpis, příroda, historie i jeden výpočet z hlavy. Průměrný člověk v produktivním věku dá pět až šest. Zvládnete všech deset bez jediného škrtu?</p>
+  <div id="quiz"></div>
+  <button id="evaluate" disabled>Vyhodnotit</button>
+  <div id="warn"></div>
+  <div id="result">
+    <div id="score"></div>
+    <p id="eval-text"></p>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+const questions = [
+  { q: `Které město je hlavním městem Turecka?`, opts: [`Istanbul`, `Ankara`, `Izmir`, `Bursa`], correct: 1 },
+  { q: `Která země má v současnosti nejvíce obyvatel?`, opts: [`Čína`, `Spojené státy americké`, `Indie`, `Indonésie`], correct: 2 },
+  { q: `Která poušť je rozlohou největší na světě?`, opts: [`Antarktida`, `Sahara`, `Arabská poušť`, `poušť Gobi`], correct: 0 },
+  { q: `Který živočich je jediným savcem schopným aktivního letu?`, opts: [`veverka létavá`, `vakoveverka létavá`, `poletucha`, `netopýr`], correct: 3 },
+  { q: `Který orgán je největším orgánem lidského těla?`, opts: [`játra`, `kůže`, `plíce`, `mozek`], correct: 1 },
+  { q: `Kolik krčních obratlů má žirafa?`, opts: [`sedm`, `čtrnáct`, `dvanáct`, `dvacet čtyři`], correct: 0 },
+  { q: `Ve kterém z těchto prostředí se zvuk šíří nejrychleji?`, opts: [`vzduch`, `voda`, `ocel`, `dřevo`], correct: 2 },
+  { q: `Která hora je měřeno od úpatí na dně oceánu k vrcholu nejvyšší na světě?`, opts: [`Mount Everest`, `K2`, `Kilimandžáro`, `Mauna Kea`], correct: 3 },
+  { q: `Který mořeplavec se považuje za prvního Evropana, který doplul do Ameriky přibližně půl tisíciletí před Kryštofem Kolumbem?`, opts: [`Amerigo Vespucci`, `Leif Eriksson`, `John Cabot`, `Vasco da Gama`], correct: 1 },
+  { q: `Kolik je 23 × 24?`, opts: [`552`, `542`, `572`, `546`], correct: 0 }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById('quiz');
+const evalBtn = document.getElementById('evaluate');
+const warnEl = document.getElementById('warn');
+const resultEl = document.getElementById('result');
+const scoreEl = document.getElementById('score');
+const evalTextEl = document.getElementById('eval-text');
+const retryBtn = document.getElementById('retry');
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement('div');
+    box.className = `q`;
+    const qt = document.createElement('div');
+    qt.className = `q-text`;
+    qt.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = `opt`;
+      btn.textContent = opt;
+      if (answers[qi] === oi) btn.classList.add(`selected`);
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        answers[qi] = oi;
+        render();
+        updateEvalState();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateEvalState() {
+  const all = answers.every(a => a !== null);
+  evalBtn.disabled = !all;
+  if (all) warnEl.textContent = ``;
+}
+
+function evaluate() {
+  if (answers.some(a => a === null)) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  questions.forEach((item, qi) => {
+    const optBtns = boxes[qi].querySelectorAll(`.opt`);
+    optBtns.forEach((btn, oi) => {
+      btn.disabled = true;
+      btn.classList.remove(`selected`);
+      if (oi === item.correct) btn.classList.add(`correct`);
+      else if (answers[qi] === oi) btn.classList.add(`wrong`);
+    });
+    if (answers[qi] === item.correct) score++;
+  });
+  evalBtn.style.display = `none`;
+  warnEl.textContent = ``;
+  scoreEl.textContent = score + ` z ` + questions.length;
+  evalTextEl.textContent = verdict(score);
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function verdict(s) {
+  if (s <= 3) return `Pasti si vás podaly přesně tam, kde uklouzne nejvíc lidí. Vsadili jste na první dojem a ten tentokrát vedl vedle. Uvažujete zatím podobně jako většina lidí v produktivním věku, kteří na tyhle otázky naletí. Dobrá zpráva je, že rozdíl mezi vámi a bystřejšími řešiteli není o vědomostech, ale o zvyku chvíli zapochybovat.`;
+  if (s <= 6) return `Jste přesně tam, kde se pohybuje průměrný člověk v produktivním věku. Část chytáků jste prokoukli, jiné vás dostaly. Uvažujete solidně, ale u sebejistých odpovědí se zatím necháte strhnout stejně jako většina vašich vrstevníků.`;
+  if (s <= 9) return `Nadprůměr. Umíte se zastavit u odpovědi, která se nabízí sama, a nenaletíte na ni. Uvažujete bystřeji než velká část lidí v produktivním věku a chybělo opravdu málo k plnému počtu.`;
+  return `Přesně to, co slibuje titulek. Ani jedna past vás nezastavila, u každé otázky jste odolali tomu nejlákavějšímu omylu. Takhle uvažuje jen menšina lidí v produktivním věku. Patříte mezi ně.`;
+}
+
+function reset() {
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  locked = false;
+  resultEl.style.display = `none`;
+  evalBtn.style.display = `block`;
+  evalBtn.disabled = true;
+  warnEl.textContent = ``;
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+evalBtn.addEventListener('click', evaluate);
+retryBtn.addEventListener('click', reset);
+render();
+</script>
+</body>
+</html>
