@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retro kvíz pro lidi, co vyrůstali v ČSSR. Kdo dá 10/10, ten je zkušený pamětník</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 24px 16px;
+  line-height: 1.5;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.8rem; line-height: 1.25; color: #2c2c2c; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin-bottom: 8px; }
+.q-box {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.text-input {
+  width: 100%;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+}
+.text-input.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.text-input.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.solution { margin-top: 12px; font-size: .98rem; color: #1e5631; font-weight: bold; }
+#evaluate {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#evaluate:hover { background: #4a6b4e; }
+#evaluate:disabled { background: #b5b5b5; cursor: not-allowed; }
+.warn { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+  display: none;
+}
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+.verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 24px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Retro kvíz pro lidi, co vyrůstali v ČSSR. Kdo dá 10/10, ten je zkušený pamětník</h1>
+<p class="perex">Major Zeman na obrazovce, bublina ze žvýkačky Pedro, stavebnice Merkur pod stromečkem a nákup v Kotvě. Deset otázek na značky, obchody a výrobky, které denně žil každý, kdo vyrůstal v socialistickém Československu.</p>
+<div id="quiz"></div>
+<button id="evaluate" disabled>Vyhodnotit</button>
+<p class="warn" id="warn"></p>
+<div id="result">
+  <p class="score" id="score"></p>
+  <p class="verdict" id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  { q: `Který herec hrál majora Zemana v seriálu 30 případů majora Zemana?`, type: `choice`, options: [`Radoslav Brzobohatý`, `Jaroslav Moučka`, `Vladimír Brabec`, `Vladimír Menšík`], answer: 2 },
+  { q: `V jaké prodejně pracovala hlavní hrdinka televizního seriálu Žena za pultem?`, type: `choice`, options: [`Jednota`, `Pramen`, `Zdroj`, `Prior`], answer: 1 },
+  { q: `Jaká postavička byla ústředním motivem obalu bublinové žvýkačky Pedro?`, type: `choice`, options: [`kovboj s lasem`, `námořník s dýmkou`, `chlapec v sombreru`, `klaun s balonky`], answer: 2 },
+  { q: `Na kterém pražském náměstí stojí obchodní dům Kotva?`, type: `choice`, options: [`náměstí Republiky`, `Václavské náměstí`, `Staroměstské náměstí`, `Karlovo náměstí`], answer: 0 },
+  { q: `Ve kterém městě se vyráběly tuzemské cigarety Sparta, Start a Petra?`, type: `choice`, options: [`Kutná Hora`, `Kolín`, `Hodonín`, `Sušice`], answer: 0 },
+  { q: `Ze kterého města pochází kovová stavebnice Merkur?`, type: `choice`, options: [`Náchod`, `Broumov`, `Police nad Metují`, `Nové Město nad Metují`], answer: 2 },
+  { q: `Jakou barvu má hvězda v logu čokoládovny Orion?`, type: `choice`, options: [`červená`, `modrá`, `zlatá`, `zelená`], answer: 1 },
+  { q: `Jakou barvu má tělo nejznámější tužky značky Koh-i-noor?`, type: `choice`, options: [`červená`, `zelená`, `modrá`, `žlutá`], answer: 3 },
+  { q: `Jak se lidově říkalo poukázkám, za které se v prodejnách Tuzex kupovalo nedostatkové zahraniční zboží?`, type: `choice`, options: [`bony`, `kupony`, `šeky`, `známky`], answer: 0 },
+  { q: `Který domácí spotřebič se stal hlavním výrobním programem podniku ETA?`, type: `choice`, options: [`lednička`, `pračka`, `mixér`, `vysavač`], answer: 3 }
+];
+
+const ranges = [
+  { min: 0, max: 3, text: `Socialistické reálie vám dnes moc neříkají. Buď jste tu dobu zastihli jen na okraji dětství, nebo se vám značky a obchody z paměti vytratily. Nevadí, stačí zalistovat starými fotkami a leccos se vám samo vybaví.` },
+  { min: 4, max: 6, text: `Slušný průměr pravého pamětníka. Půlku otázek jste trefili s jistotou, u zbytku jste chvíli lovili v paměti. Pedro i Kotvu máte v malíku, u méně slavných výrobků jste ale zaváhali.` },
+  { min: 7, max: 9, text: `Výborný výkon. Každodenní život v ČSSR znáte do detailu, od prodejny Pramen přes stavebnici Merkur až po čokoládovou hvězdu Orion. Chybí vám k plnému počtu jen pár drobností.` },
+  { min: 10, max: 10, text: `Plný počet a titul zkušeného pamětníka. Značky, obchody i výrobky socialistického Československa znáte tak, jako byste je včera prožili. Vysavač ETA, cigarety z Kutné Hory i tuzexové bony pro vás nejsou žádná neznámá.` }
+];
+
+const state = new Array(questions.length).fill(null);
+let locked = false;
+const quizEl = document.getElementById('quiz');
+const evalBtn = document.getElementById('evaluate');
+const warnEl = document.getElementById('warn');
+
+function norm(s) {
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function build() {
+  quizEl.innerHTML = '';
+  questions.forEach((item, qi) => {
+    const box = document.createElement('div');
+    box.className = 'q-box';
+    const qt = document.createElement('div');
+    qt.className = 'q-text';
+    qt.textContent = (qi + 1) + '. ' + item.q;
+    box.appendChild(qt);
+    if (item.type === 'choice') {
+      item.options.forEach((opt, oi) => {
+        const b = document.createElement('button');
+        b.className = 'opt';
+        b.textContent = String.fromCharCode(97 + oi) + ') ' + opt;
+        b.addEventListener('click', () => {
+          if (locked) return;
+          state[qi] = oi;
+          Array.from(box.querySelectorAll('.opt')).forEach(x => x.classList.remove('selected'));
+          b.classList.add('selected');
+          updateBtn();
+        });
+        box.appendChild(b);
+      });
+    } else {
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.className = 'text-input';
+      inp.addEventListener('input', () => {
+        if (locked) return;
+        state[qi] = inp.value.trim() === '' ? null : inp.value;
+        updateBtn();
+      });
+      box.appendChild(inp);
+    }
+    quizEl.appendChild(box);
+  });
+}
+
+function updateBtn() {
+  const done = state.every(v => v !== null);
+  evalBtn.disabled = !done;
+  if (done) warnEl.textContent = '';
+}
+
+evalBtn.addEventListener('click', () => {
+  if (evalBtn.disabled) { warnEl.textContent = 'Odpovězte prosím na všechny otázky'; return; }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll('.q-box');
+  questions.forEach((item, qi) => {
+    const box = boxes[qi];
+    if (item.type === 'choice') {
+      const opts = box.querySelectorAll('.opt');
+      opts.forEach((o, oi) => {
+        o.classList.remove('selected');
+        if (oi === item.answer) o.classList.add('correct');
+        else if (oi === state[qi]) o.classList.add('wrong');
+      });
+      if (state[qi] === item.answer) score++;
+    } else {
+      const inp = box.querySelector('.text-input');
+      const ok = item.answer.some(a => norm(a) === norm(String(state[qi] || '')));
+      if (ok) { inp.classList.add('correct'); score++; }
+      else {
+        inp.classList.add('wrong');
+        const sol = document.createElement('div');
+        sol.className = 'solution';
+        sol.textContent = 'Správně: ' + item.answer[0];
+        box.appendChild(sol);
+      }
+    }
+  });
+  const r = ranges.find(x => score >= x.min && score <= x.max);
+  document.getElementById('score').textContent = score + ' z ' + questions.length;
+  document.getElementById('verdict').textContent = r ? r.text : '';
+  const res = document.getElementById('result');
+  res.style.display = 'block';
+  evalBtn.disabled = true;
+  warnEl.textContent = '';
+  res.scrollIntoView({ behavior: 'smooth' });
+});
+
+document.getElementById('retry').addEventListener('click', () => {
+  locked = false;
+  state.fill(null);
+  document.getElementById('result').style.display = 'none';
+  warnEl.textContent = '';
+  build();
+  updateBtn();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+build();
+updateBtn();
+</script>
+</body>
+</html>
