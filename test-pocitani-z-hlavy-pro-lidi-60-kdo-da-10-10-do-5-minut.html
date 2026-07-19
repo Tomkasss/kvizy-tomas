@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test počítání z hlavy pro lidi 60+: kdo dá 10/10 do 5 minut, tomu to pálí i v důchodu</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 24px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.25; color: #2c2c2c; margin: 0 0 16px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+  .ans-input {
+    width: 100%;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1rem;
+    color: #3a3a3a;
+  }
+  .ans-input:focus { outline: none; border-color: #a89e92; background: #fff; }
+  .ans-input:disabled { background: #f0ece6; color: #6a6a6a; }
+  .feedback { margin-top: 14px; font-size: 1rem; padding: 10px 14px; border-radius: 8px; display: none; }
+  .feedback.correct { display: block; background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .feedback.wrong { display: block; background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  #submit {
+    background: #5b7e5f; color: #fff;
+    padding: 16px 40px; border-radius: 8px;
+    font-size: 1.1rem; font-weight: bold; font-family: Georgia, "Times New Roman", serif;
+    border: none; cursor: pointer;
+    display: block; margin: 40px auto 0;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .warn { text-align: center; color: #a04040; margin-top: 14px; font-size: .95rem; display: none; }
+  #result {
+    background: #fefcf9; border-top: 4px solid #5b7e5f;
+    border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px; margin-top: 32px; display: none;
+  }
+  .score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  .verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+  #retry {
+    background: #8c7b6b; color: #fff;
+    padding: 16px 40px; border-radius: 8px;
+    font-size: 1.1rem; font-weight: bold; font-family: Georgia, "Times New Roman", serif;
+    border: none; cursor: pointer;
+    display: block; margin: 24px auto 0;
+  }
+  #retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test počítání z hlavy pro lidi 60+: kdo dá 10/10 do 5 minut, tomu to pálí i v důchodu</h1>
+  <p class="perex">Deset příkladů čistě z hlavy, žádná tužka ani kalkulačka. Násobení dvojciferných čísel, procenta z nekulatých základů, mocniny i záludná řada. Kdo v šedesáti a výš zvládne všech deset do pěti minut, má počtářskou hlavu bystrou jako za mlada. Jdete do toho?</p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <p class="warn" id="warn">Odpovězte prosím na všechny otázky</p>
+  <div id="result">
+    <p class="score" id="score"></p>
+    <p class="verdict" id="verdict"></p>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+  const questions = [
+    { text: `1. Kolik je 23 × 18?`, answers: [`414`] },
+    { text: `2. Kolik je 17 × 13?`, answers: [`221`] },
+    { text: `3. Kolik je 462 ÷ 14?`, answers: [`33`] },
+    { text: `4. Kolik je 15 % z 340?`, answers: [`51`] },
+    { text: `5. Kolik je 40 % z 85?`, answers: [`34`] },
+    { text: `6. Kolik je 16² − 9²?`, answers: [`175`] },
+    { text: `7. Kolik jsou tři čtvrtiny z 156?`, answers: [`117`] },
+    { text: `8. Kolik je 22 × 7 − 8 × 4?`, answers: [`122`] },
+    { text: `9. Kolik je 143 − 19 × 5?`, answers: [`48`] },
+    { text: `10. Jaké číslo pokračuje v řadě 3, 6, 11, 18, 27?`, answers: [`38`] }
+  ];
+
+  const bands = [
+    { min: 0, max: 3, text: `Dnes to počtům moc nešlo. Násobení dvojciferných čísel a procenta z nekulatého základu vás zaskočila a čísla se v hlavě rozutekla. Nic ztraceného, počítání z hlavy je sval jako každý jiný. Zkuste si během dne v duchu spočítat útratu u pokladny nebo cenu za kilo a za pár týdnů to půjde znatelně hbitěji.` },
+    { min: 4, max: 6, text: `Poctivý střed. Jednodušší příklady jste dali s jistotou, ale u těch náročnějších, jako je násobení přes dvě cifry nebo řetězení operací, jste zaváhali nebo vám došel čas. Základ máte pevný, hlava pracuje. S trochou tréninku se dostanete o pásmo výš, potenciál na to jednoznačně je.` },
+    { min: 7, max: 9, text: `Výborný výkon. Procenta, mocniny i násobení velkých čísel zvládáte z hlavy a bez papíru, o co většina lidí okamžitě zavadí o mobil. Drobné klopýtnutí vás dělí od plného počtu, jinak vám to počítá rychle a spolehlivě. Tohle je hlava, která v důchodu rozhodně nezahálí.` },
+    { min: 10, max: 10, text: `Naprostá špička. Deset příkladů z hlavy do pěti minut bez jediné chyby, od dvojciferného násobení přes procenta a mocniny až po záludnou řadu. Vaše počtářská hlava jede na plné obrátky a v přímém souboji byste přebili leckterého třicátníka s kalkulačkou v ruce. Tomuhle myšlení stáří opravdu nic neubralo.` }
+  ];
+
+  function normalize(s) {
+    return s.toString().trim().toLowerCase()
+      .normalize(`NFD`).replace(/[̀-ͯ]/g, ``)
+      .replace(/\s+/g, ` `);
+  }
+
+  const quizEl = document.getElementById(`quiz`);
+  const inputs = [];
+  const feedbacks = [];
+  let locked = false;
+
+  questions.forEach((q, i) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const qt = document.createElement(`div`);
+    qt.className = `q-text`;
+    qt.textContent = q.text;
+    const inp = document.createElement(`input`);
+    inp.className = `ans-input`;
+    inp.type = `text`;
+    inp.setAttribute(`inputmode`, `numeric`);
+    inp.setAttribute(`autocomplete`, `off`);
+    inp.placeholder = `Vaše odpověď`;
+    const fb = document.createElement(`div`);
+    fb.className = `feedback`;
+    box.appendChild(qt);
+    box.appendChild(inp);
+    box.appendChild(fb);
+    quizEl.appendChild(box);
+    inputs.push(inp);
+    feedbacks.push(fb);
+    inp.addEventListener(`input`, checkComplete);
+  });
+
+  const submitBtn = document.getElementById(`submit`);
+  const warnEl = document.getElementById(`warn`);
+  const resultEl = document.getElementById(`result`);
+
+  function checkComplete() {
+    if (locked) return;
+    const allFilled = inputs.every(inp => inp.value.trim() !== ``);
+    submitBtn.disabled = !allFilled;
+    if (allFilled) warnEl.style.display = `none`;
+  }
+
+  submitBtn.addEventListener(`click`, () => {
+    if (submitBtn.disabled || locked) {
+      if (!inputs.every(inp => inp.value.trim() !== ``)) warnEl.style.display = `block`;
+      return;
+    }
+    locked = true;
+    let score = 0;
+    questions.forEach((q, i) => {
+      const val = normalize(inputs[i].value);
+      const ok = q.answers.some(a => normalize(a) === val);
+      inputs[i].disabled = true;
+      if (ok) {
+        score++;
+        feedbacks[i].className = `feedback correct`;
+        feedbacks[i].textContent = `Správně`;
+      } else {
+        feedbacks[i].className = `feedback wrong`;
+        feedbacks[i].textContent = `Špatně. Správná odpověď: ` + q.answers[0];
+      }
+    });
+    document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+    const band = bands.find(b => score >= b.min && score <= b.max);
+    document.getElementById(`verdict`).textContent = band ? band.text : ``;
+    submitBtn.style.display = `none`;
+    warnEl.style.display = `none`;
+    resultEl.style.display = `block`;
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  });
+
+  document.getElementById(`retry`).addEventListener(`click`, () => {
+    locked = false;
+    inputs.forEach((inp, i) => {
+      inp.value = ``;
+      inp.disabled = false;
+      feedbacks[i].className = `feedback`;
+      feedbacks[i].textContent = ``;
+    });
+    resultEl.style.display = `none`;
+    submitBtn.style.display = `block`;
+    submitBtn.disabled = true;
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  });
+</script>
+</body>
+</html>
