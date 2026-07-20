@@ -44,19 +44,6 @@ h1 { font-size: 1.8rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 16px; }
 .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
 .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
 .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
-.txt-input {
-  width: 100%;
-  padding: 14px 18px;
-  background: #f7f4f0;
-  border: 1px solid #d9d2c9;
-  border-radius: 8px;
-  font-size: 1rem;
-  color: #3a3a3a;
-  font-family: inherit;
-}
-.txt-input.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
-.txt-input.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
-.reveal { margin-top: 12px; font-size: .98rem; color: #1e5631; }
 #submit, #retry {
   display: block;
   margin: 40px auto 0;
@@ -90,7 +77,7 @@ h1 { font-size: 1.8rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 16px; }
 <body>
 <div class="wrap">
 <h1>Test bystrosti pro seniory: po 10 otázkách vám řeknu, jak starý je ve skutečnosti váš mozek</h1>
-<p class="perex">Deset otázek na pozornost, logiku, slovní bystrost i rychlé počítání z hlavy. Žádné biflování, jen to, jak vám myslí právě teď. Podle počtu správných vám na konci řeknu, jak starý je ve skutečnosti váš mozek. Čím víc bodů, tím mladší.</p>
+<p class="perex">Deset otázek na pozornost, logiku, slovní bystrost i počítání z hlavy. Žádné biflování, jen jak vám to pálí teď. Tenhle test je o pár stupňů náročnější, plný počet dá málokdo. Podle skóre vám prozradím, jak starý je ve skutečnosti váš mozek. Čím víc bodů, tím mladší.</p>
 <div id="quiz"></div>
 <button id="submit" disabled>Vyhodnotit</button>
 <div class="warn" id="warn"></div>
@@ -102,16 +89,16 @@ h1 { font-size: 1.8rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 16px; }
 </div>
 <script>
 const questions = [
-  { q: `Které číslo logicky patří místo otazníku v řadě 2, 5, 10, 17, 26, ?`, options: [`37`, `35`, `38`, `36`], correct: 0 },
-  { q: `Kolik je 6 + 4 × 3 − 2?`, options: [`28`, `30`, `16`, `20`], correct: 2 },
-  { q: `Kolik korun stojí zboží za 200 Kč poté, co jeho cena nejprve vzroste o 10 % a hned nato klesne o 10 %?`, options: [`200`, `202`, `196`, `198`], correct: 3 },
-  { q: `Co znamená slovo lakonický?`, options: [`stručný a výstižný`, `upovídaný a rozvláčný`, `nejasný a mlhavý`, `hrubý a neomalený`], correct: 0 },
-  { q: `Kdo ze tří lidí sedí uprostřed, jestliže Marie sedí napravo od Jany a zároveň nalevo od Petra?`, options: [`Jana`, `Marie`, `Petr`, `nelze určit`], correct: 1 },
-  { q: `Na kolika zastávkách autobus zastavil, jestliže po vyjetí z konečné nabral nejprve 8 cestujících, na další zastávce 5 přibral a 3 vysadil a na poslední 2 přibral a 6 vysadil?`, options: [`6`, `4`, `5`, `3`], correct: 3 },
-  { q: `Kolik je 40 % z 85?`, options: [`32`, `34`, `36`, `30`], correct: 1 },
-  { q: `Jaký den bude pozítří, jestliže včera byl čtvrtek?`, options: [`sobota`, `pátek`, `neděle`, `pondělí`], correct: 2 },
-  { q: `Které slovo je nejbližším opakem slova skromný, mluvíme-li o povaze člověka?`, options: [`chudý`, `tichý`, `prostý`, `domýšlivý`], correct: 3 },
-  { q: `Které číslo logicky pokračuje v řadě 1, 2, 6, 24, 120, ?`, options: [`600`, `840`, `720`, `240`], correct: 2 }
+  { q: `O kolik procent je číslo 45 větší než číslo 36?`, options: [`20 %`, `9 %`, `25 %`, `125 %`], correct: 2 },
+  { q: `Kolik hodin a minut uplyne mezi snídaní v 7:45 a večeří o půl dvanácté večer?`, options: [`16 hodin 45 minut`, `15 hodin 45 minut`, `15 hodin 15 minut`, `14 hodin 45 minut`], correct: 1 },
+  { q: `Pět přátel (Aleš, Bedřich, Cyril, Dorota a Ema) sedí vedle sebe na pěti očíslovaných židlích 1 až 5, počítáno zleva doprava. Cyril sedí přesně uprostřed. Aleš sedí hned nalevo od Cyrila. Dorota sedí hned vedle Cyrila. Ema sedí na jednom z krajů a nesedí vedle Aleše. Kdo sedí na židli číslo 1?`, options: [`Bedřich`, `Aleš`, `Dorota`, `Ema`], correct: 0 },
+  { q: `Kolik je 24 % z 425, zvětšeno o druhou mocninu čísla 12?`, options: [`102`, `250`, `226`, `246`], correct: 3 },
+  { q: `Co znamená přídavné jméno liknavý?`, options: [`přehnaně pečlivý a puntičkářský`, `pomalý a váhavý při jednání`, `náladový a nevyzpytatelný`, `lstivý a vypočítavý`], correct: 1 },
+  { q: `Jaký je součet ok na čtyřech bočních stěnách hrací kostky, na jejíchž protilehlých stěnách je vždy dohromady sedm, leží-li nahoře pětka?`, options: [`12`, `16`, `14`, `15`], correct: 2 },
+  { q: `Které z těchto slov nezapadá významem mezi ostatní: bázlivý, bojácný, obezřetný, ustrašený?`, options: [`bázlivý`, `bojácný`, `obezřetný`, `ustrašený`], correct: 2 },
+  { q: `Které spojení nejlépe vystihuje význam přídavného jména úlisný?`, options: [`ochotně úslužný a vstřícný k druhým`, `mrzoutský a věčně nevrlý vůči okolí`, `prostořeký, drzý a bez zábran`, `vtíravě lichotivý a neupřímně vlídný`], correct: 3 },
+  { q: `Které číslo logicky pokračuje v řadě 1, 4, 27, 16, 125, ?`, options: [`216`, `36`, `49`, `30`], correct: 1 },
+  { q: `Co znamená zastaralé přídavné jméno vezdejší, jako v obratu chléb náš vezdejší?`, options: [`pozemský a každodenní`, `nebeský a věčný`, `svatý a požehnaný`, `hojný a vydatný`], correct: 0 }
 ];
 
 const answers = new Array(questions.length).fill(null);
@@ -178,10 +165,10 @@ function evaluate() {
 }
 
 function verdictText(s) {
-  if (s <= 3) return `Věk vašeho mozku vychází kolem 70 let a výš. Pár pastí vás dnes dostalo hned zkraje. Nic ztraceného, bystrost se dá probrat. Zkuste kvíz projít pomaleji a u každé otázky chvíli zapochybovat, příště bude číslo znatelně nižší.`;
-  if (s <= 6) return `Věk vašeho mozku vychází zhruba na 55 až 65 let. Půlku otázek jste zvládli s jistotou, u zbytku vás svedla první nabízející se odpověď. Solidní střed, na kterém se dá dál stavět.`;
-  if (s <= 9) return `Věk vašeho mozku vychází kolem 40 až 50 let. Pozornost i rychlé usuzování vám šlapou svižně a většina chytáků vás neoblafla. Takovou svěžest vám leckterý mladší jen tiše závidí.`;
-  return `Věk vašeho mozku vychází na skvělých 30 let. Plný počet a špičková kondice, ani jedna past vás nezastavila. V bystrosti a pozornosti strčíte do kapsy nejednoho třicátníka. Klobouk dolů.`;
+  if (s <= 3) return `Věk vašeho mozku vychází kolem 65 až 70 let a výš. Tenhle test je záludný a pár pastí vás dostalo hned zkraje. Nic ztraceného, bystrost se dá probrat. Zkuste kvíz projít pomaleji a u každé otázky chvíli zapochybovat, příště bude číslo znatelně nižší.`;
+  if (s <= 6) return `Věk vašeho mozku vychází zhruba na 50 až 60 let. Na takhle tvrdý test je to solidní výsledek, přesně tady se drží většina bystrých řešitelů. Půlku otázek jste zvládli s jistotou, u zbytku vás svedla první nabízející se odpověď. Dobrý základ, na kterém se dá stavět.`;
+  if (s <= 9) return `Věk vašeho mozku vychází kolem 38 až 48 let. Pozornost i rychlé usuzování vám šlapou svižně a většina chytáků, na kterých ostatní padají, vás neoblafla. Takovou svěžest vám leckterý mladší jen tiše závidí.`;
+  return `Věk vašeho mozku vychází na skvělých 30 let. Plný počet v tomhle testu dá opravdu jen hrstka lidí, ani jedna past vás nezastavila. V bystrosti a pozornosti strčíte do kapsy nejednoho třicátníka. Klobouk dolů.`;
 }
 
 function showResult(score) {
