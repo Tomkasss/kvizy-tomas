@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nostalgický kvíz pro pamětníky: poznáte 10 věcí, které měla za socialismu doma každá rodina?</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 32px 16px;
+    color: #2c2c2c;
+  }
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.8rem;
+    color: #2c2c2c;
+    margin-bottom: 16px;
+    line-height: 1.3;
+  }
+  .perex {
+    font-size: 1.05rem;
+    color: #4a4a4a;
+    margin-bottom: 32px;
+    line-height: 1.5;
+  }
+  .question-box {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .question-text {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin-bottom: 18px;
+    line-height: 1.4;
+  }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: "Georgia", "Times New Roman", serif;
+    margin-bottom: 10px;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover:not(.locked) {
+    background: #ede8e1;
+  }
+  .option.selected {
+    background: #dcd3c7;
+    border: 1px solid #a89e92;
+    font-weight: bold;
+  }
+  .option.correct {
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    color: #1e5631;
+  }
+  .option.incorrect {
+    background: #f8d7da;
+    border: 1px solid #d4848a;
+    color: #721c24;
+  }
+  .option.locked {
+    cursor: default;
+  }
+  #evaluate-btn, #retry-btn {
+    display: block;
+    margin: 40px auto 0;
+    padding: 16px 40px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: "Georgia", "Times New Roman", serif;
+    transition: background 0.15s;
+  }
+  #evaluate-btn {
+    background: #5b7e5f;
+  }
+  #evaluate-btn:hover:not(:disabled) {
+    background: #4a6b4e;
+  }
+  #evaluate-btn:disabled {
+    background: #b5b5b5;
+    cursor: not-allowed;
+  }
+  #retry-btn {
+    background: #8c7b6b;
+  }
+  #retry-btn:hover {
+    background: #756658;
+  }
+  .result-box {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-top: 32px;
+    text-align: center;
+  }
+  .score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    margin: 0 0 16px 0;
+  }
+  .eval-text {
+    font-size: 1rem;
+    color: #4a4a4a;
+    line-height: 1.5;
+    text-align: center;
+  }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .question-box { padding: 20px; }
+    .question-text { font-size: 1.05rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Nostalgický kvíz pro pamětníky: poznáte 10 věcí, které měla za socialismu doma každá rodina?</h1>
+<p class="perex">Zavařovací sklenice Omnia ve spíži, pračka tančící po koupelně, remoska připravená na neděli a hrnek melty místo pravé kávy. Deset otázek na značky, spotřebiče a výrobky, které měla za socialismu doma skoro každá rodina. Poznáte je?</p>
+<div id="quiz"></div>
+<button id="evaluate-btn" disabled>Vyhodnotit</button>
+<div id="result" style="display:none;"></div>
+</div>
+<script>
+const questions = [
+  {
+    q: `1. Jaká zavařovací víčka a sklenice se v socialistické spíži staly naprostým standardem a vytlačily starší rýhovky?`,
+    options: [`a) Pano`, `b) Omnia`, `c) Patentní`, `d) Kyjovka`],
+    correct: 1
+  },
+  {
+    q: `2. Ve kterém středočeském městě se vyráběla legendární mycí pasta Solvina na zamaštěné ruce od oleje, mazadel a sazí?`,
+    options: [`a) Kutná Hora`, `b) Kolín`, `c) Čáslav`, `d) Kralupy nad Vltavou`],
+    correct: 2
+  },
+  {
+    q: `3. Která tuzemská značka dehydrovaných (sáčkových) polévek a bujonů patřila do spíže skoro každé rodiny?`,
+    options: [`a) Vitana`, `b) Seliko`, `c) Otma`, `d) Fruta`],
+    correct: 0
+  },
+  {
+    q: `4. Ze kterého slovenského města pocházely vytoužené automatické pračky Tatramat?`,
+    options: [`a) Prešov`, `b) Žilina`, `c) Martin`, `d) Poprad`],
+    correct: 3
+  },
+  {
+    q: `5. Které z těchto nebeských jmen skutečně nesl jeden z raných hrncových vysavačů z Hlinska, z nichž později vyrostla značka ETA?`,
+    options: [`a) Saturn`, `b) Mars`, `c) Jupiter`, `d) Uran`],
+    correct: 2
+  },
+  {
+    q: `6. Jak se jmenovala oblíbená obilná kávovina z pardubické továrny Kávoviny, běžná náhražka pravé kávy?`,
+    options: [`a) Inka`, `b) Melta`, `c) Granko`, `d) Kofila`],
+    correct: 1
+  },
+  {
+    q: `7. Ve kterém středočeském městě se vyráběl první tuzemský prostředek na mytí nádobí Jar?`,
+    options: [`a) Kralupy nad Vltavou`, `b) Kolín`, `c) Rakovník`, `d) Neratovice`],
+    correct: 2
+  },
+  {
+    q: `8. Ve kterém slovenském městě se vyráběly chladničky Calex, které stály skoro v každé domácnosti?`,
+    options: [`a) Nová Baňa`, `b) Nitra`, `c) Levice`, `d) Zlaté Moravce`],
+    correct: 3
+  },
+  {
+    q: `9. Pod jakým názvem se prodával nejrozšířenější poválečný sektorový nábytek, jehož obývací stěna stála skoro v každém paneláku?`,
+    options: [`a) Universal`, `b) Standard`, `c) Komfort`, `d) Sektor`],
+    correct: 0
+  },
+  {
+    q: `10. Podle čeho dostal elektrický pekáč remoska svůj název?`,
+    options: [`a) podle konstruktéra Remka`, `b) podle výrobního podniku Remos`, `c) podle města Rýmařov`, `d) podle značky Remoston`],
+    correct: 1
+  }
+];
+
+const evalRanges = [
+  { min: 0, max: 3, text: `Socialistická domácnost vám z paměti trochu vyprchala. Značky ze spíže i z koupelny se vám pletou dohromady a leccos vám splynulo s pozdější dobou. Nevadí, stačí zavzpomínat u starých fotek a vůně melty i cvaknutí víčka Omnia se vám samy vybaví.` },
+  { min: 4, max: 6, text: `Poctivý průměr pravého pamětníka. Půlku věcí máte pořád živě před očima, u zbytku jste chvíli lovili v paměti. Remosku i pračku, co tančila po koupelně, znáte, u méně omílaných výrobků jste ale zaváhali.` },
+  { min: 7, max: 9, text: `Výborný výkon. Domácnost za socialismu máte v malíku, od zavařovaček ve spíži přes chladničku Calex až po obývací stěnu Universal. K plnému počtu vám chybí jen pár drobností, které si běžně nikdo nepamatuje.` },
+  { min: 10, max: 10, text: `Plný počet a titul ostříleného pamětníka. Věci, které stály doma skoro v každé rodině, znáte tak, jako byste je včera drželi v ruce. Melta, Solamyl, Tatramat i remoska pro vás nejsou žádná neznámá. Tohle už mladší generace prostě nedají.` }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+function render() {
+  const quizDiv = document.getElementById(`quiz`);
+  quizDiv.innerHTML = ``;
+  questions.forEach((item, qIdx) => {
+    const box = document.createElement(`div`);
+    box.className = `question-box`;
+    const qText = document.createElement(`div`);
+    qText.className = `question-text`;
+    qText.textContent = item.q;
+    box.appendChild(qText);
+    item.options.forEach((opt, oIdx) => {
+      const btn = document.createElement(`button`);
+      btn.className = `option`;
+      btn.textContent = opt;
+      btn.setAttribute(`data-q`, qIdx);
+      btn.setAttribute(`data-o`, oIdx);
+      btn.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qIdx] = oIdx;
+        const siblings = box.querySelectorAll(`.option`);
+        siblings.forEach(s => s.classList.remove(`selected`));
+        btn.classList.add(`selected`);
+        updateEvalButton();
+      });
+      box.appendChild(btn);
+    });
+    quizDiv.appendChild(box);
+  });
+}
+
+function updateEvalButton() {
+  const btn = document.getElementById(`evaluate-btn`);
+  const allAnswered = answers.every(a => a !== null);
+  btn.disabled = !allAnswered;
+}
+
+function evaluate() {
+  if (answers.some(a => a === null)) {
+    alert(`Odpovězte prosím na všechny otázky`);
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = document.querySelectorAll(`.question-box`);
+  boxes.forEach((box, qIdx) => {
+    const opts = box.querySelectorAll(`.option`);
+    const correct = questions[qIdx].correct;
+    const selected = answers[qIdx];
+    if (selected === correct) score++;
+    opts.forEach((opt, oIdx) => {
+      opt.classList.add(`locked`);
+      opt.classList.remove(`selected`);
+      if (oIdx === correct) {
+        opt.classList.add(`correct`);
+      } else if (oIdx === selected) {
+        opt.classList.add(`incorrect`);
+      }
+    });
+  });
+  showResult(score);
+}
+
+function showResult(score) {
+  const resultDiv = document.getElementById(`result`);
+  const evalItem = evalRanges.find(r => score >= r.min && score <= r.max);
+  resultDiv.innerHTML = ``;
+  resultDiv.className = `result-box`;
+  resultDiv.style.display = `block`;
+  const scoreEl = document.createElement(`div`);
+  scoreEl.className = `score`;
+  scoreEl.textContent = `${score} z ${questions.length}`;
+  resultDiv.appendChild(scoreEl);
+  const textEl = document.createElement(`div`);
+  textEl.className = `eval-text`;
+  textEl.textContent = evalItem ? evalItem.text : ``;
+  resultDiv.appendChild(textEl);
+  const retryBtn = document.createElement(`button`);
+  retryBtn.id = `retry-btn`;
+  retryBtn.textContent = `Zkusit znovu`;
+  retryBtn.addEventListener(`click`, resetQuiz);
+  resultDiv.appendChild(retryBtn);
+  document.getElementById(`evaluate-btn`).style.display = `none`;
+  resultDiv.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function resetQuiz() {
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  locked = false;
+  document.getElementById(`result`).style.display = `none`;
+  document.getElementById(`result`).innerHTML = ``;
+  const btn = document.getElementById(`evaluate-btn`);
+  btn.style.display = `block`;
+  btn.disabled = true;
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+document.getElementById(`evaluate-btn`).addEventListener(`click`, evaluate);
+render();
+</script>
+</body>
+</html>
