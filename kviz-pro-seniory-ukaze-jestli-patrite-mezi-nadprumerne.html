@@ -44,18 +44,6 @@
   .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
   .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
   .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
-  input[type="text"] {
-    width: 100%;
-    padding: 14px 18px;
-    background: #f7f4f0;
-    border: 1px solid #d9d2c9;
-    border-radius: 8px;
-    font-family: inherit;
-    font-size: 1rem;
-    color: #3a3a3a;
-  }
-  input[type="text"].correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
-  input[type="text"].wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
   .solution { margin-top: 12px; font-size: 1rem; color: #1e5631; }
   #evaluate {
     background: #5b7e5f;
@@ -103,7 +91,7 @@
 <body>
 <div class="wrap">
   <h1>Kvíz pro seniory: ukáže, jestli patříte mezi nadprůměrně bystré důchodce, nebo do zlatého středu</h1>
-  <p class="perex">Deset otázek na logiku, slovní pohotovost a počítání z hlavy. Žádná historická data ani zeměpis, jen svěžest vašeho úsudku. Průměrný senior dá pět až šest. Kdo zvládne osm a víc, patří mezi nadprůměrně bystré důchodce.</p>
+  <p class="perex">Deset otázek napříč obory: příroda, lidské tělo, čeština, umění i zeměpis. Žádné počítání, jen svěžest vašich vědomostí. Průměrný senior tu dá pět až šest. Kdo zvládne osm a víc, patří mezi nadprůměrně bystré důchodce.</p>
   <div id="quiz"></div>
   <button id="evaluate" disabled>Vyhodnotit</button>
   <div class="hint" id="hint"></div>
@@ -115,31 +103,27 @@
 </div>
 <script>
 const questions = [
-  { text: `1. Jaké číslo logicky patří na konec řady 3, 6, 11, 18, 27, ?`, type: `choice`, options: [`36`, `37`, `38`, `40`], correct: 2 },
-  { text: `2. Autor je ke knize jako skladatel k čemu?`, type: `choice`, options: [`skladba`, `noty`, `orchestr`, `nástroj`], correct: 0 },
-  { text: `3. Co znamená slovo „obezřetný"?`, type: `choice`, options: [`odvážný`, `zvědavý`, `lhostejný`, `opatrný`], correct: 3 },
-  { text: `4. Kolik je 18 × 24?`, type: `text`, answers: [`432`] },
-  { text: `5. Co znamená „zevrubný popis"?`, type: `choice`, options: [`povrchní`, `podrobný`, `stručný`, `nepřesný`], correct: 1 },
-  { text: `6. Dnes je úterý. Jaký den v týdnu bude za 100 dní?`, type: `choice`, options: [`středa`, `pátek`, `čtvrtek`, `sobota`], correct: 2 },
-  { text: `7. Ostrov je k moři jako oáza k čemu?`, type: `choice`, options: [`voda`, `step`, `písek`, `poušť`], correct: 3 },
-  { text: `8. Jaké číslo logicky patří na konec řady 2, 3, 5, 9, 17, ?`, type: `text`, answers: [`33`] },
-  { text: `9. Kolik je 15 % z 240, když k výsledku přičtete 18 a součet vydělíte šesti?`, type: `text`, answers: [`9`] },
-  { text: `10. Adam, Bořek a Cyril mají každý jiné povolání: lékař, učitel a právník. Adam není lékař, Bořek není ani lékař, ani učitel. Jaké povolání má Cyril?`, type: `choice`, options: [`lékař`, `učitel`, `právník`, `nelze určit`], correct: 0 }
+  { text: `1. Který z našich jehličnanů na zimu shodí všechno jehličí a zůstane úplně holý?`, options: [`smrk`, `borovice`, `jedle`, `modřín`], correct: 3 },
+  { text: `2. Který orgán v lidském těle vytváří žluč?`, options: [`slinivka břišní`, `játra`, `slezina`, `žlučník`], correct: 1 },
+  { text: `3. Která planeta sluneční soustavy se otáčí kolem své osy opačným směrem než ostatní?`, options: [`Merkur`, `Venuše`, `Mars`, `Jupiter`], correct: 1 },
+  { text: `4. Který český král zahynul roku 1526 v bitvě u Moháče?`, options: [`Vladislav Jagellonský`, `Jiří z Poděbrad`, `Ludvík Jagellonský`, `Ferdinand I.`], correct: 2 },
+  { text: `5. Kdo je autorem rozsáhlého obrazového cyklu Slovanská epopej?`, options: [`Alfons Mucha`, `Mikoláš Aleš`, `Max Švabinský`, `Josef Mánes`], correct: 0 },
+  { text: `6. Co znamená přídavné jméno „úlisný"?`, options: [`hrubý a neomalený`, `bázlivý a nerozhodný`, `chorobně lakomý`, `neupřímně lichotivý a lísavý`], correct: 3 },
+  { text: `7. Z kolika obratlů se skládá krční páteř člověka?`, options: [`pět`, `šest`, `sedm`, `osm`], correct: 2 },
+  { text: `8. Kdo je autorem psychologického románu Petrolejové lampy?`, options: [`Jaroslav Havlíček`, `Karel Poláček`, `Ivan Olbracht`, `Vladislav Vančura`], correct: 0 },
+  { text: `9. Který skladatel zhudebnil operu Její pastorkyňa?`, options: [`Bedřich Smetana`, `Antonín Dvořák`, `Leoš Janáček`, `Bohuslav Martinů`], correct: 2 },
+  { text: `10. Se kterým sousedním státem má Česká republika nejdelší státní hranici?`, options: [`Německo`, `Polsko`, `Rakousko`, `Slovensko`], correct: 0 }
 ];
 
 const evaluations = [
-  { min: 0, max: 3, text: `Zatím vás kvíz zastavil pod pomyslným středem. Rychlé úsudky, slovní pohotovost i počítání z hlavy dnes trochu vázly a pár otázek vás nachytalo dřív, než jste je dořešili. Nic ztraceného, bystrost není daná jednou provždy. Luštěte, počítejte v hlavě a nespěchejte na první odpověď, příště se skóre posune nahoru.` },
-  { min: 4, max: 6, text: `Přesně tady leží zlatý střed. Půlku otázek jste zvládli s jistotou, u zbytku jste chvíli tápali nebo se nechali strhnout tou lákavější variantou. Uvažujete solidně a vyrovnaně, což je základ, na kterém se dá dál stavět. K nadprůměru vám chybělo jen kousek klidu u těžších úloh.` },
-  { min: 7, max: 9, text: `Nadprůměrně bystrý důchodce, o tom není pochyb. Logické řady, slovní vztahy i počítání z hlavy vám jdou svižně a chytáky vás jen tak neoblafnou. Do tohoto pásma se u takto stavěných otázek dostane jen menšina a vy mezi ni patříte. K plnému počtu chybělo opravdu málo.` },
-  { min: 10, max: 10, text: `Špička mezi bystrými hlavami. Ani jedna past vás nezastavila, poradili jste si s číselnými řadami, počítáním i logickou úvahou bez jediného zaváhání. Takhle svěže uvažuje jen zlomek řešitelů. Jednoznačně patříte mezi nadprůměrně bystré důchodce a mnohého mladšího strčíte do kapsy.` }
+  { min: 0, max: 3, text: `Tentokrát vás kvíz zastavil pod pomyslným středem. Několik otázek mířilo mimo nejběžnější okruh a lákavější varianty vás stáhly k sobě dřív, než jste je promysleli. Nic ztraceného, přehled se dá kdykoli osvěžit. Čtěte, ptejte se, zajímejte se o obory kolem sebe a příště se skóre posune nahoru.` },
+  { min: 4, max: 7, text: `Přesně tady leží zlatý střed. Většinu otázek jste zvládli s jistotou, u zbytku jste chvíli tápali nebo se nechali zmást těsnou nabídkou. Máte vyrovnaný rozhled napříč obory a solidní základ, na kterém se dá dál stavět. K nadprůměru vám chybělo jen kousek u těch nejtěžších otázek.` },
+  { min: 8, max: 9, text: `Nadprůměrně bystrý důchodce, o tom není pochyb. Příroda, lidské tělo, čeština, umění i zeměpis vám nedělají potíže a těsné distraktory vás jen tak neoblafnou. Do tohoto pásma se u takto stavěných otázek dostane jen menšina a vy mezi ni patříte. K plnému počtu chybělo opravdu málo.` },
+  { min: 10, max: 10, text: `Špička mezi bystrými hlavami. Ani jedna chytlavá varianta vás nezastavila, poradili jste si se všemi obory od přírody přes umění až po zeměpis. Takhle široký a svěží přehled prokáže jen zlomek řešitelů. Jednoznačně patříte mezi nadprůměrně bystré důchodce a mnohého mladšího strčíte do kapsy.` }
 ];
 
 const answers = new Array(questions.length).fill(null);
 let locked = false;
-
-function normalize(s) {
-  return s.trim().toLowerCase().normalize(`NFD`).replace(/[̀-ͯ]/g, ``).replace(/\s+/g, ` `);
-}
 
 const quizEl = document.getElementById(`quiz`);
 const evalBtn = document.getElementById(`evaluate`);
@@ -155,38 +139,25 @@ function render() {
     t.className = `q-text`;
     t.textContent = q.text;
     box.appendChild(t);
-
-    if (q.type === `choice`) {
-      q.options.forEach((opt, oi) => {
-        const b = document.createElement(`button`);
-        b.className = `opt`;
-        b.textContent = String.fromCharCode(97 + oi) + `) ` + opt;
-        b.addEventListener(`click`, () => {
-          if (locked) return;
-          answers[qi] = oi;
-          Array.from(box.querySelectorAll(`.opt`)).forEach(x => x.classList.remove(`selected`));
-          b.classList.add(`selected`);
-          updateEvalState();
-        });
-        box.appendChild(b);
-      });
-    } else {
-      const inp = document.createElement(`input`);
-      inp.type = `text`;
-      inp.setAttribute(`inputmode`, `numeric`);
-      inp.addEventListener(`input`, () => {
+    q.options.forEach((opt, oi) => {
+      const b = document.createElement(`button`);
+      b.className = `opt`;
+      b.textContent = String.fromCharCode(97 + oi) + `) ` + opt;
+      b.addEventListener(`click`, () => {
         if (locked) return;
-        answers[qi] = inp.value.trim() === `` ? null : inp.value;
+        answers[qi] = oi;
+        Array.from(box.querySelectorAll(`.opt`)).forEach(x => x.classList.remove(`selected`));
+        b.classList.add(`selected`);
         updateEvalState();
       });
-      box.appendChild(inp);
-    }
+      box.appendChild(b);
+    });
     quizEl.appendChild(box);
   });
 }
 
 function allAnswered() {
-  return answers.every(a => a !== null && a !== ``);
+  return answers.every(a => a !== null);
 }
 
 function updateEvalState() {
@@ -208,29 +179,14 @@ function evaluate() {
   const boxes = quizEl.querySelectorAll(`.q`);
   questions.forEach((q, qi) => {
     const box = boxes[qi];
-    if (q.type === `choice`) {
-      const opts = box.querySelectorAll(`.opt`);
-      const chosen = answers[qi];
-      const isCorrect = chosen === q.correct;
-      if (isCorrect) score++;
-      opts.forEach((o, oi) => {
-        o.classList.remove(`selected`);
-        if (oi === q.correct) o.classList.add(`correct`);
-        else if (oi === chosen) o.classList.add(`wrong`);
-      });
-    } else {
-      const inp = box.querySelector(`input`);
-      const ok = q.answers.some(a => normalize(a) === normalize(String(answers[qi])));
-      if (ok) score++;
-      inp.classList.add(ok ? `correct` : `wrong`);
-      inp.disabled = true;
-      if (!ok) {
-        const sol = document.createElement(`div`);
-        sol.className = `solution`;
-        sol.textContent = `Správně: ` + q.answers[0];
-        box.appendChild(sol);
-      }
-    }
+    const opts = box.querySelectorAll(`.opt`);
+    const chosen = answers[qi];
+    if (chosen === q.correct) score++;
+    opts.forEach((o, oi) => {
+      o.classList.remove(`selected`);
+      if (oi === q.correct) o.classList.add(`correct`);
+      else if (oi === chosen) o.classList.add(`wrong`);
+    });
   });
 
   document.getElementById(`score`).textContent = score + ` z ` + questions.length;
