@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Záludný kvíz z češtiny: 10 vět, ve kterých chybují i vystudovaní češtináři</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 32px 16px;
+    color: #2c2c2c;
+  }
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.8rem;
+    color: #2c2c2c;
+    margin-bottom: 16px;
+    line-height: 1.3;
+  }
+  .perex {
+    font-size: 1.05rem;
+    color: #4a4a4a;
+    margin-bottom: 32px;
+    line-height: 1.5;
+  }
+  .question-box {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .question-text {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin-bottom: 18px;
+    line-height: 1.4;
+  }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: "Georgia", "Times New Roman", serif;
+    margin-bottom: 10px;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover:not(.locked) {
+    background: #ede8e1;
+  }
+  .option.selected {
+    background: #dcd3c7;
+    border: 1px solid #a89e92;
+    font-weight: bold;
+  }
+  .option.correct {
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    color: #1e5631;
+  }
+  .option.incorrect {
+    background: #f8d7da;
+    border: 1px solid #d4848a;
+    color: #721c24;
+  }
+  .option.locked {
+    cursor: default;
+  }
+  #evaluate-btn, #retry-btn {
+    display: block;
+    margin: 40px auto 0;
+    padding: 16px 40px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: "Georgia", "Times New Roman", serif;
+    transition: background 0.15s;
+  }
+  #evaluate-btn {
+    background: #5b7e5f;
+  }
+  #evaluate-btn:hover:not(:disabled) {
+    background: #4a6b4e;
+  }
+  #evaluate-btn:disabled {
+    background: #b5b5b5;
+    cursor: not-allowed;
+  }
+  #retry-btn {
+    background: #8c7b6b;
+  }
+  #retry-btn:hover {
+    background: #756658;
+  }
+  .result-box {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 28px;
+    margin-top: 32px;
+    text-align: center;
+  }
+  .score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    margin: 0 0 16px 0;
+  }
+  .eval-text {
+    font-size: 1rem;
+    color: #4a4a4a;
+    line-height: 1.5;
+    text-align: center;
+  }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .question-box { padding: 20px; }
+    .question-text { font-size: 1.05rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Záludný kvíz z češtiny: 10 vět, ve kterých chybují i vystudovaní češtináři</h1>
+<p class="perex">V každé z těchto vět číhá jeden zádrhel, na kterém pravidelně klopýtají i lidé s červeným diplomem z bohemistiky. Zvládnete najít chybu tam, kde ji většina přehlédne? Deset otázek, u nichž se pozná opravdový cit pro češtinu.</p>
+<div id="quiz"></div>
+<button id="evaluate-btn" disabled>Vyhodnotit</button>
+<div id="result" style="display:none;"></div>
+</div>
+<script>
+const questions = [
+  {
+    q: `1. Ve které z těchto vět je pravopisná chyba?`,
+    options: [`a) Na výlet si vezmi sebou pláštěnku.`, `b) Pes sebou trhl, když uslyšel ránu.`, `c) Nezapomeň si vzít s sebou občanku.`, `d) To se rozumí samo sebou.`],
+    correct: 0
+  },
+  {
+    q: `2. Doplňte správný tvar do věty: Do cíle dorazil společně ___ kamarády.`,
+    options: [`a) se dvěmi`, `b) se dvěma`, `c) s dvouma`, `d) se dvěmy`],
+    correct: 1
+  },
+  {
+    q: `3. Která z těchto vět je napsaná zcela správně?`,
+    options: [`a) Pracuje na ministerstvu Financí.`, `b) Studuje na Filozofické fakultě Univerzity Karlovy.`, `c) Bydlí nedaleko Karlova Mostu.`, `d) Sešli se na staroměstském Náměstí.`],
+    correct: 1
+  },
+  {
+    q: `4. Ve které z těchto vět je pravopisná chyba?`,
+    options: [`a) Na náměstí se strhl velký sběh lidí.`, `b) Voják byl před soudem označen za zběha.`, `c) Velitel musel v jednotce sjednat pořádek.`, `d) Zprvu nikdo netušil, oč jde.`],
+    correct: 2
+  },
+  {
+    q: `5. Ve které z těchto vět je mluvnická chyba?`,
+    options: [`a) Kosi si postavili hnízdo v křoví.`, `b) Vrabci se slétli k rozházeným drobkům.`, `c) Holubi vzlétli z návsi.`, `d) Datli vylétly z dutiny staré vrby.`],
+    correct: 3
+  },
+  {
+    q: `6. Která z těchto vět je napsaná zcela správně?`,
+    options: [`a) Planeta mars má dva měsíce.`, `b) Celé odpoledne nemilosrdně pálilo Slunce.`, `c) Naši sluneční Soustavu tvoří osm planet.`, `d) Ze Země je vidět jen přivrácená strana Měsíce.`],
+    correct: 3
+  },
+  {
+    q: `7. Ve které z těchto vět je mluvnická chyba?`,
+    options: [`a) Otec a syn opravovali plot.`, `b) Kočky a slepice pobíhaly po dvoře.`, `c) Bratr a sestra seděly na lavičce.`, `d) Chlapci a děvčata si hráli na zahradě.`],
+    correct: 2
+  },
+  {
+    q: `8. Ve které z těchto vět je pravopisná chyba?`,
+    options: [`a) Rozloučili se slovy nashledanou.`, `b) Celou básničku odříkal zpaměti.`, `c) Potmě nahmatal vypínač u dveří.`, `d) Vstával zpravidla ještě za tmy.`],
+    correct: 0
+  },
+  {
+    q: `9. Ve které z těchto vět je chyba v interpunkci?`,
+    options: [`a) Jan Neruda, autor Povídek malostranských, bydlel na Malé Straně.`, `b) Karel Čapek, autor Války s mloky napsal i řadu dramat.`, `c) Božena Němcová, naše přední spisovatelka, psala i pohádky.`, `d) Josef Lada, malíř a spisovatel, ilustroval Švejka.`],
+    correct: 1
+  },
+  {
+    q: `10. Doplňte správný tvar do věty: Trenér byl obviněn, že ___ jen své oblíbence.`,
+    options: [`a) protežuje`, `b) protožuje`, `c) protižuje`, `d) protěžuje`],
+    correct: 0
+  }
+];
+
+const evalRanges = [
+  { min: 0, max: 3, text: `Naprosto běžný výsledek. Tyhle věty jsou stavěné tak, aby podrazily nohy i lidem, kteří píšou každý den. Zrádnou čárku, spřežku nebo shodu přehlédne většina Čechů a vy jste v dobré společnosti. Stačí si oživit pár pravidel a příště odhalíte o kus víc.` },
+  { min: 4, max: 6, text: `Slušný jazykový cit. Prokličkoval jste pastmi, na kterých hromadně pohoří i maturanti, a část záludností jste prohlédl. Nejrafinovanější jevy vás nejspíš dostaly, ale to se stává i zkušeným korektorům. Jste jasně nad průměrem.` },
+  { min: 7, max: 9, text: `Výjimečný cit pro češtinu. Odhalil jste chyby, které běžně proklouznou i vystudovaným češtinářům. Patříte k lidem, jimž neunikne špatná předpona s/z ani zákeřná spřežka. Do naprosté dokonalosti vám scházel jen krůček.` },
+  { min: 10, max: 10, text: `Naprostá vzácnost. Plný počet tenhle kvíz nedává skoro nikomu, protože na jeho pastech chybují i profesionálové. Když jste zvládl všech deset, klidně opravujete i rodilé češtináře. Klobouk dolů.` }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+function render() {
+  const quizDiv = document.getElementById(`quiz`);
+  quizDiv.innerHTML = ``;
+  questions.forEach((item, qIdx) => {
+    const box = document.createElement(`div`);
+    box.className = `question-box`;
+    const qText = document.createElement(`div`);
+    qText.className = `question-text`;
+    qText.textContent = item.q;
+    box.appendChild(qText);
+    item.options.forEach((opt, oIdx) => {
+      const btn = document.createElement(`button`);
+      btn.className = `option`;
+      btn.textContent = opt;
+      btn.setAttribute(`data-q`, qIdx);
+      btn.setAttribute(`data-o`, oIdx);
+      btn.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qIdx] = oIdx;
+        const siblings = box.querySelectorAll(`.option`);
+        siblings.forEach(s => s.classList.remove(`selected`));
+        btn.classList.add(`selected`);
+        updateEvalButton();
+      });
+      box.appendChild(btn);
+    });
+    quizDiv.appendChild(box);
+  });
+}
+
+function updateEvalButton() {
+  const btn = document.getElementById(`evaluate-btn`);
+  const allAnswered = answers.every(a => a !== null);
+  btn.disabled = !allAnswered;
+}
+
+function evaluate() {
+  if (answers.some(a => a === null)) {
+    alert(`Odpovězte prosím na všechny otázky`);
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = document.querySelectorAll(`.question-box`);
+  boxes.forEach((box, qIdx) => {
+    const opts = box.querySelectorAll(`.option`);
+    const correct = questions[qIdx].correct;
+    const selected = answers[qIdx];
+    if (selected === correct) score++;
+    opts.forEach((opt, oIdx) => {
+      opt.classList.add(`locked`);
+      opt.classList.remove(`selected`);
+      if (oIdx === correct) {
+        opt.classList.add(`correct`);
+      } else if (oIdx === selected) {
+        opt.classList.add(`incorrect`);
+      }
+    });
+  });
+  showResult(score);
+}
+
+function showResult(score) {
+  const resultDiv = document.getElementById(`result`);
+  const evalItem = evalRanges.find(r => score >= r.min && score <= r.max);
+  resultDiv.innerHTML = ``;
+  resultDiv.className = `result-box`;
+  resultDiv.style.display = `block`;
+  const scoreEl = document.createElement(`div`);
+  scoreEl.className = `score`;
+  scoreEl.textContent = `${score} z ${questions.length}`;
+  resultDiv.appendChild(scoreEl);
+  const textEl = document.createElement(`div`);
+  textEl.className = `eval-text`;
+  textEl.textContent = evalItem ? evalItem.text : ``;
+  resultDiv.appendChild(textEl);
+  const retryBtn = document.createElement(`button`);
+  retryBtn.id = `retry-btn`;
+  retryBtn.textContent = `Zkusit znovu`;
+  retryBtn.addEventListener(`click`, resetQuiz);
+  resultDiv.appendChild(retryBtn);
+  document.getElementById(`evaluate-btn`).style.display = `none`;
+  resultDiv.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function resetQuiz() {
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  locked = false;
+  document.getElementById(`result`).style.display = `none`;
+  document.getElementById(`result`).innerHTML = ``;
+  const btn = document.getElementById(`evaluate-btn`);
+  btn.style.display = `block`;
+  btn.disabled = true;
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+document.getElementById(`evaluate-btn`).addEventListener(`click`, evaluate);
+render();
+</script>
+</body>
+</html>
