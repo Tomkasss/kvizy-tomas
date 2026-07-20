@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro každého, kdo si věří: 7 bodů z 10 znamená, že máte slušný rozhled</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 24px 16px;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.8rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 16px; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+#submit, #retry {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  color: #fff;
+  cursor: pointer;
+}
+#submit { background: #5b7e5f; }
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry { background: #8c7b6b; }
+#retry:hover { background: #756658; }
+.warn { text-align: center; color: #a04040; margin-top: 14px; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+@media (max-width: 600px) { body { padding: 24px 16px; } h1 { font-size: 1.5rem; } .q { padding: 20px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro každého, kdo si věří: 7 bodů z 10 znamená, že máte slušný rozhled</h1>
+<p class="perex">Věříte si na všeobecný přehled? Deset otázek napříč zeměpisem, dějinami, vědou i kulturou prověří, jak široký záběr doopravdy máte. Laťka je jasná: sedm správných z deseti je hranice, za kterou začíná slušný rozhled. Zvládnete ji?</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<div class="warn" id="warn"></div>
+<div id="result" style="display:none;">
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  { q: `Kolik kostí má kostra dospělého člověka?`, options: [`206`, `187`, `224`, `245`], correct: 0 },
+  { q: `Která bitva znamenala definitivní porážku Napoleona Bonaparta?`, options: [`bitva u Slavkova`, `bitva u Waterloo`, `bitva u Lipska`, `bitva u Borodina`], correct: 1 },
+  { q: `Které město je hlavním městem Kanady?`, options: [`Toronto`, `Montreal`, `Ottawa`, `Vancouver`], correct: 2 },
+  { q: `Která řeka je nejdelší na území České republiky?`, options: [`Labe`, `Morava`, `Ohře`, `Vltava`], correct: 3 },
+  { q: `Ve které zemi leží hora Kilimandžáro?`, options: [`Tanzanie`, `Nigérie`, `Egypt`, `Maroko`], correct: 0 },
+  { q: `Kdo složil operu Carmen?`, options: [`Giuseppe Verdi`, `Georges Bizet`, `Giacomo Puccini`, `Gioacchino Rossini`], correct: 1 },
+  { q: `Podle kterého zákona opíše spojnice planety a Slunce za stejné časové úseky stejně velké plochy?`, options: [`prvního Keplerova`, `druhého Keplerova`, `třetího Keplerova`, `Newtonova gravitačního`], correct: 1 },
+  { q: `Ve kterém městě je oficiální sídlo Evropského parlamentu?`, options: [`Brusel`, `Lucemburk`, `Frankfurt nad Mohanem`, `Štrasburk`], correct: 3 },
+  { q: `Kdo je autorem současné opony Národního divadla v Praze?`, options: [`Vojtěch Hynais`, `Mikoláš Aleš`, `František Ženíšek`, `Josef Mánes`], correct: 0 },
+  { q: `Kdo je považován za tvůrce české diakritiky, tedy háčků a čárek?`, options: [`Josef Dobrovský`, `Jan Amos Komenský`, `Jan Hus`, `Josef Jungmann`], correct: 2 }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit`);
+const warnEl = document.getElementById(`warn`);
+const resultEl = document.getElementById(`result`);
+
+function letter(i) { return [`a`, `b`, `c`, `d`][i]; }
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const qt = document.createElement(`div`);
+    qt.className = `q-text`;
+    qt.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    item.options.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.textContent = letter(oi) + `) ` + opt;
+      if (answers[qi] === oi) btn.classList.add(`selected`);
+      btn.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        render();
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  const done = answers.every(a => a !== null);
+  submitBtn.disabled = !done;
+  if (done) warnEl.textContent = ``;
+}
+
+function evaluate() {
+  if (!answers.every(a => a !== null)) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  questions.forEach((item, qi) => {
+    const opts = boxes[qi].querySelectorAll(`.opt`);
+    opts.forEach((btn, oi) => {
+      btn.classList.remove(`selected`);
+      if (oi === item.correct) btn.classList.add(`correct`);
+      else if (oi === answers[qi]) btn.classList.add(`wrong`);
+    });
+    if (answers[qi] === item.correct) score++;
+  });
+  submitBtn.disabled = true;
+  showResult(score);
+}
+
+function verdictText(s) {
+  if (s <= 3) return `Rozhled zatím zůstává za laťkou. Řada otázek mířila mimo úplné jádro obecných znalostí a právě tam se ukázaly mezery. Není se za co stydět, jen je odsud k hranici slušného přehledu ještě kus cesty. Zkuste kvíz s odstupem znovu.`;
+  if (s <= 6) return `Průměrný výsledek, který se drží těsně pod laťkou. Základní přehled máte, ale otázky z okraje jednotlivých oborů vás dvakrát nebo třikrát dostaly. K hranici slušného rozhledu vám chybělo jen málo a příště ji nejspíš překročíte.`;
+  if (s <= 9) return `Výborně, tohle je slušný až velmi dobrý rozhled. Sedm bodů je přesně hranice, za kterou se dostane menšina řešitelů, a vy jste ji zdolali. Orientujete se napříč zeměpisem, dějinami, vědou i kulturou a záludnější otázky vás z velké části neošálily.`;
+  return `Naprostá špička. Plný počet u kvízu, který sahá do zeměpisu, historie, přírodních věd i umění, zvládne jen zlomek lidí. Váš rozhled je výjimečně široký a tohle rozhodně není náhoda ani štěstí při tipování.`;
+}
+
+function showResult(score) {
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  document.getElementById(`verdict`).textContent = verdictText(score);
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+}
+
+function reset() {
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  locked = false;
+  resultEl.style.display = `none`;
+  warnEl.textContent = ``;
+  submitBtn.disabled = true;
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitBtn.addEventListener(`click`, evaluate);
+document.getElementById(`retry`).addEventListener(`click`, reset);
+render();
+</script>
+</body>
+</html>
