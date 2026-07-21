@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro seniory: podle počtu bodů poznáte, na kolik let máte vědomosti. 10/10 je vzácné</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.7rem; line-height: 1.3; color: #2c2c2c; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin-bottom: 28px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .otazka .text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  #vyhodnotit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 12px; min-height: 1.2em; }
+  #vysledek {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; }
+  #znovu {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 24px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #znovu:hover { background: #756658; }
+</style>
+</head>
+<body>
+<h1>Kvíz pro seniory: podle počtu bodů poznáte, na kolik let máte vědomosti. 10/10 je vzácné</h1>
+<p class="perex">Roky čtení, školy i životních zkušeností se počítají. Deset otázek z historie, zeměpisu, vědy, hudby i češtiny prověří váš rozhled a podle počtu bodů vám prozradí, na kolik let máte vědomosti. Plných 10 z 10 se povede jen málokomu.</p>
+
+<div id="kviz"></div>
+
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<div id="hlaska"></div>
+
+<div id="vysledek">
+  <div id="skore"></div>
+  <div id="hodnoceni"></div>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+
+<script>
+const otazky = [
+  { text: `1. Kdo je autorem historického románu Ivanhoe?`, varianty: [`Alexandre Dumas`, `Charles Dickens`, `Walter Scott`, `Robert Louis Stevenson`], spravna: 2 },
+  { text: `2. Kdo je autorem filozofické pohádky Malý princ?`, varianty: [`Jules Verne`, `Victor Hugo`, `Antoine de Saint-Exupéry`, `Romain Rolland`], spravna: 2 },
+  { text: `3. Která kost je nejdelší v lidském těle?`, varianty: [`kost stehenní`, `kost pažní`, `kost holenní`, `kost lýtková`], spravna: 0 },
+  { text: `4. Co znamená přídavné jméno rozšafný?`, varianty: [`náladový a prchlivý`, `marnotratný a rozhazovačný`, `domýšlivý a povýšený`, `rozvážný a uvážlivý`], spravna: 3 },
+  { text: `5. Ve které zemi se narodil hudební skladatel Fryderyk Chopin?`, varianty: [`v Polsku`, `ve Francii`, `v Rakousku`, `v Maďarsku`], spravna: 0 },
+  { text: `6. Který skladatel je autorem cyklu houslových koncertů Čtvero ročních dob?`, varianty: [`Johann Sebastian Bach`, `Antonio Vivaldi`, `Georg Friedrich Händel`, `Joseph Haydn`], spravna: 1 },
+  { text: `7. Které barvivo v červených krvinkách zajišťuje přenos kyslíku?`, varianty: [`chlorofyl`, `melanin`, `hemoglobin`, `myoglobin`], spravna: 2 },
+  { text: `8. Kdo je autorem české novely Krysař?`, varianty: [`Alois Jirásek`, `Karel Čapek`, `Julius Zeyer`, `Viktor Dyk`], spravna: 3 },
+  { text: `9. Který mughalský vládce nechal postavit Tádž Mahal?`, varianty: [`Akbar`, `Šáhdžahán`, `Aurangzeb`, `Bábur`], spravna: 1 },
+  { text: `10. Která hora je nejvyšším vrcholem Jižní Ameriky?`, varianty: [`Aconcagua`, `Chimborazo`, `Huascarán`, `Ojos del Salado`], spravna: 0 }
+];
+
+const pismena = [`a`, `b`, `c`, `d`];
+const odpovedi = new Array(otazky.length).fill(null);
+let zamek = false;
+
+const kvizEl = document.getElementById(`kviz`);
+const btnVyhodnotit = document.getElementById(`vyhodnotit`);
+const hlaska = document.getElementById(`hlaska`);
+const vysledek = document.getElementById(`vysledek`);
+
+otazky.forEach((o, i) => {
+  const box = document.createElement(`div`);
+  box.className = `otazka`;
+  const t = document.createElement(`div`);
+  t.className = `text`;
+  t.textContent = o.text;
+  box.appendChild(t);
+  o.varianty.forEach((v, j) => {
+    const btn = document.createElement(`button`);
+    btn.className = `varianta`;
+    btn.textContent = pismena[j] + `) ` + v;
+    btn.addEventListener(`click`, () => {
+      if (zamek) return;
+      odpovedi[i] = j;
+      box.querySelectorAll(`.varianta`).forEach(b => b.classList.remove(`vybrana`));
+      btn.classList.add(`vybrana`);
+      aktualizuj();
+    });
+    box.appendChild(btn);
+  });
+  kvizEl.appendChild(box);
+});
+
+function aktualizuj() {
+  const hotovo = odpovedi.every(o => o !== null);
+  btnVyhodnotit.disabled = !hotovo;
+  if (hotovo) hlaska.textContent = ``;
+}
+
+btnVyhodnotit.addEventListener(`click`, () => {
+  if (odpovedi.some(o => o === null)) {
+    hlaska.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  zamek = true;
+  let skore = 0;
+  const boxy = kvizEl.querySelectorAll(`.otazka`);
+  boxy.forEach((box, i) => {
+    const btns = box.querySelectorAll(`.varianta`);
+    btns.forEach((b, j) => {
+      b.disabled = true;
+      if (j === otazky[i].spravna) b.classList.add(`spravna`);
+      if (j === odpovedi[i] && odpovedi[i] !== otazky[i].spravna) b.classList.add(`spatna`);
+    });
+    if (odpovedi[i] === otazky[i].spravna) skore++;
+  });
+  btnVyhodnotit.disabled = true;
+  btnVyhodnotit.style.display = `none`;
+  zobrazVysledek(skore);
+});
+
+function zobrazVysledek(skore) {
+  document.getElementById(`skore`).textContent = skore + ` z ` + otazky.length;
+  let text;
+  if (skore <= 3) {
+    text = `Vaše vědomosti zatím odpovídají rozhledu člověka kolem 25 až 35 let. Základ máte položený, teď je ideální čas přehled dál rozšiřovat.`;
+  } else if (skore <= 6) {
+    text = `Vaše vědomosti odpovídají rozhledu člověka kolem 45 až 55 let. Solidní všeobecný přehled, který sahá napříč obory a nenechá vás zaskočit.`;
+  } else if (skore <= 9) {
+    text = `Vaše vědomosti odpovídají rozhledu člověka kolem 60 až 70 let. Načteno, nacestováno, na vašich odpovědích jsou léta zkušeností znát.`;
+  } else {
+    text = `Vaše vědomosti odpovídají rozhledu člověka kolem 75 let a výš. Mimořádně zralý a bohatý rozhled, jaký se vidí opravdu vzácně.`;
+  }
+  document.getElementById(`hodnoceni`).textContent = text;
+  vysledek.style.display = `block`;
+  vysledek.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+document.getElementById(`znovu`).addEventListener(`click`, () => {
+  zamek = false;
+  odpovedi.fill(null);
+  kvizEl.querySelectorAll(`.otazka`).forEach(box => {
+    box.querySelectorAll(`.varianta`).forEach(b => {
+      b.disabled = false;
+      b.classList.remove(`vybrana`, `spravna`, `spatna`);
+    });
+  });
+  btnVyhodnotit.style.display = `block`;
+  btnVyhodnotit.disabled = true;
+  hlaska.textContent = ``;
+  vysledek.style.display = `none`;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+</script>
+</body>
+</html>
