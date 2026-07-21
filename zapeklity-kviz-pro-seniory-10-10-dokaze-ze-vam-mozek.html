@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zapeklitý kvíz pro seniory: 10/10 dokáže, že vám mozek nezlenivěl ani po odchodu do penze</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.7rem; line-height: 1.3; color: #2c2c2c; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin-bottom: 28px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .otazka .text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  input.otevrena {
+    width: 100%;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+  }
+  #vyhodnotit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 12px; min-height: 1.2em; }
+  #vysledek {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; }
+  #znovu {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 24px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #znovu:hover { background: #756658; }
+</style>
+</head>
+<body>
+<h1>Zapeklitý kvíz pro seniory: 10/10 dokáže, že vám mozek nezlenivěl ani po odchodu do penze</h1>
+<p class="perex">Penze rozum neuspává, pokud ho krmíte. Deset tvrdých otázek z dějin, zeměpisu, literatury, vědy, umění i češtiny ukáže, jestli vám to myslí jako zamlada. Kdo dá všech deset, dokázal, že mu mozek v penzi nezlenivěl.</p>
+
+<div id="kviz"></div>
+
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<div id="hlaska"></div>
+
+<div id="vysledek">
+  <div id="skore"></div>
+  <div id="hodnoceni"></div>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+
+<script>
+const otazky = [
+  { text: `1. Kdo je autorem románu Muž bez vlastností?`, varianty: [`Robert Musil`, `Franz Kafka`, `Hermann Broch`, `Joseph Roth`], spravna: 0 },
+  { text: `2. Který lékař jako první popsal oběh krve v lidském těle?`, varianty: [`Andreas Vesalius`, `Ambroise Paré`, `William Harvey`, `Marcello Malpighi`], spravna: 2 },
+  { text: `3. Kolik párů žeber má typický dospělý člověk?`, varianty: [`jedenáct párů`, `dvanáct párů`, `třináct párů`, `deset párů`], spravna: 1 },
+  { text: `4. Kdo se stal prvním římským císařem?`, varianty: [`Gaius Julius Caesar`, `Nero`, `Traján`, `Augustus`], spravna: 3 },
+  { text: `5. Co znamená přídavné jméno zpupný?`, varianty: [`povýšený a vzdorovitě drzý`, `ustrašený a poddajný`, `shovívavý a smířlivý`, `lhostejný a netečný`], spravna: 0 },
+  { text: `6. Kdo je autorem obrazu Ostrov mrtvých?`, varianty: [`Gustav Klimt`, `Arnold Böcklin`, `Max Klinger`, `Franz von Stuck`], spravna: 1 },
+  { text: `7. Petr je bratr Ivany, Ivana je matka Lukáše a Lukáš je otec Terezy, v jakém příbuzenském vztahu je Petr k Tereze?`, varianty: [`strýc`, `dědeček`, `prastrýc`, `bratranec`], spravna: 2 },
+  { text: `8. Který stát je rozlohou největší v Africe?`, varianty: [`Súdán`, `Demokratická republika Kongo`, `Libye`, `Alžírsko`], spravna: 3 },
+  { text: `9. Který fyzik zformuloval princip neurčitosti?`, varianty: [`Erwin Schrödinger`, `Niels Bohr`, `Werner Heisenberg`, `Wolfgang Pauli`], spravna: 2 },
+  { text: `10. Kterým mírem roku 1748 skončila válka o rakouské dědictví?`, varianty: [`Utrechtský mír`, `Vestfálský mír`, `Pařížský mír`, `Cášský mír`], spravna: 3 }
+];
+
+const pismena = [`a`, `b`, `c`, `d`];
+const odpovedi = new Array(otazky.length).fill(null);
+let zamek = false;
+
+const kvizEl = document.getElementById(`kviz`);
+const btnVyhodnotit = document.getElementById(`vyhodnotit`);
+const hlaska = document.getElementById(`hlaska`);
+const vysledek = document.getElementById(`vysledek`);
+
+otazky.forEach((o, i) => {
+  const box = document.createElement(`div`);
+  box.className = `otazka`;
+  const t = document.createElement(`div`);
+  t.className = `text`;
+  t.textContent = o.text;
+  box.appendChild(t);
+  o.varianty.forEach((v, j) => {
+    const btn = document.createElement(`button`);
+    btn.className = `varianta`;
+    btn.textContent = pismena[j] + `) ` + v;
+    btn.addEventListener(`click`, () => {
+      if (zamek) return;
+      odpovedi[i] = j;
+      box.querySelectorAll(`.varianta`).forEach(b => b.classList.remove(`vybrana`));
+      btn.classList.add(`vybrana`);
+      aktualizuj();
+    });
+    box.appendChild(btn);
+  });
+  kvizEl.appendChild(box);
+});
+
+function aktualizuj() {
+  const hotovo = odpovedi.every(o => o !== null);
+  btnVyhodnotit.disabled = !hotovo;
+  if (hotovo) hlaska.textContent = ``;
+}
+
+btnVyhodnotit.addEventListener(`click`, () => {
+  if (odpovedi.some(o => o === null)) {
+    hlaska.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  zamek = true;
+  let skore = 0;
+  const boxy = kvizEl.querySelectorAll(`.otazka`);
+  boxy.forEach((box, i) => {
+    const btns = box.querySelectorAll(`.varianta`);
+    btns.forEach((b, j) => {
+      b.disabled = true;
+      if (j === otazky[i].spravna) b.classList.add(`spravna`);
+      if (j === odpovedi[i] && odpovedi[i] !== otazky[i].spravna) b.classList.add(`spatna`);
+    });
+    if (odpovedi[i] === otazky[i].spravna) skore++;
+  });
+  btnVyhodnotit.disabled = true;
+  btnVyhodnotit.style.display = `none`;
+  zobrazVysledek(skore);
+});
+
+function zobrazVysledek(skore) {
+  document.getElementById(`skore`).textContent = skore + ` z ` + otazky.length;
+  let text;
+  if (skore <= 3) {
+    text = `Tentokrát vás kvíz přemohl. Otázky mířily mimo nejběžnější okruh a lákavější varianty vás stáhly k sobě dřív, než jste je promysleli. Nic ztraceného, hlava se dá probrat. Čtěte, ptejte se a nad každou otázkou chvíli setrvejte, příště bude číslo o dost výš.`;
+  } else if (skore <= 6) {
+    text = `Přesně tady, uprostřed pole, končí většina řešitelů. Půlku otázek jste rozlouskli s jistotou, u zbytku vás strhla těsná nabídka. Slušný důkaz, že mozek pracuje dál, jen ty nejtvrdší otázky si ještě pár bodů uzmuly.`;
+  } else if (skore <= 9) {
+    text = `Výborný výkon. Dějiny, zeměpis, literatura, věda i čeština vám nedělají potíže a na většinu nástrah jste nenaletěli. Do tohoto pásma se u takto stavěných otázek dostane jen menšina a váš mozek očividně nezahálí. K plnému počtu chybělo opravdu málo.`;
+  } else {
+    text = `Přesně jak slibuje titulek, váš mozek po odchodu do penze rozhodně nezlenivěl. Ani jedna past vás nezastavila, poradili jste si se všemi obory od dějin přes umění až po přírodní vědy. Takhle svěží a široký přehled prokáže jen zlomek řešitelů. Klobouk dolů.`;
+  }
+  document.getElementById(`hodnoceni`).textContent = text;
+  vysledek.style.display = `block`;
+  vysledek.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+document.getElementById(`znovu`).addEventListener(`click`, () => {
+  zamek = false;
+  odpovedi.fill(null);
+  kvizEl.querySelectorAll(`.otazka`).forEach(box => {
+    box.querySelectorAll(`.varianta`).forEach(b => {
+      b.disabled = false;
+      b.classList.remove(`vybrana`, `spravna`, `spatna`);
+    });
+  });
+  btnVyhodnotit.style.display = `block`;
+  btnVyhodnotit.disabled = true;
+  hlaska.textContent = ``;
+  vysledek.style.display = `none`;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+</script>
+</body>
+</html>
