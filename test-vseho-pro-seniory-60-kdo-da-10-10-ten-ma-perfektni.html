@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test všeho pro seniory 60+. Kdo dá 10/10, ten má perfektní rozhled i v důchodu</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 24px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.8rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 16px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .opt:disabled { cursor: default; }
+  #submit {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint { text-align: center; color: #8a3a3a; margin: 12px 0 0; min-height: 1.2em; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+    display: none;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #retry {
+    display: block;
+    margin: 28px auto 0;
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test všeho pro seniory 60+. Kdo dá 10/10, ten má perfektní rozhled i v důchodu</h1>
+  <p class="perex">Deset otázek napříč obory pro každého, kdo si po šedesátce udržel zvědavost a přehled. Zeměpis, dějiny, příroda, umění i čeština v jednom testu. Průměr bývá pět až šest bodů. Kolik z nich zvládnete vy bez jediného zaváhání?</p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <p class="hint" id="hint"></p>
+  <div id="result">
+    <div id="score"></div>
+    <p id="verdict"></p>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+const questions = [
+  { q: `Který průliv odděluje evropskou a africkou pevninu?`, opts: [`Bosporský průliv`, `Lamanšský průliv`, `Gibraltarský průliv`, `Dardanely`], correct: 2 },
+  { q: `Ve kterém roce dobyla první křížová výprava Jeruzalém?`, opts: [`1071`, `1099`, `1147`, `1187`], correct: 1 },
+  { q: `Na jaké stupnici se tradičně měří síla zemětřesení?`, opts: [`Richterova stupnice`, `Beaufortova stupnice`, `Mohsova stupnice`, `Celsiova stupnice`], correct: 0 },
+  { q: `Kdo je autorem renesančního obrazu Zrození Venuše?`, opts: [`Rafael`, `Sandro Botticelli`, `Tizian`, `Caravaggio`], correct: 1 },
+  { q: `Co znamená podstatné jméno „škarohlíd"?`, opts: [`lakomec, který nerad utrácí`, `člověk, který rád pomlouvá druhé`, `věčný pesimista, který vidí všechno v černých barvách`, `prostořeký vtipálek`], correct: 2 },
+  { q: `Jaká je přibližně teplota absolutní nuly ve stupních Celsia?`, opts: [`-73 °C`, `-173 °C`, `-273 °C`, `-373 °C`], correct: 2 },
+  { q: `Ve kterém pohoří pramení řeka Dunaj?`, opts: [`Alpy`, `Karpaty`, `Šumava`, `Černý les`], correct: 3 },
+  { q: `Která panovnická dynastie vládla ve Francii v době vypuknutí Velké francouzské revoluce?`, opts: [`Habsburkové`, `Bourboni`, `Valois`, `Orleánská dynastie`], correct: 1 },
+  { q: `Jak se jmenuje nejvyšší vodopád světa?`, opts: [`Niagarské vodopády`, `Viktoriiny vodopády`, `Iguazú`, `Andělský vodopád`], correct: 3 },
+  { q: `Který skladatel je autorem scénické hudby k dramatu Peer Gynt?`, opts: [`Edvard Grieg`, `Jean Sibelius`, `Antonín Dvořák`, `Nikolaj Rimskij-Korsakov`], correct: 0 }
+];
+const letters = [`a`, `b`, `c`, `d`];
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+const scoreEl = document.getElementById(`score`);
+const verdictEl = document.getElementById(`verdict`);
+const retryBtn = document.getElementById(`retry`);
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const qt = document.createElement(`p`);
+    qt.className = `q-text`;
+    qt.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.textContent = letters[oi] + `) ` + opt;
+      btn.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        Array.from(box.querySelectorAll(`.opt`)).forEach(b => b.classList.remove(`selected`));
+        btn.classList.add(`selected`);
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  const all = answers.every(a => a !== null);
+  submitBtn.disabled = !all;
+  if (all) hintEl.textContent = ``;
+}
+
+submitBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll(`.opt`);
+    opts.forEach((btn, oi) => {
+      btn.disabled = true;
+      if (oi === questions[qi].correct) btn.classList.add(`correct`);
+      if (oi === answers[qi] && answers[qi] !== questions[qi].correct) btn.classList.add(`wrong`);
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  scoreEl.textContent = score + ` z ` + questions.length;
+  verdictEl.textContent = verdictFor(score);
+  submitBtn.style.display = `none`;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+function verdictFor(s) {
+  if (s <= 3) return `Rozhled zatím trochu drhne. Několik otázek zamířilo mimo úplně známé jádro a lákavější varianty vás stáhly dřív, než jste je promysleli. Nic ztraceného, přehled se dá v každém věku osvěžit. Čtěte, luštěte, ptejte se na svět kolem sebe a příště se skóre pohne nahoru.`;
+  if (s <= 6) return `Přesně tady leží zlatý střed a pohybuje se v něm většina řešitelů. Půlku otázek jste zvládli s jistotou, u zbytku jste chvíli tápali nebo vás zmátla těsná nabídka. Máte vyrovnaný rozhled napříč obory a k tomu nejtěžšímu pásmu vám chybělo jen o kousek víc.`;
+  if (s <= 9) return `Nadprůměrně bystrá hlava, o tom není pochyb. Zeměpis, dějiny, příroda i umění vám nedělají potíže a těsné distraktory vás jen tak neoblafnou. Do tohoto pásma se dostane jen menšina a váš rozhled v důchodu je zjevně pořád svěží a široký. K plnému počtu chybělo opravdu málo.`;
+  return `Perfektní rozhled i v důchodu, přesně jak slibuje titulek. Ani jedna chytlavá varianta vás nezastavila a poradili jste si se vším od průlivů přes hudbu až po lidské tělo. Takhle kompletní záběr znalostí prokáže jen zlomek řešitelů a vy mezi ně jednoznačně patříte. Mnohého mladšího strčíte do kapsy.`;
+}
+
+retryBtn.addEventListener(`click`, () => {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  resultEl.style.display = `none`;
+  submitBtn.style.display = `block`;
+  submitBtn.disabled = true;
+  hintEl.textContent = ``;
+  render();
+  document.querySelector(`.wrap`).scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+render();
+</script>
+</body>
+</html>
