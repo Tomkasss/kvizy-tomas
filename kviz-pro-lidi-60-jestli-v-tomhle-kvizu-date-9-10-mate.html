@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro lidi 60+: jestli v tomhle kvízu dáte 9/10, máte pořád hlavu jako ve 40</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  max-width: 720px;
+  margin: 0 auto;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  padding: 24px 16px;
+  line-height: 1.5;
+}
+h1 { font-size: 1.7rem; line-height: 1.3; color: #2c2c2c; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin-bottom: 8px; }
+.question-box {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.question-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; }
+.option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+.option:last-child { margin-bottom: 0; }
+.option:hover { background: #ede8e1; }
+.option.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.option.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.option.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.locked .option { cursor: default; }
+#evaluate {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#evaluate:hover { background: #4a6b4e; }
+#evaluate:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warning { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+  display: none;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 28px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<h1>Kvíz pro lidi 60+: jestli v tomhle kvízu dáte 9/10, máte pořád hlavu jako ve 40</h1>
+<p class="perex">Deset otázek napříč zeměpisem, dějinami, hudbou, uměním i přírodou, plus jedna na logiku. Žádné počítání, jen to, co vám v hlavě zůstalo za celý život. Dáte jich devět a potvrdíte hlavu jako ve čtyřiceti?</p>
+<div id="quiz"></div>
+<button id="evaluate" disabled>Vyhodnotit</button>
+<div id="warning"></div>
+<div id="result">
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="retry">Zkusit znovu</button>
+</div>
+<script>
+const questions = [
+  { q: `Která hora je nejvyšší na celém evropském kontinentu, počítáme-li k Evropě i pohoří Kavkaz?`,
+    options: [`Mont Blanc`, `Elbrus`, `Matterhorn`, `Grossglockner`], correct: 1 },
+  { q: `Který lidský orgán dokáže i po odebrání velké části dorůst zpět do původní velikosti?`,
+    options: [`Játra`, `Ledviny`, `Slinivka břišní`, `Plíce`], correct: 0 },
+  { q: `Jestliže prší, je chodník mokrý. Chodník je ale suchý. Co z toho nutně vyplývá?`,
+    options: [`Prší`, `Neprší`, `Pršelo, ale přestalo`, `Nelze to určit`], correct: 1 },
+  { q: `Která z pařížských předměstských mírových smluv upravila po první světové válce postavení Rakouska?`,
+    options: [`Trianonská`, `Versailleská`, `Sèvreská`, `Saint-Germainská`], correct: 3 },
+  { q: `Který francouzský skladatel je autorem slavného orchestrálního Boléra?`,
+    options: [`Claude Debussy`, `Maurice Ravel`, `Camille Saint-Saëns`, `Georges Bizet`], correct: 1 },
+  { q: `Kdo je autorem hrůzostrašného románu Frankenstein z roku 1818?`,
+    options: [`Bram Stoker`, `Robert Louis Stevenson`, `Mary Shelleyová`, `John Polidori`], correct: 2 },
+  { q: `Který pták dokáže jako jediný na světě létat pozpátku?`,
+    options: [`Rorýs`, `Kolibřík`, `Vlaštovka`, `Poštolka`], correct: 1 },
+  { q: `Kdo je autorem secesního obrazu Polibek, celého pokrytého zlatem?`,
+    options: [`Egon Schiele`, `Gustav Klimt`, `Alfons Mucha`, `Oskar Kokoschka`], correct: 1 },
+  { q: `Která planeta Sluneční soustavy má nejvíce měsíců?`,
+    options: [`Jupiter`, `Saturn`, `Uran`, `Neptun`], correct: 1 },
+  { q: `Který dnešní africký stát se dříve jmenoval Rhodésie, respektive Jižní Rhodésie?`,
+    options: [`Zambie`, `Botswana`, `Zimbabwe`, `Mosambik`], correct: 2 }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+const quizEl = document.getElementById('quiz');
+const evalBtn = document.getElementById('evaluate');
+const warningEl = document.getElementById('warning');
+const resultEl = document.getElementById('result');
+
+questions.forEach((item, qi) => {
+  const box = document.createElement('div');
+  box.className = 'question-box';
+  const qt = document.createElement('div');
+  qt.className = 'question-text';
+  qt.textContent = (qi + 1) + '. ' + item.q;
+  box.appendChild(qt);
+  item.options.forEach((opt, oi) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.textContent = String.fromCharCode(97 + oi) + ') ' + opt;
+    btn.addEventListener('click', () => {
+      if (locked) return;
+      answers[qi] = oi;
+      box.querySelectorAll('.option').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      updateEval();
+    });
+    box.appendChild(btn);
+  });
+  quizEl.appendChild(box);
+});
+
+function updateEval() {
+  const allAnswered = answers.every(a => a !== null);
+  evalBtn.disabled = !allAnswered;
+  if (allAnswered) warningEl.textContent = '';
+}
+
+evalBtn.addEventListener('click', () => {
+  if (answers.some(a => a === null)) {
+    warningEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll('.question-box');
+  boxes.forEach((box, qi) => {
+    box.classList.add('locked');
+    const opts = box.querySelectorAll('.option');
+    const correct = questions[qi].correct;
+    const chosen = answers[qi];
+    if (chosen === correct) score++;
+    opts.forEach((o, oi) => {
+      o.classList.remove('selected');
+      if (oi === correct) o.classList.add('correct');
+      else if (oi === chosen) o.classList.add('wrong');
+    });
+  });
+  showResult(score);
+});
+
+function showResult(score) {
+  document.getElementById('score').textContent = score + ' z ' + questions.length;
+  let text;
+  if (score <= 3) {
+    text = `Dnes to tolik nejiskřilo. Pár otázek vás zaskočilo, ale nic není ztraceno. Mozek je sval a pravidelné hádanky ho spolehlivě rozproudí. Berte tenhle výsledek jako rozehřívací kolo, ze kterého se dá jen zlepšovat.`;
+  } else if (score <= 6) {
+    text = `Solidní průměr. Prošli jste půlkou otázek napříč obory a vaše hlava šlape zhruba jako v padesáti letech. Přehled máte, jen na detailech a méně obvyklých faktech se dá ještě zapracovat a posunout se výš.`;
+  } else if (score <= 9) {
+    text = `Výborně. Tohle je výkon hlavy jako ve čtyřiceti letech: pružná paměť, široký rozhled i jistá logika. Devítka z deseti znamená, že vám to pálí jako v nejlepších letech a většinu vrstevníků necháváte za sebou.`;
+  } else {
+    text = `Naprostá špička a vzácný úkaz. Plný počet svede jen zlomek lidí. Vaše hlava pracuje, jako by jí bylo sotva třicet, bez jediného zaváhání napříč zeměpisem, dějinami, uměním, přírodou i logikou.`;
+  }
+  document.getElementById('verdict').textContent = text;
+  resultEl.style.display = 'block';
+  evalBtn.style.display = 'none';
+  warningEl.textContent = '';
+  resultEl.scrollIntoView({ behavior: 'smooth' });
+}
+
+document.getElementById('retry').addEventListener('click', () => {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  quizEl.querySelectorAll('.question-box').forEach(box => {
+    box.classList.remove('locked');
+    box.querySelectorAll('.option').forEach(o => o.classList.remove('selected', 'correct', 'wrong'));
+  });
+  resultEl.style.display = 'none';
+  evalBtn.style.display = 'block';
+  evalBtn.disabled = true;
+  warningEl.textContent = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+</script>
+</body>
+</html>
