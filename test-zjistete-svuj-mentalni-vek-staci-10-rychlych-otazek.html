@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test: Zjistěte svůj mentální věk. Stačí 10 rychlých otázek za 5 minut</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  max-width: 720px;
+  margin: 0 auto;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  padding: 24px 16px;
+  line-height: 1.5;
+}
+h1 { font-size: 1.7rem; line-height: 1.3; color: #2c2c2c; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin-bottom: 8px; }
+.question-box {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.question-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; }
+.option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+.option:last-child { margin-bottom: 0; }
+.option:hover { background: #ede8e1; }
+.option.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.option.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.option.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.locked .option { cursor: default; }
+#evaluate {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#evaluate:hover { background: #4a6b4e; }
+#evaluate:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warning { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+  display: none;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 28px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<h1>Test: Zjistěte svůj mentální věk. Stačí 10 rychlých otázek za 5 minut</h1>
+<p class="perex">Deset otázek napříč obory, z toho jedna na logické myšlení. Za pět minut zjistíte, na kolik let si stojí vaše hlava. Nepočítá se rok narození, jen to, co v ní máte a jak vám to pálí. Tak s chutí do toho.</p>
+<div id="quiz"></div>
+<button id="evaluate" disabled>Vyhodnotit</button>
+<div id="warning"></div>
+<div id="result">
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="retry">Zkusit znovu</button>
+</div>
+<script>
+const questions = [
+  { q: `Adam je rychlejší než Cyril. Adam je pomalejší než David. David je pomalejší než Bořek. Kdo je nejrychlejší?`,
+    options: [`Bořek`, `David`, `Adam`, `Cyril`], correct: 0 },
+  { q: `Která tkáň je v lidském těle nejtvrdší?`,
+    options: [`stehenní kost`, `kloubní chrupavka`, `nehtová ploténka`, `zubní sklovina`], correct: 3 },
+  { q: `Který z těchto nerostů je na Mohsově stupnici tvrdosti hodnocen jako nejměkčí?`,
+    options: [`fluorit`, `kalcit`, `mastek`, `sádrovec`], correct: 2 },
+  { q: `Kdo složil balet Labutí jezero?`,
+    options: [`Sergej Prokofjev`, `Petr Iljič Čajkovskij`, `Igor Stravinskij`, `Aram Chačaturjan`], correct: 1 },
+  { q: `Který římský vojevůdce porazil Hannibala v rozhodující bitvě u Zamy?`,
+    options: [`Scipio Africanus`, `Julius Caesar`, `Pompeius Veliký`, `Marcus Crassus`], correct: 0 },
+  { q: `Který rybník je rozlohou největší v České republice?`,
+    options: [`Bezdrev`, `Máchovo jezero`, `Rožmberk`, `Svět`], correct: 2 },
+  { q: `Kdo je autorem románu Kdo chytá v žitě?`,
+    options: [`Ernest Hemingway`, `J. D. Salinger`, `Jack Kerouac`, `F. Scott Fitzgerald`], correct: 1 },
+  { q: `Který malíř je autorem obrazu Nedělní odpoledne na ostrově Grande Jatte?`,
+    options: [`Claude Monet`, `Paul Cézanne`, `Georges Seurat`, `Paul Gauguin`], correct: 2 },
+  { q: `Kdo se ujal velení husitských polních vojsk po smrti Jana Žižky?`,
+    options: [`Jan Roháč z Dubé`, `Prokop Holý`, `Jan Želivský`, `Vilém Kostka z Postupic`], correct: 1 },
+  { q: `Které je nejseverněji položené hlavní město suverénního státu na světě?`,
+    options: [`Oslo`, `Helsinky`, `Stockholm`, `Reykjavík`], correct: 3 }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+const quizEl = document.getElementById('quiz');
+const evalBtn = document.getElementById('evaluate');
+const warningEl = document.getElementById('warning');
+const resultEl = document.getElementById('result');
+
+questions.forEach((item, qi) => {
+  const box = document.createElement('div');
+  box.className = 'question-box';
+  const qt = document.createElement('div');
+  qt.className = 'question-text';
+  qt.textContent = (qi + 1) + '. ' + item.q;
+  box.appendChild(qt);
+  item.options.forEach((opt, oi) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.textContent = String.fromCharCode(97 + oi) + ') ' + opt;
+    btn.addEventListener('click', () => {
+      if (locked) return;
+      answers[qi] = oi;
+      box.querySelectorAll('.option').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      updateEval();
+    });
+    box.appendChild(btn);
+  });
+  quizEl.appendChild(box);
+});
+
+function updateEval() {
+  const allAnswered = answers.every(a => a !== null);
+  evalBtn.disabled = !allAnswered;
+  if (allAnswered) warningEl.textContent = '';
+}
+
+evalBtn.addEventListener('click', () => {
+  if (answers.some(a => a === null)) {
+    warningEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll('.question-box');
+  boxes.forEach((box, qi) => {
+    box.classList.add('locked');
+    const opts = box.querySelectorAll('.option');
+    const correct = questions[qi].correct;
+    const chosen = answers[qi];
+    if (chosen === correct) score++;
+    opts.forEach((o, oi) => {
+      o.classList.remove('selected');
+      if (oi === correct) o.classList.add('correct');
+      else if (oi === chosen) o.classList.add('wrong');
+    });
+  });
+  showResult(score);
+});
+
+function showResult(score) {
+  document.getElementById('score').textContent = score + ' z ' + questions.length;
+  let text;
+  if (score <= 3) {
+    text = `Mentální věk kolem 20 až 30 let. Rozhled teprve nabíráte, řada oborů je pro vás zatím bílé místo. Svěžest a chuť učit se ale máte na své straně.`;
+  } else if (score <= 6) {
+    text = `Mentální věk kolem 35 až 45 let. Solidní všeobecný přehled zralého dospělého, který se v běžném rozhovoru neztratí. Pár oborů máte pevně, jinde jsou rezervy.`;
+  } else if (score <= 9) {
+    text = `Mentální věk kolem 50 až 60 let. Nasbíraný rozhled a zralost, jaké dá jen roky budovaná znalost napříč obory. Patříte k lidem, na které se ostatní v kvízu spoléhají.`;
+  } else {
+    text = `Mentální věk 65 let a výše. Hlava jako encyklopedie, k tomu klidná logická úvaha. Takhle širokou a propojenou znalost má jen málokdo a vy mezi ně patříte.`;
+  }
+  document.getElementById('verdict').textContent = text;
+  resultEl.style.display = 'block';
+  evalBtn.style.display = 'none';
+  warningEl.textContent = '';
+  resultEl.scrollIntoView({ behavior: 'smooth' });
+}
+
+document.getElementById('retry').addEventListener('click', () => {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  quizEl.querySelectorAll('.question-box').forEach(box => {
+    box.classList.remove('locked');
+    box.querySelectorAll('.option').forEach(o => o.classList.remove('selected', 'correct', 'wrong'));
+  });
+  resultEl.style.display = 'none';
+  evalBtn.style.display = 'block';
+  evalBtn.disabled = true;
+  warningEl.textContent = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+</script>
+</body>
+</html>
