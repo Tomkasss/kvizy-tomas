@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro prarodiče: dáte aspoň 7 bodů z 10? Pak si troufněte vyzvat celou rodinu</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 24px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.8rem; line-height: 1.3; color: #2c2c2c; }
+  .perex { font-size: 1.1rem; color: #3a3a3a; margin-bottom: 8px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .opt:disabled { cursor: default; }
+  #submit {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint { text-align: center; color: #8c7b6b; margin-top: 12px; min-height: 1.2em; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+    display: none;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+  #retry {
+    display: block;
+    margin: 24px auto 0;
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz pro prarodiče: dáte aspoň 7 bodů z 10? Pak si troufněte vyzvat celou rodinu</h1>
+  <p class="perex">Deset otázek napříč obory, od zeměpisu a přírody přes dějiny až po umění i češtinu. Žádné vzpomínky na mládí, jen fakta. Průměrný řešitel dá pět až šest. Kdo zvládne aspoň sedm z deseti, může s klidem vyzvat celou rodinu.</p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <div class="hint" id="hint"></div>
+  <div id="result">
+    <div id="score"></div>
+    <div id="verdict"></div>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+const questions = [
+  { q: `1. Který ostrov je rozlohou největší v Evropě?`, opts: [`Island`, `Irsko`, `Velká Británie`, `Sicílie`], correct: 2 },
+  { q: `2. Který orgán v lidském těle vytváří žluč?`, opts: [`játra`, `žlučník`, `slinivka břišní`, `slezina`], correct: 0 },
+  { q: `3. Nedostatek kterého vitaminu způsobuje šeroslepost?`, opts: [`vitaminu C`, `vitaminu A`, `vitaminu D`, `vitaminu E`], correct: 1 },
+  { q: `4. Do kterého století spadá vypuknutí Velké francouzské revoluce?`, opts: [`do 16. století`, `do 17. století`, `do 19. století`, `do 18. století`], correct: 3 },
+  { q: `5. Kdo je autorem románu Bídníci?`, opts: [`Victor Hugo`, `Alexandre Dumas`, `Honoré de Balzac`, `Émile Zola`], correct: 0 },
+  { q: `6. Kdo je skladatelem opery Aida?`, opts: [`Gioacchino Rossini`, `Giacomo Puccini`, `Giuseppe Verdi`, `Gaetano Donizetti`], correct: 2 },
+  { q: `7. Co znamená přídavné jméno „lapidární"?`, opts: [`zdobný a rozvláčný`, `stručný a výstižný`, `hrubý a neomalený`, `tajemný a nejasný`], correct: 1 },
+  { q: `8. Která dynastie byla poslední vládnoucí císařskou dynastií v Číně?`, opts: [`dynastie Ming`, `dynastie Tchang`, `dynastie Chan`, `dynastie Čching`], correct: 3 },
+  { q: `9. Které jezero je nejhlubší na světě?`, opts: [`Bajkal`, `Tanganika`, `Hořejší jezero`, `Viktoriino jezero`], correct: 0 },
+  { q: `10. Který plyn tvoří objemově největší část zemské atmosféry?`, opts: [`kyslík`, `dusík`, `argon`, `oxid uhličitý`], correct: 1 }
+];
+const verdicts = [
+  { min: 0, max: 3, text: `Zatím to drhne. Několik otázek mířilo mimo úplné jádro a lákavější varianty vás stáhly dřív, než jste je promysleli. Nic ztraceného, přehled se dá kdykoli osvěžit. Na výzvu celé rodině to ještě není, ale příště se skóre posune nahoru.` },
+  { min: 4, max: 6, text: `Přesně tady se pohybuje průměrný řešitel. Půlku otázek jste zvládli s jistotou, u zbytku jste váhali nebo se nechali zmást těsnou nabídkou. Solidní rozhled napříč obory, na slíbených sedm bodů ale zatím chybí kousek. K vyzvání rodiny se ještě chvíli chystejte.` },
+  { min: 7, max: 9, text: `Výborně, laťku z titulku jste zdolali. Do tohoto pásma se u takto stavěných otázek dostane jen menšina a vy mezi ni patříte. Máte na to svolat celou rodinu ke stolu a klidně jim tenhle kvíz předložit, náskok máte pěkný.` },
+  { min: 10, max: 10, text: `Naprostá špička. Ani jedna past vás nezastavila, poradili jste si se vším od zeměpisu přes umění až po češtinu. Plný počet tu zvládne jen zlomek řešitelů. Rodinu můžete vyzvat bez obav, tenhle výsledek jen tak někdo nepřekoná.` }
+];
+const answers = new Array(questions.length).fill(-1);
+let locked = false;
+const letters = [`a`, `b`, `c`, `d`];
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const qt = document.createElement(`div`);
+    qt.className = `q-text`;
+    qt.textContent = item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.textContent = letters[oi] + `) ` + opt;
+      if (answers[qi] === oi) btn.classList.add(`selected`);
+      if (locked) {
+        btn.disabled = true;
+        if (oi === item.correct) btn.classList.add(`correct`);
+        else if (answers[qi] === oi) btn.classList.add(`wrong`);
+      } else {
+        btn.addEventListener(`click`, () => {
+          answers[qi] = oi;
+          render();
+          updateSubmit();
+        });
+      }
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+function updateSubmit() {
+  const all = answers.every(a => a !== -1);
+  submitBtn.disabled = !all;
+  hintEl.textContent = ``;
+}
+submitBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === -1)) { hintEl.textContent = `Odpovězte prosím na všechny otázky`; return; }
+  locked = true;
+  let score = 0;
+  questions.forEach((item, qi) => { if (answers[qi] === item.correct) score++; });
+  render();
+  submitBtn.style.display = `none`;
+  hintEl.textContent = ``;
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  const v = verdicts.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`verdict`).textContent = v ? v.text : ``;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+});
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  for (let i = 0; i < answers.length; i++) answers[i] = -1;
+  locked = false;
+  render();
+  submitBtn.style.display = `block`;
+  submitBtn.disabled = true;
+  resultEl.style.display = `none`;
+  hintEl.textContent = ``;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+render();
+</script>
+</body>
+</html>
