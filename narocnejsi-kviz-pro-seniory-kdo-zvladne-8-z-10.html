@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Náročnější kvíz pro seniory: kdo zvládne 8 z 10, nechá za sebou i vnoučata z vysoké</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 24px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.8rem; line-height: 1.3; color: #2c2c2c; }
+  .perex { font-size: 1.1rem; color: #3a3a3a; margin-bottom: 8px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .opt:disabled { cursor: default; }
+  #submit {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint { text-align: center; color: #8c7b6b; margin-top: 12px; min-height: 1.2em; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+    display: none;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+  #retry {
+    display: block;
+    margin: 24px auto 0;
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Náročnější kvíz pro seniory: kdo zvládne 8 z 10, nechá za sebou i vnoučata z vysoké</h1>
+  <p class="perex">Deset tvrdých otázek z dějin, vědy, zeměpisu, umění i literatury. Žádné vzpomínky na mládí, jen fakta. Běžný řešitel jich dá čtyři až pět. Kdo zvládne osm z deseti, nechá za sebou i vnoučata z vysoké.</p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <div class="hint" id="hint"></div>
+  <div id="result">
+    <div id="score"></div>
+    <div id="verdict"></div>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+const questions = [
+  { q: `1. Které božstvo uctívali Nabatejci jako svého nejvyššího boha?`, opts: [`Marduk`, `Aššur`, `Dúšara`, `Chemoš`], correct: 2 },
+  { q: `2. Které město je hlavním městem Nového Zélandu?`, opts: [`Auckland`, `Wellington`, `Christchurch`, `Dunedin`], correct: 1 },
+  { q: `3. Ve kterém roce byl podle tradiční datace založen Řím?`, opts: [`753 př. n. l.`, `509 př. n. l.`, `27 př. n. l.`, `476 n. l.`], correct: 0 },
+  { q: `4. Který římský císař proslul vydáním ediktu milánského roku 313, jímž bylo v říši povoleno křesťanství?`, opts: [`Nero`, `Diokletián`, `Theodosius I.`, `Konstantin I.`], correct: 3 },
+  { q: `5. Kdo je autorem rozsáhlé básnické skladby Ztracený ráj z roku 1667?`, opts: [`Dante Alighieri`, `John Bunyan`, `John Milton`, `William Blake`], correct: 2 },
+  { q: `6. Který z těchto chemických prvků je za pokojové teploty kapalný?`, opts: [`brom`, `jód`, `fosfor`, `síra`], correct: 0 },
+  { q: `7. Který německý malíř je autorem Isenheimského oltáře, vzniklého kolem let 1512 až 1516?`, opts: [`Albrecht Dürer`, `Matthias Grünewald`, `Lucas Cranach starší`, `Hans Holbein mladší`], correct: 1 },
+  { q: `8. Který skladatel je autorem neoklasicistního baletu Karetní hra (Jeu de cartes) z roku 1937?`, opts: [`Sergej Prokofjev`, `Igor Stravinskij`, `Maurice Ravel`, `Dmitrij Šostakovič`], correct: 1 },
+  { q: `9. Který panovník je podle tradice pokládán za posledního, sedmého krále starověkého Říma?`, opts: [`Tarquinius Superbus`, `Numa Pompilius`, `Servius Tullius`, `Ancus Marcius`], correct: 0 },
+  { q: `10. Který britský vědec svým laboratorním pokusem s torzními vahami jako první změřil sílu gravitační přitažlivosti mezi tělesy?`, opts: [`Isaac Newton`, `Michael Faraday`, `James Prescott Joule`, `Henry Cavendish`], correct: 3 }
+];
+const verdicts = [
+  { min: 0, max: 3, text: `Zádrhel hned na startu. Snadné otázky padly, ale barokní hudba, německá renesanční malba i králové starého Říma vás zaskočili. Není se za co stydět, tenhle kvíz srazí většinu lidí.` },
+  { min: 4, max: 6, text: `Solidní všeobecný rozhled na úrovni běžného vzdělaného dospělého. Trefil jste jádro obecných znalostí a k tomu pár tvrdších detailů. Přesně tady se pohybuje průměrný řešitel, na slíbených osm bodů to ale ještě nestačí.` },
+  { min: 7, max: 9, text: `Výjimečný výkon. Zvládl jste i položky, na kterých pohoří většina vysokoškoláků, od nejvyššího boha Nabatejců přes Grünewalda až po posledního římského krále. Přesně o tomhle pásmu mluví titulek, vnoučata z vysoké zůstávají za vámi.` },
+  { min: 10, max: 10, text: `Bezchybně, včetně obou vražedních otázek. Takový výsledek se v tomto kvízu vidí zcela vzácně, klobouk dolů.` }
+];
+const answers = new Array(questions.length).fill(-1);
+let locked = false;
+const letters = [`a`, `b`, `c`, `d`];
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const qt = document.createElement(`div`);
+    qt.className = `q-text`;
+    qt.textContent = item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.textContent = letters[oi] + `) ` + opt;
+      if (answers[qi] === oi) btn.classList.add(`selected`);
+      if (locked) {
+        btn.disabled = true;
+        if (oi === item.correct) btn.classList.add(`correct`);
+        else if (answers[qi] === oi) btn.classList.add(`wrong`);
+      } else {
+        btn.addEventListener(`click`, () => {
+          answers[qi] = oi;
+          render();
+          updateSubmit();
+        });
+      }
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+function updateSubmit() {
+  const all = answers.every(a => a !== -1);
+  submitBtn.disabled = !all;
+  hintEl.textContent = ``;
+}
+submitBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === -1)) { hintEl.textContent = `Odpovězte prosím na všechny otázky`; return; }
+  locked = true;
+  let score = 0;
+  questions.forEach((item, qi) => { if (answers[qi] === item.correct) score++; });
+  render();
+  submitBtn.style.display = `none`;
+  hintEl.textContent = ``;
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  const v = verdicts.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`verdict`).textContent = v ? v.text : ``;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+});
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  for (let i = 0; i < answers.length; i++) answers[i] = -1;
+  locked = false;
+  render();
+  submitBtn.style.display = `block`;
+  submitBtn.disabled = true;
+  resultEl.style.display = `none`;
+  hintEl.textContent = ``;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+render();
+</script>
+</body>
+</html>
