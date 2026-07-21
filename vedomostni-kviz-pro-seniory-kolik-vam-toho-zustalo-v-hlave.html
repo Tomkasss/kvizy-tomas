@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vědomostní kvíz pro seniory: kolik vám toho zůstalo v hlavě ze školy i ze života?</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 24px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.8rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 16px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .opt:disabled { cursor: default; }
+  #submit {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint { text-align: center; color: #8a3a3a; margin: 12px 0 0; min-height: 1.2em; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+    display: none;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #retry {
+    display: block;
+    margin: 28px auto 0;
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Vědomostní kvíz pro seniory: kolik vám toho zůstalo v hlavě ze školy i ze života?</h1>
+  <p class="perex">Deset otázek z oborů, které jste poznávali ve škole i za celý život: literatura, dějiny, příroda, zeměpis i mateřština. Bez spěchu a bez nápovědy. Zjistěte, kolik vám toho v hlavě opravdu zůstalo. Hodně štěstí.</p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <p class="hint" id="hint"></p>
+  <div id="result">
+    <div id="score"></div>
+    <p id="verdict"></p>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+const questions = [
+  { q: `Ve kterém dnešním státě leželo starověké město Kartágo?`, opts: [`Tunisko`, `Libye`, `Alžírsko`, `Egypt`], correct: 0 },
+  { q: `Který chemický prvek je ve vesmíru nejrozšířenější?`, opts: [`helium`, `kyslík`, `uhlík`, `vodík`], correct: 3 },
+  { q: `Který malíř je autorem série obrazů Slunečnice?`, opts: [`Claude Monet`, `Vincent van Gogh`, `Paul Cézanne`, `Paul Gauguin`], correct: 1 },
+  { q: `Který český spisovatel napsal román Krakatit?`, opts: [`Vladislav Vančura`, `Ivan Olbracht`, `Karel Poláček`, `Karel Čapek`], correct: 3 },
+  { q: `Který anglický král nechal popravit svou manželku Annu Boleynovou?`, opts: [`Eduard VI.`, `Jindřich VIII.`, `Karel I.`, `Jiří III.`], correct: 1 },
+  { q: `Co znamená přídavné jméno úskočný?`, opts: [`lstivý a záludný`, `bázlivý a ustrašený`, `prudký a vznětlivý`, `lakomý a skoupý`], correct: 0 },
+  { q: `Jaká je chemická značka draslíku?`, opts: [`D`, `Ka`, `K`, `Dr`], correct: 2 },
+  { q: `Který spisovatel je autorem historického románu Jméno růže?`, opts: [`Italo Calvino`, `Milan Kundera`, `Günter Grass`, `Umberto Eco`], correct: 3 },
+  { q: `Který fyzik objevil elektromagnetickou indukci?`, opts: [`Michael Faraday`, `Alessandro Volta`, `André-Marie Ampère`, `Georg Ohm`], correct: 0 },
+  { q: `Ve které zemi se nachází chrámový komplex Angkor Vat?`, opts: [`Thajsko`, `Vietnam`, `Kambodža`, `Barma`], correct: 2 }
+];
+const letters = [`a`, `b`, `c`, `d`];
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+const scoreEl = document.getElementById(`score`);
+const verdictEl = document.getElementById(`verdict`);
+const retryBtn = document.getElementById(`retry`);
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const qt = document.createElement(`p`);
+    qt.className = `q-text`;
+    qt.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.textContent = letters[oi] + `) ` + opt;
+      btn.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        Array.from(box.querySelectorAll(`.opt`)).forEach(b => b.classList.remove(`selected`));
+        btn.classList.add(`selected`);
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  const all = answers.every(a => a !== null);
+  submitBtn.disabled = !all;
+  if (all) hintEl.textContent = ``;
+}
+
+submitBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll(`.opt`);
+    opts.forEach((btn, oi) => {
+      btn.disabled = true;
+      if (oi === questions[qi].correct) btn.classList.add(`correct`);
+      if (oi === answers[qi] && answers[qi] !== questions[qi].correct) btn.classList.add(`wrong`);
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  scoreEl.textContent = score + ` z ` + questions.length;
+  verdictEl.textContent = verdictFor(score);
+  submitBtn.style.display = `none`;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+function verdictFor(s) {
+  if (s <= 3) return `Ze školních let i z celého života toho v hlavě zůstala jen hrstka a dnes se ozvala spíš plachá. Nevadí, paměť se probouzí čtením, křížovkami a otázkami, nad kterými chvíli posedíte. Dejte si kvíz znovu za pár dní a číslo se hne nahoru.`;
+  if (s <= 6) return `Slušný výsledek přesně tam, kde se pohybuje většina lidí. Základ ze školy i životní zkušenost drží pohromadě, jen ty nejtěžší otázky si zatím nechaly odstup. Máte na čem stavět a k lepšímu skóre chybí jen kousek.`;
+  if (s <= 9) return `Výborně. V hlavě vám zůstalo mnohem víc než jen školní základ a rozhled máte napříč obory, které spolu na první pohled nesouvisí. Do plného počtu vás dělila jedna dvě zapeklité otázky, na kterých ztroskotá skoro každý.`;
+  return `Naprosto bezchybně. Zvládl jste literaturu, dějiny, přírodu, zeměpis i mateřštinu bez jediného zaváhání. Takový přehled ze školy i ze života si drží jen malá menšina. Klobouk dolů.`;
+}
+
+retryBtn.addEventListener(`click`, () => {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  resultEl.style.display = `none`;
+  submitBtn.style.display = `block`;
+  submitBtn.disabled = true;
+  hintEl.textContent = ``;
+  render();
+  document.querySelector(`.wrap`).scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+render();
+</script>
+</body>
+</html>
