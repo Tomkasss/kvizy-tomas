@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bleskový test pro seniory: 10 otázek a odhadnu, jestli je vaší hlavě 50 nebo 70</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 24px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.8rem; line-height: 1.3; color: #2c2c2c; }
+  .perex { font-size: 1.1rem; color: #3a3a3a; margin-bottom: 8px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .opt:disabled { cursor: default; }
+  #submit {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint { text-align: center; color: #8c7b6b; margin-top: 12px; min-height: 1.2em; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+    display: none;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+  #retry {
+    display: block;
+    margin: 24px auto 0;
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Bleskový test pro seniory: 10 otázek a odhadnu, jestli je vaší hlavě 50 nebo 70</h1>
+  <p class="perex">Deset otázek napříč obory a na bystrost úsudku, žádné počítání. Dějiny, příroda, umění, čeština i logika. Podle toho, kolik jich trefíte, odhadnu, jestli vaše hlava pracuje spíš jako v padesáti, nebo blíž sedmdesátce.</p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <div class="hint" id="hint"></div>
+  <div id="result">
+    <div id="score"></div>
+    <div id="verdict"></div>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+const questions = [
+  { q: `1. Které moře jako jediné na světě nemá pevninské břehy a je vymezeno pouze mořskými proudy?`, opts: [`Rudé moře`, `Sargasové moře`, `Kaspické moře`, `Mramorové moře`], correct: 1 },
+  { q: `2. Co patří na místo otazníku: skoupý je ke štědrému jako zbabělý k …?`, opts: [`statečnému`, `bojácnému`, `opatrnému`, `lstivému`], correct: 0 },
+  { q: `3. V kterém prostředí se zvuk šíří nejrychleji?`, opts: [`ve vzduchu`, `ve vodě`, `v oceli`, `ve vakuu`], correct: 2 },
+  { q: `4. Co znamená přídavné jméno „úlisný"?`, opts: [`lakomý a hrabivý`, `roztržitý a zapomnětlivý`, `tvrdohlavý a neústupný`, `falešně lísavý a vlichocující se do něčí přízně`], correct: 3 },
+  { q: `5. Kdo vytvořil proslulou stropní fresku v Sixtinské kapli ve Vatikánu?`, opts: [`Leonardo da Vinci`, `Raffael Santi`, `Michelangelo Buonarroti`, `Sandro Botticelli`], correct: 2 },
+  { q: `6. Jestliže všechny kočky rády spí a Mína ráda nespí, co z toho jistě vyplývá?`, opts: [`Mína není kočka`, `Mína je kočka`, `Mína je pes`, `nelze nic jistě určit`], correct: 0 },
+  { q: `7. Který jev způsobí, že rovná tužka zpola ponořená do sklenice s vodou vypadá jako zlomená?`, opts: [`odraz světla`, `lom světla`, `rozklad světla`, `pohlcení světla`], correct: 1 },
+  { q: `8. Která řeka je nejdelší v Evropě?`, opts: [`Dunaj`, `Rýn`, `Dněpr`, `Volha`], correct: 3 },
+  { q: `9. Který mořeplavec vedl výpravu, jež jako první obeplula zeměkouli?`, opts: [`Fernão de Magalhães`, `Kryštof Kolumbus`, `Vasco da Gama`, `James Cook`], correct: 0 },
+  { q: `10. Který skladatel je autorem opery Figarova svatba?`, opts: [`Gioachino Rossini`, `Giuseppe Verdi`, `Wolfgang Amadeus Mozart`, `Giacomo Puccini`], correct: 2 }
+];
+const verdicts = [
+  { min: 0, max: 3, text: `Věk vaší hlavy vychází kolem 70 let. Dnes vás zaskočily jemné významy slov i otázky, kde se první nabízející odpověď ukázala jako past. Nic ztraceného, bystrost se dá probouzet. Čtěte, luštěte a nad každou otázkou chvíli setrvejte, příště bude číslo znatelně níž.` },
+  { min: 4, max: 6, text: `Věk vaší hlavy vychází zhruba na 60 až 65 let. Přesně tady se pohybuje většina řešitelů. Půlku úloh jste rozlouskli s jistotou, u zbytku vás strhla lákavější varianta. Solidní kondice, na které se dá dál stavět.` },
+  { min: 7, max: 9, text: `Věk vaší hlavy vychází kolem 50 až 55 let. Fakta z různých oborů i logické úvahy vám naskakují svižně a na většinu nástrah jste nenaletěli. Takovou svěžest vám leckterý mladší jen tiše závidí, k plnému počtu chybělo opravdu málo.` },
+  { min: 10, max: 10, text: `Věk vaší hlavy vychází na skvělých 50 let, přesně jak slibuje titulek. Ani jedna past vás nezastavila, přehled i úsudek vám slouží ve špičkové formě. Plný počet tu zvládne jen menšina. Klobouk dolů.` }
+];
+const answers = new Array(questions.length).fill(-1);
+let locked = false;
+const letters = [`a`, `b`, `c`, `d`];
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const qt = document.createElement(`div`);
+    qt.className = `q-text`;
+    qt.textContent = item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.textContent = letters[oi] + `) ` + opt;
+      if (answers[qi] === oi) btn.classList.add(`selected`);
+      if (locked) {
+        btn.disabled = true;
+        if (oi === item.correct) btn.classList.add(`correct`);
+        else if (answers[qi] === oi) btn.classList.add(`wrong`);
+      } else {
+        btn.addEventListener(`click`, () => {
+          answers[qi] = oi;
+          render();
+          updateSubmit();
+        });
+      }
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+function updateSubmit() {
+  const all = answers.every(a => a !== -1);
+  submitBtn.disabled = !all;
+  hintEl.textContent = ``;
+}
+submitBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === -1)) { hintEl.textContent = `Odpovězte prosím na všechny otázky`; return; }
+  locked = true;
+  let score = 0;
+  questions.forEach((item, qi) => { if (answers[qi] === item.correct) score++; });
+  render();
+  submitBtn.style.display = `none`;
+  hintEl.textContent = ``;
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  const v = verdicts.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`verdict`).textContent = v ? v.text : ``;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+});
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  for (let i = 0; i < answers.length; i++) answers[i] = -1;
+  locked = false;
+  render();
+  submitBtn.style.display = `block`;
+  submitBtn.disabled = true;
+  resultEl.style.display = `none`;
+  hintEl.textContent = ``;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+render();
+</script>
+</body>
+</html>
