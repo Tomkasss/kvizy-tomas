@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retro kvíz značek z dob ČSSR: schováváme 10 legend. Poznáte je?</title>
+<style>
+* { box-sizing: border-box; }
+body { font-family: Georgia,"Times New Roman",serif; background:#f5f0eb; color:#2c2c2c; margin:0; padding:24px 16px; }
+.wrap { max-width:720px; margin:0 auto; }
+h1 { font-size:1.7rem; line-height:1.3; color:#2c2c2c; }
+.perex { font-size:1.1rem; line-height:1.55; color:#4a4a4a; margin-bottom:8px; }
+.q { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); padding:28px; margin-bottom:24px; }
+.q-text { font-weight:bold; font-size:1.15rem; color:#2c2c2c; margin-bottom:16px; }
+.opt { display:block; width:100%; text-align:left; padding:14px 18px; background:#f7f4f0; border:1px solid #d9d2c9; border-radius:8px; font-size:1rem; color:#3a3a3a; margin-bottom:10px; cursor:pointer; font-family:inherit; }
+.opt:hover { background:#ede8e1; }
+.opt.selected { background:#dcd3c7; border:1px solid #a89e92; font-weight:bold; }
+.opt.correct { background:#d4edda; border:1px solid #7cb987; color:#1e5631; }
+.opt.wrong { background:#f8d7da; border:1px solid #d4848a; color:#721c24; }
+.opt:disabled { cursor:default; }
+#submit { background:#5b7e5f; color:#fff; padding:16px 40px; border-radius:8px; font-size:1.1rem; font-weight:bold; border:none; display:block; margin:40px auto 0; cursor:pointer; font-family:inherit; }
+#submit:hover { background:#4a6b4e; }
+#submit:disabled { background:#b5b5b5; cursor:not-allowed; }
+.warn { text-align:center; color:#a05a5a; margin-top:14px; min-height:1.2em; }
+#result { background:#fefcf9; border-top:4px solid #5b7e5f; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); padding:28px; margin-top:24px; display:none; }
+#score { font-size:2.5rem; font-weight:bold; color:#5b7e5f; text-align:center; margin:0 0 12px; }
+#verdict { font-size:1rem; color:#4a4a4a; text-align:center; line-height:1.55; }
+#retry { background:#8c7b6b; color:#fff; padding:16px 40px; border-radius:8px; font-size:1.1rem; font-weight:bold; border:none; display:block; margin:24px auto 0; cursor:pointer; font-family:inherit; }
+#retry:hover { background:#756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Retro kvíz značek z dob ČSSR: schováváme 10 legend. Poznáte je?</h1>
+<p class="perex">Značky aut i mopedů, hodinek, bot, kol i limonád, které provázely život v socialistickém Československu. Deset legend napříč obory, od garáže přes koupelnu až po fotobrašnu. Kolik jich po letech poznáte?</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="warn" id="warn"></p>
+<div id="result">
+<p id="score"></p>
+<p id="verdict"></p>
+<button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+{ q: `Sycený nealkoholický nápoj vyrobený z hroznů, uvedený na trh v roce 1974, se rychle stal oblíbenou tuzemskou náhradou západních kolových limonád. Jak se jmenoval?`, opts: [`Vinea`,`Traubi`,`Vitakola`,`Sinalco`], correct: 0 },
+{ q: `Který národní podnik se v roce 1949 stal největším československým výrobcem obuvi a udržel si toto postavení po celou éru ČSSR?`, opts: [`Botana`,`Svit`,`Snaha`,`Prabos`], correct: 1 },
+{ q: `Lehký moped se šlapacím ústrojím, jehož typ 207 mířil od roku 1976 prakticky celou produkcí na export do desítek zemí, patřil ke které značce?`, opts: [`Stadion`,`Pionýr`,`Babetta`,`Manet`], correct: 2 },
+{ q: `Luxusní osobní vůz s obtékavou zaoblenou karoserií a vzduchem chlazeným osmiválcem uloženým vzadu, vyráběný od poloviny 50. let v Kopřivnici hlavně pro státní funkcionáře. O který model šlo?`, opts: [`Tatra 603`,`Tatra 613`,`Tatra 87`,`Tatra 700`], correct: 0 },
+{ q: `Sportovní silniční jízdní kola značky Favorit, vysněný dopravní prostředek generací mladých cyklistů, se vyráběla v kterém městě?`, opts: [`Cheb`,`Rokycany`,`Kolín`,`Prostějov`], correct: 1 },
+{ q: `Plastové stavebnice modelů aut, které se skládaly bez lepidla pouhým zacvakáváním dílů a dozdobovaly nálepkami, uvedly v roce 1984 Kovozávody Semily. Pod jakým názvem se tato řada prodávala?`, opts: [`Merkur`,`Cheva`,`Seva`,`Monti System`], correct: 3 },
+{ q: `Francovka značky Alpa z Velkého Meziříčí, po desetiletí používaná na masáže i unavené nohy, vděčí za svou nezaměnitelnou svěží vůni hlavně přírodní silici z které rostliny?`, opts: [`z levandule`,`z eukalyptu`,`z máty`,`z rozmarýnu`], correct: 2 },
+{ q: `Nejrozšířenější tuzemská dvouoká zrcadlovka na svitkový film, kterou v Přerově vyráběl podnik Meopta, nesla jaký název?`, opts: [`Flexaret`,`Etareta`,`Opema`,`Pionýr`], correct: 0 },
+{ q: `Ve kterém východočeském městě se od konce 50. let vyráběly náramkové hodinky značky Prim?`, opts: [`Trutnov`,`Rychnov nad Kněžnou`,`Náchod`,`Nové Město nad Metují`], correct: 3 },
+{ q: `Tuzemské polyamidové vlákno typu 6, jehož výroba začala roku 1950 v Plané nad Lužnicí a z něhož se staly proslulé dámské punčochy, dostalo jaký název?`, opts: [`tesil`,`silon`,`dederon`,`nylon`], correct: 1 }
+];
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+const quizEl = document.getElementById('quiz');
+const submitBtn = document.getElementById('submit');
+const warnEl = document.getElementById('warn');
+const letters = ['a','b','c','d'];
+
+function render() {
+  quizEl.innerHTML = '';
+  questions.forEach((item, qi) => {
+    const box = document.createElement('div');
+    box.className = 'q';
+    const qt = document.createElement('div');
+    qt.className = 'q-text';
+    qt.textContent = (qi+1) + '. ' + item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = letters[oi] + ') ' + opt;
+      if (answers[qi] === oi) btn.classList.add('selected');
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        answers[qi] = oi;
+        render();
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+function updateSubmit() {
+  const all = answers.every(a => a !== null);
+  submitBtn.disabled = !all;
+  if (all) warnEl.textContent = '';
+}
+submitBtn.addEventListener('click', () => {
+  if (answers.some(a => a === null)) { warnEl.textContent = 'Odpovězte prosím na všechny otázky'; return; }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll('.q');
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll('.opt');
+    opts.forEach((btn, oi) => {
+      btn.disabled = true;
+      btn.classList.remove('selected');
+      if (oi === questions[qi].correct) btn.classList.add('correct');
+      else if (oi === answers[qi]) btn.classList.add('wrong');
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  showResult(score);
+});
+function showResult(score) {
+  const scoreEl = document.getElementById('score');
+  const verdictEl = document.getElementById('verdict');
+  scoreEl.textContent = score + ' z 10';
+  let text;
+  if (score <= 3) text = 'Značky socialistického Československa vám dnes splývají. Éru jste možná zastihli jen okrajem dětství, nebo vám názvy z výkladů, garáží a spíží z paměti vyprchaly. Nevadí, stačí zalistovat starým katalogem nebo rodinnými fotkami a leccos se vám samo vybaví.';
+  else if (score <= 6) text = 'Poctivý průměr pamětníka. Půlku legend jste poznali s jistotou, u zbytku jste chvíli lovili v paměti. Slavnější kousky máte v malíku, u méně omílaných výrobců, měst a modelů jste ale zaváhali. Přesně tady se pohybuje většina těch, kdo tu dobu prožili.';
+  else if (score <= 9) text = 'Výborný výkon. Spotřební značky ČSSR znáte napříč obory, od vozu z Kopřivnice přes kola z Rokycan až po hodinky a francovku. Poznáte i to, co jsme schovali za popis bez jména. K plnému počtu vám chybělo opravdu málo.';
+  else text = 'Plný počet a titul ostříleného pamětníka. Všech deset legend jste odhalili jen podle popisu, bez jediné nápovědy v podobě obrázku. Tatra, Babetta, Flexaret i silon pro vás nejsou žádná neznámá. Takový přehled o značkách té doby má dnes málokdo, klobouk dolů.';
+  verdictEl.textContent = text;
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+}
+document.getElementById('retry').addEventListener('click', () => {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  document.getElementById('result').style.display = 'none';
+  warnEl.textContent = '';
+  render();
+  updateSubmit();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+render();
+updateSubmit();
+</script>
+</body>
+</html>
