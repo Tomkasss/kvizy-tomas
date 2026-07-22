@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zeměpisný kvíz pro každého: základ ze školy nedá dnes na 10/10 skoro nikdo</title>
+<style>
+* { box-sizing: border-box; }
+body { font-family: Georgia,"Times New Roman",serif; background:#f5f0eb; color:#2c2c2c; margin:0; padding:24px 16px; }
+.wrap { max-width:720px; margin:0 auto; }
+h1 { font-size:1.7rem; line-height:1.3; color:#2c2c2c; }
+.perex { font-size:1.1rem; line-height:1.55; color:#4a4a4a; margin-bottom:8px; }
+.q { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); padding:28px; margin-bottom:24px; }
+.q-text { font-weight:bold; font-size:1.15rem; color:#2c2c2c; margin-bottom:16px; }
+.opt { display:block; width:100%; text-align:left; padding:14px 18px; background:#f7f4f0; border:1px solid #d9d2c9; border-radius:8px; font-size:1rem; color:#3a3a3a; margin-bottom:10px; cursor:pointer; font-family:inherit; }
+.opt:hover { background:#ede8e1; }
+.opt.selected { background:#dcd3c7; border:1px solid #a89e92; font-weight:bold; }
+.opt.correct { background:#d4edda; border:1px solid #7cb987; color:#1e5631; }
+.opt.wrong { background:#f8d7da; border:1px solid #d4848a; color:#721c24; }
+.opt:disabled { cursor:default; }
+#submit { background:#5b7e5f; color:#fff; padding:16px 40px; border-radius:8px; font-size:1.1rem; font-weight:bold; border:none; display:block; margin:40px auto 0; cursor:pointer; font-family:inherit; }
+#submit:hover { background:#4a6b4e; }
+#submit:disabled { background:#b5b5b5; cursor:not-allowed; }
+.warn { text-align:center; color:#a05a5a; margin-top:14px; min-height:1.2em; }
+#result { background:#fefcf9; border-top:4px solid #5b7e5f; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); padding:28px; margin-top:24px; display:none; }
+#score { font-size:2.5rem; font-weight:bold; color:#5b7e5f; text-align:center; margin:0 0 12px; }
+#verdict { font-size:1rem; color:#4a4a4a; text-align:center; line-height:1.55; }
+#retry { background:#8c7b6b; color:#fff; padding:16px 40px; border-radius:8px; font-size:1.1rem; font-weight:bold; border:none; display:block; margin:24px auto 0; cursor:pointer; font-family:inherit; }
+#retry:hover { background:#756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Zeměpisný kvíz pro každého: základ ze školy nedá dnes na 10/10 skoro nikdo</h1>
+<p class="perex">Kontinenty a oceány, státy a hlavní města, řeky, pohoří i pouště. Deset otázek ze světového zeměpisu ze základní i střední školy. Většina lidí dá sedm nebo osm, ale plných 10 z 10 nasbírá jen málokdo. Jak si povedete vy?</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="warn" id="warn"></p>
+<div id="result">
+<p id="score"></p>
+<p id="verdict"></p>
+<button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+{ q: `Které město je hlavním městem Brazílie?`, opts: [`Rio de Janeiro`,`São Paulo`,`Brasília`,`Salvador`], correct: 2 },
+{ q: `Který oceán omývá východní pobřeží Afriky?`, opts: [`Atlantský oceán`,`Indický oceán`,`Tichý oceán`,`Severní ledový oceán`], correct: 1 },
+{ q: `Na kterém kontinentu se rozkládá pohoří Atlas?`, opts: [`Afrika`,`Asie`,`Jižní Amerika`,`Austrálie`], correct: 0 },
+{ q: `Do kterého moře se vlévá řeka Dunaj?`, opts: [`Středozemního moře`,`Baltského moře`,`Černého moře`,`Kaspického moře`], correct: 2 },
+{ q: `Na kterém kontinentu leží poušť Gobi?`, opts: [`Afrika`,`Austrálie`,`Jižní Amerika`,`Asie`], correct: 3 },
+{ q: `Ke kterému státu patří ostrov Grónsko?`, opts: [`Dánsko`,`Norsko`,`Island`,`Kanada`], correct: 0 },
+{ q: `Na kterém kontinentu leží Viktoriino jezero?`, opts: [`Asie`,`Afrika`,`Severní Amerika`,`Jižní Amerika`], correct: 1 },
+{ q: `Ke kterému státu patří Kanárské ostrovy?`, opts: [`Španělsko`,`Portugalsko`,`Maroko`,`Itálie`], correct: 0 },
+{ q: `Na kterém poloostrově leží Řecko?`, opts: [`Apeninský poloostrov`,`Pyrenejský poloostrov`,`Balkánský poloostrov`,`Skandinávský poloostrov`], correct: 2 },
+{ q: `Které moře odděluje Afriku od Arabského poloostrova?`, opts: [`Středozemní moře`,`Černé moře`,`Kaspické moře`,`Rudé moře`], correct: 3 }
+];
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+const quizEl = document.getElementById('quiz');
+const submitBtn = document.getElementById('submit');
+const warnEl = document.getElementById('warn');
+const letters = ['a','b','c','d'];
+
+function render() {
+  quizEl.innerHTML = '';
+  questions.forEach((item, qi) => {
+    const box = document.createElement('div');
+    box.className = 'q';
+    const qt = document.createElement('div');
+    qt.className = 'q-text';
+    qt.textContent = (qi+1) + '. ' + item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = letters[oi] + ') ' + opt;
+      if (answers[qi] === oi) btn.classList.add('selected');
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        answers[qi] = oi;
+        render();
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+function updateSubmit() {
+  const all = answers.every(a => a !== null);
+  submitBtn.disabled = !all;
+  if (all) warnEl.textContent = '';
+}
+submitBtn.addEventListener('click', () => {
+  if (answers.some(a => a === null)) { warnEl.textContent = 'Odpovězte prosím na všechny otázky'; return; }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll('.q');
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll('.opt');
+    opts.forEach((btn, oi) => {
+      btn.disabled = true;
+      btn.classList.remove('selected');
+      if (oi === questions[qi].correct) btn.classList.add('correct');
+      else if (oi === answers[qi]) btn.classList.add('wrong');
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  showResult(score);
+});
+function showResult(score) {
+  const scoreEl = document.getElementById('score');
+  const verdictEl = document.getElementById('verdict');
+  scoreEl.textContent = score + ' z 10';
+  let text;
+  if (score <= 3) text = 'Svět se vám zatím slévá do jedné velké mapy. Kontinenty, oceány i hlavní města cizích států se pletou a jistota chybí. Nevadí, projděte si správné odpovědi, ať se příště odrazíte výš.';
+  else if (score <= 6) text = 'Základ ze školy ve vás zůstal. Poznáte kontinenty, velké řeky i známé pouště, ale u sousedních států, poloostrovů nebo méně nápadných moří jistota kolísá. Do plného počtu vám chybí už jen kousek.';
+  else if (score <= 9) text = 'Výborně. Světový zeměpis máte pevně zažitý a mapou se pohybujete s přehledem. Ke stovce vám chyběl jen krok, nejspíš na jediné záludnější otázce, kde se dva pojmy nabízely stejně. Skvělý výsledek.';
+  else text = 'Naprostá špička. Od hlavních měst cizích států přes pohoří a pouště až po ostrovy a moře jste nezaváhali ani jednou. Plných 10 z 10 ze světového zeměpisu nasbírá opravdu jen zlomek lidí a vy mezi ně patříte.';
+  verdictEl.textContent = text;
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+}
+document.getElementById('retry').addEventListener('click', () => {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  document.getElementById('result').style.display = 'none';
+  warnEl.textContent = '';
+  render();
+  updateSubmit();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+render();
+updateSubmit();
+</script>
+</body>
+</html>
