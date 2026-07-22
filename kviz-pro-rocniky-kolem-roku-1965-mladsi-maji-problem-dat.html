@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro ročníky kolem roku 1965: mladší mají problém dát aspoň 6/10</title>
+<style>
+* { box-sizing: border-box; }
+body { font-family: Georgia,"Times New Roman",serif; background:#f5f0eb; color:#2c2c2c; margin:0; padding:24px 16px; }
+.wrap { max-width:720px; margin:0 auto; }
+h1 { font-size:1.7rem; line-height:1.3; color:#2c2c2c; }
+.perex { font-size:1.1rem; line-height:1.55; color:#4a4a4a; margin-bottom:8px; }
+.q { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); padding:28px; margin-bottom:24px; }
+.q-text { font-weight:bold; font-size:1.15rem; color:#2c2c2c; margin-bottom:16px; }
+.opt { display:block; width:100%; text-align:left; padding:14px 18px; background:#f7f4f0; border:1px solid #d9d2c9; border-radius:8px; font-size:1rem; color:#3a3a3a; margin-bottom:10px; cursor:pointer; font-family:inherit; }
+.opt:hover { background:#ede8e1; }
+.opt.selected { background:#dcd3c7; border:1px solid #a89e92; font-weight:bold; }
+.opt.correct { background:#d4edda; border:1px solid #7cb987; color:#1e5631; }
+.opt.wrong { background:#f8d7da; border:1px solid #d4848a; color:#721c24; }
+.opt:disabled { cursor:default; }
+#submit { background:#5b7e5f; color:#fff; padding:16px 40px; border-radius:8px; font-size:1.1rem; font-weight:bold; border:none; display:block; margin:40px auto 0; cursor:pointer; font-family:inherit; }
+#submit:hover { background:#4a6b4e; }
+#submit:disabled { background:#b5b5b5; cursor:not-allowed; }
+.warn { text-align:center; color:#a05a5a; margin-top:14px; min-height:1.2em; }
+#result { background:#fefcf9; border-top:4px solid #5b7e5f; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); padding:28px; margin-top:24px; display:none; }
+#score { font-size:2.5rem; font-weight:bold; color:#5b7e5f; text-align:center; margin:0 0 12px; }
+#verdict { font-size:1rem; color:#4a4a4a; text-align:center; line-height:1.55; }
+#retry { background:#8c7b6b; color:#fff; padding:16px 40px; border-radius:8px; font-size:1.1rem; font-weight:bold; border:none; display:block; margin:24px auto 0; cursor:pointer; font-family:inherit; }
+#retry:hover { background:#756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro ročníky kolem roku 1965: mladší mají problém dát aspoň 6/10</h1>
+<p class="perex">Diskotéky, sobotní televizní estrády, plné stadiony i kina, kam se stály fronty. Kdo dospíval v sedmdesátých a osmdesátých letech, má náskok. Deset otázek napříč hudbou, filmem, sportem i dějinami té doby.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="warn" id="warn"></p>
+<div id="result">
+<p id="score"></p>
+<p id="verdict"></p>
+<button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+{ q: `Který scenárista napsal televizní seriály Nemocnice na kraji města, Žena za pultem i Muž na radnici?`, opts: [`František Pavlíček`,`Jaroslav Dietl`,`Otto Zelenka`,`Jaroslav Papoušek`], correct: 1 },
+{ q: `Kdo je zakládajícím frontmanem, kytaristou a zpěvákem rockové skupiny Katapult, jedné z nejúspěšnějších českých kytarových kapel přelomu sedmdesátých a osmdesátých let?`, opts: [`Vladimír Mišík`,`Radim Hladík`,`Miki Volek`,`Oldřich Říha`], correct: 3 },
+{ q: `Který herec ztvárnil amerického detektiva Nicka Cartera v komediální detektivce Adéla ještě nevečeřela?`, opts: [`Jiří Bartoška`,`Michal Dočolomanský`,`Karel Heřmánek`,`Marián Labuda`], correct: 1 },
+{ q: `Který československý tenista zvítězil v roce 1973 ve dvouhře mužů na Wimbledonu?`, opts: [`Ivan Lendl`,`Tomáš Šmíd`,`Miloslav Mečíř`,`Jan Kodeš`], correct: 3 },
+{ q: `Který československý atlet se na prvním mistrovství světa v atletice v Helsinkách roku 1983 stal vůbec prvním světovým šampionem v hodu diskem?`, opts: [`Imrich Bugár`,`Ludvík Daněk`,`Remigius Machura`,`Jozef Pribilinec`], correct: 0 },
+{ q: `Který zpěvák a baskytarista je dlouholetou vůdčí osobností slovenské skupiny Elán?`, opts: [`Miroslav Žbirka`,`Vašo Patejdl`,`Jožo Ráž`,`Pavol Habera`], correct: 2 },
+{ q: `Která československá atletka vytvořila v roce 1983 dodnes platný světový rekord v běhu na 800 metrů?`, opts: [`Helena Fibingerová`,`Táňa Kocembová`,`Ludmila Formanová`,`Jarmila Kratochvílová`], correct: 3 },
+{ q: `Kdo založil roku 1977 kultovní rockovou skupinu Pražský výběr, kterou režim v osmdesátých letech na několik let umlčel?`, opts: [`Petr Janda`,`Michael Kocáb`,`Vilém Čok`,`Aleš Brichta`], correct: 1 },
+{ q: `Který režisér natočil v roce 1982 populární tragikomedii Sněženky a machři o lyžařském výcviku středoškoláků?`, opts: [`Zdeněk Troška`,`Dušan Klein`,`Karel Smyczek`,`Jiří Menzel`], correct: 2 },
+{ q: `Který filozof se stal jedním z prvních tří mluvčích Charty 77 a v březnu 1977 zemřel po vyčerpávajícím výslechu Státní bezpečnosti?`, opts: [`Jan Patočka`,`Karel Kosík`,`Milan Machovec`,`Egon Bondy`], correct: 0 }
+];
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+const quizEl = document.getElementById('quiz');
+const submitBtn = document.getElementById('submit');
+const warnEl = document.getElementById('warn');
+const letters = ['a','b','c','d'];
+
+function render() {
+  quizEl.innerHTML = '';
+  questions.forEach((item, qi) => {
+    const box = document.createElement('div');
+    box.className = 'q';
+    const qt = document.createElement('div');
+    qt.className = 'q-text';
+    qt.textContent = (qi+1) + '. ' + item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = letters[oi] + ') ' + opt;
+      if (answers[qi] === oi) btn.classList.add('selected');
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        answers[qi] = oi;
+        render();
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+function updateSubmit() {
+  const all = answers.every(a => a !== null);
+  submitBtn.disabled = !all;
+  if (all) warnEl.textContent = '';
+}
+submitBtn.addEventListener('click', () => {
+  if (answers.some(a => a === null)) { warnEl.textContent = 'Odpovězte prosím na všechny otázky'; return; }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll('.q');
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll('.opt');
+    opts.forEach((btn, oi) => {
+      btn.disabled = true;
+      btn.classList.remove('selected');
+      if (oi === questions[qi].correct) btn.classList.add('correct');
+      else if (oi === answers[qi]) btn.classList.add('wrong');
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  showResult(score);
+});
+function showResult(score) {
+  const scoreEl = document.getElementById('score');
+  const verdictEl = document.getElementById('verdict');
+  scoreEl.textContent = score + ' z 10';
+  let text;
+  if (score <= 3) text = 'Sedmdesátá a osmdesátá léta vám dnes splývají do jednoho pásma. Nejspíš jste tu dobu zastihli jen okrajově, nebo se vám jména z obrazovek, stadionů a gramofonů z paměti vytratila. Tady se obvykle scházejí mladší ročníky, které tu éru samy neprožily.';
+  else if (score <= 6) text = 'Poctivý průměr pamětníka. Největší hity a nejslavnější tváře poznáváte s jistotou, u méně omílaných jmen jste ale zaváhali. Přesně na téhle hranici se pohybuje většina těch, kdo v té době dospívali, a přes kterou se mladší dostávají jen výjimečně.';
+  else if (score <= 9) text = 'Výborný výkon. Dobu svého mládí máte v malíku napříč hudbou, filmem, sportem i dějinami. K plnému počtu vám chybělo jen pár detailů, které si běžně vybaví málokdo. Tohle skóre je pro mladší generaci prakticky nedosažitelné.';
+  else text = 'Plný počet a titul ostříleného pamětníka. Poznáte nejen velké hvězdy, ale i tvůrce, sportovce a osobnosti, kteří většině lidí dávno vypadli z paměti. Kdo si po letech vybaví režiséra Sněženek i filozofa z prvních mluvčích Charty, ten sedmdesátá a osmdesátá léta opravdu prožil. Takový přehled má dnes málokdo.';
+  verdictEl.textContent = text;
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+}
+document.getElementById('retry').addEventListener('click', () => {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  document.getElementById('result').style.display = 'none';
+  warnEl.textContent = '';
+  render();
+  updateSubmit();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+render();
+updateSubmit();
+</script>
+</body>
+</html>
