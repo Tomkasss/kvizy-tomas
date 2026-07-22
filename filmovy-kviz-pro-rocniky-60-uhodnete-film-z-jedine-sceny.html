@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Filmový kvíz pro ročníky 60+: uhodnete film z jediné scény? Mladí u toho tápou</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: "Georgia", "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 40px 16px;
+  line-height: 1.6;
+}
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+}
+h1 {
+  font-size: 1.8rem;
+  margin: 0 0 20px 0;
+  color: #2c2c2c;
+  line-height: 1.3;
+}
+.perex {
+  font-size: 1.05rem;
+  color: #4a4a4a;
+  margin-bottom: 32px;
+  font-style: italic;
+}
+.question {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.question-text {
+  font-weight: bold;
+  font-size: 1.15rem;
+  color: #2c2c2c;
+  margin-bottom: 18px;
+}
+.option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.option:last-child { margin-bottom: 0; }
+.option:hover:not(:disabled) { background: #ede8e1; }
+.option.selected {
+  background: #dcd3c7;
+  border: 1px solid #a89e92;
+  font-weight: bold;
+}
+.option.correct {
+  background: #d4edda;
+  border: 1px solid #7cb987;
+  color: #1e5631;
+}
+.option.incorrect {
+  background: #f8d7da;
+  border: 1px solid #d4848a;
+  color: #721c24;
+}
+.option:disabled { cursor: default; }
+#evaluate-btn {
+  display: block;
+  margin: 40px auto 0;
+  background: #5b7e5f;
+  color: #ffffff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+#evaluate-btn:hover:not(:disabled) { background: #4a6b4e; }
+#evaluate-btn:disabled {
+  background: #b5b5b5;
+  cursor: not-allowed;
+}
+#result {
+  display: none;
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 32px;
+  text-align: center;
+}
+.score {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #5b7e5f;
+  margin-bottom: 12px;
+}
+.eval-text {
+  font-size: 1rem;
+  color: #4a4a4a;
+  margin-bottom: 20px;
+}
+#retry-btn {
+  display: block;
+  margin: 24px auto 0;
+  background: #8c7b6b;
+  color: #ffffff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+#retry-btn:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 20px 16px; }
+  h1 { font-size: 1.5rem; }
+  .question { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Filmový kvíz pro ročníky 60+: uhodnete film z jediné scény? Mladí u toho tápou</h1>
+<p class="perex">Jedna scéna, jedna hláška, jeden obraz a hned víte, o který film jde. Prošli jste zlatou érou kin i nedělních televizních večerů, tak zkuste, jestli poznáte deset klasik českého i světového filmu z jediného výjevu.</p>
+<div id="quiz"></div>
+<button id="evaluate-btn" disabled>Vyhodnotit</button>
+<div id="result">
+  <div class="score" id="score-text"></div>
+  <div class="eval-text" id="eval-text"></div>
+  <button id="retry-btn">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  {
+    q: `1. Ze kterého filmu pochází scéna, v níž vystupuje kouzelník a zvíře v brýlích, jež po jejich sundání svým pohledem obarví lidi podle povahy, takže lháři zfialovějí?`,
+    options: [`Až přijde kocour`, `Kdyby tisíc klarinetů`, `Fantom Morrisvillu`, `Bílá paní`],
+    correct: 0
+  },
+  {
+    q: `2. Ze kterého filmu pochází scéna, v níž samozvaný inkvizitor v severomoravském kraji 17. století mučením vynucuje přiznání údajných čarodějnic?`,
+    options: [`Markéta Lazarová`, `Spalovač mrtvol`, `Kladivo na čarodějnice`, `Údolí včel`],
+    correct: 2
+  },
+  {
+    q: `3. Ze kterého filmu pochází scéna, v níž americký detektiv v secesní Praze pátrá po nepolapitelném zločinci přezdívaném Zahradník?`,
+    options: [`Tajemství hradu v Karpatech`, `Zítra vstanu a opařím se čajem`, `Což takhle dát si špenát`, `Adéla ještě nevečeřela`],
+    correct: 3
+  },
+  {
+    q: `4. Ze kterého filmu pochází scéna, v níž gymnaziální profesor latiny truchlí nad třemi maturanty, které gestapo popravilo za pošklebek nad atentátem na říšského protektora?`,
+    options: [`Smrt si říká Engelchen`, `Transport z ráje`, `Démanty noci`, `Vyšší princip`],
+    correct: 3
+  },
+  {
+    q: `5. Ze kterého filmu pochází scéna, v níž advokát zorganizuje řetězovou výměnu bytů dvanácti rodin najednou?`,
+    options: [`Rozpuštěný a vypuštěný`, `Jak utopit doktora Mráčka`, `Kulový blesk`, `Trhák`],
+    correct: 2
+  },
+  {
+    q: `6. Ze kterého filmu pochází scéna, v níž vědci oživí kreslené postavy z komiksu a svalnatý silák s kovbojem svírajícím revolver spolu mluví v bublinách vznášejících se ve vzduchu?`,
+    options: [`Kdo chce zabít Jessii?`, `Ikarie XB-1`, `Zabil jsem Einsteina, pánové`, `Pane, vy jste vdova!`],
+    correct: 0
+  },
+  {
+    q: `7. Ze kterého filmu pochází scéna, v níž novinář veze princeznu na skútru Římem a skončí spolu na policejní stanici?`,
+    options: [`Prázdniny v Římě`, `Sabrina`, `Snídaně u Tiffanyho`, `Casablanca`],
+    correct: 0
+  },
+  {
+    q: `8. Ze kterého filmu pochází scéna, v níž si manželka správce pivovaru nechá zkrátit své obdivované dlouhé vlasy na krátko podle moderní módy?`,
+    options: [`Slavnosti sněženek`, `Postřižiny`, `Rozmarné léto`, `Báječní muži s klikou`],
+    correct: 1
+  },
+  {
+    q: `9. Ze kterého filmu pochází scéna, v níž rytíř vracející se z křížové výpravy hraje na mořském břehu partii šachů se Smrtí?`,
+    options: [`Rašómon`, `Andrej Rublev`, `Sedmá pečeť`, `Divoké jahody`],
+    correct: 2
+  },
+  {
+    q: `10. Ze kterého filmu pochází scéna, v níž stranický funkcionář v noci prohledává vlastní vilu, protože tuší, že je odposloucháván StB?`,
+    options: [`Všichni dobří rodáci`, `Ucho`, `Skřivánci na niti`, `Hoří, má panenko`],
+    correct: 1
+  }
+];
+
+const evalRanges = [
+  { min: 0, max: 3, text: `Filmy jste sice viděli, ale poznat je z jediného útržku vám dělá potíže. Nevadí, tohle je disciplína pro ostřílené pamětníky. Zkuste to znovu, až vám příště naskočí nedělní odpolední film.` },
+  { min: 4, max: 6, text: `Slušný výsledek pravého filmového pamětníka. Velké klasiky spolehlivě poznáte, na méně okatých scénách vás ale kvíz nachytal. Poctivý průměr člověka, který do kina chodil rád.` },
+  { min: 7, max: 9, text: `Výborně, tady mluví opravdový znalec zlaté éry filmu. Scény spojujete s tituly jistě a nenachytají vás ani záludnější výjevy. Do plného počtu vám chyběl jen kousek.` },
+  { min: 10, max: 10, text: `Mistrovský výkon a titul filmového pamětníka bez chybičky. Znáte i to, co většině lidí dávno vypadlo z paměti. Vaše hlava je jako filmový archiv.` }
+];
+
+const answers = new Array(questions.length).fill(null);
+let evaluated = false;
+
+const quizEl = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`evaluate-btn`);
+const resultEl = document.getElementById(`result`);
+const scoreEl = document.getElementById(`score-text`);
+const evalTextEl = document.getElementById(`eval-text`);
+const retryBtn = document.getElementById(`retry-btn`);
+
+function renderQuiz() {
+  quizEl.innerHTML = ``;
+  questions.forEach((question, qIdx) => {
+    const box = document.createElement(`div`);
+    box.className = `question`;
+    const qText = document.createElement(`div`);
+    qText.className = `question-text`;
+    qText.textContent = question.q;
+    box.appendChild(qText);
+    question.options.forEach((opt, oIdx) => {
+      const btn = document.createElement(`button`);
+      btn.className = `option`;
+      btn.type = `button`;
+      const letter = String.fromCharCode(97 + oIdx);
+      btn.textContent = `${letter}) ${opt}`;
+      btn.dataset.qIdx = qIdx;
+      btn.dataset.oIdx = oIdx;
+      btn.addEventListener(`click`, handleOptionClick);
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function handleOptionClick(event) {
+  if (evaluated) return;
+  const btn = event.currentTarget;
+  const qIdx = parseInt(btn.dataset.qIdx, 10);
+  const oIdx = parseInt(btn.dataset.oIdx, 10);
+  answers[qIdx] = oIdx;
+  const box = btn.parentElement;
+  box.querySelectorAll(`.option`).forEach(b => b.classList.remove(`selected`));
+  btn.classList.add(`selected`);
+  updateEvalButton();
+}
+
+function updateEvalButton() {
+  const allAnswered = answers.every(a => a !== null);
+  evalBtn.disabled = !allAnswered;
+}
+
+function evaluate() {
+  if (answers.some(a => a === null)) {
+    alert(`Odpovězte prosím na všechny otázky`);
+    return;
+  }
+  evaluated = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.question`);
+  boxes.forEach((box, qIdx) => {
+    const opts = box.querySelectorAll(`.option`);
+    const correctIdx = questions[qIdx].correct;
+    const userIdx = answers[qIdx];
+    opts.forEach((opt, oIdx) => {
+      opt.disabled = true;
+      opt.classList.remove(`selected`);
+      if (oIdx === correctIdx) {
+        opt.classList.add(`correct`);
+      } else if (oIdx === userIdx) {
+        opt.classList.add(`incorrect`);
+      }
+    });
+    if (userIdx === correctIdx) score++;
+  });
+  scoreEl.textContent = `${score} z ${questions.length}`;
+  const range = evalRanges.find(r => score >= r.min && score <= r.max);
+  evalTextEl.textContent = range ? range.text : ``;
+  evalBtn.style.display = `none`;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  evaluated = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  renderQuiz();
+  evalBtn.disabled = true;
+  evalBtn.style.display = `block`;
+  resultEl.style.display = `none`;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+evalBtn.addEventListener(`click`, evaluate);
+retryBtn.addEventListener(`click`, reset);
+
+renderQuiz();
+</script>
+</body>
+</html>
