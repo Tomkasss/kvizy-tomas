@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro pamětníky: poznáte největší filmové hvězdy a jejich kultovní role?</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: "Georgia", "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 40px 16px;
+  line-height: 1.6;
+}
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+}
+h1 {
+  font-size: 1.8rem;
+  margin: 0 0 20px 0;
+  color: #2c2c2c;
+  line-height: 1.3;
+}
+.perex {
+  font-size: 1.05rem;
+  color: #4a4a4a;
+  margin-bottom: 32px;
+  font-style: italic;
+}
+.question {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.question-text {
+  font-weight: bold;
+  font-size: 1.15rem;
+  color: #2c2c2c;
+  margin-bottom: 18px;
+}
+.option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.option:last-child { margin-bottom: 0; }
+.option:hover:not(:disabled) { background: #ede8e1; }
+.option.selected {
+  background: #dcd3c7;
+  border: 1px solid #a89e92;
+  font-weight: bold;
+}
+.option.correct {
+  background: #d4edda;
+  border: 1px solid #7cb987;
+  color: #1e5631;
+}
+.option.incorrect {
+  background: #f8d7da;
+  border: 1px solid #d4848a;
+  color: #721c24;
+}
+.option:disabled { cursor: default; }
+#evaluate-btn {
+  display: block;
+  margin: 40px auto 0;
+  background: #5b7e5f;
+  color: #ffffff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+#evaluate-btn:hover:not(:disabled) { background: #4a6b4e; }
+#evaluate-btn:disabled {
+  background: #b5b5b5;
+  cursor: not-allowed;
+}
+#result {
+  display: none;
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 32px;
+  text-align: center;
+}
+.score {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #5b7e5f;
+  margin-bottom: 12px;
+}
+.eval-text {
+  font-size: 1rem;
+  color: #4a4a4a;
+  margin-bottom: 20px;
+}
+#retry-btn {
+  display: block;
+  margin: 24px auto 0;
+  background: #8c7b6b;
+  color: #ffffff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+#retry-btn:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 20px 16px; }
+  h1 { font-size: 1.5rem; }
+  .question { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Kvíz pro pamětníky: poznáte největší filmové hvězdy a jejich kultovní role?</h1>
+<p class="perex">Zlatá éra filmu vám utkvěla v paměti? Kina i nedělní televize kdysi patřily hvězdám, které si celý národ zamiloval. Otestujte, jestli slavné herce a herečky bezpečně spojíte s jejich nejznámějšími rolemi.</p>
+<div id="quiz"></div>
+<button id="evaluate-btn" disabled>Vyhodnotit</button>
+<div id="result">
+  <div class="score" id="score-text"></div>
+  <div class="eval-text" id="eval-text"></div>
+  <button id="retry-btn">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  {
+    q: `1. Který herec ztvárnil plukovníka Nicholsona ve válečném dramatu Most přes řeku Kwai a získal za tuto roli Oscara?`,
+    options: [`William Holden`, `Alec Guinness`, `Jack Hawkins`, `David Lean`],
+    correct: 1
+  },
+  {
+    q: `2. Který herec ztvárnil majitele motelu Normana Batese v Hitchcockově hororu Psycho z roku 1960?`,
+    options: [`Christopher Lee`, `Vincent Price`, `Anthony Perkins`, `Anthony Hopkins`],
+    correct: 2
+  },
+  {
+    q: `3. Která herečka ztvárnila Scarlett O'Harovou ve filmovém velkofilmu Jih proti Severu?`,
+    options: [`Vivien Leigh`, `Greer Garson`, `Olivia de Havilland`, `Ingrid Bergman`],
+    correct: 0
+  },
+  {
+    q: `4. Který herec ztvárnil dona Vita Corleoneho v prvním díle filmové ságy Kmotr z roku 1972?`,
+    options: [`Al Pacino`, `Robert De Niro`, `James Caan`, `Marlon Brando`],
+    correct: 3
+  },
+  {
+    q: `5. Který herec získal Oscara za hlavní roli ve westernu V pravé poledne?`,
+    options: [`John Wayne`, `Gary Cooper`, `James Stewart`, `Henry Fonda`],
+    correct: 1
+  },
+  {
+    q: `6. Který zpěvák nazpíval písně hlavního hrdiny ve filmové parodii Limonádový Joe?`,
+    options: [`Waldemar Matuška`, `Milan Chladil`, `Karel Gott`, `Josef Zíma`],
+    correct: 2
+  },
+  {
+    q: `7. Který herec ztvárnil agenta Jamese Bonda pouze v jediném filmu, konkrétně ve snímku V tajné službě Jejího Veličenstva z roku 1969?`,
+    options: [`Sean Connery`, `George Lazenby`, `Roger Moore`, `Timothy Dalton`],
+    correct: 1
+  },
+  {
+    q: `8. Který herec ztvárnil Old Shatterhanda po boku Vinnetoua ve filmech podle Karla Maye?`,
+    options: [`Pierre Brice`, `Stewart Granger`, `Gojko Mitić`, `Lex Barker`],
+    correct: 3
+  },
+  {
+    q: `9. Jaké je vlastní jméno italského herce, který se ve filmech s Budem Spencerem proslavil jako Terence Hill?`,
+    options: [`Mario Girotti`, `Carlo Pedersoli`, `Giuliano Gemma`, `Franco Nero`],
+    correct: 0
+  },
+  {
+    q: `10. Který český herec získal Stříbrného medvěda za hlavní roli ve válečném dramatu Jakub lhář?`,
+    options: [`Rudolf Hrušínský`, `Karel Höger`, `Vlastimil Brodský`, `Miloš Kopecký`],
+    correct: 2
+  }
+];
+
+const evalRanges = [
+  { min: 0, max: 3, text: `Zlatá éra filmu vám zřejmě prošla kolem. Nevadí, máte se na co těšit u nedělního odpoledního filmu. Zkuste to znovu, hvězdy stříbrného plátna si zaslouží druhou šanci.` },
+  { min: 4, max: 6, text: `Slušný přehled. Největší jména a nejslavnější role máte v malíku, u těch méně okatých pastí vás ale kvíz nachytal. Poctivý průměr pamětníka, který chodil do kina rád, ale ne každý týden.` },
+  { min: 7, max: 9, text: `Výborně, tady mluví opravdový filmový fanoušek. Herce spojujete s rolemi spolehlivě a nenachytají vás ani záludnější otázky. Do plného počtu vám chyběl jen kousek.` },
+  { min: 10, max: 10, text: `Klobouk dolů, tohle je mistrovská úroveň. Znáte i to, co většině lidí dávno vypadlo z paměti. Vaše hlava je jako filmová databáze.` }
+];
+
+const answers = new Array(questions.length).fill(null);
+let evaluated = false;
+
+const quizEl = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`evaluate-btn`);
+const resultEl = document.getElementById(`result`);
+const scoreEl = document.getElementById(`score-text`);
+const evalTextEl = document.getElementById(`eval-text`);
+const retryBtn = document.getElementById(`retry-btn`);
+
+function renderQuiz() {
+  quizEl.innerHTML = ``;
+  questions.forEach((question, qIdx) => {
+    const box = document.createElement(`div`);
+    box.className = `question`;
+    const qText = document.createElement(`div`);
+    qText.className = `question-text`;
+    qText.textContent = question.q;
+    box.appendChild(qText);
+    question.options.forEach((opt, oIdx) => {
+      const btn = document.createElement(`button`);
+      btn.className = `option`;
+      btn.type = `button`;
+      const letter = String.fromCharCode(97 + oIdx);
+      btn.textContent = `${letter}) ${opt}`;
+      btn.dataset.qIdx = qIdx;
+      btn.dataset.oIdx = oIdx;
+      btn.addEventListener(`click`, handleOptionClick);
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function handleOptionClick(event) {
+  if (evaluated) return;
+  const btn = event.currentTarget;
+  const qIdx = parseInt(btn.dataset.qIdx, 10);
+  const oIdx = parseInt(btn.dataset.oIdx, 10);
+  answers[qIdx] = oIdx;
+  const box = btn.parentElement;
+  box.querySelectorAll(`.option`).forEach(b => b.classList.remove(`selected`));
+  btn.classList.add(`selected`);
+  updateEvalButton();
+}
+
+function updateEvalButton() {
+  const allAnswered = answers.every(a => a !== null);
+  evalBtn.disabled = !allAnswered;
+}
+
+function evaluate() {
+  if (answers.some(a => a === null)) {
+    alert(`Odpovězte prosím na všechny otázky`);
+    return;
+  }
+  evaluated = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.question`);
+  boxes.forEach((box, qIdx) => {
+    const opts = box.querySelectorAll(`.option`);
+    const correctIdx = questions[qIdx].correct;
+    const userIdx = answers[qIdx];
+    opts.forEach((opt, oIdx) => {
+      opt.disabled = true;
+      opt.classList.remove(`selected`);
+      if (oIdx === correctIdx) {
+        opt.classList.add(`correct`);
+      } else if (oIdx === userIdx) {
+        opt.classList.add(`incorrect`);
+      }
+    });
+    if (userIdx === correctIdx) score++;
+  });
+  scoreEl.textContent = `${score} z ${questions.length}`;
+  const range = evalRanges.find(r => score >= r.min && score <= r.max);
+  evalTextEl.textContent = range ? range.text : ``;
+  evalBtn.style.display = `none`;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  evaluated = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  renderQuiz();
+  evalBtn.disabled = true;
+  evalBtn.style.display = `block`;
+  resultEl.style.display = `none`;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+evalBtn.addEventListener(`click`, evaluate);
+retryBtn.addEventListener(`click`, reset);
+
+renderQuiz();
+</script>
+</body>
+</html>
