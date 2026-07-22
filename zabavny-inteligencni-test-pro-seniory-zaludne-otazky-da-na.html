@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zábavný inteligenční test pro seniory: záludné otázky dá na 10/10 menšina</title>
+<style>
+* { box-sizing: border-box; }
+body { font-family: Georgia,"Times New Roman",serif; background:#f5f0eb; color:#2c2c2c; margin:0; padding:24px 16px; }
+.wrap { max-width:720px; margin:0 auto; }
+h1 { font-size:1.7rem; line-height:1.3; color:#2c2c2c; }
+.perex { font-size:1.1rem; line-height:1.55; color:#4a4a4a; margin-bottom:8px; }
+.q { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); padding:28px; margin-bottom:24px; }
+.q-text { font-weight:bold; font-size:1.15rem; color:#2c2c2c; margin-bottom:16px; }
+.opt { display:block; width:100%; text-align:left; padding:14px 18px; background:#f7f4f0; border:1px solid #d9d2c9; border-radius:8px; font-size:1rem; color:#3a3a3a; margin-bottom:10px; cursor:pointer; font-family:inherit; }
+.opt:hover { background:#ede8e1; }
+.opt.selected { background:#dcd3c7; border:1px solid #a89e92; font-weight:bold; }
+.opt.correct { background:#d4edda; border:1px solid #7cb987; color:#1e5631; }
+.opt.wrong { background:#f8d7da; border:1px solid #d4848a; color:#721c24; }
+.opt:disabled { cursor:default; }
+#submit { background:#5b7e5f; color:#fff; padding:16px 40px; border-radius:8px; font-size:1.1rem; font-weight:bold; border:none; display:block; margin:40px auto 0; cursor:pointer; font-family:inherit; }
+#submit:hover { background:#4a6b4e; }
+#submit:disabled { background:#b5b5b5; cursor:not-allowed; }
+.warn { text-align:center; color:#a05a5a; margin-top:14px; min-height:1.2em; }
+#result { background:#fefcf9; border-top:4px solid #5b7e5f; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); padding:28px; margin-top:24px; display:none; }
+#score { font-size:2.5rem; font-weight:bold; color:#5b7e5f; text-align:center; margin:0 0 12px; }
+#verdict { font-size:1rem; color:#4a4a4a; text-align:center; line-height:1.55; }
+#retry { background:#8c7b6b; color:#fff; padding:16px 40px; border-radius:8px; font-size:1.1rem; font-weight:bold; border:none; display:block; margin:24px auto 0; cursor:pointer; font-family:inherit; }
+#retry:hover { background:#756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Zábavný inteligenční test pro seniory: záludné otázky dá na 10/10 menšina</h1>
+<p class="perex">Deset otázek prověří logiku, pozornost i slovní cit a k tomu přehled napříč obory. Žádné biflování, jen jak vám to sepne teď. Rychlá odpověď bývá ta zrádná. Plných deset bodů posbírá jen menšina bystrých hlav. Kolik zvládnete vy?</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="warn" id="warn"></p>
+<div id="result">
+<p id="score"></p>
+<p id="verdict"></p>
+<button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+{ q: `Všichni lékaři jsou vysokoškoláci. Někteří vysokoškoláci mluví plynně anglicky. Co z toho nutně vyplývá?`, opts: [`Někteří lékaři mluví plynně anglicky`,`Všichni lékaři mluví plynně anglicky`,`O znalosti angličtiny u lékařů z toho nutně nevyplývá nic`,`Žádný lékař nemluví plynně anglicky`], correct: 2 },
+{ q: `Který renesanční stavitel navrhl a postavil proslulou kupoli katedrály ve Florencii?`, opts: [`Filippo Brunelleschi`,`Michelangelo Buonarroti`,`Donatello`,`Sandro Botticelli`], correct: 0 },
+{ q: `Mrholení je k lijáku jako vánek k čemu?`, opts: [`mlze`,`přeháňce`,`průvanu`,`vichřici`], correct: 3 },
+{ q: `Žádná kočka není pták a některá domácí zvířata jsou kočky. Co z toho nutně vyplývá?`, opts: [`Žádné domácí zvíře není pták`,`Některá domácí zvířata nejsou ptáci`,`Některá domácí zvířata jsou ptáci`,`Všechna domácí zvířata jsou kočky`], correct: 1 },
+{ q: `Co znamená přídavné jméno vetchý?`, opts: [`sešlý stářím a chatrný`,`svěží a plný sil`,`náladový a popudlivý`,`lakomý a skoupý`], correct: 0 },
+{ q: `Který z lidských smyslů má nervovou dráhu vedenou nejpříměji do mozkových center paměti a emocí?`, opts: [`zrak`,`sluch`,`čich`,`hmat`], correct: 2 },
+{ q: `Co znamená přídavné jméno zevrubný, například v obratu zevrubný popis?`, opts: [`povrchní a zběžný`,`předběžný a nezávazný`,`zdlouhavý a únavný`,`podrobný a důkladný`], correct: 3 },
+{ q: `Který z těchto jazyků nepatří mezi slovanské?`, opts: [`polština`,`litevština`,`slovenština`,`chorvatština`], correct: 1 },
+{ q: `Který český lékař proslul rozdělením lidské krve do čtyř základních skupin?`, opts: [`Jan Janský`,`Josef Thomayer`,`Karel Raška`,`Antonín Holý`], correct: 0 },
+{ q: `Jak se nazývá pomocná věda historická zabývající se vlajkami a prapory?`, opts: [`heraldika`,`faleristika`,`numismatika`,`vexilologie`], correct: 3 }
+];
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+const quizEl = document.getElementById('quiz');
+const submitBtn = document.getElementById('submit');
+const warnEl = document.getElementById('warn');
+const letters = ['a','b','c','d'];
+
+function render() {
+  quizEl.innerHTML = '';
+  questions.forEach((item, qi) => {
+    const box = document.createElement('div');
+    box.className = 'q';
+    const qt = document.createElement('div');
+    qt.className = 'q-text';
+    qt.textContent = (qi+1) + '. ' + item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = letters[oi] + ') ' + opt;
+      if (answers[qi] === oi) btn.classList.add('selected');
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        answers[qi] = oi;
+        render();
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+function updateSubmit() {
+  const all = answers.every(a => a !== null);
+  submitBtn.disabled = !all;
+  if (all) warnEl.textContent = '';
+}
+submitBtn.addEventListener('click', () => {
+  if (answers.some(a => a === null)) { warnEl.textContent = 'Odpovězte prosím na všechny otázky'; return; }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll('.q');
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll('.opt');
+    opts.forEach((btn, oi) => {
+      btn.disabled = true;
+      btn.classList.remove('selected');
+      if (oi === questions[qi].correct) btn.classList.add('correct');
+      else if (oi === answers[qi]) btn.classList.add('wrong');
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  showResult(score);
+});
+function showResult(score) {
+  const scoreEl = document.getElementById('score');
+  const verdictEl = document.getElementById('verdict');
+  scoreEl.textContent = score + ' z 10';
+  let text;
+  if (score <= 3) text = 'Záludné otázky si tentokrát vybraly svou daň a lákavější varianty vás stáhly dřív, než jste je promysleli. Nic ztraceného, bystrost není dar, ale zvyk. Čtěte, luštěte a nad každou otázkou chvíli posečkejte, příště bude číslo znatelně výš.';
+  else if (score <= 6) text = 'Solidní střed, přesně tady se drží většina řešitelů. Půlku otázek jste rozlouskli s jistotou, u zbytku vás svedla první nabízející se odpověď. Hlava pracuje dobře, prostor k posunu je hlavně na těch nejzáludnějších pastech.';
+  else if (score <= 9) text = 'Výborný výkon. Logika, pozornost i slovní cit vám slouží svižně a na většinu nástrah jste nenaletěli. Do tohoto pásma se u takto stavěných otázek dostane jen menšina a k plnému počtu chybělo opravdu málo.';
+  else text = 'Naprostá špička a vzácný úkaz, přesně jak slibuje titulek. Plných deset bodů posbírá jen hrstka řešitelů a ani jedna past vás nezastavila. Bystrost, přehled i pozornost vám šlapou bez jediného zaváhání. Klobouk dolů.';
+  verdictEl.textContent = text;
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+}
+document.getElementById('retry').addEventListener('click', () => {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  document.getElementById('result').style.display = 'none';
+  warnEl.textContent = '';
+  render();
+  updateSubmit();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+render();
+updateSubmit();
+</script>
+</body>
+</html>
