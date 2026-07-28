@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zábavný inteligenční test pro seniory: plných 10 bodů získá jen menšina opravdu bystrých hlav</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 24px 16px;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.8rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 16px; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+#submit, #retry {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  color: #fff;
+  cursor: pointer;
+}
+#submit { background: #5b7e5f; }
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry { background: #8c7b6b; }
+#retry:hover { background: #756658; }
+.warn { text-align: center; color: #a04040; margin-top: 14px; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Zábavný inteligenční test pro seniory: plných 10 bodů získá jen menšina opravdu bystrých hlav</h1>
+<p class="perex">Bystrost se nepozná podle biflování, ale podle toho, jak vám myšlení sepne teď. Deset otázek zamíchá úsudek, slovní cit i střípky vědění z různých oborů. U sebejisté odpovědi se vyplatí chvíli zaváhat. Plných deset zvládne jen menšina. Jdete do toho?</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<div class="warn" id="warn"></div>
+<div id="result" style="display:none;">
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  { q: `Nůžky jsou ke stříhání jako kladivo k čemu?`, options: [`měření`, `broušení`, `zatloukání`, `řezání`], correct: 2 },
+  { q: `Karel je vyšší než Filip, Karel je nižší než Ondřej a Ondřej je nižší než Tomáš. Kdo z této čtveřice je nejvyšší?`, options: [`Karel`, `Tomáš`, `Ondřej`, `Filip`], correct: 1 },
+  { q: `Který vitamín si lidské tělo dokáže samo vytvořit v kůži vlivem slunečního záření?`, options: [`vitamín C`, `vitamín A`, `vitamín B12`, `vitamín D`], correct: 3 },
+  { q: `Prší-li, zůstává Petr doma. Dnes Petr doma nezůstal. Co z toho nutně vyplývá?`, options: [`Dnes prší`, `Dnes neprší`, `Petr nemá rád déšť`, `Nelze nic jistě určit`], correct: 1 },
+  { q: `Které z těchto slov nezapadá významem mezi ostatní: mrzutý, nevrlý, rozjařený, nabručený?`, options: [`mrzutý`, `nevrlý`, `rozjařený`, `nabručený`], correct: 2 },
+  { q: `Ovce je ke stádu jako ryba k čemu?`, options: [`hejnu`, `rybníku`, `síti`, `vodě`], correct: 0 },
+  { q: `Co znamená přídavné jméno vrtkavý?`, options: [`tvrdošíjný a neoblomný`, `prudký a snadno vzplanoucí hněvem`, `obratný a mrštný v pohybu`, `nestálý a snadno měnící své názory`], correct: 3 },
+  { q: `Který poloostrov je rozlohou největší na světě?`, options: [`Arabský poloostrov`, `Balkánský poloostrov`, `Skandinávský poloostrov`, `Indický poloostrov`], correct: 0 },
+  { q: `Který strom dorůstá ze všech stromů světa největší výšky?`, options: [`borovice lesní`, `dub letní`, `sekvoj vždyzelená`, `sekvojovec obrovský`], correct: 2 },
+  { q: `Který francouzský král zrušil roku 1685 vydáním ediktu z Fontainebleau dosavadní náboženskou svobodu hugenotů, kterou jim zaručoval edikt nantský?`, options: [`Jindřich IV.`, `Ludvík XIV.`, `Ludvík XIII.`, `František I.`], correct: 1 }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit`);
+const warnEl = document.getElementById(`warn`);
+const resultEl = document.getElementById(`result`);
+
+function letter(i) { return [`a`, `b`, `c`, `d`][i]; }
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const qt = document.createElement(`div`);
+    qt.className = `q-text`;
+    qt.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    item.options.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.textContent = letter(oi) + `) ` + opt;
+      if (answers[qi] === oi) btn.classList.add(`selected`);
+      btn.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        render();
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  const done = answers.every(a => a !== null);
+  submitBtn.disabled = !done;
+  if (done) warnEl.textContent = ``;
+}
+
+function evaluate() {
+  if (!answers.every(a => a !== null)) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  questions.forEach((item, qi) => {
+    const opts = boxes[qi].querySelectorAll(`.opt`);
+    opts.forEach((btn, oi) => {
+      btn.classList.remove(`selected`);
+      if (oi === item.correct) btn.classList.add(`correct`);
+      else if (oi === answers[qi]) btn.classList.add(`wrong`);
+    });
+    if (answers[qi] === item.correct) score++;
+  });
+  submitBtn.disabled = true;
+  showResult(score);
+}
+
+function verdictText(s) {
+  if (s <= 3) return `Dnes to zatím jiskřilo jen málo. Několik otázek zamířilo mimo první dojem a lákavější varianta vás stáhla dřív, než jste ji promysleli. Nic ztraceného, bystrost není dar, ale zvyk. Čtěte, luštěte a nad každou otázkou chvíli posečkejte, příště bude číslo znatelně výš.`;
+  if (s <= 6) return `Solidní střed, přesně tady se drží většina řešitelů. Polovinu otázek jste rozlouskli s jistotou, u zbytku vás svedla první nabízející se odpověď. Hlava pracuje dobře, prostor k posunu je hlavně na těch nejzáludnějších pastech mezi úsudkem a slovním citem.`;
+  if (s <= 9) return `Výborný výkon. Logika, slovní cit i přehled napříč obory vám slouží svižně a na většinu nástrah jste nenaletěli. Do tohoto pásma se u takto stavěných otázek dostane jen menšina a k plnému počtu chybělo opravdu málo.`;
+  return `Naprostá špička a vzácný úkaz, přesně jak slibuje titulek. Plných deset bodů posbírá jen menšina opravdu bystrých hlav a vy jste mezi nimi. Ani jedna past vás nezastavila a úsudek, slovní cit i široký přehled vám šlapou bez zaváhání. Klobouk dolů.`;
+}
+
+function showResult(score) {
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  document.getElementById(`verdict`).textContent = verdictText(score);
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+}
+
+function reset() {
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  locked = false;
+  resultEl.style.display = `none`;
+  warnEl.textContent = ``;
+  submitBtn.disabled = true;
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitBtn.addEventListener(`click`, evaluate);
+document.getElementById(`retry`).addEventListener(`click`, reset);
+render();
+</script>
+</body>
+</html>
