@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Náročný kvíz pro seniory: kdo dá 8 z 10, nechá za sebou většinu mladé generace</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 24px 16px;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.8rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 16px; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+#submit, #retry {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  color: #fff;
+  cursor: pointer;
+}
+#submit { background: #5b7e5f; }
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry { background: #8c7b6b; }
+#retry:hover { background: #756658; }
+.warn { text-align: center; color: #a04040; margin-top: 14px; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Náročný kvíz pro seniory: kdo dá 8 z 10, nechá za sebou většinu mladé generace</h1>
+<p class="perex">Deset tvrdých otázek napříč obory, od dějin přes umění až po přírodu. Žádné chytáky na věk, jen fakta. Kdo tu dá osm z deseti, nechá za sebou většinu mladé generace.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<div class="warn" id="warn"></div>
+<div id="result" style="display:none;">
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  { q: `Který z Titánů byl v řecké mytologii otcem nejvyššího boha Dia?`, options: [`Kronos`, `Atlas`, `Prométheus`, `Uranos`], correct: 0 },
+  { q: `Kdo je autorem románu Bílá velryba, známého i pod názvem Moby Dick?`, options: [`Jack London`, `Mark Twain`, `Herman Melville`, `James Fenimore Cooper`], correct: 2 },
+  { q: `Který španělský malíř je autorem obrazu Třetí květen 1808?`, options: [`Diego Velázquez`, `El Greco`, `Bartolomé Esteban Murillo`, `Francisco Goya`], correct: 3 },
+  { q: `Který italský skladatel je autorem komické opery Nápoj lásky (L'elisir d'amore)?`, options: [`Gioachino Rossini`, `Gaetano Donizetti`, `Giuseppe Verdi`, `Vincenzo Bellini`], correct: 1 },
+  { q: `Který orgán lidského těla nemá vlastní cévní zásobení a kyslík přijímá přímo ze vzduchu?`, options: [`rohovka oka`, `slezina`, `ledvina`, `játra`], correct: 0 },
+  { q: `Jak se nazývá slitina mědi a cínu?`, options: [`mosaz`, `dural`, `bronz`, `ocel`], correct: 2 },
+  { q: `Které město je hlavním městem Maroka?`, options: [`Casablanca`, `Marrákeš`, `Fez`, `Rabat`], correct: 3 },
+  { q: `Který stát zvítězil na úplně prvním mistrovství světa ve fotbale v roce 1930?`, options: [`Uruguay`, `Brazílie`, `Argentina`, `Itálie`], correct: 0 },
+  { q: `Ve kterém roce rozdělila Verdunská smlouva Franskou říši na tři části?`, options: [`800`, `843`, `814`, `870`], correct: 1 },
+  { q: `Ve které části trávicí soustavy se vstřebává většina živin z potravy?`, options: [`žaludek`, `jícen`, `tenké střevo`, `tlusté střevo`], correct: 2 }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit`);
+const warnEl = document.getElementById(`warn`);
+const resultEl = document.getElementById(`result`);
+
+function letter(i) { return [`a`, `b`, `c`, `d`][i]; }
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const qt = document.createElement(`div`);
+    qt.className = `q-text`;
+    qt.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    item.options.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.textContent = letter(oi) + `) ` + opt;
+      if (answers[qi] === oi) btn.classList.add(`selected`);
+      btn.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        render();
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  const done = answers.every(a => a !== null);
+  submitBtn.disabled = !done;
+  if (done) warnEl.textContent = ``;
+}
+
+function evaluate() {
+  if (!answers.every(a => a !== null)) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  questions.forEach((item, qi) => {
+    const opts = boxes[qi].querySelectorAll(`.opt`);
+    opts.forEach((btn, oi) => {
+      btn.classList.remove(`selected`);
+      if (oi === item.correct) btn.classList.add(`correct`);
+      else if (oi === answers[qi]) btn.classList.add(`wrong`);
+    });
+    if (answers[qi] === item.correct) score++;
+  });
+  submitBtn.disabled = true;
+  showResult(score);
+}
+
+function verdictText(s) {
+  if (s <= 3) return `Laťka byla nasazená tvrdě a tentokrát vás přemohla. Většina řešitelů i z řad mladších dospělých na těchto otázkách klopýtá stejně, takže tu není za co se stydět. Fakta z dějin, umění i přírody se dají oprášit, zkuste to znovu.`;
+  if (s <= 6) return `Solidní střed, přesně tam, kde končí běžný dospělý řešitel. Půlku otázek jste zvládli s jistotou, u zbytku jste váhali. Na slíbených osm bodů to ještě o kousek nestačí, ale máte na čem stavět.`;
+  if (s <= 9) return `Výborný výkon. Kdo dosáhl osmi a víc, splnil přesně to, co slibuje titulek, a nechal za sebou většinu mladé generace, která na takto široké otázky obvykle nestačí. Máte rozhled napříč obory, jaký se hned tak nevidí.`;
+  return `Naprostá špička. Plný počet u kvízu tohoto kalibru je vzácnost. Zvládl jste mytologii, literaturu, malířství, hudbu i vědu bez jediného zaváhání. Takový záběr znalostí je výsledkem celoživotní zvídavosti, klobouk dolů.`;
+}
+
+function showResult(score) {
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  document.getElementById(`verdict`).textContent = verdictText(score);
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+}
+
+function reset() {
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  locked = false;
+  resultEl.style.display = `none`;
+  warnEl.textContent = ``;
+  submitBtn.disabled = true;
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitBtn.addEventListener(`click`, evaluate);
+document.getElementById(`retry`).addEventListener(`click`, reset);
+render();
+</script>
+</body>
+</html>
