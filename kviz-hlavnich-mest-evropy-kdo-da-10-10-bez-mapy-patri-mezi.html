@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz hlavních měst Evropy: kdo dá 10/10 bez mapy, patří mezi opravdové znalce</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 24px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.7rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 18px; }
+  .perex { font-size: 1.1rem; color: #444; margin: 0 0 28px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .znuni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta.zamek { cursor: default; }
+  #vyhodnotit {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.2em; }
+  #vysledek {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 28px;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #znovu {
+    display: block;
+    margin: 24px auto 0;
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #znovu:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz hlavních měst Evropy: kdo dá 10/10 bez mapy, patří mezi opravdové znalce</h1>
+  <p class="perex">Deset evropských metropolí a u každé jediná otázka. Vynechali jsme ta nejokoukanější sídla a vsadili na méně protřelé kouty kontinentu, kde jistota rychle mizí. Dáte všech deset bez jediného pohledu do mapy?</p>
+  <div id="kviz"></div>
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <div class="hlaska" id="hlaska"></div>
+  <div id="vysledek">
+    <div id="skore"></div>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+  const otazky = [
+    { znuni: `1. Hlavním městem kterého státu je Priština?`,
+      varianty: [`a) Albánie`, `b) Černá Hora`, `c) Severní Makedonie`, `d) Kosovo`], spravna: 3 },
+    { znuni: `2. Které město je hlavním městem Estonska?`,
+      varianty: [`a) Tallinn`, `b) Riga`, `c) Vilnius`, `d) Helsinky`], spravna: 0 },
+    { znuni: `3. Hlavním městem kterého státu je Tirana?`,
+      varianty: [`a) Kosovo`, `b) Severní Makedonie`, `c) Albánie`, `d) Černá Hora`], spravna: 2 },
+    { znuni: `4. Které město je hlavním městem Lotyšska?`,
+      varianty: [`a) Vilnius`, `b) Riga`, `c) Tallinn`, `d) Kaunas`], spravna: 1 },
+    { znuni: `5. Hlavním městem kterého státu je Valletta?`,
+      varianty: [`a) Řecko`, `b) Itálie`, `c) Chorvatsko`, `d) Malta`], spravna: 3 },
+    { znuni: `6. Které město je hlavním městem Litvy?`,
+      varianty: [`a) Riga`, `b) Minsk`, `c) Vilnius`, `d) Tallinn`], spravna: 2 },
+    { znuni: `7. Hlavním městem kterého státu je Kišiněv?`,
+      varianty: [`a) Moldavsko`, `b) Ukrajina`, `c) Rumunsko`, `d) Bělorusko`], spravna: 0 },
+    { znuni: `8. Které město je hlavním městem Severní Makedonie?`,
+      varianty: [`a) Sofie`, `b) Skopje`, `c) Priština`, `d) Tirana`], spravna: 1 },
+    { znuni: `9. Hlavním městem kterého státu je Nikósie?`,
+      varianty: [`a) Řecko`, `b) Turecko`, `c) Bulharsko`, `d) Kypr`], spravna: 3 },
+    { znuni: `10. Které město je hlavním městem Lichtenštejnska?`,
+      varianty: [`a) Lucemburk`, `b) Vaduz`, `c) Andorra la Vella`, `d) San Marino`], spravna: 1 }
+  ];
+
+  const odpovedi = new Array(otazky.length).fill(null);
+  let vyhodnoceno = false;
+  const kvizEl = document.getElementById(`kviz`);
+  const btn = document.getElementById(`vyhodnotit`);
+  const hlaska = document.getElementById(`hlaska`);
+
+  otazky.forEach((o, i) => {
+    const box = document.createElement(`div`);
+    box.className = `otazka`;
+    const z = document.createElement(`div`);
+    z.className = `znuni`;
+    z.textContent = o.znuni;
+    box.appendChild(z);
+    o.varianty.forEach((v, j) => {
+      const b = document.createElement(`button`);
+      b.className = `varianta`;
+      b.textContent = v;
+      b.addEventListener(`click`, () => {
+        if (vyhodnoceno) return;
+        odpovedi[i] = j;
+        Array.from(box.querySelectorAll(`.varianta`)).forEach(el => el.classList.remove(`vybrana`));
+        b.classList.add(`vybrana`);
+        if (odpovedi.every(x => x !== null)) { btn.disabled = false; hlaska.textContent = ``; }
+      });
+      box.appendChild(b);
+    });
+    kvizEl.appendChild(box);
+  });
+
+  btn.addEventListener(`click`, () => {
+    if (odpovedi.some(x => x === null)) { hlaska.textContent = `Odpovězte prosím na všechny otázky`; return; }
+    vyhodnoceno = true;
+    let skore = 0;
+    const boxy = kvizEl.querySelectorAll(`.otazka`);
+    boxy.forEach((box, i) => {
+      const tlacitka = box.querySelectorAll(`.varianta`);
+      tlacitka.forEach((b, j) => {
+        b.classList.add(`zamek`);
+        b.classList.remove(`vybrana`);
+        if (j === otazky[i].spravna) b.classList.add(`spravna`);
+        else if (j === odpovedi[i]) b.classList.add(`spatna`);
+      });
+      if (odpovedi[i] === otazky[i].spravna) skore++;
+    });
+    btn.disabled = true;
+    hlaska.textContent = ``;
+    document.getElementById(`skore`).textContent = skore + ` z 10`;
+    document.getElementById(`hodnoceni`).textContent = hodnoceniText(skore);
+    document.getElementById(`vysledek`).style.display = `block`;
+    document.getElementById(`vysledek`).scrollIntoView({ behavior: `smooth` });
+  });
+
+  function hodnoceniText(s) {
+    if (s <= 3) return `Méně známé kouty evropské mapy vám zatím splývají dohromady. Balkánská sídla i pobaltské metropole se pletou a jistota chybí. Nevadí, projděte si správné odpovědi a příště se odrazíte mnohem výš.`;
+    if (s <= 6) return `Přesně tady se drží většina řešitelů. Slavnější státy zvládnete, ale jakmile přijde na město, které si lidé pletou se sousední zemí, jistota kolísá. Do party skutečných znalců vám schází jen kousek.`;
+    if (s <= 9) return `Výborný výkon. Evropskou mapu čtete i tam, kde většina naletí na těsný sousední distraktor. K plnému počtu vám chyběl jediný krok, nejspíš u jedné zvlášť záludné metropole.`;
+    return `Naprostá špička. Od pobaltských břehů přes Balkán a středomořské ostrovy až po alpský ministát jste poslali každé město do správné země a žádná léčka vás nerozhodila. Plných 10 z 10 bez mapy dá opravdu jen zlomek lidí a vy mezi ně patříte.`;
+  }
+
+  document.getElementById(`znovu`).addEventListener(`click`, () => {
+    vyhodnoceno = false;
+    for (let i = 0; i < odpovedi.length; i++) odpovedi[i] = null;
+    kvizEl.querySelectorAll(`.varianta`).forEach(b => { b.className = `varianta`; });
+    document.getElementById(`vysledek`).style.display = `none`;
+    btn.disabled = true;
+    hlaska.textContent = ``;
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  });
+</script>
+</body>
+</html>
