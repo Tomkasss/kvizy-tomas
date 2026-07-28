@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz slovenské gramatiky pro Čechy: už první otázka nachytá většinu lidí</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 24px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.7rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 18px; }
+  .perex { font-size: 1.1rem; color: #444; margin: 0 0 28px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .znuni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta.zamek { cursor: default; }
+  #vyhodnotit {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.2em; }
+  #vysledek {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 28px;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #znovu {
+    display: block;
+    margin: 24px auto 0;
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #znovu:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz slovenské gramatiky pro Čechy: už první otázka nachytá většinu lidí</h1>
+  <p class="perex">Slovenčine rozumíte, nebo si to jen myslíte? Spisovná slovenština má vlastní pravidla i slova, která znějí povědomě, ale znamenají něco úplně jiného. Deset otázek prověří, kde končí vaše pasivní znalost.</p>
+  <div id="kviz"></div>
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <div class="hlaska" id="hlaska"></div>
+  <div id="vysledek">
+    <div id="skore"></div>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+  const otazky = [
+    { znuni: `1. Který z těchto zápisů je podle spisovné slovenštiny správný pro slovo s významem „kůň"?`,
+      varianty: [`a) koň`, `b) kóň`, `c) kuoň`, `d) kôň`], spravna: 3 },
+    { znuni: `2. Který tvar je ve spisovné slovenštině správný pro 3. osobu množného čísla (oni) slovesa „chcieť" (chtít)?`,
+      varianty: [`a) chcú`, `b) chcejú`, `c) chtia`, `d) chceli`], spravna: 0 },
+    { znuni: `3. Co znamená ve spisovné slovenštině slovo „vankúš"?`,
+      varianty: [`a) peřina`, `b) polštář`, `c) matrace`, `d) deka`], spravna: 1 },
+    { znuni: `4. Který tvar 1. osoby jednotného čísla (já) slovesa „chváliť" odpovídá spisovné slovenštině a jejímu rytmickému zákonu?`,
+      varianty: [`a) chválím`, `b) chvälim`, `c) chválim`, `d) chvália`], spravna: 2 },
+    { znuni: `5. Co znamená ve spisovné slovenštině slovo „ťava"?`,
+      varianty: [`a) žirafa`, `b) lama`, `c) velbloud`, `d) los`], spravna: 2 },
+    { znuni: `6. Co znamená ve spisovné slovenštině slovo „pivnica"?`,
+      varianty: [`a) hospoda`, `b) sklep`, `c) spíž`, `d) půda`], spravna: 1 },
+    { znuni: `7. Co znamená ve spisovné slovenštině přídavné jméno „horký"?`,
+      varianty: [`a) horký, teplý`, `b) hořlavý`, `c) prudký`, `d) hořký`], spravna: 3 },
+    { znuni: `8. Které z těchto přídavných jmen je napsané správně podle slovenského rytmického zákona?`,
+      varianty: [`a) krásny`, `b) bielý`, `c) múdrý`, `d) vážný`], spravna: 0 },
+    { znuni: `9. Co znamená ve spisovné slovenštině sloveso „kúriť"?`,
+      varianty: [`a) kouřit cigaretu`, `b) vařit`, `c) topit, vytápět`, `d) uklízet`], spravna: 2 },
+    { znuni: `10. Který zápis je podle spisovné slovenštiny správný pro slovo s významem „žloutek"?`,
+      varianty: [`a) žltok`, `b) žĺtok`, `c) žíltok`, `d) žltók`], spravna: 1 }
+  ];
+
+  const odpovedi = new Array(otazky.length).fill(null);
+  let vyhodnoceno = false;
+  const kvizEl = document.getElementById(`kviz`);
+  const btn = document.getElementById(`vyhodnotit`);
+  const hlaska = document.getElementById(`hlaska`);
+
+  otazky.forEach((o, i) => {
+    const box = document.createElement(`div`);
+    box.className = `otazka`;
+    const z = document.createElement(`div`);
+    z.className = `znuni`;
+    z.textContent = o.znuni;
+    box.appendChild(z);
+    o.varianty.forEach((v, j) => {
+      const b = document.createElement(`button`);
+      b.className = `varianta`;
+      b.textContent = v;
+      b.addEventListener(`click`, () => {
+        if (vyhodnoceno) return;
+        odpovedi[i] = j;
+        Array.from(box.querySelectorAll(`.varianta`)).forEach(el => el.classList.remove(`vybrana`));
+        b.classList.add(`vybrana`);
+        if (odpovedi.every(x => x !== null)) { btn.disabled = false; hlaska.textContent = ``; }
+      });
+      box.appendChild(b);
+    });
+    kvizEl.appendChild(box);
+  });
+
+  btn.addEventListener(`click`, () => {
+    if (odpovedi.some(x => x === null)) { hlaska.textContent = `Odpovězte prosím na všechny otázky`; return; }
+    vyhodnoceno = true;
+    let skore = 0;
+    const boxy = kvizEl.querySelectorAll(`.otazka`);
+    boxy.forEach((box, i) => {
+      const tlacitka = box.querySelectorAll(`.varianta`);
+      tlacitka.forEach((b, j) => {
+        b.classList.add(`zamek`);
+        b.classList.remove(`vybrana`);
+        if (j === otazky[i].spravna) b.classList.add(`spravna`);
+        else if (j === odpovedi[i]) b.classList.add(`spatna`);
+      });
+      if (odpovedi[i] === otazky[i].spravna) skore++;
+    });
+    btn.disabled = true;
+    hlaska.textContent = ``;
+    document.getElementById(`skore`).textContent = skore + ` z 10`;
+    document.getElementById(`hodnoceni`).textContent = hodnoceniText(skore);
+    document.getElementById(`vysledek`).style.display = `block`;
+    document.getElementById(`vysledek`).scrollIntoView({ behavior: `smooth` });
+  });
+
+  function hodnoceniText(s) {
+    if (s <= 3) return `Slovenština vám zní povědomě, ale spousta slov vás poslala úplně jinam. Patříte k většině Čechů, které kvíz spolehlivě nachytá. „Kúriť" jste nejspíš pochopili jako kouřit a „horký" jako teplý. Doporučená kúra: slovenský film bez titulků.`;
+    if (s <= 6) return `Slušný základ pasivní slovenštiny. Běžná slovíčka dáte, ale u zrádných dvojic, kde stejně znějící slovo znamená něco jiného, a u pravopisných chytáků typu rytmického zákona jste zaváhali. Pořád jste ale nad průměrem, který titulek slibuje nachytat.`;
+    if (s <= 9) return `Tady už je znát, že slovenštinu nejen slýcháte, ale i chápete. Rozeznáte falešné přátele od skutečného významu a tušíte, že slovenská slova mají svá pravidla o krácení. Zakoplo vás nanejvýš jedno vražedné pravopisné slovo.`;
+    return `Klobouk dolů. Zvládli jste zrádná slova, slovesné tvary, rytmický zákon i slabikotvorné „ĺ" ve slově „žĺtok". Tohle není pasivní znalost z večerníčků, tohle je opravdová slovenština. Nachytat vás se rozhodně nepovedlo.`;
+  }
+
+  document.getElementById(`znovu`).addEventListener(`click`, () => {
+    vyhodnoceno = false;
+    for (let i = 0; i < odpovedi.length; i++) odpovedi[i] = null;
+    kvizEl.querySelectorAll(`.varianta`).forEach(b => { b.className = `varianta`; });
+    document.getElementById(`vysledek`).style.display = `none`;
+    btn.disabled = true;
+    hlaska.textContent = ``;
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  });
+</script>
+</body>
+</html>
