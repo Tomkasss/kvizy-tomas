@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz střední obtížnosti: kdo zvládne všech 10 otázek, uvažuje bystřeji než většina Čechů</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: "Georgia", "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 40px 16px;
+  line-height: 1.6;
+}
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+}
+h1 {
+  font-size: 1.8rem;
+  margin: 0 0 20px 0;
+  color: #2c2c2c;
+  line-height: 1.3;
+}
+.perex {
+  font-size: 1.05rem;
+  color: #4a4a4a;
+  margin-bottom: 32px;
+  font-style: italic;
+}
+.question {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.question-text {
+  font-weight: bold;
+  font-size: 1.15rem;
+  color: #2c2c2c;
+  margin-bottom: 18px;
+}
+.option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.option:last-child { margin-bottom: 0; }
+.option:hover:not(:disabled) { background: #ede8e1; }
+.option.selected {
+  background: #dcd3c7;
+  border: 1px solid #a89e92;
+  font-weight: bold;
+}
+.option.correct {
+  background: #d4edda;
+  border: 1px solid #7cb987;
+  color: #1e5631;
+}
+.option.incorrect {
+  background: #f8d7da;
+  border: 1px solid #d4848a;
+  color: #721c24;
+}
+.option:disabled { cursor: default; }
+#evaluate-btn {
+  display: block;
+  margin: 40px auto 0;
+  background: #5b7e5f;
+  color: #ffffff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+#evaluate-btn:hover:not(:disabled) { background: #4a6b4e; }
+#evaluate-btn:disabled {
+  background: #b5b5b5;
+  cursor: not-allowed;
+}
+#result {
+  display: none;
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 32px;
+  text-align: center;
+}
+.score {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #5b7e5f;
+  margin-bottom: 12px;
+}
+.eval-text {
+  font-size: 1rem;
+  color: #4a4a4a;
+  margin-bottom: 20px;
+}
+#retry-btn {
+  display: block;
+  margin: 24px auto 0;
+  background: #8c7b6b;
+  color: #ffffff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+#retry-btn:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 20px 16px; }
+  h1 { font-size: 1.5rem; }
+  .question { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Kvíz střední obtížnosti: kdo zvládne všech 10 otázek, uvažuje bystřeji než většina Čechů</h1>
+<p class="perex">Deset otázek napříč obory, od přírodních věd přes dějiny a umění až po jednu úlohu na logické uvažování. Průměrný Čech dá pět až šest. Kdo zvládne všech deset bez zaváhání, uvažuje bystřeji než většina. Troufnete si?</p>
+<div id="quiz"></div>
+<button id="evaluate-btn" disabled>Vyhodnotit</button>
+<div id="result">
+  <div class="score" id="score-text"></div>
+  <div class="eval-text" id="eval-text"></div>
+  <button id="retry-btn">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  {
+    q: `1. Jak se nazývá dělení buňky, při němž z jedné mateřské buňky vzniknou dvě geneticky totožné dceřiné buňky?`,
+    options: [`osmóza`, `meióza`, `difúze`, `mitóza`],
+    correct: 3
+  },
+  {
+    q: `2. Když ve frontě stojí Petr těsně před Janou a zároveň těsně za Tomášem a Marie je úplně poslední, kdo z této čtveřice stojí jako první?`,
+    options: [`Tomáš`, `Petr`, `Jana`, `Marie`],
+    correct: 0
+  },
+  {
+    q: `3. Který antický učenec je označován za „otce dějepisu"?`,
+    options: [`Pythagoras`, `Hippokratés`, `Hérodotos`, `Sokrates`],
+    correct: 2
+  },
+  {
+    q: `4. Který národ vybudoval v 15. století horské sídlo Machu Picchu?`,
+    options: [`Aztékové`, `Inkové`, `Mayové`, `Olmékové`],
+    correct: 1
+  },
+  {
+    q: `5. Jak se nazývá skupenská přeměna, při níž pevná látka přechází přímo v plyn, aniž by se roztavila?`,
+    options: [`sublimace`, `desublimace`, `kondenzace`, `vypařování`],
+    correct: 0
+  },
+  {
+    q: `6. Kdo je autorem románu Důmyslný rytíř don Quijote de la Mancha?`,
+    options: [`Miguel de Cervantes`, `Lope de Vega`, `Francisco de Quevedo`, `Pedro Calderón de la Barca`],
+    correct: 0
+  },
+  {
+    q: `7. Které město je hlavním městem Černé Hory?`,
+    options: [`Kotor`, `Budva`, `Nikšić`, `Podgorica`],
+    correct: 3
+  },
+  {
+    q: `8. Co znamená přídavné jméno „efemérní"?`,
+    options: [`okázalý a nápadný`, `pomíjivý a krátkodobý`, `nejasný a mlhavý`, `vzácný a jedinečný`],
+    correct: 1
+  },
+  {
+    q: `9. Která velká spirální galaxie leží nejblíže naší Mléčné dráze?`,
+    options: [`Galaxie v Trojúhelníku`, `galaxie Sombrero`, `Velké Magellanovo mračno`, `Galaxie v Andromedě`],
+    correct: 3
+  },
+  {
+    q: `10. Jak se nazývá vědní obor zabývající se houbami?`,
+    options: [`entomologie`, `botanika`, `mykologie`, `ornitologie`],
+    correct: 2
+  }
+];
+
+const evalRanges = [
+  { min: 0, max: 3, text: `Zatím uvažujete podobně jako většina Čechů, kterou tenhle typ otázek spolehlivě zaskočí. Lákavější varianta vás strhla dřív, než jste ji stačili promyslet. Není to o vědomostech, ale o zvyku u samozřejmé odpovědi ještě chvíli zaváhat. Na bystřejší polovinu to dnes nebylo, příště se skóre posune.` },
+  { min: 4, max: 6, text: `Přesně tady se pohybuje průměrný Čech. Půlku otázek jste zvládli s jistotou, u zbytku vás dostala těsná nabídka. Solidní rozhled napříč obory, k tomu, abyste většinu nechali za sebou, ale ještě kousek chybí. Uvažujete zhruba jako vaši vrstevníci, ani nad, ani pod.` },
+  { min: 7, max: 9, text: `Nadprůměr. Do tohoto pásma se u takto stavěných otázek dostane jen menšina a vy mezi ni patříte. Umíte se u odpovědi, která se nabízí sama, zastavit a nenaletět na ni. Uvažujete prokazatelně bystřeji než většina Čechů a k plnému počtu chybělo opravdu málo.` },
+  { min: 10, max: 10, text: `Přesně to, co slibuje titulek. Ani jedna past vás nezastavila, u každé otázky jste odolali tomu nejlákavějšímu omylu. Takhle uvažuje jen zlomek lidí a vy jste jedním z nich. Bystřeji než většina Čechů, bez jediného škrtu.` }
+];
+
+const answers = new Array(questions.length).fill(null);
+let evaluated = false;
+
+const quizEl = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`evaluate-btn`);
+const resultEl = document.getElementById(`result`);
+const scoreEl = document.getElementById(`score-text`);
+const evalTextEl = document.getElementById(`eval-text`);
+const retryBtn = document.getElementById(`retry-btn`);
+
+function renderQuiz() {
+  quizEl.innerHTML = ``;
+  questions.forEach((question, qIdx) => {
+    const box = document.createElement(`div`);
+    box.className = `question`;
+    const qText = document.createElement(`div`);
+    qText.className = `question-text`;
+    qText.textContent = question.q;
+    box.appendChild(qText);
+    question.options.forEach((opt, oIdx) => {
+      const btn = document.createElement(`button`);
+      btn.className = `option`;
+      btn.type = `button`;
+      const letter = String.fromCharCode(97 + oIdx);
+      btn.textContent = `${letter}) ${opt}`;
+      btn.dataset.qIdx = qIdx;
+      btn.dataset.oIdx = oIdx;
+      btn.addEventListener(`click`, handleOptionClick);
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function handleOptionClick(event) {
+  if (evaluated) return;
+  const btn = event.currentTarget;
+  const qIdx = parseInt(btn.dataset.qIdx, 10);
+  const oIdx = parseInt(btn.dataset.oIdx, 10);
+  answers[qIdx] = oIdx;
+  const box = btn.parentElement;
+  box.querySelectorAll(`.option`).forEach(b => b.classList.remove(`selected`));
+  btn.classList.add(`selected`);
+  updateEvalButton();
+}
+
+function updateEvalButton() {
+  const allAnswered = answers.every(a => a !== null);
+  evalBtn.disabled = !allAnswered;
+}
+
+function evaluate() {
+  if (answers.some(a => a === null)) {
+    alert(`Odpovězte prosím na všechny otázky`);
+    return;
+  }
+  evaluated = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.question`);
+  boxes.forEach((box, qIdx) => {
+    const opts = box.querySelectorAll(`.option`);
+    const correctIdx = questions[qIdx].correct;
+    const userIdx = answers[qIdx];
+    opts.forEach((opt, oIdx) => {
+      opt.disabled = true;
+      opt.classList.remove(`selected`);
+      if (oIdx === correctIdx) {
+        opt.classList.add(`correct`);
+      } else if (oIdx === userIdx) {
+        opt.classList.add(`incorrect`);
+      }
+    });
+    if (userIdx === correctIdx) score++;
+  });
+  scoreEl.textContent = `${score} z ${questions.length}`;
+  const range = evalRanges.find(r => score >= r.min && score <= r.max);
+  evalTextEl.textContent = range ? range.text : ``;
+  evalBtn.style.display = `none`;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  evaluated = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  renderQuiz();
+  evalBtn.disabled = true;
+  evalBtn.style.display = `block`;
+  resultEl.style.display = `none`;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+evalBtn.addEventListener(`click`, evaluate);
+retryBtn.addEventListener(`click`, reset);
+
+renderQuiz();
+</script>
+</body>
+</html>
