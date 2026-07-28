@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Denní vědomostní výzva pro seniory: 10 otázek ukáže, jestli vám to stále pálí</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 24px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.7rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 18px; }
+  .perex { font-size: 1.1rem; color: #444; margin: 0 0 28px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .znuni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta.zamek { cursor: default; }
+  #vyhodnotit {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.2em; }
+  #vysledek {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 28px;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #znovu {
+    display: block;
+    margin: 24px auto 0;
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #znovu:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Denní vědomostní výzva pro seniory: 10 otázek ukáže, jestli vám to stále pálí</h1>
+  <p class="perex">Deset otázek napříč obory, od umění a dějin přes zeměpis a přírodu až po čistou logiku. Žádné počítání, jen to, co vám za život utkvělo v hlavě a jak vám to sepne dnes. Ukažte, že vám to stále pálí.</p>
+  <div id="kviz"></div>
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <div class="hlaska" id="hlaska"></div>
+  <div id="vysledek">
+    <div id="skore"></div>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+  const otazky = [
+    { znuni: `1. Kdo je architektem poutního kostela svatého Jana Nepomuckého na Zelené hoře, klenotu barokní gotiky?`,
+      varianty: [`a) Kilián Ignác Dientzenhofer`, `b) Petr Parléř`, `c) Jan Blažej Santini-Aichel`, `d) Josef Mocker`], spravna: 2 },
+    { znuni: `2. Co znamená rčení „prokázat někomu medvědí službu"?`,
+      varianty: [`a) štědře a nezištně mu pomoci`, `b) prokázat mu službu, o kterou vůbec nestál`, `c) nemotorně, ale s dobrým koncem mu posloužit`, `d) v dobrém úmyslu mu spíše uškodit než pomoci`], spravna: 3 },
+    { znuni: `3. Které pohoří tvoří horský předěl mezi Černým a Kaspickým mořem, na pomezí Evropy a Asie?`,
+      varianty: [`a) Kavkaz`, `b) Ural`, `c) Karpaty`, `d) Balkán`], spravna: 0 },
+    { znuni: `4. Která složka krve má hlavní úlohu při srážení krve a zastavení krvácení?`,
+      varianty: [`a) červené krvinky`, `b) bílé krvinky`, `c) krevní destičky`, `d) krevní plazma`], spravna: 2 },
+    { znuni: `5. Kdo je autorem románu Zločin a trest?`,
+      varianty: [`a) Lev Nikolajevič Tolstoj`, `b) Fjodor Michajlovič Dostojevskij`, `c) Ivan Sergejevič Turgeněv`, `d) Nikolaj Vasiljevič Gogol`], spravna: 1 },
+    { znuni: `6. Každý pátek chodí Eva do knihovny. Dnes do knihovny nešla. Co z toho jistě vyplývá?`,
+      varianty: [`a) Dnes není pátek`, `b) Dnes je víkend`, `c) Eva dnes vůbec nečetla`, `d) Zítra Eva do knihovny půjde`], spravna: 0 },
+    { znuni: `7. Jak se v astronomii nazývá zdánlivá dráha, po níž se Slunce během roku pohybuje mezi hvězdami?`,
+      varianty: [`a) světový rovník`, `b) ekliptika`, `c) poledník`, `d) zenit`], spravna: 1 },
+    { znuni: `8. Který český král dal koncem 13. století založit královské město Plzeň?`,
+      varianty: [`a) Karel IV.`, `b) Přemysl Otakar II.`, `c) Jan Lucemburský`, `d) Václav II.`], spravna: 3 },
+    { znuni: `9. Kdo je skladatelem opery Nabucco?`,
+      varianty: [`a) Giacomo Puccini`, `b) Gioacchino Rossini`, `c) Giuseppe Verdi`, `d) Gaetano Donizetti`], spravna: 2 },
+    { znuni: `10. Která z těchto kostí je nejmenší v lidském těle?`,
+      varianty: [`a) kladívko`, `b) jazylka`, `c) třmínek`, `d) kovadlinka`], spravna: 2 }
+  ];
+
+  const odpovedi = new Array(otazky.length).fill(null);
+  let vyhodnoceno = false;
+  const kvizEl = document.getElementById(`kviz`);
+  const btn = document.getElementById(`vyhodnotit`);
+  const hlaska = document.getElementById(`hlaska`);
+
+  otazky.forEach((o, i) => {
+    const box = document.createElement(`div`);
+    box.className = `otazka`;
+    const z = document.createElement(`div`);
+    z.className = `znuni`;
+    z.textContent = o.znuni;
+    box.appendChild(z);
+    o.varianty.forEach((v, j) => {
+      const b = document.createElement(`button`);
+      b.className = `varianta`;
+      b.textContent = v;
+      b.addEventListener(`click`, () => {
+        if (vyhodnoceno) return;
+        odpovedi[i] = j;
+        Array.from(box.querySelectorAll(`.varianta`)).forEach(el => el.classList.remove(`vybrana`));
+        b.classList.add(`vybrana`);
+        if (odpovedi.every(x => x !== null)) { btn.disabled = false; hlaska.textContent = ``; }
+      });
+      box.appendChild(b);
+    });
+    kvizEl.appendChild(box);
+  });
+
+  btn.addEventListener(`click`, () => {
+    if (odpovedi.some(x => x === null)) { hlaska.textContent = `Odpovězte prosím na všechny otázky`; return; }
+    vyhodnoceno = true;
+    let skore = 0;
+    const boxy = kvizEl.querySelectorAll(`.otazka`);
+    boxy.forEach((box, i) => {
+      const tlacitka = box.querySelectorAll(`.varianta`);
+      tlacitka.forEach((b, j) => {
+        b.classList.add(`zamek`);
+        b.classList.remove(`vybrana`);
+        if (j === otazky[i].spravna) b.classList.add(`spravna`);
+        else if (j === odpovedi[i]) b.classList.add(`spatna`);
+      });
+      if (odpovedi[i] === otazky[i].spravna) skore++;
+    });
+    btn.disabled = true;
+    hlaska.textContent = ``;
+    document.getElementById(`skore`).textContent = skore + ` z 10`;
+    document.getElementById(`hodnoceni`).textContent = hodnoceniText(skore);
+    document.getElementById(`vysledek`).style.display = `block`;
+    document.getElementById(`vysledek`).scrollIntoView({ behavior: `smooth` });
+  });
+
+  function hodnoceniText(s) {
+    if (s <= 3) return `Zatím to jiskří jen tu a tam. Pár otázek jste trefili, ale většina záludností vás přelstila. Nic ztraceného. Hlava se rozehřívá jako motor za studena a stačí ji pravidelně přikrmovat. Zkuste to zítra znovu, mozek si pamatuje víc, než tušíte.`;
+    if (s <= 6) return `Solidní průměr a přesně to, co tahle liga čeká. Základ máte pevný, orientujete se napříč obory a chytáky vás sice občas nachytají, ale nepoloží. Pár bodů uteklo v detailech, a právě ty oddělují dobrý výsledek od výborného. Pálí vám to slušně.`;
+    if (s <= 9) return `Tohle je nadprůměr, na který můžete být pyšní. Prošli jste uměním, dějinami, zeměpisem i přírodou a nenechali jste se svést ani na promyšlených pastech. Chybička nebo dvě jsou jen důkazem, že otázky nebyly zadarmo. Hlavu máte v naprostém pořádku a na bystrosti vám neubývá.`;
+    return `Plný počet, klobouk dolů. Deset otázek napříč obory, samé lákavé pasti, a vy jste neškobrtli ani jednou. Tohle není náhoda, ale výsledek celoživotního čtení, zvídavosti a paměti, která drží jako skála. Pálí vám to naprosto výjimečně a máte to černé na bílém.`;
+  }
+
+  document.getElementById(`znovu`).addEventListener(`click`, () => {
+    vyhodnoceno = false;
+    for (let i = 0; i < odpovedi.length; i++) odpovedi[i] = null;
+    kvizEl.querySelectorAll(`.varianta`).forEach(b => { b.className = `varianta`; });
+    document.getElementById(`vysledek`).style.display = `none`;
+    btn.disabled = true;
+    hlaska.textContent = ``;
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  });
+</script>
+</body>
+</html>
