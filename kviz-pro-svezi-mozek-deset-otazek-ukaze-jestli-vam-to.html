@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro svěží mozek: deset otázek ukáže, jestli vám to i v důchodu myslí jako zamlada</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 24px 16px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.8rem; line-height: 1.25; color: #2c2c2c; margin: 0 0 18px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 16px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .locked .opt { cursor: default; }
+  #submit {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint { text-align: center; color: #a05050; margin: 14px 0 0; min-height: 1.2em; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #rating { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #retry {
+    display: block;
+    margin: 28px auto 0;
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #retry:hover { background: #756658; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz pro svěží mozek: deset otázek ukáže, jestli vám to i v důchodu myslí jako zamlada</h1>
+  <p class="perex">Deset otázek na bystrost a svěžest mysli: slovní hříčky, logický úsudek i střípky vědění z různých oborů. Žádné počítání, jen jak vám to teď sepne. Dáte pět, šest, nebo všech deset a potvrdíte, že vám to myslí jako zamlada?</p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <p class="hint" id="hint"></p>
+  <div id="result" class="hidden">
+    <div id="score"></div>
+    <p id="rating"></p>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+  const questions = [
+    { q: `Co znamená rčení hodit flintu do žita?`, options: [`unáhlit se a rozhodnout se ve zlosti`, `prozradit nechtěně tajemství`, `vzdát se a přestat se snažit`, `udělat něco potají a nepozorovaně`], correct: 2 },
+    { q: `Kuchař je k pokrmu jako spisovatel k čemu?`, options: [`peru`, `knize`, `knihovně`, `inkoustu`], correct: 1 },
+    { q: `Které slovo je nejpřesnějším opakem slova všední?`, options: [`sváteční`, `obyčejný`, `zdlouhavý`, `nenápadný`], correct: 0 },
+    { q: `Jak se nazývá básnická figura, při níž se stejné slovo opakuje na začátku několika po sobě jdoucích veršů?`, options: [`anafora`, `metafora`, `personifikace`, `hyperbola`], correct: 0 },
+    { q: `K jakému uměleckému směru se řadí obrazy Salvadora Dalího s roztékajícími se hodinami v pusté krajině?`, options: [`impresionismus`, `kubismus`, `realismus`, `surrealismus`], correct: 3 },
+    { q: `Které z těchto slov svým významem nepatří k ostatním?`, options: [`chrabrý`, `udatný`, `srdnatý`, `obratný`], correct: 3 },
+    { q: `Který průplav spojuje Středozemní moře s Rudým mořem?`, options: [`Panamský průplav`, `Suezský průplav`, `Korintský průplav`, `Kielský průplav`], correct: 1 },
+    { q: `Co znamená přídavné jméno úsečný, například v obratu úsečná odpověď?`, options: [`stručná až strohá`, `zdvořilá a obšírná`, `nejasná a vyhýbavá`, `posměšná a jízlivá`], correct: 0 },
+    { q: `Všichni krokodýli jsou plazi a někteří živočichové v této řece jsou krokodýli. Co z toho nutně vyplývá?`, options: [`Všichni živočichové v této řece jsou plazi`, `Někteří plazi nejsou krokodýli`, `Někteří živočichové v této řece jsou plazi`, `Žádný živočich v této řece není plaz`], correct: 2 },
+    { q: `Jak se nazývá jazykovědná nauka o správné spisovné výslovnosti?`, options: [`etymologie`, `ortoepie`, `ortografie`, `morfologie`], correct: 1 }
+  ];
+
+  const ratings = [
+    { min: 0, max: 3, text: `Dnes to hlava rozjížděla pomalu. Několik otázek zamířilo mimo první dojem a lákavější varianta vás stáhla dřív, než jste ji domysleli. Svěžest mysli se ale dá probrat čtením, luštěním a otázkami, nad kterými chvíli posedíte. Berte to jako rozehřívací kolo, výš už se dá jen stoupat.` },
+    { min: 4, max: 6, text: `Solidní střed, přesně tady se drží většina řešitelů. Půlku otázek jste rozlouskli s jistotou, u zbytku vás svedla první nabízející se odpověď. Mysl vám šlape svěže, jen na nejzáludnějších slovních pastech a těsných dvojicích se dá ještě zapracovat a posunout se výš.` },
+    { min: 7, max: 9, text: `Výborně, tohle je výkon svěží a pružné hlavy. Slovní cit, logický úsudek i přehled napříč obory vám slouží bystře a těsné distraktory vás jen tak neoblafnou. Do tohoto pásma se dostane jen menšina a vám to očividně myslí jako v nejlepších letech. K plnému počtu chybělo opravdu málo.` },
+    { min: 10, max: 10, text: `Naprostá špička a vzácný úkaz. Všech deset zvládne jen zlomek řešitelů. Ani jedna past vás nezastavila, poradili jste si se vším od slovních hříček přes čistou logiku až po vědomosti z různých oborů. Mysl vám pracuje bez jediného zaváhání, přesně jak slibuje titulek: myslí vám to jako zamlada.` }
+  ];
+
+  const answers = new Array(questions.length).fill(null);
+  let locked = false;
+
+  const quizEl = document.getElementById('quiz');
+  const submitBtn = document.getElementById('submit');
+  const hintEl = document.getElementById('hint');
+  const resultEl = document.getElementById('result');
+  const scoreEl = document.getElementById('score');
+  const ratingEl = document.getElementById('rating');
+  const retryBtn = document.getElementById('retry');
+
+  questions.forEach((item, qi) => {
+    const box = document.createElement('div');
+    box.className = 'q';
+    const qt = document.createElement('p');
+    qt.className = 'q-text';
+    qt.textContent = (qi + 1) + '. ' + item.q;
+    box.appendChild(qt);
+    item.options.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = opt;
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        answers[qi] = oi;
+        Array.from(box.querySelectorAll('.opt')).forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+
+  function updateSubmit() {
+    const done = answers.every(a => a !== null);
+    submitBtn.disabled = !done;
+    if (done) hintEl.textContent = '';
+  }
+
+  submitBtn.addEventListener('click', () => {
+    if (answers.some(a => a === null)) {
+      hintEl.textContent = 'Odpovězte prosím na všechny otázky';
+      return;
+    }
+    locked = true;
+    let score = 0;
+    const boxes = quizEl.querySelectorAll('.q');
+    boxes.forEach((box, qi) => {
+      box.classList.add('locked');
+      const opts = box.querySelectorAll('.opt');
+      const correct = questions[qi].correct;
+      const chosen = answers[qi];
+      if (chosen === correct) score++;
+      opts.forEach((b, oi) => {
+        b.classList.remove('selected');
+        if (oi === correct) b.classList.add('correct');
+        else if (oi === chosen) b.classList.add('wrong');
+      });
+    });
+    submitBtn.classList.add('hidden');
+    hintEl.textContent = '';
+    scoreEl.textContent = score + ' z ' + questions.length;
+    const r = ratings.find(x => score >= x.min && score <= x.max);
+    ratingEl.textContent = r ? r.text : '';
+    resultEl.classList.remove('hidden');
+    resultEl.scrollIntoView({ behavior: 'smooth' });
+  });
+
+  retryBtn.addEventListener('click', () => {
+    locked = false;
+    for (let i = 0; i < answers.length; i++) answers[i] = null;
+    quizEl.querySelectorAll('.q').forEach(box => {
+      box.classList.remove('locked');
+      box.querySelectorAll('.opt').forEach(b => b.classList.remove('selected', 'correct', 'wrong'));
+    });
+    resultEl.classList.add('hidden');
+    submitBtn.classList.remove('hidden');
+    submitBtn.disabled = true;
+    hintEl.textContent = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
+</body>
+</html>
