@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test všeobecných znalostí pro seniory: kdo získá aspoň 8 bodů, má vyšší rozhled než většina lidí</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 24px 16px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.8rem; line-height: 1.25; color: #2c2c2c; margin: 0 0 18px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 16px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .locked .opt { cursor: default; }
+  #submit {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint { text-align: center; color: #a05050; margin: 14px 0 0; min-height: 1.2em; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #rating { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #retry {
+    display: block;
+    margin: 28px auto 0;
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #retry:hover { background: #756658; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test všeobecných znalostí pro seniory: kdo získá aspoň 8 bodů, má vyšší rozhled než většina lidí</h1>
+  <p class="perex">Deset otázek napříč obory: od literatury a dějin přes přírodu a fyziku až po sport a zeměpis. Nejde o školní biflování, ale o rozhled, který člověk sbírá celý život. Zjistěte, kolik toho máte pevně v hlavě.</p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <p class="hint" id="hint"></p>
+  <div id="result" class="hidden">
+    <div id="score"></div>
+    <p id="rating"></p>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+  const questions = [
+    { q: `Kdo je autorem dobrodružného románu Tři mušketýři?`, options: [`Victor Hugo`, `Jules Verne`, `Alexandre Dumas`, `Honoré de Balzac`], correct: 2 },
+    { q: `Který americký prezident stál v čele země během občanské války (Severu proti Jihu)?`, options: [`George Washington`, `Thomas Jefferson`, `Franklin D. Roosevelt`, `Abraham Lincoln`], correct: 3 },
+    { q: `Který pták má ze všech žijících ptáků největší rozpětí křídel?`, options: [`Albatros stěhovavý`, `Kondor andský`, `Orel skalní`, `Pelikán bílý`], correct: 0 },
+    { q: `Co znamená české slovo letora?`, options: [`Roční období`, `Povaha a temperament člověka`, `Náhlý poryv větru`, `Chvíle nicnedělání`], correct: 1 },
+    { q: `Který stát má ze všech nejmenší rozlohu na světě?`, options: [`Monako`, `Vatikán`, `San Marino`, `Lichtenštejnsko`], correct: 1 },
+    { q: `Jakou rychlostí se přibližně šíří světlo ve vakuu?`, options: [`30 000 km/s`, `300 000 km/s`, `3 000 000 km/s`, `30 000 000 km/s`], correct: 1 },
+    { q: `Který kov je ze všech kovů nejlepším vodičem elektrického proudu?`, options: [`Zlato`, `Měď`, `Stříbro`, `Hliník`], correct: 2 },
+    { q: `Který antický učenec už ve 3. století před naším letopočtem docela přesně vypočítal obvod Země?`, options: [`Eratosthenés`, `Pythagoras`, `Archimédes`, `Klaudios Ptolemaios`], correct: 0 },
+    { q: `Která hvězda je nejjasnější na noční obloze?`, options: [`Polárka`, `Betelgeuse`, `Vega`, `Sírius`], correct: 3 },
+    { q: `Kolik hráčů jednoho družstva je při vodním pólu současně ve vodě, včetně brankáře?`, options: [`Sedm`, `Šest`, `Pět`, `Jedenáct`], correct: 0 }
+  ];
+
+  const ratings = [
+    { min: 0, max: 3, text: `Tentokrát to nevyšlo. Otázky sahaly do řady oborů a pěkných pár vás jich zaskočilo. Vezměte to jako pozvánku projít si znovu několik témat, příště jich zvládnete výrazně víc.` },
+    { min: 4, max: 6, text: `Slušný průměr, přesně tady se pohybuje většina lidí. Základ z několika oborů máte pevně, ale u přesných detailů a chytáků jistota kolísá. Od lepšího výsledku vás nedělilo mnoho.` },
+    { min: 7, max: 9, text: `Výborně. Máte široký rozhled napříč obory a poradíte si i s otázkami, na kterých běžný člověk zaváhá. Od osmi bodů výš patříte mezi ty, kdo mají všeobecný přehled nad úrovní většiny lidí.` },
+    { min: 10, max: 10, text: `Naprostá špička. Deset z deseti napříč literaturou, dějinami, přírodou i fyzikou nedá skoro nikdo. Váš všeobecný přehled je mimořádný a máte plné právo být na něj hrdí.` }
+  ];
+
+  const answers = new Array(questions.length).fill(null);
+  let locked = false;
+
+  const quizEl = document.getElementById('quiz');
+  const submitBtn = document.getElementById('submit');
+  const hintEl = document.getElementById('hint');
+  const resultEl = document.getElementById('result');
+  const scoreEl = document.getElementById('score');
+  const ratingEl = document.getElementById('rating');
+  const retryBtn = document.getElementById('retry');
+
+  questions.forEach((item, qi) => {
+    const box = document.createElement('div');
+    box.className = 'q';
+    const qt = document.createElement('p');
+    qt.className = 'q-text';
+    qt.textContent = (qi + 1) + '. ' + item.q;
+    box.appendChild(qt);
+    item.options.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = opt;
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        answers[qi] = oi;
+        Array.from(box.querySelectorAll('.opt')).forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+
+  function updateSubmit() {
+    const done = answers.every(a => a !== null);
+    submitBtn.disabled = !done;
+    if (done) hintEl.textContent = '';
+  }
+
+  submitBtn.addEventListener('click', () => {
+    if (answers.some(a => a === null)) {
+      hintEl.textContent = 'Odpovězte prosím na všechny otázky';
+      return;
+    }
+    locked = true;
+    let score = 0;
+    const boxes = quizEl.querySelectorAll('.q');
+    boxes.forEach((box, qi) => {
+      box.classList.add('locked');
+      const opts = box.querySelectorAll('.opt');
+      const correct = questions[qi].correct;
+      const chosen = answers[qi];
+      if (chosen === correct) score++;
+      opts.forEach((b, oi) => {
+        b.classList.remove('selected');
+        if (oi === correct) b.classList.add('correct');
+        else if (oi === chosen) b.classList.add('wrong');
+      });
+    });
+    submitBtn.classList.add('hidden');
+    hintEl.textContent = '';
+    scoreEl.textContent = score + ' z ' + questions.length;
+    const r = ratings.find(x => score >= x.min && score <= x.max);
+    ratingEl.textContent = r ? r.text : '';
+    resultEl.classList.remove('hidden');
+    resultEl.scrollIntoView({ behavior: 'smooth' });
+  });
+
+  retryBtn.addEventListener('click', () => {
+    locked = false;
+    for (let i = 0; i < answers.length; i++) answers[i] = null;
+    quizEl.querySelectorAll('.q').forEach(box => {
+      box.classList.remove('locked');
+      box.querySelectorAll('.opt').forEach(b => b.classList.remove('selected', 'correct', 'wrong'));
+    });
+    resultEl.classList.add('hidden');
+    submitBtn.classList.remove('hidden');
+    submitBtn.disabled = true;
+    hintEl.textContent = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
+</body>
+</html>
