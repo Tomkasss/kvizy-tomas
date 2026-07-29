@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz slovní zásoby z dob ČSSR: kdo pozná všech 10 výrazů, je opravdové Husákovo dítě</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 24px 16px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.8rem; line-height: 1.25; color: #2c2c2c; margin: 0 0 18px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 16px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .locked .opt { cursor: default; }
+  #submit {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint { text-align: center; color: #a05050; margin: 14px 0 0; min-height: 1.2em; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #rating { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #retry {
+    display: block;
+    margin: 28px auto 0;
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #retry:hover { background: #756658; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz slovní zásoby z dob ČSSR: kdo pozná všech 10 výrazů, je opravdové Husákovo dítě</h1>
+  <p class="perex">Mánička, melouch, akce Z. Slova, která za socialismu znal každý, ale dnešní mladí u nich jen krčí rameny. Deset dobových výrazů prověří, kolik vám toho v hlavě zůstalo. Kdo pozná význam všech deseti, je opravdové Husákovo dítě.</p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <p class="hint" id="hint"></p>
+  <div id="result" class="hidden">
+    <div id="score"></div>
+    <p id="rating"></p>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+  const questions = [
+    { q: `Koho v 70. a 80. letech označoval výraz mánička?`, options: [`mladíka vyznávajícího moderní tanec a diskotéky`, `mladíka s nápadně dlouhými vlasy, obvykle příznivce bigbítu a undergroundu`, `mladého trampa, který o víkendech putoval do lesů k ohni`, `mladého svazáckého aktivistu organizujícího brigády`], correct: 1 },
+    { q: `Koho v hovorové řeči za normalizace označoval výraz esenbák?`, options: [`civilního dobrovolníka Pomocné stráže VB, který ve volném čase v civilu s páskou na rukávu pomáhal hlídkám dohlížet na pořádek`, `uniformovaného pořádkového policistu, který dohlížel na veřejný pořádek a dopravu`, `vojáka Pohraniční stráže, který střežil hranice se Západem`, `ozbrojeného člena dělnických milicí, které měla k dispozici komunistická strana`], correct: 1 },
+    { q: `Co se za socialismu myslelo melouchem?`, options: [`dobrovolná neplacená výpomoc příbuzným o víkendu`, `přesčasová práce navíc řádně proplácená zaměstnavatelem`, `práce načerno, přivýdělek vykonávaný soukromě mimo zaměstnání`, `podniková prémie vyplácená za splnění výrobního plánu`], correct: 2 },
+    { q: `Co byl za socialismu kádrový posudek?`, options: [`pracovní hodnocení, v němž mistr popsal odbornou zdatnost a výkon zaměstnance`, `lékařský posudek o zdravotní způsobilosti k výkonu určité profese`, `doporučení odborové organizace k přidělení podnikové rekreace`, `hodnocení politické a třídní spolehlivosti občana, zakládané do jeho osobních materiálů a rozhodující o kariéře i o studiu jeho dětí`], correct: 3 },
+    { q: `Co byla za socialismu takzvaná akce Z?`, options: [`neplacená dobrovolná práce občanů na výstavbě a údržbě v místě bydliště`, `organizovaný sběr starého papíru a železa pořádaný školami`, `mimořádná noční směna v továrně při dohánění plánu`, `nábor brigádníků na sezonní práce v zemědělství, na chmel a brambory`], correct: 0 },
+    { q: `Koho označoval výraz mukl v éře komunistického Československa?`, options: [`vězně komunistických věznic a táborů nucené práce, typicky politického vězně z 50. let`, `dozorce, takzvaného bachaře, který v těchto věznicích hlídal odsouzené`, `ozbrojeného člena Lidových milicí ve velkém průmyslovém podniku`, `chovance nápravného ústavu pro mladistvé provinilce`], correct: 0 },
+    { q: `Co byla za socialismu výjezdní doložka?`, options: [`potvrzení zaměstnavatele, že uvolňuje pracovníka na dovolenou`, `bankovní povolení směnit koruny za valuty na cestu`, `úřední povolení v pase, bez něhož občan nesměl překročit hranice do zahraničí`, `celní prohlášení o věcech vyvážených přes hranice`], correct: 2 },
+    { q: `Co znamenal za socialismu pojem devizový příslib?`, options: [`razítko v pase, které samo o sobě povolovalo vycestování za hranice`, `potvrzení, že občan nemá vůči státu žádné devizové dluhy`, `povinnou směnu určité částky valut hned při vstupu do země`, `příslib státu prodat občanovi omezené množství valut na cestu do nesocialistické země`], correct: 3 },
+    { q: `Kdo byl v socialistické výrobě úderník?`, options: [`přední dělník, který soustavně překračoval stanovené pracovní normy`, `vzorný zaměstnanec oceňovaný hlavně za bezchybnou docházku a kázeň`, `dělník obsluhující v kovárně těžký buchar a kovací lisy`, `reprezentant podnikového oddílu v úpolových sportech`], correct: 0 },
+    { q: `Koho v socialistické dětské organizaci označoval pojem jiskra?`, options: [`vzorného pionýra vyznamenaného za výborný prospěch`, `vedoucího pionýrského oddílu z řad starší mládeže`, `nejmladší dítě v prvních třídách školy, které se teprve chystalo stát pionýrem`, `člena svazácké agitační skupiny`], correct: 2 }
+  ];
+
+  const ratings = [
+    { min: 0, max: 3, text: `Dobu ČSSR jste nejspíš zastihli jen okrajem dětství, nebo se vám slovník té éry z paměti vytratil. Mánička nebo melouch vám ještě něco říkají, u kádrového posudku nebo výjezdní doložky jste ale tápali. Tady se obvykle scházejí mladší ročníky, které normalizaci samy neprožily.` },
+    { min: 4, max: 6, text: `Poctivý průměr pamětníka. Nejomílanější výrazy socialistického života máte v malíku, u méně slavných a zrádnějších pojmů jste ale zaváhali. Přesně na téhle hranici se pohybuje většina těch, kdo za Husáka dospívali, a přes kterou se mladší dostávají jen výjimečně.` },
+    { min: 7, max: 9, text: `Výborný výkon opravdového Husákova dítěte. Slovní zásobu té doby ovládáte napříč obory, od policejního dohledu a kádrových posudků přes cestovní byrokracii až po dětské organizace. K plnému počtu vám chybělo jen pár výrazů, které si dnes vybaví málokdo.` },
+    { min: 10, max: 10, text: `Plný počet a titul opravdového Husákova dítěte. Poznáte i pojmy, které většině lidí dávno vypadly z hlavy, od devizového příslibu přes úderníka až po jiskru. Řeč normalizace ovládáte tak, jako byste ji včera slyšeli ve frontě před obchodem. Takový přehled má dnes už málokdo, klobouk dolů.` }
+  ];
+
+  const answers = new Array(questions.length).fill(null);
+  let locked = false;
+
+  const quizEl = document.getElementById('quiz');
+  const submitBtn = document.getElementById('submit');
+  const hintEl = document.getElementById('hint');
+  const resultEl = document.getElementById('result');
+  const scoreEl = document.getElementById('score');
+  const ratingEl = document.getElementById('rating');
+  const retryBtn = document.getElementById('retry');
+
+  questions.forEach((item, qi) => {
+    const box = document.createElement('div');
+    box.className = 'q';
+    const qt = document.createElement('p');
+    qt.className = 'q-text';
+    qt.textContent = (qi + 1) + '. ' + item.q;
+    box.appendChild(qt);
+    item.options.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = opt;
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        answers[qi] = oi;
+        Array.from(box.querySelectorAll('.opt')).forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+
+  function updateSubmit() {
+    const done = answers.every(a => a !== null);
+    submitBtn.disabled = !done;
+    if (done) hintEl.textContent = '';
+  }
+
+  submitBtn.addEventListener('click', () => {
+    if (answers.some(a => a === null)) {
+      hintEl.textContent = 'Odpovězte prosím na všechny otázky';
+      return;
+    }
+    locked = true;
+    let score = 0;
+    const boxes = quizEl.querySelectorAll('.q');
+    boxes.forEach((box, qi) => {
+      box.classList.add('locked');
+      const opts = box.querySelectorAll('.opt');
+      const correct = questions[qi].correct;
+      const chosen = answers[qi];
+      if (chosen === correct) score++;
+      opts.forEach((b, oi) => {
+        b.classList.remove('selected');
+        if (oi === correct) b.classList.add('correct');
+        else if (oi === chosen) b.classList.add('wrong');
+      });
+    });
+    submitBtn.classList.add('hidden');
+    hintEl.textContent = '';
+    scoreEl.textContent = score + ' z ' + questions.length;
+    const r = ratings.find(x => score >= x.min && score <= x.max);
+    ratingEl.textContent = r ? r.text : '';
+    resultEl.classList.remove('hidden');
+    resultEl.scrollIntoView({ behavior: 'smooth' });
+  });
+
+  retryBtn.addEventListener('click', () => {
+    locked = false;
+    for (let i = 0; i < answers.length; i++) answers[i] = null;
+    quizEl.querySelectorAll('.q').forEach(box => {
+      box.classList.remove('locked');
+      box.querySelectorAll('.opt').forEach(b => b.classList.remove('selected', 'correct', 'wrong'));
+    });
+    resultEl.classList.add('hidden');
+    submitBtn.classList.remove('hidden');
+    submitBtn.disabled = true;
+    hintEl.textContent = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
+</body>
+</html>
