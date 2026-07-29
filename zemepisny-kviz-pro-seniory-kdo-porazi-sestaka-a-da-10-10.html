@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zeměpisný kvíz pro seniory: kdo porazí šesťáka a dá 10/10, může být na sebe pyšný</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 24px 16px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.8rem; line-height: 1.25; color: #2c2c2c; margin: 0 0 18px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 16px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .locked .opt { cursor: default; }
+  #submit {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint { text-align: center; color: #a05050; margin: 14px 0 0; min-height: 1.2em; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #rating { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #retry {
+    display: block;
+    margin: 28px auto 0;
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #retry:hover { background: #756658; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Zeměpisný kvíz pro seniory: kdo porazí šesťáka a dá 10/10, může být na sebe pyšný</h1>
+  <p class="perex">Deset otázek napříč zeměpisem: průlivy, moře, řeky, jezera, ostrovy, vodopády i geografie Česka. Poměříte se se šesťákem, který má látku čerstvě v hlavě. Kdo dá plných deset z deseti, může být na sebe právem pyšný.</p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <p class="hint" id="hint"></p>
+  <div id="result" class="hidden">
+    <div id="score"></div>
+    <p id="rating"></p>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+  const questions = [
+    { q: `Který průliv odděluje Asii od Severní Ameriky?`, options: [`Beringův průliv`, `Gibraltarský průliv`, `Bosporský průliv`, `Magalhãesův průliv`], correct: 0 },
+    { q: `Které dva africké státy si mezi sebou dělí Viktoriiny vodopády?`, options: [`Keňa a Tanzanie`, `Uganda a Rwanda`, `Malawi a Tanzanie`, `Zambie a Zimbabwe`], correct: 3 },
+    { q: `Na kterém světadílu leží poušť Kalahari?`, options: [`Asie`, `Afrika`, `Austrálie`, `Jižní Amerika`], correct: 1 },
+    { q: `Které moře odděluje Apeninský poloostrov od Balkánského poloostrova?`, options: [`Egejské moře`, `Jónské moře`, `Tyrhénské moře`, `Jaderské moře`], correct: 3 },
+    { q: `Do kterého moře ústí řeka Rýn?`, options: [`Severního moře`, `Baltského moře`, `Černého moře`, `Středozemního moře`], correct: 0 },
+    { q: `Který z těchto států nemá žádný přístup k moři?`, options: [`Chorvatsko`, `Bulharsko`, `Rakousko`, `Albánie`], correct: 2 },
+    { q: `Na hranici kterých dvou zemí leží Ženevské jezero?`, options: [`Rakousko a Itálie`, `Švýcarsko a Francie`, `Německo a Rakousko`, `Itálie a Švýcarsko`], correct: 1 },
+    { q: `Kterému státu patří ostrov Korsika?`, options: [`Itálie`, `Španělsko`, `Řecko`, `Francie`], correct: 3 },
+    { q: `Které město je hlavním městem Vietnamu?`, options: [`Ho Či Minovo Město`, `Da Nang`, `Hanoj`, `Hue`], correct: 2 },
+    { q: `Který národní park byl v České republice vyhlášen jako vůbec první?`, options: [`Krkonošský národní park`, `Národní park Šumava`, `Národní park Podyjí`, `Národní park České Švýcarsko`], correct: 0 }
+  ];
+
+  const ratings = [
+    { min: 0, max: 3, text: `Mapa světa se vám zatím slévá dohromady a školák, který má látku čerstvě v paměti, by tentokrát měl navrch. Nic ztraceného, projděte si správné odpovědi a příště se odrazíte mnohem výš.` },
+    { min: 4, max: 6, text: `Přesně tady se drží většina řešitelů. Světadíly, velká moře i známé řeky poznáte, ale jakmile přijde na průliv, sousední ostrov nebo vzdálenou metropoli, jistota kolísá. Se šesťákem byste svedli vyrovnaný souboj a k jasnému vítězství vám chybí už jen kousek.` },
+    { min: 7, max: 9, text: `Výborný výkon, šesťáka jste nechali za sebou. Zeměpisem se pohybujete s přehledem i tam, kde většina naletí na těsný sousední distraktor. K plnému počtu vám chyběl jediný krok, nejspíš u jedné zvlášť záludné otázky.` },
+    { min: 10, max: 10, text: `Naprostá špička. Od průlivu mezi dvěma světadíly přes středomořské ostrovy a vzdálené metropole až po nejstarší český národní park jste nezaváhali ani jednou. Šesťáka jste porazili na celé čáře a plných 10 z 10 dá opravdu jen menšina. Právem můžete být na sebe pyšní.` }
+  ];
+
+  const answers = new Array(questions.length).fill(null);
+  let locked = false;
+
+  const quizEl = document.getElementById('quiz');
+  const submitBtn = document.getElementById('submit');
+  const hintEl = document.getElementById('hint');
+  const resultEl = document.getElementById('result');
+  const scoreEl = document.getElementById('score');
+  const ratingEl = document.getElementById('rating');
+  const retryBtn = document.getElementById('retry');
+
+  questions.forEach((item, qi) => {
+    const box = document.createElement('div');
+    box.className = 'q';
+    const qt = document.createElement('p');
+    qt.className = 'q-text';
+    qt.textContent = (qi + 1) + '. ' + item.q;
+    box.appendChild(qt);
+    item.options.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = opt;
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        answers[qi] = oi;
+        Array.from(box.querySelectorAll('.opt')).forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+
+  function updateSubmit() {
+    const done = answers.every(a => a !== null);
+    submitBtn.disabled = !done;
+    if (done) hintEl.textContent = '';
+  }
+
+  submitBtn.addEventListener('click', () => {
+    if (answers.some(a => a === null)) {
+      hintEl.textContent = 'Odpovězte prosím na všechny otázky';
+      return;
+    }
+    locked = true;
+    let score = 0;
+    const boxes = quizEl.querySelectorAll('.q');
+    boxes.forEach((box, qi) => {
+      box.classList.add('locked');
+      const opts = box.querySelectorAll('.opt');
+      const correct = questions[qi].correct;
+      const chosen = answers[qi];
+      if (chosen === correct) score++;
+      opts.forEach((b, oi) => {
+        b.classList.remove('selected');
+        if (oi === correct) b.classList.add('correct');
+        else if (oi === chosen) b.classList.add('wrong');
+      });
+    });
+    submitBtn.classList.add('hidden');
+    hintEl.textContent = '';
+    scoreEl.textContent = score + ' z ' + questions.length;
+    const r = ratings.find(x => score >= x.min && score <= x.max);
+    ratingEl.textContent = r ? r.text : '';
+    resultEl.classList.remove('hidden');
+    resultEl.scrollIntoView({ behavior: 'smooth' });
+  });
+
+  retryBtn.addEventListener('click', () => {
+    locked = false;
+    for (let i = 0; i < answers.length; i++) answers[i] = null;
+    quizEl.querySelectorAll('.q').forEach(box => {
+      box.classList.remove('locked');
+      box.querySelectorAll('.opt').forEach(b => b.classList.remove('selected', 'correct', 'wrong'));
+    });
+    resultEl.classList.add('hidden');
+    submitBtn.classList.remove('hidden');
+    submitBtn.disabled = true;
+    hintEl.textContent = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
+</body>
+</html>
