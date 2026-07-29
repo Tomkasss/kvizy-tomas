@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz českých a slovenských slov pro seniory: kdo dá 10/10 bez slovníku, vyrůstal v Československu</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 24px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.7rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 18px; }
+  .perex { font-size: 1.1rem; color: #444; margin: 0 0 28px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .znuni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta.zamek { cursor: default; }
+  #vyhodnotit {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.2em; }
+  #vysledek {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 28px;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #znovu {
+    display: block;
+    margin: 24px auto 0;
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #znovu:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz českých a slovenských slov pro seniory: kdo dá 10/10 bez slovníku, vyrůstal v Československu</h1>
+  <p class="perex">Slovenštině z večerníčků jste kdysi rozuměli bez přemýšlení a stará česká slova slýchali od babiček. Deset výrazů z obou stran řeky Moravy teď prověří, kolik vám toho po společném státě zůstalo v hlavě.</p>
+  <div id="kviz"></div>
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <div class="hlaska" id="hlaska"></div>
+  <div id="vysledek">
+    <div id="skore"></div>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+  const otazky = [
+    { znuni: `1. Co znamená slovenské slovo „raňajky"?`,
+      varianty: [`a) druhý, vydatnější chod oběda`, `b) slavnostní hostina po svatbě`, `c) snídaně, tedy ranní jídlo po probuzení`, `d) odpolední svačina mezi obědem a večeří`], spravna: 2 },
+    { znuni: `2. Co znamená slovenské slovo „korčule"?`,
+      varianty: [`a) brusle na jízdu po ledě`, `b) běžecké lyže`, `c) dřevěné sáně tažené do kopce`, `d) sněžnice na chůzi v hlubokém sněhu`], spravna: 0 },
+    { znuni: `3. Co znamená slovo „šenkýř"?`,
+      varianty: [`a) sládek, který ve várce připravuje a vaří pivo`, `b) povozník rozvážející sudy s pivem po hospodách`, `c) obecní ponocný, jenž v noci hlídkoval ve vsi`, `d) hostinský, jenž v šenku čepuje pivo a obsluhuje hosty`], spravna: 3 },
+    { znuni: `4. Co znamená slovo „necky"?`,
+      varianty: [`a) rýhované prkno, na němž se drhnulo mokré prádlo`, `b) podlouhlá dřevěná nádoba, v níž se ručně pralo prádlo`, `c) proutěný koš na odnášení vypraného mokrého prádla`, `d) dřevěná palice na pěchování a máchání prádla`], spravna: 1 },
+    { znuni: `5. Co znamená slovenské slovo „obrus"?`,
+      varianty: [`a) ozdobný běhoun prostřený uprostřed sváteční tabule`, `b) přehoz natažený přes ustlanou postel`, `c) ubrus prostřený přes celý stůl`, `d) záclona zavěšená přes okno do světnice`], spravna: 2 },
+    { znuni: `6. Co znamená slovo „almara"?`,
+      varianty: [`a) velká dřevěná skříň na šaty a prádlo`, `b) nízká truhla s víkem na uložení výbavy`, `c) otevřená police na nádobí zavěšená na stěně`, `d) prosklená vitrína na sváteční sklo`], spravna: 0 },
+    { znuni: `7. Co znamená slovenské slovo „korytnačka"?`,
+      varianty: [`a) rak říční s krunýřem a klepety`, `b) ropucha, velká bradavičnatá žába`, `c) slimák s ulitou na zádech`, `d) želva, plaz s krunýřem`], spravna: 3 },
+    { znuni: `8. Co znamená slovo „šumař"?`,
+      varianty: [`a) podomní obchodník nabízející zboží dům od domu`, `b) potulný lidový muzikant hrající po hospodách a poutích`, `c) vandrovní tovaryš putující za prací od mistra k mistru`, `d) jarmareční vypravěč a kejklíř bavící dav`], spravna: 1 },
+    { znuni: `9. Co znamená slovo „biřic"?`,
+      varianty: [`a) městský radní zasedající v konšelské radě`, `b) hlásný, jenž z věže troubil a ohlašoval čas`, `c) ozbrojený sluha vrchnosti, který zatýkal a vykonával tresty`, `d) výběrčí mýta a cla u městské brány`], spravna: 2 },
+    { znuni: `10. Co znamená slovo „úvrať"?`,
+      varianty: [`a) okrajový pruh pole, kde se při orbě obracel potah s pluhem`, `b) hluboká rýha, kterou pluh při orání nadzvedl a obrátil`, `c) hromada kamení vysbíraného z pole a snesená na jeho kraj`, `d) nezoraná travnatá mez dělící pozemky dvou hospodářů`], spravna: 0 }
+  ];
+
+  const odpovedi = new Array(otazky.length).fill(null);
+  let vyhodnoceno = false;
+  const kvizEl = document.getElementById(`kviz`);
+  const btn = document.getElementById(`vyhodnotit`);
+  const hlaska = document.getElementById(`hlaska`);
+
+  otazky.forEach((o, i) => {
+    const box = document.createElement(`div`);
+    box.className = `otazka`;
+    const z = document.createElement(`div`);
+    z.className = `znuni`;
+    z.textContent = o.znuni;
+    box.appendChild(z);
+    o.varianty.forEach((v, j) => {
+      const b = document.createElement(`button`);
+      b.className = `varianta`;
+      b.textContent = v;
+      b.addEventListener(`click`, () => {
+        if (vyhodnoceno) return;
+        odpovedi[i] = j;
+        Array.from(box.querySelectorAll(`.varianta`)).forEach(el => el.classList.remove(`vybrana`));
+        b.classList.add(`vybrana`);
+        if (odpovedi.every(x => x !== null)) { btn.disabled = false; hlaska.textContent = ``; }
+      });
+      box.appendChild(b);
+    });
+    kvizEl.appendChild(box);
+  });
+
+  btn.addEventListener(`click`, () => {
+    if (odpovedi.some(x => x === null)) { hlaska.textContent = `Odpovězte prosím na všechny otázky`; return; }
+    vyhodnoceno = true;
+    let skore = 0;
+    const boxy = kvizEl.querySelectorAll(`.otazka`);
+    boxy.forEach((box, i) => {
+      const tlacitka = box.querySelectorAll(`.varianta`);
+      tlacitka.forEach((b, j) => {
+        b.classList.add(`zamek`);
+        b.classList.remove(`vybrana`);
+        if (j === otazky[i].spravna) b.classList.add(`spravna`);
+        else if (j === odpovedi[i]) b.classList.add(`spatna`);
+      });
+      if (odpovedi[i] === otazky[i].spravna) skore++;
+    });
+    btn.disabled = true;
+    hlaska.textContent = ``;
+    document.getElementById(`skore`).textContent = skore + ` z 10`;
+    document.getElementById(`hodnoceni`).textContent = hodnoceniText(skore);
+    document.getElementById(`vysledek`).style.display = `block`;
+    document.getElementById(`vysledek`).scrollIntoView({ behavior: `smooth` });
+  });
+
+  function hodnoceniText(s) {
+    if (s <= 3) return `Společný stát vám nejspíš proklouzl mezi prsty. Pár slov jste zaslechli, ale slovenština i stará čeština vám dnes zní jako z jiného světa. Nevadí, ke každému výrazu se dá vrátit a znovu si ho osahat.`;
+    if (s <= 6) return `Poctivý průměr pamětníka. Nejběžnější slova z obou jazyků máte v malíku, u zrádnějších výrazů jste ale volili podle citu. Přesně tady se schází většina těch, kdo společný stát pamatují.`;
+    if (s <= 9) return `Výborný výkon. Slovenštinu i méně známá česká slova ovládáte napříč obory, od kuchyně přes hospodářství až po dávné městské pořádky. K plnému počtu vám chybělo jen málo.`;
+    return `Plných deset z deseti bez jediného zaváhání. Rozumíte oběma jazykům tak samozřejmě, jako byste je slýchali každý den, a to dnes svede opravdu jen menšina. Československo ve vaší hlavě žije dál a slovník k tomu nepotřebujete.`;
+  }
+
+  document.getElementById(`znovu`).addEventListener(`click`, () => {
+    vyhodnoceno = false;
+    for (let i = 0; i < odpovedi.length; i++) odpovedi[i] = null;
+    kvizEl.querySelectorAll(`.varianta`).forEach(b => { b.className = `varianta`; });
+    document.getElementById(`vysledek`).style.display = `none`;
+    btn.disabled = true;
+    hlaska.textContent = ``;
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  });
+</script>
+</body>
+</html>
