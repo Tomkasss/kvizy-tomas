@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz měst a řek: kdo dá 10/10, orientuje se v zeměpisu lépe než většina Čechů</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 24px 16px;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.7rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 28px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  margin: 0 0 10px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1rem;
+  color: #3a3a3a;
+  cursor: pointer;
+  transition: background .15s;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt.locked { cursor: default; }
+#submit {
+  display: block;
+  margin: 40px auto 0;
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hint { text-align: center; color: #8a7f72; margin: 12px 0 0; font-style: italic; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 28px;
+  display: none;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#retry {
+  display: block;
+  margin: 28px auto 0;
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+#retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz měst a řek: kdo dá 10/10, orientuje se v zeměpisu lépe než většina Čechů</h1>
+<p class="perex">Deset měst z Česka i ze světa a u každého jedna otázka: která řeka je s ním spojená. Nabízené možnosti jsou si blízké a snadno svedou. Kdo dá všech deset, orientuje se v mapě řek a měst líp než většina Čechů.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="hint" id="hint"></p>
+<div id="result">
+  <div id="score"></div>
+  <p id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  { q: `Na které řece leží Bratislava?`,
+    opts: [`Váh`, `Morava`, `Dunaj`, `Hron`], correct: 2 },
+  { q: `Na které řece leží město Hamburk?`,
+    opts: [`Rýn`, `Labe`, `Vezera`, `Odra`], correct: 1 },
+  { q: `Na které řece leží Český Krumlov?`,
+    opts: [`Vltava`, `Malše`, `Nežárka`, `Blanice`], correct: 0 },
+  { q: `Na které řece leží polské město Krakov?`,
+    opts: [`Odra`, `San`, `Warta`, `Visla`], correct: 3 },
+  { q: `Kterou řekou protéká Bagdád?`,
+    opts: [`Eufrat`, `Tigris`, `Jordán`, `Nil`], correct: 1 },
+  { q: `Na které řece leží americké město New Orleans?`,
+    opts: [`Missouri`, `Ohio`, `Mississippi`, `Colorado`], correct: 2 },
+  { q: `Na které řece leží město Písek?`,
+    opts: [`Otava`, `Lužnice`, `Berounka`, `Sázava`], correct: 0 },
+  { q: `Kterou řekou protéká portugalské město Porto?`,
+    opts: [`Tejo`, `Minho`, `Mondego`, `Douro`], correct: 3 },
+  { q: `Kterou řekou protéká jihokorejské město Soul?`,
+    opts: [`Mekong`, `Han`, `Jang-c'-ťiang`, `Žlutá řeka`], correct: 1 },
+  { q: `Ve kterém městě se řeka Sáva vlévá do Dunaje?`,
+    opts: [`Bělehrad`, `Záhřeb`, `Budapešť`, `Bratislava`], correct: 0 }
+];
+
+const answers = new Array(questions.length).fill(null);
+const letters = [`a`, `b`, `c`, `d`];
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+const scoreEl = document.getElementById(`score`);
+const verdictEl = document.getElementById(`verdict`);
+const retryBtn = document.getElementById(`retry`);
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const qt = document.createElement(`p`);
+    qt.className = `q-text`;
+    qt.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.textContent = letters[oi] + `) ` + opt;
+      if (answers[qi] === oi) btn.classList.add(`selected`);
+      btn.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        render();
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  const allAnswered = answers.every(a => a !== null);
+  submitBtn.disabled = !allAnswered;
+}
+
+submitBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  hintEl.textContent = ``;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll(`.opt`);
+    opts.forEach((btn, oi) => {
+      btn.classList.add(`locked`);
+      btn.classList.remove(`selected`);
+      if (oi === questions[qi].correct) btn.classList.add(`correct`);
+      if (answers[qi] === oi && oi !== questions[qi].correct) btn.classList.add(`wrong`);
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  scoreEl.textContent = score + ` z ` + questions.length;
+  verdictEl.textContent = verdictText(score);
+  submitBtn.style.display = `none`;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+function verdictText(score) {
+  if (score <= 3) return `Řeky a města se vám zatím slévají do jedné mlhavé mapy. Podobně znějící toky téhož regionu vás opakovaně svedly a jistota chyběla i u známějších dvojic. Nic se neděje, projděte si správné odpovědi a příště se odrazíte mnohem výš.`;
+  if (score <= 6) return `Přesně tady se pohybuje většina Čechů. Slavnější města k jejich řekám přiřadíte, ale jakmile přijde na dva blízké toky téže země nebo na méně omílané město, jistota kolísá. K opravdovému znalci map vám schází už jen kousek.`;
+  if (score <= 9) return `Výborný výkon. Vztah mezi městem a řekou čtete s přehledem i tam, kde většina naletí na těsný sousední distraktor. K plnému počtu vám chyběl jediný krok, nejspíš u jedné zvlášť záludné dvojice.`;
+  return `Naprostá špička. Od jihočeských řek přes Balkán a Blízký východ až po americké a asijské metropole jste každé město spojili se správnou řekou a žádná léčka vás nerozhodila. Takhle jistá orientace v mapě měst a řek dá opravdu jen menšina, vy se v zeměpisu orientujete lépe než většina Čechů.`;
+}
+
+retryBtn.addEventListener(`click`, () => {
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  locked = false;
+  submitBtn.style.display = `block`;
+  submitBtn.disabled = true;
+  resultEl.style.display = `none`;
+  hintEl.textContent = ``;
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+render();
+</script>
+</body>
+</html>
