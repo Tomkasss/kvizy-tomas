@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bleskový test pro seniory: řekněte mi 10 věcí a já uhodnu, ve kterém roce jste vyrůstali</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 20px 16px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 18px; color: #2c2c2c; }
+  .perex { font-size: 1.1rem; margin: 0 0 28px; color: #4a4a4a; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 12px;
+    cursor: pointer;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .opt:disabled { cursor: default; }
+  #evalBtn {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #evalBtn:hover { background: #4a6b4e; }
+  #evalBtn:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint { text-align: center; color: #8a2b2b; margin-top: 14px; min-height: 1.2em; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 28px;
+    display: none;
+  }
+  .score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+  .verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+  #retryBtn {
+    display: block;
+    margin: 28px auto 0;
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #retryBtn:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    .q { padding: 20px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Bleskový test pro seniory: řekněte mi 10 věcí a já uhodnu, ve kterém roce jste vyrůstali</h1>
+  <p class="perex">Řekněte mi, co všechno ze svého mládí ještě poznáte. Deset otázek na rozhlas, tisk, film, hračky i všední shon socialistického Československa. Podle toho, kolik dávných reálií trefíte, odhadnu, ve kterém roce jste vyrůstali.</p>
+  <div id="quiz"></div>
+  <button id="evalBtn" disabled>Vyhodnotit</button>
+  <div class="hint" id="hint"></div>
+  <div id="result">
+    <div class="score" id="score"></div>
+    <div class="verdict" id="verdict"></div>
+    <button id="retryBtn">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+const questions = [
+  { q: `Jak se v letech 1949 až 1990 jmenovalo moravské město, sídlo Baťových závodů, které komunisté přejmenovali na počest svého prvního dělnického prezidenta?`,
+    opts: [`Gottwaldov`, `Havířov`, `Kladno`, `Poruba`], correct: 0 },
+  { q: `Jak se v padesátých letech říkalo systému, který do bytů, kanceláří a dílen přiváděl celostátní rozhlasové vysílání do jednoduché skříňky s reproduktorem a jediným otočným knoflíkem hlasitosti?`,
+    opts: [`domácí rozhlasová ústředna`, `obecní ampliony`, `místní drátový rozhlas`, `rozhlas po drátě`], correct: 3 },
+  { q: `Který satiricko-humoristický týdeník s kreslenými vtipy vycházel po celou éru socialismu na Slovensku jako protějšek českého Dikobrazu?`,
+    opts: [`Sršeň`, `Roháč`, `Ohníček`, `Zornička`], correct: 1 },
+  { q: `Který herec ztvárnil kouzelného pána v buřince, jenž v celém dětském seriálu Pan Tau nikdy nepromluvil?`,
+    opts: [`Otto Šimánek`, `František Filipovský`, `Josef Kemr`, `Rudolf Deyl`], correct: 0 },
+  { q: `Jak se jmenovala tuzemská desková hra uvedená v roce 1984, v níž hráči po hracím plánu kupovali a pronajímali políčka a snažili se přivést soupeře k bankrotu?`,
+    opts: [`Byznys`, `Dostihy a sázky`, `Finance`, `Manažer`], correct: 1 },
+  { q: `Jak se jmenoval nejprestižnější etapový cyklistický závod amatérů východního bloku, který se od poválečných let jezdil jako vrchol socialistického sportovního kalendáře?`,
+    opts: [`Závod míru`, `Okolo Slovenska`, `Okolo Bulharska`, `Okolo Rumunska`], correct: 0 },
+  { q: `Který písničkář složil protestní píseň Bratříčku, zavírej vrátka jako reakci na srpnovou okupaci roku 1968 a krátce nato emigroval?`,
+    opts: [`Waldemar Matuška`, `Jaroslav Hutka`, `Karel Kryl`, `Jaromír Nohavica`], correct: 2 },
+  { q: `Jak se jmenoval terénní nákladní automobil přezdívaný vejtřaska, který od 50. let sloužil armádě, na stavbách i v zemědělství?`,
+    opts: [`Tatra 138`, `Praga V3S`, `Liaz 706`, `Škoda 706 RT`], correct: 1 },
+  { q: `Jak se jmenovala oblíbená pomazánka v hliníkové tubě, kterou si od 60. let brávaly děti do školy i na tábor?`,
+    opts: [`Pikant`, `Delikatesa`, `Lahůdka`, `Májka`], correct: 3 },
+  { q: `Co stálo v letech 1955 až 1962 na pražské Letné, než to bylo odstřeleno, a lidé tomu posměšně říkali fronta na maso?`,
+    opts: [`socha rudoarmějce`, `Leninův pomník`, `Stalinův pomník`, `pomník Vítězného února`], correct: 2 }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+const quizEl = document.getElementById('quiz');
+const evalBtn = document.getElementById('evalBtn');
+const hintEl = document.getElementById('hint');
+const letters = ['a', 'b', 'c', 'd'];
+
+function render() {
+  quizEl.innerHTML = '';
+  questions.forEach((item, qi) => {
+    const box = document.createElement('div');
+    box.className = 'q';
+    const qt = document.createElement('div');
+    qt.className = 'q-text';
+    qt.textContent = (qi + 1) + '. ' + item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = letters[oi] + ') ' + opt;
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        answers[qi] = oi;
+        Array.from(box.querySelectorAll('.opt')).forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        updateBtn();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateBtn() {
+  const allAnswered = answers.every(a => a !== null);
+  evalBtn.disabled = !allAnswered;
+  if (allAnswered) hintEl.textContent = '';
+}
+
+function evaluate() {
+  if (answers.some(a => a === null)) {
+    hintEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll('.q');
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll('.opt');
+    opts.forEach((btn, oi) => {
+      btn.disabled = true;
+      btn.classList.remove('selected');
+      if (oi === questions[qi].correct) btn.classList.add('correct');
+      else if (oi === answers[qi]) btn.classList.add('wrong');
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  showResult(score);
+}
+
+function showResult(score) {
+  const total = questions.length;
+  document.getElementById('score').textContent = score + ' z ' + total;
+  let text = '';
+  if (score <= 3) {
+    text = `Poznali jste jen to nejběžnější, co doznívalo ještě dlouho. Nejstarší reálie, jako vejtřaska nebo kolos na Letné, vám nic neříkají. Podle toho odhaduji, že vaše dětství a mládí spadá spíš do sedmdesátých a osmdesátých let. To nejtvrdší retro jste zastihli už jen z vyprávění starších.`;
+  } else if (score <= 6) {
+    text = `Poctivý střed pamětníka. Polovinu věcí máte živě v paměti, u těch dávnějších jste ale zaváhali. Tohle skóre svádí vaše mládí zhruba na přelom šedesátých a sedmdesátých let. Všední socialistický shon jste prožili, na úplně nejstarší kousky už ale bylo brzy.`;
+  } else if (score <= 9) {
+    text = `Výborný výkon. Poznáváte i méně omílané věci, které mladším nic neříkají. Podle přehledu jste dětství a mládí prožili nejspíš v šedesátých letech, kdy tyhle reálie byly všude kolem vás.`;
+  } else {
+    text = `Plný počet, který dá jen menšina. Trefili jste i to nejstarší, včetně Stalinova kolosu na Letné a vejtřasky z padesátých let. Takový přehled prozrazuje, že jste vyrůstali už v padesátých a raných šedesátých letech a nejstarší poválečné Československo máte pod kůží. Klobouk dolů.`;
+  }
+  document.getElementById('verdict').textContent = text;
+  const result = document.getElementById('result');
+  result.style.display = 'block';
+  evalBtn.style.display = 'none';
+  result.scrollIntoView({ behavior: 'smooth' });
+}
+
+function retry() {
+  locked = false;
+  answers.fill(null);
+  document.getElementById('result').style.display = 'none';
+  evalBtn.style.display = 'block';
+  evalBtn.disabled = true;
+  hintEl.textContent = '';
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+evalBtn.addEventListener('click', evaluate);
+document.getElementById('retryBtn').addEventListener('click', retry);
+render();
+</script>
+</body>
+</html>
