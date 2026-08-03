@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro seniory: za 5 minut zjistíte, jak čerstvá zůstala vaše paměť</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 20px 16px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 18px; color: #2c2c2c; }
+  .perex { font-size: 1.1rem; margin: 0 0 28px; color: #4a4a4a; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 12px;
+    cursor: pointer;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .opt:disabled { cursor: default; }
+  #evalBtn {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #evalBtn:hover { background: #4a6b4e; }
+  #evalBtn:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint { text-align: center; color: #8a2b2b; margin-top: 14px; min-height: 1.2em; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 28px;
+    display: none;
+  }
+  .score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+  .verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+  #retryBtn {
+    display: block;
+    margin: 28px auto 0;
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #retryBtn:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    .q { padding: 20px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz pro seniory: za 5 minut zjistíte, jak čerstvá zůstala vaše paměť</h1>
+  <p class="perex">Deset otázek napříč dějinami, přírodou, uměním, hudbou i mateřštinou, k tomu jedna úloha na logiku. Žádné počítání, jen to, co vám za život utkvělo v hlavě. Za pět minut zjistíte, jak čerstvá zůstala vaše paměť.</p>
+  <div id="quiz"></div>
+  <button id="evalBtn" disabled>Vyhodnotit</button>
+  <div class="hint" id="hint"></div>
+  <div id="result">
+    <div class="score" id="score"></div>
+    <div class="verdict" id="verdict"></div>
+    <button id="retryBtn">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+const questions = [
+  { q: `Které jezero je svou rozlohou největší na světě?`,
+    opts: [`Kaspické moře`, `Bajkal`, `Viktoriino jezero`, `Ladožské jezero`], correct: 0 },
+  { q: `Který chemický prvek tvoří základní stavební kámen všech organických sloučenin?`,
+    opts: [`kyslík`, `uhlík`, `dusík`, `vodík`], correct: 1 },
+  { q: `Ze které země pochází bojový sport judo?`,
+    opts: [`Čína`, `Korea`, `Japonsko`, `Thajsko`], correct: 2 },
+  { q: `Kdo je autorem pohádek Malá mořská víla, Ošklivé káčátko a Statečný cínový vojáček?`,
+    opts: [`bratři Grimmové`, `Charles Perrault`, `Wilhelm Hauff`, `Hans Christian Andersen`], correct: 3 },
+  { q: `Co znamená přídavné jméno zarputilý?`,
+    opts: [`tvrdošíjný a neústupný`, `prchlivý a vznětlivý`, `bezstarostný a lehkomyslný`, `uzavřený a nemluvný`], correct: 0 },
+  { q: `Do které skupiny hudebních nástrojů patří hoboj?`,
+    opts: [`žesťové dechové nástroje`, `smyčcové nástroje`, `dřevěné dechové nástroje`, `bicí nástroje`], correct: 2 },
+  { q: `V jakém slohu je postavena katedrála Notre-Dame v Paříži?`,
+    opts: [`románský sloh`, `gotický sloh`, `renesanční sloh`, `barokní sloh`], correct: 1 },
+  { q: `Který francouzský král byl popraven gilotinou za Velké francouzské revoluce?`,
+    opts: [`Ludvík XIV.`, `Ludvík XV.`, `František I.`, `Ludvík XVI.`], correct: 3 },
+  { q: `Který z těchto panovníků byl roku 1458 zvolen českým králem?`,
+    opts: [`Ladislav Pohrobek`, `Matyáš Korvín`, `Jiří z Poděbrad`, `Zikmund Lucemburský`], correct: 2 },
+  { q: `Všechny kapradiny jsou rostliny a žádná rostlina není živočich. Co z toho nutně vyplývá?`,
+    opts: [`Některé rostliny jsou živočichové`, `Všechny rostliny jsou kapradiny`, `Někteří živočichové jsou kapradiny`, `Žádná kapradina není živočich`], correct: 3 }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+const quizEl = document.getElementById('quiz');
+const evalBtn = document.getElementById('evalBtn');
+const hintEl = document.getElementById('hint');
+const letters = ['a', 'b', 'c', 'd'];
+
+function render() {
+  quizEl.innerHTML = '';
+  questions.forEach((item, qi) => {
+    const box = document.createElement('div');
+    box.className = 'q';
+    const qt = document.createElement('div');
+    qt.className = 'q-text';
+    qt.textContent = (qi + 1) + '. ' + item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = letters[oi] + ') ' + opt;
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        answers[qi] = oi;
+        Array.from(box.querySelectorAll('.opt')).forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        updateBtn();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateBtn() {
+  const allAnswered = answers.every(a => a !== null);
+  evalBtn.disabled = !allAnswered;
+  if (allAnswered) hintEl.textContent = '';
+}
+
+function evaluate() {
+  if (answers.some(a => a === null)) {
+    hintEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll('.q');
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll('.opt');
+    opts.forEach((btn, oi) => {
+      btn.disabled = true;
+      btn.classList.remove('selected');
+      if (oi === questions[qi].correct) btn.classList.add('correct');
+      else if (oi === answers[qi]) btn.classList.add('wrong');
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  showResult(score);
+}
+
+function showResult(score) {
+  const total = questions.length;
+  document.getElementById('score').textContent = score + ' z ' + total;
+  let text = '';
+  if (score <= 3) {
+    text = `Paměť se dnes ozvala jen tu a tam a čerstvosti jí zatím schází. Několik otázek zamířilo mimo nejběžnější okruh a lákavější varianta vás stáhla dřív, než jste ji domysleli. Nic ztraceného, paměť se probouzí čtením, křížovkami a otázkami, nad kterými chvíli posedíte. Dejte si kvíz znovu za pár dní a číslo se pohne nahoru.`;
+  } else if (score <= 6) {
+    text = `Paměť máte svěží a drží pevně, přesně tam, kde se pohybuje většina řešitelů. Půlku otázek jste rozlouskli s jistotou, u zbytku se vzpomínka na chvíli schovala nebo vás svedla první nabízející se odpověď. Základ napříč obory je pevný a do lepšího výsledku vám chybělo jen málo.`;
+  } else if (score <= 9) {
+    text = `Paměť vám zůstala pozoruhodně čerstvá a pružná. Dějiny, příroda, umění, hudba i mateřština vám naskakují svižně a ani logická úloha vás nezaskočila. Do tohoto pásma se dostane jen menšina a k plnému počtu vás dělila jedna dvě zapeklité otázky, na kterých ztroskotá skoro každý.`;
+  } else {
+    text = `Paměť máte svěží, jako by léta neubíhala, a to je vzácnost. Zvládl jste dějiny, přírodu, umění, hudbu, mateřštinu i čistou logiku bez jediného zaváhání a žádná past vás nezastavila. Takhle čerstvou a spolehlivou paměť prokáže jen zlomek řešitelů. Klobouk dolů.`;
+  }
+  document.getElementById('verdict').textContent = text;
+  const result = document.getElementById('result');
+  result.style.display = 'block';
+  evalBtn.style.display = 'none';
+  result.scrollIntoView({ behavior: 'smooth' });
+}
+
+function retry() {
+  locked = false;
+  answers.fill(null);
+  document.getElementById('result').style.display = 'none';
+  evalBtn.style.display = 'block';
+  evalBtn.disabled = true;
+  hintEl.textContent = '';
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+evalBtn.addEventListener('click', evaluate);
+document.getElementById('retryBtn').addEventListener('click', retry);
+render();
+</script>
+</body>
+</html>
