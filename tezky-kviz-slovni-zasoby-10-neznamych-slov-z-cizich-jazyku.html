@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Těžký kvíz slovní zásoby: 10 neznámých slov z cizích jazyků potrápí i mistry češtiny</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+h1 { font-size: 1.7rem; line-height: 1.3; margin-bottom: 8px; }
+.perex { font-size: 1.1rem; margin-bottom: 28px; color: #3a3a3a; }
+.question-box {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.question-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; }
+.option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .15s;
+}
+.option:last-child { margin-bottom: 0; }
+.option:hover:not(.locked) { background: #ede8e1; }
+.option.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.option.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.option.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.option.locked { cursor: default; }
+#submit-btn {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  background: #5b7e5f;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit-btn:hover:not(:disabled) { background: #4a6b4e; }
+#submit-btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hint { text-align: center; color: #8c5a5a; margin-top: 14px; min-height: 1.2em; }
+#result {
+  display: none;
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+#retry-btn {
+  display: block;
+  margin: 28px auto 0;
+  padding: 16px 40px;
+  background: #8c7b6b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+#retry-btn:hover { background: #756658; }
+</style>
+</head>
+<body>
+<h1></h1>
+<p class="perex"></p>
+<div id="quiz"></div>
+<button id="submit-btn" disabled>Vyhodnotit</button>
+<p class="hint" id="hint"></p>
+<div id="result">
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="retry-btn">Zkusit znovu</button>
+</div>
+<script>
+const TITLE = `Těžký kvíz slovní zásoby: 10 neznámých slov z cizích jazyků potrápí i mistry češtiny`;
+const PEREX = `Perzifláž, hochštapler, kontenance. Slova, která se v češtině sem tam mihnou, jejich přesný význam ale zná málokdo. Deset přejatých výrazů z francouzštiny, latiny, řečtiny i němčiny teď prověří, jestli si zasloužíte titul mistra češtiny.`;
+const QUESTIONS = [
+  { q: `Co znamená slovo „prekluze"?`, options: [`zánik práva, které nebylo uplatněno ve stanovené lhůtě`, `oslabení nároku, jenž sice trvá dál, ale nelze jej už soudně vymáhat`, `předběžné zajištění majetku soudem do rozhodnutí ve věci`, `zrušení dřívějšího rozsudku soudem vyšší instance`], correct: 0 },
+  { q: `Co znamená slovo „fortel"?`, options: [`nenadálé štěstí, šťastná náhoda`, `vrozený sklon k pohodlnosti a lenosti`, `zručnost a obratný, promyšlený pracovní postup`, `puntičkářská pečlivost lpící na maličkostech`], correct: 2 },
+  { q: `Co znamená slovo „servilní"?`, options: [`přehnaně úslužný až podlézavý`, `přísně dbalý předpisů a služebního postupu`, `chladně odměřený a povýšený k okolí`, `ochotně pomáhající, ale bez ztráty vlastní důstojnosti`], correct: 0 },
+  { q: `Co znamená slovo „bonviván"?`, options: [`štědrý dárce, který podporuje umělce`, `uhlazený, obratný svůdník žen`, `marnotratník rozhazující zděděný majetek`, `člověk, který vyhledává požitky, dobré jídlo, pití a zábavu`], correct: 3 },
+  { q: `Co znamená slovo „exaltovaný"?`, options: [`navenek chladný a bez viditelných emocí`, `povýšený a pohrdající okolím`, `přehnaně vzrušený a přepjatě nadšený v projevu`, `uzavřený a nedůvěřivý k cizím lidem`], correct: 2 },
+  { q: `Co znamená slovo „perzifláž"?`, options: [`jemné, ironické zesměšnění někoho či něčeho`, `nabubřelá, přehnaně květnatá řeč`, `oslavná chvála pronesená na něčí počest`, `tajná narážka srozumitelná jen zasvěceným`], correct: 0 },
+  { q: `Co znamená slovo „epigon"?`, options: [`zakladatel nového uměleckého směru`, `nepůvodní napodobitel navazující na slavnějšího předchůdce`, `přísný kritik soustavně odsuzující cizí díla`, `štědrý mecenáš podporující mladé tvůrce`], correct: 1 },
+  { q: `Co znamená slovo „lukulský"?`, options: [`prostý a střídmý, bez zbytečné okázalosti`, `obřadný a strojený, svázaný formálními pravidly`, `veselý a bujarý, provázený hudbou a tancem`, `přepychový, hýřivě bohatý a nákladný`], correct: 3 },
+  { q: `Co znamená slovo „kontenance"?`, options: [`obsah nebo náplň nějakého sdělení`, `klid, rozvaha a sebeovládání`, `mlčenlivý, nevyslovený souhlas`, `spokojené, blažené rozpoložení mysli`], correct: 1 },
+  { q: `Co znamená slovo „litotes"?`, options: [`úmyslné zveličení, nadsázka`, `opakování téhož slova na začátku po sobě jdoucích veršů`, `zjemnění výrazu popřením opaku, tedy dvojím záporem`, `mírnější výraz nahrazující slovo nevhodné či drsné`], correct: 2 }
+];
+const EVAL = [
+  { min: 0, max: 3, text: `Přejatá slova jsou pro vás zatím cizinou. Většina těchto výrazů vám proklouzla mezi prsty a spoléhali jste spíš na cit než na jistotu. Slovník cizích slov teď bude vaším nejlepším společníkem.` },
+  { min: 4, max: 6, text: `Slušný výsledek uprostřed pole. Několik zapeklitých výrazů jste rozklíčovali přesně, u ostatních vás zradil první dojem. Na mistra češtiny to ještě nestačí, ale máte nakročeno.` },
+  { min: 7, max: 9, text: `Výborně. Vaše slovní zásoba sahá hluboko pod povrch běžné mluvy a rozlišujete i jemné významové odstíny řídce užívaných slov. Titul znalce jazyka vám nikdo neupře.` },
+  { min: 10, max: 10, text: `Naprostá dokonalost. Kontenanci jste neztratili ani u nejzáludnějších výrazů a všech deset významů jste určili bez zaváhání. Patříte mezi skutečné mistry češtiny, jimž bohatství přejatých slov nedělá nejmenší potíž.` }
+];
+
+const LETTERS = [`a`, `b`, `c`, `d`];
+let answers = new Array(QUESTIONS.length).fill(null);
+let locked = false;
+
+document.querySelector(`h1`).textContent = TITLE;
+document.querySelector(`.perex`).textContent = PEREX;
+
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit-btn`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+
+function render() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `question-box`;
+    const qt = document.createElement(`div`);
+    qt.className = `question-text`;
+    qt.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    item.options.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `option`;
+      btn.textContent = LETTERS[oi] + `) ` + opt;
+      btn.addEventListener(`click`, () => selectOption(qi, oi));
+      btn.dataset.qi = qi;
+      btn.dataset.oi = oi;
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function selectOption(qi, oi) {
+  if (locked) return;
+  answers[qi] = oi;
+  const boxes = quizEl.children[qi].querySelectorAll(`.option`);
+  boxes.forEach((b, i) => b.classList.toggle(`selected`, i === oi));
+  updateSubmit();
+}
+
+function updateSubmit() {
+  const allAnswered = answers.every(a => a !== null);
+  submitBtn.disabled = !allAnswered;
+  if (allAnswered) hintEl.textContent = ``;
+}
+
+submitBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  QUESTIONS.forEach((item, qi) => {
+    const boxes = quizEl.children[qi].querySelectorAll(`.option`);
+    boxes.forEach((b, i) => {
+      b.classList.add(`locked`);
+      b.classList.remove(`selected`);
+      if (i === item.correct) b.classList.add(`correct`);
+      else if (i === answers[qi]) b.classList.add(`wrong`);
+    });
+    if (answers[qi] === item.correct) score++;
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + QUESTIONS.length;
+  const ev = EVAL.find(e => score >= e.min && score <= e.max);
+  document.getElementById(`verdict`).textContent = ev ? ev.text : ``;
+  submitBtn.style.display = `none`;
+  hintEl.textContent = ``;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+});
+
+document.getElementById(`retry-btn`).addEventListener(`click`, () => {
+  answers = new Array(QUESTIONS.length).fill(null);
+  locked = false;
+  render();
+  submitBtn.style.display = `block`;
+  submitBtn.disabled = true;
+  resultEl.style.display = `none`;
+  hintEl.textContent = ``;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+render();
+</script>
+</body>
+</html>
