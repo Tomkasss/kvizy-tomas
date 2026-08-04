@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test pro seniory: 10 otázek prozradí, jestli je vaše paměť lepší než u většiny vrstevníků</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 24px 16px;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 18px; color: #2c2c2c; }
+.perex { font-size: 1.1rem; margin: 0 0 28px; color: #4a4a4a; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 16px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #3a3a3a;
+  cursor: pointer;
+  transition: background .15s, border .15s;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+#submit {
+  display: block;
+  margin: 40px auto 0;
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hint { text-align: center; color: #a05a4a; margin: 12px 0 0; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+  display: none;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#retry {
+  display: block;
+  margin: 24px auto 0;
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+#retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test pro seniory: 10 otázek prozradí, jestli je vaše paměť lepší než u většiny vrstevníků</h1>
+<p class="perex">Deset otázek napříč historií, přírodou, uměním i sportem prověří, co všechno vám zůstalo v paměti. Nespěchejte, čtěte pozorně a zkuste projít celou desítku. Na závěr zjistíte, jak si vaše paměť stojí ve srovnání s vrstevníky.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="hint" id="hint"></p>
+<div id="result">
+  <div id="score"></div>
+  <p id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  { q: `1. Ve kterém roce zvítězil Napoleon v bitvě u Slavkova, zvané též bitva tří císařů?`,
+    options: [`1799`, `1805`, `1812`, `1815`], correct: 1 },
+  { q: `2. Které město je hlavním městem Švýcarska?`,
+    options: [`Bern`, `Curych`, `Ženeva`, `Basilej`], correct: 0 },
+  { q: `3. Ve kterém souhvězdí leží Polárka, hvězda ukazující přibližně k severu?`,
+    options: [`Orion`, `Velký medvěd (Velký vůz)`, `Kasiopeja`, `Malý medvěd (Malý vůz)`], correct: 3 },
+  { q: `4. Který vědec sestavil první ucelenou periodickou soustavu chemických prvků?`,
+    options: [`Marie Curie`, `Dmitrij Mendělejev`, `Isaac Newton`, `Alfred Nobel`], correct: 1 },
+  { q: `5. Jak se nazývá malířská technika, při které se barvy nanášejí na čerstvou vlhkou omítku?`,
+    options: [`freska`, `tempera`, `mozaika`, `akvarel`], correct: 0 },
+  { q: `6. Který vědec objevil penicilin, první široce používané antibiotikum?`,
+    options: [`Louis Pasteur`, `Robert Koch`, `Alexander Fleming`, `Joseph Lister`], correct: 2 },
+  { q: `7. Který herec ztvárnil hlavní roli v historickém velkofilmu Ben Hur z roku 1959?`,
+    options: [`Kirk Douglas`, `Gregory Peck`, `Charlton Heston`, `Burt Lancaster`], correct: 2 },
+  { q: `8. Ve kterém sportu obléká průběžně vedoucí závodník žlutý trikot?`,
+    options: [`běh na lyžích`, `silniční cyklistika`, `atletika`, `rychlobruslení`], correct: 1 },
+  { q: `9. Jak se nazývá zjemňující označení nepříjemné nebo drsné skutečnosti?`,
+    options: [`eufemismus`, `metafora`, `synonymum`, `nadsázka`], correct: 0 },
+  { q: `10. Který spisovatel je autorem detektivních příběhů o pátrajícím knězi otci Brownovi?`,
+    options: [`Arthur Conan Doyle`, `Agatha Christie`, `Georges Simenon`, `Gilbert Keith Chesterton`], correct: 3 }
+];
+
+const evaluation = [
+  { min: 0, max: 3, text: `Začátek se nevydařil a většina vrstevníků je zatím kus před vámi. Nic není ztraceno, paměť se dá cvičit každý den. Vezměte to jako rozehřátí a příště klidně zabodujete výš.` },
+  { min: 4, max: 6, text: `Jste zhruba v průměru své generace. Přesně tolik správných odpovědí zvládne typický senior, takže se vaše paměť drží tam, kde má. Pár otázek vás nachytalo, ale základ máte pevný.` },
+  { min: 7, max: 9, text: `Výborný výsledek, který řadu vrstevníků nechává za sebou. Patříte do nadprůměrné třetiny své generace a vaše paměť je znatelně čerstvější než u většiny stejně starých lidí.` },
+  { min: 10, max: 10, text: `Naprostá špička. Plný počet zvládne jen malá menšina, takže vaše paměť je lepší než téměř u všech vrstevníků. Klobouk dolů, tohle je hlava jako křišťál.` }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById('quiz');
+const submitBtn = document.getElementById('submit');
+const hintEl = document.getElementById('hint');
+const resultEl = document.getElementById('result');
+const scoreEl = document.getElementById('score');
+const verdictEl = document.getElementById('verdict');
+const retryBtn = document.getElementById('retry');
+
+function render() {
+  quizEl.innerHTML = '';
+  questions.forEach((item, qi) => {
+    const box = document.createElement('div');
+    box.className = 'q';
+    const qt = document.createElement('p');
+    qt.className = 'q-text';
+    qt.textContent = item.q;
+    box.appendChild(qt);
+    item.options.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = opt;
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        answers[qi] = oi;
+        Array.from(box.querySelectorAll('.opt')).forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  const all = answers.every(a => a !== null);
+  submitBtn.disabled = !all;
+  if (all) hintEl.textContent = '';
+}
+
+submitBtn.addEventListener('click', () => {
+  if (answers.some(a => a === null)) {
+    hintEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll('.q');
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll('.opt');
+    opts.forEach((b, oi) => {
+      b.disabled = true;
+      b.classList.remove('selected');
+      if (oi === questions[qi].correct) b.classList.add('correct');
+      else if (oi === answers[qi]) b.classList.add('wrong');
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  scoreEl.textContent = score + ' z ' + questions.length;
+  const ev = evaluation.find(e => score >= e.min && score <= e.max);
+  verdictEl.textContent = ev ? ev.text : '';
+  submitBtn.style.display = 'none';
+  hintEl.textContent = '';
+  resultEl.style.display = 'block';
+  resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+retryBtn.addEventListener('click', () => {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  render();
+  submitBtn.style.display = 'block';
+  submitBtn.disabled = true;
+  resultEl.style.display = 'none';
+  hintEl.textContent = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+render();
+</script>
+</body>
+</html>
