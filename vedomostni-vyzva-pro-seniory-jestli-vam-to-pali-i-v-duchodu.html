@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vědomostní výzva pro seniory: odpovězte na 10 otázek ze všeho a zjistěte, jestli vám to pálí i v důchodu</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 24px 16px;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 18px; color: #2c2c2c; }
+.perex { font-size: 1.1rem; margin: 0 0 28px; color: #4a4a4a; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 16px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #3a3a3a;
+  cursor: pointer;
+  transition: background .15s, border .15s;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+#submit {
+  display: block;
+  margin: 40px auto 0;
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hint { text-align: center; color: #a05a4a; margin: 12px 0 0; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+  display: none;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#retry {
+  display: block;
+  margin: 24px auto 0;
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+#retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Vědomostní výzva pro seniory: odpovězte na 10 otázek ze všeho a zjistěte, jestli vám to pálí i v důchodu</h1>
+<p class="perex">Léta praxe, přečtené knihy a nasbírané zkušenosti dělají svoje. Deset otázek z nejrůznějších koutů lidského vědění prověří, kolik vám toho v hlavě zůstalo a jak rychle vám to pálí. Zvládnete udržet přehled i teď?</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="hint" id="hint"></p>
+<div id="result">
+  <div id="score"></div>
+  <p id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  { q: `1. Kdo je autorem románu Rudý a černý?`,
+    options: [`Honoré de Balzac`, `Stendhal`, `Gustave Flaubert`, `Émile Zola`], correct: 1 },
+  { q: `2. Který ostrov je rozlohou největší ve Středozemním moři?`,
+    options: [`Sicílie`, `Sardinie`, `Kypr`, `Korsika`], correct: 0 },
+  { q: `3. Kdo koncem 19. století objevil paprsky X, tedy záření, jímž se v nemocnicích prosvěcují kosti?`,
+    options: [`Marie Curie-Skłodowská`, `Wilhelm Conrad Röntgen`, `Henri Becquerel`, `Thomas Alva Edison`], correct: 1 },
+  { q: `4. Co je z odborného hlediska jantar?`,
+    options: [`zkamenělá stromová pryskyřice`, `sopečné sklo`, `zkamenělé dřevo`, `zvláštní druh mořské soli`], correct: 0 },
+  { q: `5. Kdo v 18. století zásadně zdokonalil parní stroj a učinil z něj hnací sílu průmyslové revoluce?`,
+    options: [`Thomas Newcomen`, `James Watt`, `George Stephenson`, `Denis Papin`], correct: 1 },
+  { q: `6. Ve kterém dnešním státě leží ruiny starověkého města Trója?`,
+    options: [`Řecko`, `Itálie`, `Egypt`, `Turecko`], correct: 3 },
+  { q: `7. Kolik hráčů jednoho družstva je při klasickém volejbalu současně na hřišti?`,
+    options: [`pět`, `sedm`, `šest`, `osm`], correct: 2 },
+  { q: `8. Co znamená staré české slovo „žernov"?`,
+    options: [`mlýnský kámen`, `brus na kosy a nože`, `dřevěná díže na těsto`, `součást koňského postroje`], correct: 0 },
+  { q: `9. Který český král padl roku 1346 v bitvě u Kresčaku?`,
+    options: [`Přemysl Otakar II.`, `Václav II.`, `Karel IV.`, `Jan Lucemburský`], correct: 3 },
+  { q: `10. Ze kterého jazyka pochází slovo algebra?`,
+    options: [`hebrejština`, `perština`, `arabština`, `řečtina`], correct: 2 }
+];
+
+const evaluation = [
+  { min: 0, max: 3, text: `Tentokrát vás pár otázek pořádně nachytalo. Neberte to jako verdikt, spíš jako pozvánku k rozcvičce. Bystrost se dá probudit křížovkami, čtením i debatou u kávy, a uvidíte, že příště to půjde znatelně líp. Hlava jen potřebuje častěji dostat práci.` },
+  { min: 4, max: 6, text: `Solidní půlka a někdy i víc. To vám to pořád slušně pálí a přehled napříč obory se z hlavy jen tak nevytratil. U pár záludnějších otázek jste zaváhali, jenže přesně na těch klopýtne většina lidí. Rozhodně nepatříte mezi ty, kdo by ztráceli nit.` },
+  { min: 7, max: 9, text: `Výborný výsledek, který svědčí o hlavě stále v plné formě. Bystrost skoro jako zamlada a přehled, za který by se nemusel stydět leckdo o generaci mladší. K plnému počtu vám chyběl jen krůček u některé z nejtěžších otázek. Tohle je forma, ze které jde mít radost.` },
+  { min: 10, max: 10, text: `Naprostá špička. Deset z deseti napříč historií, přírodou, uměním i sportem dá jen zlomek lidí a vy jste mezi nimi. Nejde o žádné dohasínání, tohle je hlava, která pálí na plné obrátky a rozhodně nezvolnila. Klobouk dolů, takový přehled je vzácný v každém věku.` }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById('quiz');
+const submitBtn = document.getElementById('submit');
+const hintEl = document.getElementById('hint');
+const resultEl = document.getElementById('result');
+const scoreEl = document.getElementById('score');
+const verdictEl = document.getElementById('verdict');
+const retryBtn = document.getElementById('retry');
+
+function render() {
+  quizEl.innerHTML = '';
+  questions.forEach((item, qi) => {
+    const box = document.createElement('div');
+    box.className = 'q';
+    const qt = document.createElement('p');
+    qt.className = 'q-text';
+    qt.textContent = item.q;
+    box.appendChild(qt);
+    item.options.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = opt;
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        answers[qi] = oi;
+        Array.from(box.querySelectorAll('.opt')).forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  const all = answers.every(a => a !== null);
+  submitBtn.disabled = !all;
+  if (all) hintEl.textContent = '';
+}
+
+submitBtn.addEventListener('click', () => {
+  if (answers.some(a => a === null)) {
+    hintEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll('.q');
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll('.opt');
+    opts.forEach((b, oi) => {
+      b.disabled = true;
+      b.classList.remove('selected');
+      if (oi === questions[qi].correct) b.classList.add('correct');
+      else if (oi === answers[qi]) b.classList.add('wrong');
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  scoreEl.textContent = score + ' z ' + questions.length;
+  const ev = evaluation.find(e => score >= e.min && score <= e.max);
+  verdictEl.textContent = ev ? ev.text : '';
+  submitBtn.style.display = 'none';
+  hintEl.textContent = '';
+  resultEl.style.display = 'block';
+  resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+retryBtn.addEventListener('click', () => {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  render();
+  submitBtn.style.display = 'block';
+  submitBtn.disabled = true;
+  resultEl.style.display = 'none';
+  hintEl.textContent = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+render();
+</script>
+</body>
+</html>
