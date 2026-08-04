@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro nadstandardně chytré seniory: kdo dá 10/10, je chytřejší než dnešní třicátníci</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+h1 { font-size: 1.7rem; line-height: 1.3; margin-bottom: 8px; }
+.perex { font-size: 1.1rem; margin-bottom: 28px; color: #3a3a3a; }
+.question-box {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.question-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; }
+.option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .15s;
+}
+.option:last-child { margin-bottom: 0; }
+.option:hover:not(.locked) { background: #ede8e1; }
+.option.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.option.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.option.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.option.locked { cursor: default; }
+#submit-btn {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  background: #5b7e5f;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit-btn:hover:not(:disabled) { background: #4a6b4e; }
+#submit-btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hint { text-align: center; color: #8c5a5a; margin-top: 14px; min-height: 1.2em; }
+#result {
+  display: none;
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+#retry-btn {
+  display: block;
+  margin: 28px auto 0;
+  padding: 16px 40px;
+  background: #8c7b6b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+#retry-btn:hover { background: #756658; }
+</style>
+</head>
+<body>
+<h1></h1>
+<p class="perex"></p>
+<div id="quiz"></div>
+<button id="submit-btn" disabled>Vyhodnotit</button>
+<p class="hint" id="hint"></p>
+<div id="result">
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="retry-btn">Zkusit znovu</button>
+</div>
+<script>
+const TITLE = `Kvíz pro nadstandardně chytré seniory: kdo dá 10/10, je chytřejší než dnešní třicátníci`;
+const PEREX = `Deset otázek napříč obory, u kterých školní paměť sama nestačí. Kdo prošel životem se zvědavou hlavou, má výhodu. Za správnou platí vždy jen jedna možnost, zbylé tři jsou nastražené pasti. Kdo zvládne všech deset, uvažuje bystřeji než leckterý dnešní třicátník.`;
+const QUESTIONS = [
+  { q: `Který průliv odděluje africkou pevninu od Arabského poloostrova?`, options: [`Hormuzský průliv`, `Gibraltarský průliv`, `Báb al-Mandab`, `Bosporský průliv`], correct: 2 },
+  { q: `Kdo je autorem monumentálního obrazu Vor Medúzy?`, options: [`Eugène Delacroix`, `Jacques-Louis David`, `Théodore Géricault`, `Gustave Courbet`], correct: 2 },
+  { q: `Který dobyvatel vyvrátil říši Aztéků?`, options: [`Francisco Pizarro`, `Hernán Cortés`, `Vasco da Gama`, `Kryštof Kolumbus`], correct: 1 },
+  { q: `Do které skupiny živočichů se řadí sépie?`, options: [`korýši`, `ryby`, `hlavonožci`, `ostnokožci`], correct: 2 },
+  { q: `Jak se v zeměpisu nazývá úzký pruh souše, který spojuje dvě větší pevniny a odděluje dvě moře?`, options: [`šíje`, `průliv`, `mys`, `delta`], correct: 0 },
+  { q: `Kdo je autorem románu Lolita?`, options: [`Boris Pasternak`, `Vladimir Nabokov`, `Ivan Bunin`, `Alexandr Solženicyn`], correct: 1 },
+  { q: `Co znamená slovo panegyrik?`, options: [`štvavá pomlouvačná řeč namířená proti někomu`, `obhajovací řeč pronesená u soudu`, `improvizovaný žertovný proslov`, `oslavná řeč pronesená na něčí počest`], correct: 3 },
+  { q: `Kdo složil scénickou kantátu Carmina Burana?`, options: [`Igor Stravinskij`, `Sergej Prokofjev`, `Béla Bartók`, `Carl Orff`], correct: 3 },
+  { q: `Kdo objevil radioaktivitu?`, options: [`Marie Curie-Skłodowská`, `Henri Becquerel`, `Ernest Rutherford`, `Wilhelm Röntgen`], correct: 1 },
+  { q: `Který bůh střeží v severské mytologii duhový most Bifröst?`, options: [`Heimdall`, `Týr`, `Baldr`, `Loki`], correct: 0 }
+];
+const EVAL = [
+  { min: 0, max: 3, text: `Tenhle kvíz byl stavěný jako výběrový a vy jste narazili na jeho tvrdé jádro. Většina otázek mířila mimo školní učebnici, takže nízké skóre neznamená slabou hlavu, ale téma, které vám prostě neleželo. Vezměte to jako rozcvičku a příště si troufněte na tipy, které vám napovídá instinkt.` },
+  { min: 4, max: 6, text: `Přesně tady se pohybuje šikovný senior, pro kterého byl kvíz napsaný. Udrželi jste se nad nástrahami, které polovinu řešitelů srazily hned v první třetině, a prokázali široký rozhled napříč obory. Pár nejzáludnějších otázek vás obralo o body, ale to platí i pro většinu ostatních.` },
+  { min: 7, max: 9, text: `Výborný výsledek, který dá dohromady jen málokdo. Zvládli jste i otázky, u nichž si dnešní třicátník sáhne po telefonu, a spletli jste se nanejvýš u těch nejzáludnějších pastí. Vaše paměť i úsudek pracují na plné obrátky a máte navrch nad drtivou většinou.` },
+  { min: 10, max: 10, text: `Naprostá vzácnost. Dát plný počet v kvízu, který schválně míchá historii, umění, přírodu, jazyk i mytologii, dokáže jeden z mnoha. Prošli jste i těmi dvěma vražednými otázkami, na kterých ztroskotá skoro každý. Máte pravdu, kterou slibuje titulek: v tomhle testu jste jednoznačně chytřejší než dnešní třicátníci.` }
+];
+
+const LETTERS = [`a`, `b`, `c`, `d`];
+let answers = new Array(QUESTIONS.length).fill(null);
+let locked = false;
+
+document.querySelector(`h1`).textContent = TITLE;
+document.querySelector(`.perex`).textContent = PEREX;
+
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit-btn`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+
+function render() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `question-box`;
+    const qt = document.createElement(`div`);
+    qt.className = `question-text`;
+    qt.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    item.options.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `option`;
+      btn.textContent = LETTERS[oi] + `) ` + opt;
+      btn.addEventListener(`click`, () => selectOption(qi, oi));
+      btn.dataset.qi = qi;
+      btn.dataset.oi = oi;
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function selectOption(qi, oi) {
+  if (locked) return;
+  answers[qi] = oi;
+  const boxes = quizEl.children[qi].querySelectorAll(`.option`);
+  boxes.forEach((b, i) => b.classList.toggle(`selected`, i === oi));
+  updateSubmit();
+}
+
+function updateSubmit() {
+  const allAnswered = answers.every(a => a !== null);
+  submitBtn.disabled = !allAnswered;
+  if (allAnswered) hintEl.textContent = ``;
+}
+
+submitBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  QUESTIONS.forEach((item, qi) => {
+    const boxes = quizEl.children[qi].querySelectorAll(`.option`);
+    boxes.forEach((b, i) => {
+      b.classList.add(`locked`);
+      b.classList.remove(`selected`);
+      if (i === item.correct) b.classList.add(`correct`);
+      else if (i === answers[qi]) b.classList.add(`wrong`);
+    });
+    if (answers[qi] === item.correct) score++;
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + QUESTIONS.length;
+  const ev = EVAL.find(e => score >= e.min && score <= e.max);
+  document.getElementById(`verdict`).textContent = ev ? ev.text : ``;
+  submitBtn.style.display = `none`;
+  hintEl.textContent = ``;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+});
+
+document.getElementById(`retry-btn`).addEventListener(`click`, () => {
+  answers = new Array(QUESTIONS.length).fill(null);
+  locked = false;
+  render();
+  submitBtn.style.display = `block`;
+  submitBtn.disabled = true;
+  resultEl.style.display = `none`;
+  hintEl.textContent = ``;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+render();
+</script>
+</body>
+</html>
