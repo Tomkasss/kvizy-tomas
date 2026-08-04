@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro Čechy v důchodovém věku. Kdo v něm dá aspoň 8/10, má pořád mozek v dobré kondici</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+h1 { font-size: 1.7rem; line-height: 1.3; margin-bottom: 8px; }
+.perex { font-size: 1.1rem; margin-bottom: 28px; color: #3a3a3a; }
+.question-box {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.question-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; }
+.option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .15s;
+}
+.option:last-child { margin-bottom: 0; }
+.option:hover:not(.locked) { background: #ede8e1; }
+.option.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.option.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.option.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.option.locked { cursor: default; }
+#submit-btn {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  background: #5b7e5f;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit-btn:hover:not(:disabled) { background: #4a6b4e; }
+#submit-btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hint { text-align: center; color: #8c5a5a; margin-top: 14px; min-height: 1.2em; }
+#result {
+  display: none;
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+#retry-btn {
+  display: block;
+  margin: 28px auto 0;
+  padding: 16px 40px;
+  background: #8c7b6b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+#retry-btn:hover { background: #756658; }
+</style>
+</head>
+<body>
+<h1></h1>
+<p class="perex"></p>
+<div id="quiz"></div>
+<button id="submit-btn" disabled>Vyhodnotit</button>
+<p class="hint" id="hint"></p>
+<div id="result">
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="retry-btn">Zkusit znovu</button>
+</div>
+<script>
+const TITLE = `Kvíz pro Čechy v důchodovém věku. Kdo v něm dá aspoň 8/10, má pořád mozek v dobré kondici`;
+const PEREX = `Roky praxe, čtení i křížovek se počítají. Deset otázek z historie, přírody, umění, jazyka i logiky prověří, jak svěže vám to po letech myslí. Kdo dá aspoň osm správně, potvrdí, že má mozek pořád v dobré kondici. Jdete do toho?`;
+const QUESTIONS = [
+  { q: `V zrcadlovém sále které stavby bylo roku 1871 vyhlášeno německé císařství?`, options: [`palác Tuileries`, `zámek Versailles`, `palác Louvre`, `zámek Fontainebleau`], correct: 1 },
+  { q: `Které město je hlavním městem amerického státu New York?`, options: [`Albany`, `Buffalo`, `New York`, `Rochester`], correct: 0 },
+  { q: `Jak se nazývá samičí pohlavní orgán květu?`, options: [`pestík`, `tyčinka`, `prašník`, `kalich`], correct: 0 },
+  { q: `Který malíř je autorem impresionistického plátna Ples v Moulin de la Galette?`, options: [`Claude Monet`, `Édouard Manet`, `Edgar Degas`, `Auguste Renoir`], correct: 3 },
+  { q: `Co znamená přídavné jméno nevraživý?`, options: [`upovídaný a společenský`, `nepřátelský a plný zášti`, `roztržitý a nesoustředěný`, `lakomý a skoupý`], correct: 1 },
+  { q: `Po kom je pojmenován fyzikální zákon o vztlaku působícím na těleso ponořené do kapaliny?`, options: [`Archimédés`, `Blaise Pascal`, `Isaac Newton`, `Pythagoras`], correct: 0 },
+  { q: `Které slovo patří na místo otazníku: PONDĚLÍ je ke STŘEDĚ jako LEDEN je k ?`, options: [`únoru`, `dubnu`, `březnu`, `prosinci`], correct: 2 },
+  { q: `Kdo je autorem světoznámé básně Havran (The Raven)?`, options: [`Walt Whitman`, `Lord Byron`, `William Wordsworth`, `Edgar Allan Poe`], correct: 3 },
+  { q: `Kterému králi měl Héraklés v rámci svých dvanácti úkolů odvést stádo dravých klisen živících se lidským masem?`, options: [`Augiáš`, `Diomédés`, `Minós`, `Priamos`], correct: 1 },
+  { q: `Který římský místodržitel Judeje podle evangelií vynesl nad Ježíšem rozsudek smrti?`, options: [`Valerius Gratus`, `Antonius Felix`, `Pontský Pilát`, `Porcius Festus`], correct: 2 }
+];
+const EVAL = [
+  { min: 0, max: 3, text: `Dnes to mozku iskřilo jen chvílemi. Několik otázek zamířilo mimo nejběžnější okruh a lákavější varianta vás stáhla dřív, než jste ji promysleli. Kondice se ale dá vrátit čtením, křížovkami a otázkami, nad kterými chvíli posedíte. Berte to jako rozehřívací kolo, ze kterého se dá jen stoupat.` },
+  { min: 4, max: 6, text: `Solidní střed, přesně tady se drží většina řešitelů. Půlku otázek jste rozlouskli s jistotou, u zbytku vás svedla první nabízející se odpověď. Mozek vám šlape dobře, na těch nejtěžších detailech a nejzáludnějších pastech se dá ještě zapracovat a posunout se výš.` },
+  { min: 7, max: 9, text: `Výborný výkon svěží hlavy. Historie, příroda, umění, jazyk i logika vám nedělají potíže a těsné distraktory vás jen tak neoblafnou. Od osmi bodů výš potvrzujete přesně to, co slibuje titulek: mozek máte pořád v dobré kondici. K plnému počtu chybělo opravdu málo.` },
+  { min: 10, max: 10, text: `Naprostá špička a vzácný úkaz. Plný počet napříč všemi obory od dějin přes umění až po čistou logiku svede jen zlomek řešitelů. Ani jedna past vás nezastavila a váš mozek pracuje bez jediného zaváhání. Klobouk dolů.` }
+];
+
+const LETTERS = [`a`, `b`, `c`, `d`];
+let answers = new Array(QUESTIONS.length).fill(null);
+let locked = false;
+
+document.querySelector(`h1`).textContent = TITLE;
+document.querySelector(`.perex`).textContent = PEREX;
+
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit-btn`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+
+function render() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `question-box`;
+    const qt = document.createElement(`div`);
+    qt.className = `question-text`;
+    qt.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    item.options.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `option`;
+      btn.textContent = LETTERS[oi] + `) ` + opt;
+      btn.addEventListener(`click`, () => selectOption(qi, oi));
+      btn.dataset.qi = qi;
+      btn.dataset.oi = oi;
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function selectOption(qi, oi) {
+  if (locked) return;
+  answers[qi] = oi;
+  const boxes = quizEl.children[qi].querySelectorAll(`.option`);
+  boxes.forEach((b, i) => b.classList.toggle(`selected`, i === oi));
+  updateSubmit();
+}
+
+function updateSubmit() {
+  const allAnswered = answers.every(a => a !== null);
+  submitBtn.disabled = !allAnswered;
+  if (allAnswered) hintEl.textContent = ``;
+}
+
+submitBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  QUESTIONS.forEach((item, qi) => {
+    const boxes = quizEl.children[qi].querySelectorAll(`.option`);
+    boxes.forEach((b, i) => {
+      b.classList.add(`locked`);
+      b.classList.remove(`selected`);
+      if (i === item.correct) b.classList.add(`correct`);
+      else if (i === answers[qi]) b.classList.add(`wrong`);
+    });
+    if (answers[qi] === item.correct) score++;
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + QUESTIONS.length;
+  const ev = EVAL.find(e => score >= e.min && score <= e.max);
+  document.getElementById(`verdict`).textContent = ev ? ev.text : ``;
+  submitBtn.style.display = `none`;
+  hintEl.textContent = ``;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+});
+
+document.getElementById(`retry-btn`).addEventListener(`click`, () => {
+  answers = new Array(QUESTIONS.length).fill(null);
+  locked = false;
+  render();
+  submitBtn.style.display = `block`;
+  submitBtn.disabled = true;
+  resultEl.style.display = `none`;
+  hintEl.textContent = ``;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+render();
+</script>
+</body>
+</html>
