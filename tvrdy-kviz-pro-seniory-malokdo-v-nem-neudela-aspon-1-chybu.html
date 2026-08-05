@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tvrdý kvíz pro seniory: málokdo v něm neudělá aspoň 1 chybu</title>
+<style>
+* { box-sizing: border-box; }
+body { font-family: Georgia, "Times New Roman", serif; background: #f5f0eb; color: #2c2c2c; margin: 0; padding: 24px 16px; }
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.8rem; line-height: 1.3; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; line-height: 1.6; margin: 0 0 28px; color: #444; }
+.q { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 28px; margin-bottom: 24px; }
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 16px; }
+.opt { display: block; width: 100%; text-align: left; padding: 14px 18px; background: #f7f4f0; border: 1px solid #d9d2c9; border-radius: 8px; font-size: 1rem; color: #3a3a3a; margin-bottom: 10px; cursor: pointer; font-family: inherit; }
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt.locked { cursor: default; }
+#submit { background: #5b7e5f; color: #fff; padding: 16px 40px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; border: none; display: block; margin: 40px auto 0; cursor: pointer; font-family: inherit; }
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hint { text-align: center; color: #8c7b6b; margin: 12px auto 0; min-height: 1.2em; }
+#result { background: #fefcf9; border-top: 4px solid #5b7e5f; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 28px; margin-top: 24px; display: none; }
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; }
+#retry { background: #8c7b6b; color: #fff; padding: 16px 40px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; border: none; display: block; margin: 24px auto 0; cursor: pointer; font-family: inherit; }
+#retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Tvrdý kvíz pro seniory: málokdo v něm neudělá aspoň 1 chybu</h1>
+<p class="perex">Deset otázek napříč obory od dějin a zeměpisu přes přírodu, hudbu a literaturu až k umění, češtině i sportu. Žádné nápovědy, žádné druhé pokusy. Málokdo z vašich vrstevníků projde bez jediné chyby. Patříte k nim?</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="hint" id="hint"></p>
+<div id="result">
+<div id="score"></div>
+<div id="verdict"></div>
+<button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  { q: `Který z těchto druhů je největší kočkovitou šelmou žijící na světě?`, opts: [`lev`, `jaguár`, `tygr`, `levhart`], correct: 2 },
+  { q: `Které území se v roce 1959 stalo padesátým, tedy zatím posledním státem USA?`, opts: [`Havaj`, `Aljaška`, `Portoriko`, `Kalifornie`], correct: 0 },
+  { q: `Který atlet jako první na světě zaběhl anglickou míli pod čtyři minuty?`, opts: [`Paavo Nurmi`, `Roger Bannister`, `Emil Zátopek`, `Jesse Owens`], correct: 1 },
+  { q: `Který měsíc je největší v celé sluneční soustavě?`, opts: [`Titan`, `Europa`, `náš Měsíc`, `Ganymed`], correct: 3 },
+  { q: `Kdo je autorem cyklu šesti Braniborských koncertů?`, opts: [`Johann Sebastian Bach`, `Georg Friedrich Händel`, `Antonio Vivaldi`, `Georg Philipp Telemann`], correct: 0 },
+  { q: `Kdo je autorem románu Pán much?`, opts: [`George Orwell`, `Aldous Huxley`, `Ernest Hemingway`, `William Golding`], correct: 3 },
+  { q: `Kdo je autorem obrazu Olympia, který roku 1865 pobouřil návštěvníky pařížského Salonu?`, opts: [`Claude Monet`, `Edgar Degas`, `Édouard Manet`, `Auguste Renoir`], correct: 2 },
+  { q: `Co znamená slovo foliant?`, opts: [`rozměrná, objemná kniha velkého formátu`, `starobylá listina opatřená pečetí`, `ozdobná kožená vazba knihy`, `soupis knih uložených v knihovně`], correct: 0 },
+  { q: `Kdo se roku 1886 stal historicky prvním oficiálním mistrem světa v šachu?`, opts: [`Paul Morphy`, `Wilhelm Steinitz`, `José Raúl Capablanca`, `Emanuel Lasker`], correct: 1 },
+  { q: `Jak se v řecké mytologii jmenuje řeka podsvětí, z níž se duše mrtvých napily, aby zapomněly na svůj pozemský život?`, opts: [`Styx`, `Acheron`, `Léthé`, `Kokytos`], correct: 2 }
+];
+const verdicts = [
+  { min: 0, max: 3, text: `Tenhle kvíz mířil vysoko a schválně sázel na jména a fakta, která se z paměti vytrácejí jako první. Pár otázek vás nachytalo, ale žádná ostuda. Dopřejte si oddech a klidně to zkuste ještě jednou, číslo příště povyskočí.` },
+  { min: 4, max: 6, text: `Slušný výsledek, na jaký dosáhne většina bystrých seniorů. Prošel jste zrádnými pastmi a udržel se nad průměrem svých vrstevníků. Na plný počet chybělo jen o kousek víc přehledu napříč obory.` },
+  { min: 7, max: 9, text: `Výborně. Takhle vysoko se dostane opravdu málokdo. Máte široký rozhled od dějin přes vědu a umění až po mytologii a pevnou paměť, jen ta nejzáludnější otázka si nechala poslední slovo. K bezchybné jízdě vám scházel jediný krok.` },
+  { min: 10, max: 10, text: `Přesně jak slibuje titulek. Bez jediné chyby projde tímhle kvízem sotva kdo z vašich vrstevníků a vy jste to dokázal. Takový přehled napříč historií, přírodou, uměním, jazykem i sportem je vzácný v každém věku. Klobouk dolů.` }
+];
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const qt = document.createElement(`p`);
+    qt.className = `q-text`;
+    qt.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.textContent = opt;
+      btn.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        Array.from(box.querySelectorAll(`.opt`)).forEach(b => b.classList.remove(`selected`));
+        btn.classList.add(`selected`);
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+function updateSubmit() {
+  const all = answers.every(a => a !== null);
+  submitBtn.disabled = !all;
+  hintEl.textContent = ``;
+}
+function evaluate() {
+  if (!answers.every(a => a !== null)) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll(`.opt`);
+    opts.forEach((btn, oi) => {
+      btn.classList.add(`locked`);
+      btn.classList.remove(`selected`);
+      if (oi === questions[qi].correct) btn.classList.add(`correct`);
+      if (oi === answers[qi] && answers[qi] !== questions[qi].correct) btn.classList.add(`wrong`);
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  const v = verdicts.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`verdict`).textContent = v ? v.text : ``;
+  submitBtn.style.display = `none`;
+  hintEl.textContent = ``;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+}
+function reset() {
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  locked = false;
+  resultEl.style.display = `none`;
+  submitBtn.style.display = `block`;
+  submitBtn.disabled = true;
+  hintEl.textContent = ``;
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+submitBtn.addEventListener(`click`, evaluate);
+document.getElementById(`retry`).addEventListener(`click`, reset);
+render();
+</script>
+</body>
+</html>
