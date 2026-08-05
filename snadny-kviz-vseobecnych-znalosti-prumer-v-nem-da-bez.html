@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snadný kvíz všeobecných znalostí. Průměr v něm dá bez problémů 7/10</title>
+<style>
+* { box-sizing: border-box; }
+body { font-family: Georgia, "Times New Roman", serif; background: #f5f0eb; color: #2c2c2c; margin: 0; padding: 24px 16px; }
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.8rem; line-height: 1.3; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; line-height: 1.6; margin: 0 0 28px; color: #444; }
+.q { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 28px; margin-bottom: 24px; }
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 16px; }
+.opt { display: block; width: 100%; text-align: left; padding: 14px 18px; background: #f7f4f0; border: 1px solid #d9d2c9; border-radius: 8px; font-size: 1rem; color: #3a3a3a; margin-bottom: 10px; cursor: pointer; font-family: inherit; }
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt.locked { cursor: default; }
+#submit { background: #5b7e5f; color: #fff; padding: 16px 40px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; border: none; display: block; margin: 40px auto 0; cursor: pointer; font-family: inherit; }
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hint { text-align: center; color: #8c7b6b; margin: 12px auto 0; min-height: 1.2em; }
+#result { background: #fefcf9; border-top: 4px solid #5b7e5f; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 28px; margin-top: 24px; display: none; }
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; }
+#retry { background: #8c7b6b; color: #fff; padding: 16px 40px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; border: none; display: block; margin: 24px auto 0; cursor: pointer; font-family: inherit; }
+#retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Snadný kvíz všeobecných znalostí. Průměr v něm dá bez problémů 7/10</h1>
+<p class="perex">Deset otázek napříč historií, přírodou, vědou, zeměpisem, kulturou i sportem, u každé čtyři možnosti a jediná správná. Žádné chytáky, jen slušný všeobecný základ. Průměrný řešitel tu sedmičku obvykle dá bez velkého zaváhání. Zvládnete ji i vy?</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="hint" id="hint"></p>
+<div id="result">
+<div id="score"></div>
+<div id="verdict"></div>
+<button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  { q: `Co udává jednotka zvaná světelný rok?`, opts: [`čas`, `vzdálenost`, `rychlost`, `hmotnost`], correct: 1 },
+  { q: `Které město je hlavním městem Norska?`, opts: [`Stockholm`, `Kodaň`, `Oslo`, `Helsinky`], correct: 2 },
+  { q: `Který plyn přijímají rostliny ze vzduchu při fotosyntéze?`, opts: [`kyslík`, `dusík`, `vodní pára`, `oxid uhličitý`], correct: 3 },
+  { q: `Do které skupiny živočichů patří delfín?`, opts: [`savci`, `ryby`, `plazi`, `obojživelníci`], correct: 0 },
+  { q: `Kdo byl prvním prezidentem Spojených států amerických?`, opts: [`Abraham Lincoln`, `George Washington`, `Thomas Jefferson`, `Benjamin Franklin`], correct: 1 },
+  { q: `Kolik strun mají klasické housle?`, opts: [`tři`, `pět`, `čtyři`, `šest`], correct: 2 },
+  { q: `Kdo je autorem obrazu Hvězdná noc?`, opts: [`Vincent van Gogh`, `Paul Gauguin`, `Claude Monet`, `Edvard Munch`], correct: 0 },
+  { q: `Jakou vzdálenost měří klasická maratonská trať?`, opts: [`21,1 km`, `41,2 km`, `45 km`, `42,2 km`], correct: 3 },
+  { q: `Který režisér natočil film Jurský park z roku 1993?`, opts: [`George Lucas`, `James Cameron`, `Steven Spielberg`, `Robert Zemeckis`], correct: 2 },
+  { q: `Co znamená přídavné jméno škodolibý?`, opts: [`přehnaně opatrný a ustrašený`, `mající radost z neštěstí druhých`, `lakomý a neochotný se dělit`, `prudce vznětlivý a výbušný`], correct: 1 }
+];
+const verdicts = [
+  { min: 0, max: 3, text: `Tentokrát to nesedlo. Základ se někam zatoulal, ale nic ztraceného není. Projděte si otázky ještě jednou a příště se dostanete výš.` },
+  { min: 4, max: 6, text: `Kousek pod průměrem. Půlku jste zvládli, jen pár otázek vás připravilo o cestu k sedmičce. Chybí opravdu málo.` },
+  { min: 7, max: 9, text: `Přesně tady se pohybuje průměrný řešitel a vy jste se mezi něj zařadili, ne-li o krok výš. Solidní všeobecný přehled, který drží pohromadě.` },
+  { min: 10, max: 10, text: `Plný počet a čistý štít. Tohle už není o průměru, tohle je perfektní všeobecný základ bez jediného zaváhání.` }
+];
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const qt = document.createElement(`p`);
+    qt.className = `q-text`;
+    qt.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.textContent = opt;
+      btn.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        Array.from(box.querySelectorAll(`.opt`)).forEach(b => b.classList.remove(`selected`));
+        btn.classList.add(`selected`);
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+function updateSubmit() {
+  const all = answers.every(a => a !== null);
+  submitBtn.disabled = !all;
+  hintEl.textContent = ``;
+}
+function evaluate() {
+  if (!answers.every(a => a !== null)) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll(`.opt`);
+    opts.forEach((btn, oi) => {
+      btn.classList.add(`locked`);
+      btn.classList.remove(`selected`);
+      if (oi === questions[qi].correct) btn.classList.add(`correct`);
+      if (oi === answers[qi] && answers[qi] !== questions[qi].correct) btn.classList.add(`wrong`);
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  const v = verdicts.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`verdict`).textContent = v ? v.text : ``;
+  submitBtn.style.display = `none`;
+  hintEl.textContent = ``;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+}
+function reset() {
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  locked = false;
+  resultEl.style.display = `none`;
+  submitBtn.style.display = `block`;
+  submitBtn.disabled = true;
+  hintEl.textContent = ``;
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+submitBtn.addEventListener(`click`, evaluate);
+document.getElementById(`retry`).addEventListener(`click`, reset);
+render();
+</script>
+</body>
+</html>
