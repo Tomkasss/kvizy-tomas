@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test na 5 minut pro seniory: rychlých 10 otázek odhalí váš mentální věk</title>
+<style>
+* { box-sizing: border-box; }
+body { font-family: Georgia, "Times New Roman", serif; background: #f5f0eb; color: #2c2c2c; margin: 0; padding: 24px 16px; }
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.8rem; line-height: 1.3; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; line-height: 1.6; margin: 0 0 28px; color: #444; }
+.q { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 28px; margin-bottom: 24px; }
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 16px; }
+.opt { display: block; width: 100%; text-align: left; padding: 14px 18px; background: #f7f4f0; border: 1px solid #d9d2c9; border-radius: 8px; font-size: 1rem; color: #3a3a3a; margin-bottom: 10px; cursor: pointer; font-family: inherit; }
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt.locked { cursor: default; }
+#submit { background: #5b7e5f; color: #fff; padding: 16px 40px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; border: none; display: block; margin: 40px auto 0; cursor: pointer; font-family: inherit; }
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hint { text-align: center; color: #8c7b6b; margin: 12px auto 0; min-height: 1.2em; }
+#result { background: #fefcf9; border-top: 4px solid #5b7e5f; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 28px; margin-top: 24px; display: none; }
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; }
+#retry { background: #8c7b6b; color: #fff; padding: 16px 40px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; border: none; display: block; margin: 24px auto 0; cursor: pointer; font-family: inherit; }
+#retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test na 5 minut pro seniory: rychlých 10 otázek odhalí váš mentální věk</h1>
+<p class="perex">Pět minut, deset otázek a jeden překvapivý výsledek: mentální věk vaší hlavy. Namícháme všeobecný přehled s nečíselnou logikou, kde nejde o roky v občance, ale o to, jak vám to dnes myslí. Čím víc bodů, tím svěžejší číslo.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="hint" id="hint"></p>
+<div id="result">
+<div id="score"></div>
+<div id="verdict"></div>
+<button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  { q: `Které slovo patří na místo otazníku: PTÁK je k HNÍZDU jako VČELA je k ?`, opts: [`úlu`, `medu`, `květu`, `žihadlu`], correct: 0 },
+  { q: `Který z těchto živočichů je největším živočichem žijícím v současnosti na naší planetě?`, opts: [`slon africký`, `žirafa`, `plejtvák obrovský`, `žralok obrovský`], correct: 2 },
+  { q: `Všichni členové spolku platí členské příspěvky. Pan Novák žádné členské příspěvky neplatí. Co z toho nutně plyne?`, opts: [`Pan Novák je členem spolku.`, `Pan Novák není členem spolku.`, `Pan Novák platí jiné poplatky.`, `Z uvedeného to nelze určit.`], correct: 1 },
+  { q: `Co znamená zastaralé přídavné jméno spanilý, například ve spojení spanilá dívka?`, opts: [`urozená a vznešená`, `veselá a rozpustilá`, `mladá a nezkušená`, `krásná a půvabná`], correct: 3 },
+  { q: `Není pravda, že všichni žáci ve třídě uměli básničku zpaměti. Co z toho jistě vyplývá?`, opts: [`Žádný žák básničku neuměl.`, `Alespoň jeden žák básničku neuměl.`, `Všichni žáci básničku uměli.`, `Z uvedeného nelze nic určit.`], correct: 1 },
+  { q: `Který německý státník, strůjce sjednocení Německa roku 1871, bývá přezdíván železný kancléř?`, opts: [`Otto von Bismarck`, `Vilém II.`, `Konrad Adenauer`, `Helmut Kohl`], correct: 0 },
+  { q: `Které z těchto slov do řady nepatří: kladivo, pila, kleště, hřebík?`, opts: [`kladivo`, `pila`, `kleště`, `hřebík`], correct: 3 },
+  { q: `Někteří ptáci neumějí létat a pštros je pták. Co z těchto dvou vět logicky nutně plyne o pštrosovi?`, opts: [`Pštros umí létat.`, `Pštros neumí létat.`, `Z uvedených vět to o pštrosovi nelze určit.`, `Žádný pták neumí létat.`], correct: 2 },
+  { q: `Který britský admirál velel vítězné anglické flotile v námořní bitvě u Trafalgaru roku 1805?`, opts: [`Horatio Nelson`, `Francis Drake`, `John Jervis`, `James Cook`], correct: 0 },
+  { q: `Co znamená přídavné jméno sveřepý, například ve spojení sveřepý pohled?`, opts: [`unavený a zasmušilý`, `urputný a nelítostný`, `povýšený a pohrdavý`, `vylekaný a nejistý`], correct: 1 }
+];
+const verdicts = [
+  { min: 0, max: 3, text: `Mentální věk kolem 75 až 85 let. Pár otázek vám vyklouzlo a záludnější varianty si počkaly na zaváhání. Nic ztraceného, hlava se probírá čtením, luštěním a otázkami, nad kterými chvíli posedíte. Zítra si vezměte jednu, u které jste tápali, a schválně, jestli vám správná odpověď naskočí sama.` },
+  { min: 4, max: 6, text: `Mentální věk kolem 55 až 65 let. Solidní, vyrovnaný střed, přesně tady se drží většina bystrých řešitelů. Půlku otázek jste trefili s jistotou, u zbytku vás svedla první nabízející se možnost. Dobrý základ, na kterém se dá stavět, a nahoru to máte blízko.` },
+  { min: 7, max: 9, text: `Mentální věk kolem 40 až 50 let. Svěží hlava, která si poradí i s věcmi mimo hlavní proud a nenaletí na těsný distraktor. Všeobecný přehled i klidná logická úvaha vám šlapou svižně a k plnému počtu chyběl jen krůček. Takovou pružnost vám leckdo mladší jen tiše závidí.` },
+  { min: 10, max: 10, text: `Mentální věk kolem 30 let. Plný počet napříč vědomostmi i čistou logikou zvládne opravdu jen hrstka. Ani jedna past vás nezastavila, od slovního citu přes dějiny až po přísný úsudek jste prošli bez zaváhání. Hlava jako křišťál, klobouk dolů.` }
+];
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const qt = document.createElement(`p`);
+    qt.className = `q-text`;
+    qt.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.textContent = opt;
+      btn.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        Array.from(box.querySelectorAll(`.opt`)).forEach(b => b.classList.remove(`selected`));
+        btn.classList.add(`selected`);
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+function updateSubmit() {
+  const all = answers.every(a => a !== null);
+  submitBtn.disabled = !all;
+  hintEl.textContent = ``;
+}
+function evaluate() {
+  if (!answers.every(a => a !== null)) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll(`.opt`);
+    opts.forEach((btn, oi) => {
+      btn.classList.add(`locked`);
+      btn.classList.remove(`selected`);
+      if (oi === questions[qi].correct) btn.classList.add(`correct`);
+      if (oi === answers[qi] && answers[qi] !== questions[qi].correct) btn.classList.add(`wrong`);
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  const v = verdicts.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`verdict`).textContent = v ? v.text : ``;
+  submitBtn.style.display = `none`;
+  hintEl.textContent = ``;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+}
+function reset() {
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  locked = false;
+  resultEl.style.display = `none`;
+  submitBtn.style.display = `block`;
+  submitBtn.disabled = true;
+  hintEl.textContent = ``;
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+submitBtn.addEventListener(`click`, evaluate);
+document.getElementById(`retry`).addEventListener(`click`, reset);
+render();
+</script>
+</body>
+</html>
