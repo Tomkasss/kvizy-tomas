@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz všeobecných znalostí: jste chytřejší než průměr? 10 otázek</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 20px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 18px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .otazka p.q { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 16px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  #vyhodnotit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .15s;
+  }
+  #vyhodnotit:hover:not(:disabled) { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #hlaska { text-align: center; color: #721c24; margin: 14px 0 0; min-height: 1.2em; }
+  #vysledek {
+    display: none;
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+    text-align: center;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; margin: 0 0 12px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; margin: 0; }
+  #znovu {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 28px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .15s;
+  }
+  #znovu:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    .otazka { padding: 20px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz všeobecných znalostí: jste chytřejší než průměr? 10 otázek</h1>
+  <p class="perex">Deset otázek napříč vědou, dějinami, zeměpisem, mytologií, uměním, literaturou, hudbou i sportem, u každé čtyři možnosti a jediná správná. Průměrný člověk dá pět až šest, plný počet zvládne jen menšina. Zjistěte, jestli patříte nad průměr.</p>
+  <div id="kviz"></div>
+  <p id="hlaska"></p>
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <div id="vysledek">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+  const otazky = [
+    { q: `1. Která planeta Sluneční soustavy se otáčí kolem své osy prakticky naležato, s osou skloněnou zhruba o 98 stupňů?`,
+      moznosti: [`Neptun`, `Saturn`, `Uran`, `Jupiter`], spravna: 2 },
+    { q: `2. Jak se nazývá jev, při kterém kapalina samovolně stoupá úzkou trubičkou vzhůru proti působení gravitace?`,
+      moznosti: [`osmóza`, `kapilarita`, `difúze`, `koheze`], spravna: 1 },
+    { q: `3. Jak se nazývá děj, při kterém rostliny vydávají vodní páru převážně průduchy v listech?`,
+      moznosti: [`fotosyntéza`, `osmóza`, `dýchání`, `transpirace`], spravna: 3 },
+    { q: `4. Ve kterém dnešním státě leží zříceniny starověkého města Persepolis?`,
+      moznosti: [`Irák`, `Írán`, `Turecko`, `Sýrie`], spravna: 1 },
+    { q: `5. Který španělský dobyvatel v 16. století vyvrátil říši Inků?`,
+      moznosti: [`Francisco Pizarro`, `Hernán Cortés`, `Vasco Núñez de Balboa`, `Juan Ponce de León`], spravna: 0 },
+    { q: `6. Který bůh vládl v řecké mytologii podsvětí, říši mrtvých?`,
+      moznosti: [`Zeus`, `Poseidon`, `Kronos`, `Hádes`], spravna: 3 },
+    { q: `7. Který francouzský spisovatel je autorem románu Cizinec?`,
+      moznosti: [`Jean-Paul Sartre`, `Marcel Proust`, `Albert Camus`, `André Gide`], spravna: 2 },
+    { q: `8. Který francouzský malíř je autorem obrazu Svoboda vedoucí lid?`,
+      moznosti: [`Jacques-Louis David`, `Eugène Delacroix`, `Gustave Courbet`, `Édouard Manet`], spravna: 1 },
+    { q: `9. Který ruský skladatel je autorem symfonické suity Šeherezáda z roku 1888?`,
+      moznosti: [`Alexandr Borodin`, `Petr Iljič Čajkovskij`, `Modest Musorgskij`, `Nikolaj Rimskij-Korsakov`], spravna: 3 },
+    { q: `10. Který ze čtyř grandslamových tenisových turnajů se hraje na antukovém povrchu?`,
+      moznosti: [`Roland Garros`, `Wimbledon`, `US Open`, `Australian Open`], spravna: 0 }
+  ];
+
+  const odpovedi = new Array(otazky.length).fill(null);
+  let zamek = false;
+  const kvizEl = document.getElementById(`kviz`);
+  const vyhodnotitBtn = document.getElementById(`vyhodnotit`);
+  const hlaskaEl = document.getElementById(`hlaska`);
+  const vysledekEl = document.getElementById(`vysledek`);
+  const skoreEl = document.getElementById(`skore`);
+  const hodnoceniEl = document.getElementById(`hodnoceni`);
+  const znovuBtn = document.getElementById(`znovu`);
+  const pismena = [`a`, `b`, `c`, `d`];
+
+  function vykresli() {
+    kvizEl.innerHTML = ``;
+    otazky.forEach((ot, i) => {
+      const box = document.createElement(`div`);
+      box.className = `otazka`;
+      const qp = document.createElement(`p`);
+      qp.className = `q`;
+      qp.textContent = ot.q;
+      box.appendChild(qp);
+      ot.moznosti.forEach((m, j) => {
+        const btn = document.createElement(`button`);
+        btn.className = `varianta`;
+        btn.textContent = pismena[j] + `) ` + m;
+        btn.addEventListener(`click`, () => {
+          if (zamek) return;
+          odpovedi[i] = j;
+          Array.from(box.querySelectorAll(`.varianta`)).forEach(b => b.classList.remove(`vybrana`));
+          btn.classList.add(`vybrana`);
+          aktualizujTlacitko();
+        });
+        box.appendChild(btn);
+      });
+      kvizEl.appendChild(box);
+    });
+  }
+
+  function aktualizujTlacitko() {
+    const vse = odpovedi.every(o => o !== null);
+    vyhodnotitBtn.disabled = !vse;
+    if (vse) hlaskaEl.textContent = ``;
+  }
+
+  vyhodnotitBtn.addEventListener(`click`, () => {
+    if (odpovedi.some(o => o === null)) {
+      hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+      return;
+    }
+    zamek = true;
+    let skore = 0;
+    const boxy = kvizEl.querySelectorAll(`.otazka`);
+    boxy.forEach((box, i) => {
+      const btns = box.querySelectorAll(`.varianta`);
+      btns.forEach((btn, j) => {
+        btn.disabled = true;
+        if (j === otazky[i].spravna) btn.classList.add(`spravna`);
+        if (j === odpovedi[i] && odpovedi[i] !== otazky[i].spravna) btn.classList.add(`spatna`);
+      });
+      if (odpovedi[i] === otazky[i].spravna) skore++;
+    });
+    vyhodnotitBtn.style.display = `none`;
+    hlaskaEl.textContent = ``;
+    skoreEl.textContent = skore + ` z ` + otazky.length;
+    hodnoceniEl.textContent = hodnoceni(skore);
+    vysledekEl.style.display = `block`;
+    vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  });
+
+  function hodnoceni(s) {
+    if (s <= 3) return `Tentokrát to nevyšlo. Otázky sahaly do mnoha různých oborů a hned několik z nich vás poslalo vedle. Na to, abyste se dnes zařadili nad průměr, to nestačilo, ale široký záběr témat srazí spoustu lidí a příště se skóre posune výš.`;
+    if (s <= 6) return `Přesně tady se pohybuje průměrný řešitel a vy jste se mezi něj zařadili. Půlku otázek jste zvládli s jistotou, u zbytku vás dostaly těsné nabídky. Solidní všeobecný přehled, který drží krok s většinou, ale nad ni zatím nevystupuje.`;
+    if (s <= 9) return `Nadprůměr. Do tohoto pásma se u otázek napříč tolika obory dostane jen menšina a vy mezi ni patříte. Orientujete se prokazatelně líp než většina lidí a k plnému počtu chybělo opravdu málo.`;
+    return `Naprostá špička. Deset z deseti napříč vědou, dějinami, uměním i sportem dá jen zlomek lidí. Tohle není náhoda ani štěstí při tipování, ale rozhled, který vás staví jednoznačně nad průměr. Smekáme.`;
+  }
+
+  znovuBtn.addEventListener(`click`, () => {
+    for (let i = 0; i < odpovedi.length; i++) odpovedi[i] = null;
+    zamek = false;
+    vysledekEl.style.display = `none`;
+    vyhodnotitBtn.style.display = `block`;
+    vyhodnotitBtn.disabled = true;
+    hlaskaEl.textContent = ``;
+    vykresli();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  });
+
+  vykresli();
+</script>
+</body>
+</html>
