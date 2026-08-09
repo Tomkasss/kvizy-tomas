@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro seniory: 10 věcí, co znal za dříve úplně každý</title>
+<style>
+* { box-sizing: border-box; }
+body { font-family: Georgia, "Times New Roman", serif; background: #f5f0eb; color: #2c2c2c; margin: 0; padding: 24px 16px; }
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 28px; }
+.q { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 28px; margin-bottom: 24px; }
+.qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt { display: block; width: 100%; text-align: left; padding: 14px 18px; background: #f7f4f0; border: 1px solid #d9d2c9; border-radius: 8px; font-family: inherit; font-size: 1rem; color: #3a3a3a; margin-bottom: 12px; cursor: pointer; }
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+#submit { background: #5b7e5f; color: #fff; padding: 16px 40px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; border: none; display: block; margin: 40px auto 0; cursor: pointer; font-family: inherit; }
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hint { text-align: center; color: #8a5a5a; margin: 14px 0 0; min-height: 1.2em; }
+#result { background: #fefcf9; border-top: 4px solid #5b7e5f; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 28px; margin-top: 28px; display: none; }
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+.verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+#retry { background: #8c7b6b; color: #fff; padding: 16px 40px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; border: none; display: block; margin: 28px auto 0; cursor: pointer; font-family: inherit; }
+#retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro seniory: 10 věcí, co znal za dříve úplně každý. Kdo dá 8/10, má super pamět</h1>
+<p class="perex">Staré míry, mince, lidová slova i dávné zvyky, které kdysi znal úplně každý. Dnešní mladí u nich krčí rameny, vy jste v tom ale vyrostli. Deset otázek ukáže, kolik vám toho zůstalo. Kdo dá osm z deseti, má paměť jako křemen.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="hint" id="hint"></p>
+<div id="result">
+<div class="score" id="score"></div>
+<p class="verdict" id="verdict"></p>
+<button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+{ q: `Kolik zhruba měřil starý český loket?`, opts: [`asi 45 centimetrů`, `asi 60 centimetrů`, `asi 75 centimetrů`, `asi 90 centimetrů`], correct: 1 },
+{ q: `Kolik zhruba vážila stará libra, na kterou se odvažovalo maso i mouka?`, opts: [`přibližně 10 dekagramů`, `přibližně čtvrt kilogramu`, `přibližně jeden kilogram`, `přibližně půl kilogramu`], correct: 3 },
+{ q: `Jakou hodnotu měla stará měděná grešle vůči krejcaru?`, opts: [`rovnala se polovině krejcaru`, `měla hodnotu tří krejcarů`, `rovnala se třetině krejcaru`, `rovnala se přesně jednomu krejcaru`], correct: 2 },
+{ q: `Co znamená staré rčení, že někdo „přišel na buben"?`, opts: [`že přišel o všechen majetek a zkrachoval`, `že náhle a nečekaně zemřel`, `že se octl v řečech a pomluvách`, `že ztratil rozum a pomátl se`], correct: 0 },
+{ q: `K čemu ve staveních sloužil kolovrat?`, opts: [`ke spřádání vlny nebo lnu do nitě`, `k tkaní látky z hotových nití`, `k česání a čištění ovčí vlny`, `k navíjení hotové příze do klubek`], correct: 0 },
+{ q: `Co byla louč, kterou se dříve svítilo ve světnici?`, opts: [`knot plovoucí v mističce s rozpuštěným lojem`, `svíce ulitá ze včelího vosku`, `tenká hořící tříska z pryskyřičnatého dřeva`, `hrubá pochodeň smočená ve smůle`], correct: 2 },
+{ q: `Co byla kacabajka, kterou nosívaly ženy na venkově?`, opts: [`zástěra vázaná přes sukni`, `čepec s krajkovým lemem`, `teplý vlněný šátek přes ramena`, `krátký ženský kabátek`], correct: 3 },
+{ q: `Co dívky podle zvyku přinášely do vsi krátce poté, co byla Morana vhozena do vody?`, opts: [`košík malovaných kraslic k obdarování sousedů`, `otep slámy, kterou pak spálili na návsi`, `věnec z prvních jarních květin na obecní kříž`, `ozdobený zelený stromeček, takzvané líto`], correct: 3 },
+{ q: `Kolik kusů odpovídalo staré početní jednotce jeden mandel, kterou se počítala vejce i snopy?`, opts: [`deset kusů`, `patnáct kusů`, `osmnáct kusů`, `dvacet kusů`], correct: 1 },
+{ q: `Co byly takzvané ohlášky, které kněz čítával z kazatelny tři neděle po sobě?`, opts: [`seznam farníků zemřelých za uplynulý týden`, `veřejné oznámení, že se dvojice chystá vzít`, `výzva věřícím, aby zaplatili církevní desátek`, `oznámení o chystané dražbě obecních pozemků`], correct: 1 }
+];
+const answers = new Array(questions.length).fill(-1);
+let locked = false;
+const quizEl = document.getElementById('quiz');
+const submitBtn = document.getElementById('submit');
+const hintEl = document.getElementById('hint');
+const resultEl = document.getElementById('result');
+
+function render() {
+  quizEl.innerHTML = '';
+  questions.forEach((item, qi) => {
+    const box = document.createElement('div');
+    box.className = 'q';
+    const qt = document.createElement('p');
+    qt.className = 'qtext';
+    qt.textContent = (qi + 1) + '. ' + item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = String.fromCharCode(97 + oi) + ') ' + opt;
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        answers[qi] = oi;
+        Array.from(box.querySelectorAll('.opt')).forEach((b, bi) => {
+          b.classList.toggle('selected', bi === oi);
+        });
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+function updateSubmit() {
+  const all = answers.every(a => a !== -1);
+  submitBtn.disabled = !all;
+  if (all) hintEl.textContent = '';
+}
+submitBtn.addEventListener('click', () => {
+  if (answers.some(a => a === -1)) { hintEl.textContent = 'Odpovězte prosím na všechny otázky'; return; }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll('.q');
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll('.opt');
+    opts.forEach((b, oi) => {
+      b.disabled = true;
+      b.classList.remove('selected');
+      if (oi === questions[qi].correct) b.classList.add('correct');
+      else if (oi === answers[qi]) b.classList.add('wrong');
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  submitBtn.style.display = 'none';
+  hintEl.textContent = '';
+  document.getElementById('score').textContent = score + ' z 10';
+  document.getElementById('verdict').textContent = verdictFor(score);
+  resultEl.style.display = 'block';
+  resultEl.scrollIntoView({ behavior: 'smooth' });
+});
+function verdictFor(s) {
+  if (s <= 3) return `Svět našich babiček a dědečků se vám trochu rozplynul. Staré míry, mince i zvyky dnes znějí jako z jiné doby a leccos jste možná zastihli jen koutkem oka. Nevadí, zkuste zavzpomínat u starých fotek a vyprávění, spousta věcí se vám sama vybaví.`;
+  if (s <= 6) return `Poctivý výkon pamětníka. Půlku věcí máte pořád živě před sebou, u zbytku jste chvíli lovili v paměti. Nejznámější míry a rčení jste trefili, na starých zvycích a méně omílaných pojmech jste ale zaváhali. Přesně tady se schází většina těch, kdo dřívější časy pamatují.`;
+  if (s <= 9) return `Výborně, tohle je paměť jako křemen. Staré míry, mince, lidová slova i dávné zvyky ovládáte napříč obory a bez zaváhání. Kdo nasbíral aspoň osm bodů, splnil metu super paměti, na kterou dosáhne jen málokdo. K plnému počtu vám chybělo jen pár drobností, které si dnes vybaví hrstka lidí.`;
+  return `Plný počet a klobouk dolů. Znáte i to, co většině lidí dávno vypadlo z hlavy, od lokte a libry přes vynášení Morany až po nedělní ohlášky. Dřívější život ve vás žije dál tak, jako byste ho včera prožívali. Takový přehled má dnes už opravdu málokdo.`;
+}
+document.getElementById('retry').addEventListener('click', () => {
+  locked = false;
+  answers.fill(-1);
+  resultEl.style.display = 'none';
+  submitBtn.style.display = 'block';
+  submitBtn.disabled = true;
+  hintEl.textContent = '';
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+render();
+</script>
+</body>
+</html>
