@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro seniory: 10 otázek ze školních lavic</title>
+<style>
+* { box-sizing: border-box; }
+body { font-family: Georgia, "Times New Roman", serif; background: #f5f0eb; color: #2c2c2c; margin: 0; padding: 24px 16px; }
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 28px; }
+.q { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 28px; margin-bottom: 24px; }
+.qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt { display: block; width: 100%; text-align: left; padding: 14px 18px; background: #f7f4f0; border: 1px solid #d9d2c9; border-radius: 8px; font-family: inherit; font-size: 1rem; color: #3a3a3a; margin-bottom: 12px; cursor: pointer; }
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+#submit { background: #5b7e5f; color: #fff; padding: 16px 40px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; border: none; display: block; margin: 40px auto 0; cursor: pointer; font-family: inherit; }
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hint { text-align: center; color: #8a5a5a; margin: 14px 0 0; min-height: 1.2em; }
+#result { background: #fefcf9; border-top: 4px solid #5b7e5f; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 28px; margin-top: 28px; display: none; }
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+.verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+#retry { background: #8c7b6b; color: #fff; padding: 16px 40px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; border: none; display: block; margin: 28px auto 0; cursor: pointer; font-family: inherit; }
+#retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro seniory: 10 otázek ze školních lavic. Kdo dá plný počet, dával pozor líp než dnešní děti</h1>
+<p class="perex">Školní léta máte dávno za sebou, ale kolik toho ve vás po letech zůstalo? Deset otázek napříč předměty od češtiny přes dějepis a zeměpis až po přírodní vědy prověří, jestli jste v lavici dávali pozor. Tužku netřeba, stačí dobrá paměť.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="hint" id="hint"></p>
+<div id="result">
+<div class="score" id="score"></div>
+<p class="verdict" id="verdict"></p>
+<button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+{ q: `Kterou fyzikální veličinu měří voltmetr?`, opts: [`elektrický proud`, `elektrický odpor`, `elektrické napětí`, `elektrický výkon`], correct: 2 },
+{ q: `Který lidský smysl mají na starosti polokruhovité kanálky ve vnitřním uchu?`, opts: [`rovnováhu`, `sluch`, `zrak`, `hmat`], correct: 0 },
+{ q: `Kdo je autorem historického dramatu Vilém Tell?`, opts: [`Johann Wolfgang Goethe`, `Heinrich von Kleist`, `Friedrich Hölderlin`, `Friedrich Schiller`], correct: 3 },
+{ q: `K čemu v češtině slouží pátý pád?`, opts: [`k přivlastňování`, `k oslovování`, `k vyjádření nástroje nebo prostředku`, `k určení místa`], correct: 1 },
+{ q: `Ve kterém roce začala dobytím Bastily Velká francouzská revoluce?`, opts: [`1776`, `1815`, `1789`, `1848`], correct: 2 },
+{ q: `Na kolik dutin je rozděleno lidské srdce?`, opts: [`čtyři`, `dvě`, `šest`, `tři`], correct: 0 },
+{ q: `Jak se nazývá čtyřúhelník, který má právě jednu dvojici rovnoběžných stran?`, opts: [`kosočtverec`, `rovnoběžník`, `kosodélník`, `lichoběžník`], correct: 3 },
+{ q: `Kdo je autorem románu Nikola Šuhaj loupežník?`, opts: [`Vladislav Vančura`, `Ivan Olbracht`, `Karel Nový`, `Eduard Bass`], correct: 1 },
+{ q: `Který ostrov je po Grónsku druhý největší na světě?`, opts: [`Nová Guinea`, `Borneo`, `Madagaskar`, `Sumatra`], correct: 0 },
+{ q: `Jaká je chemická značka cínu?`, opts: [`Zn`, `Si`, `Sn`, `Cu`], correct: 2 }
+];
+const answers = new Array(questions.length).fill(-1);
+let locked = false;
+const quizEl = document.getElementById('quiz');
+const submitBtn = document.getElementById('submit');
+const hintEl = document.getElementById('hint');
+const resultEl = document.getElementById('result');
+
+function render() {
+  quizEl.innerHTML = '';
+  questions.forEach((item, qi) => {
+    const box = document.createElement('div');
+    box.className = 'q';
+    const qt = document.createElement('p');
+    qt.className = 'qtext';
+    qt.textContent = (qi + 1) + '. ' + item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = String.fromCharCode(97 + oi) + ') ' + opt;
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        answers[qi] = oi;
+        Array.from(box.querySelectorAll('.opt')).forEach((b, bi) => {
+          b.classList.toggle('selected', bi === oi);
+        });
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+function updateSubmit() {
+  const all = answers.every(a => a !== -1);
+  submitBtn.disabled = !all;
+  if (all) hintEl.textContent = '';
+}
+submitBtn.addEventListener('click', () => {
+  if (answers.some(a => a === -1)) { hintEl.textContent = 'Odpovězte prosím na všechny otázky'; return; }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll('.q');
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll('.opt');
+    opts.forEach((b, oi) => {
+      b.disabled = true;
+      b.classList.remove('selected');
+      if (oi === questions[qi].correct) b.classList.add('correct');
+      else if (oi === answers[qi]) b.classList.add('wrong');
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  submitBtn.style.display = 'none';
+  hintEl.textContent = '';
+  document.getElementById('score').textContent = score + ' z 10';
+  document.getElementById('verdict').textContent = verdictFor(score);
+  resultEl.style.display = 'block';
+  resultEl.scrollIntoView({ behavior: 'smooth' });
+});
+function verdictFor(s) {
+  if (s <= 3) return `Školní léta se ve vás zřejmě spíš zaprášila. Pár předmětů vám z hlavy dávno vyprchalo, ale nic není ztraceno. Otevřete encyklopedii nebo starou učebnici a příště to půjde líp.`;
+  if (s <= 6) return `Solidní průměr člověka, který kdysi lavici prosedět nemusel. Něco vám pevně drží, jinde už jsou vzpomínky rozostřené. Kdyby se dnešní děti učily jako vy, byla by radost.`;
+  if (s <= 9) return `Výborný výkon. Napříč předměty se ztratíte jen výjimečně a nad většinou žáků máte pořádný náskok. K plnému počtu vám scházel jen krůček.`;
+  return `Plný počet. Vysvědčení samé jedničky. Ve škole jste dávali pozor líp než leckterý dnešní školák a klidně byste se mohli postavit před tabuli sami.`;
+}
+document.getElementById('retry').addEventListener('click', () => {
+  locked = false;
+  answers.fill(-1);
+  resultEl.style.display = 'none';
+  submitBtn.style.display = 'block';
+  submitBtn.disabled = true;
+  hintEl.textContent = '';
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+render();
+</script>
+</body>
+</html>
