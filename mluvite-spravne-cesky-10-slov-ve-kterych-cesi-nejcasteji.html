@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mluvíte správně česky? 10 slov, ve kterých Češi nejčastěji chybují</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 24px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.25; color: #2c2c2c; margin: 0 0 18px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover:not(.locked) { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .opt.locked { cursor: default; }
+  .txtinput {
+    width: 100%;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+  }
+  #submit {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #submit:hover:not(:disabled) { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint { text-align: center; color: #8a6d3b; margin: 14px 0 0; min-height: 1.2em; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+    display: none;
+  }
+  .score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  .verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #retry {
+    display: block;
+    margin: 28px auto 0;
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Mluvíte správně česky? 10 slov, ve kterých Češi nejčastěji chybují</h1>
+  <p class="perex">Čeština dokáže nastražit past i rodilým mluvčím. Deset slov a vět, ve kterých chybuje spousta lidí, prověří, jak jistě ovládáte pravopis, tvarosloví i velká písmena. Najdete správnou podobu tam, kde většina jen zaváhá?</p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <p class="hint" id="hint"></p>
+  <div id="result">
+    <div class="score" id="score"></div>
+    <p class="verdict" id="verdict"></p>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+const questions = [
+  { q: `1. Která varianta slova je pravopisně správně?`, opts: [`profesor`, `proffesor`, `professor`, `profesór`], correct: 0 },
+  { q: `2. Za takové jednání bys neměl ___ ani zvíře.`, opts: [`být`, `byt`, `bít`, `bit`], correct: 2 },
+  { q: `3. Do divadla nakonec půjdu ___.`, opts: [`s nima`, `s nimi`, `s nimy`, `s ními`], correct: 1 },
+  { q: `4. O víkendu nás v horách čeká pořádně náročná ___.`, opts: [`túra`, `tůra`, `tůrá`, `tura`], correct: 0 },
+  { q: `5. Celý večer se bavili jenom o ___.`, opts: [`mě`, `mne`, `mňe`, `mně`], correct: 3 },
+  { q: `6. Každý se přece může někdy ___.`, opts: [`mílit`, `mýlit`, `mýlít`, `mílít`], correct: 1 },
+  { q: `7. Na trhu se objevila první ___ zelenina.`, opts: [`ranná`, `ránná`, `rannná`, `raná`], correct: 3 },
+  { q: `8. Včera večer jsem v televizi ___ zajímavý dokument.`, opts: [`shlédl`, `zhlédl`, `shlídl`, `zhlídnul`], correct: 1 },
+  { q: `9. Ve které větě jsou velká písmena napsána správně?`, opts: [`Děda bojoval v První světové válce.`, `Děda bojoval v první Světové válce.`, `Děda bojoval v první světové válce.`, `Děda bojoval v První Světové Válce.`], correct: 2 },
+  { q: `10. Koťata si celé odpoledne hrál__ na dvoře.`, opts: [`hráli`, `hrály`, `hrála`, `hrálo`], correct: 2 }
+];
+
+const verdicts = [
+  { min: 0, max: 3, text: `Čeština vás tentokrát potopila. Zrádná koncovka, předpona nebo velké písmeno dostane spoustu lidí, kteří píšou každý den, takže na to nejste sami. Osvěžte si pár pravidel a příště odhalíte znatelně víc.` },
+  { min: 4, max: 6, text: `Solidní jazykový cit, přesně kolem téhle hranice se pohybuje průměrný pisatel. Polovinu záludností jste prohlédli s jistotou, u těch nejrafinovanějších vás dostala těsná nabídka. Jasně slušný výsledek.` },
+  { min: 7, max: 9, text: `Výborná práce. Prokličkovali jste pastmi, na kterých hromadně chybují i lidé se smyslem pro pravopis, a neunikla vám špatná předpona ani zákeřná koncovka. Do plného počtu scházel jen krůček.` },
+  { min: 10, max: 10, text: `Klobouk dolů. Plný počet z tohohle kvízu nedá zdaleka každý, protože i zdánlivě jasné věty tu skrývají pastičku. Čeština je zjevně vaše silná stránka.` }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById('quiz');
+const submitBtn = document.getElementById('submit');
+const hintEl = document.getElementById('hint');
+const resultEl = document.getElementById('result');
+const scoreEl = document.getElementById('score');
+const verdictEl = document.getElementById('verdict');
+const retryBtn = document.getElementById('retry');
+
+function render() {
+  quizEl.innerHTML = '';
+  questions.forEach((item, qi) => {
+    const box = document.createElement('div');
+    box.className = 'q';
+    const qt = document.createElement('p');
+    qt.className = 'q-text';
+    qt.textContent = item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = opt;
+      if (answers[qi] === oi) btn.classList.add('selected');
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        answers[qi] = oi;
+        render();
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  const all = answers.every(a => a !== null);
+  submitBtn.disabled = !all;
+  hintEl.textContent = '';
+}
+
+function evaluate() {
+  if (!answers.every(a => a !== null)) {
+    hintEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll('.q');
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll('.opt');
+    opts.forEach((btn, oi) => {
+      btn.classList.add('locked');
+      btn.classList.remove('selected');
+      if (oi === questions[qi].correct) btn.classList.add('correct');
+      else if (oi === answers[qi]) btn.classList.add('wrong');
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  submitBtn.disabled = true;
+  hintEl.textContent = '';
+  scoreEl.textContent = score + ' z ' + questions.length;
+  const v = verdicts.find(v => score >= v.min && score <= v.max);
+  verdictEl.textContent = v ? v.text : '';
+  resultEl.style.display = 'block';
+  resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function reset() {
+  locked = false;
+  answers.fill(null);
+  resultEl.style.display = 'none';
+  submitBtn.disabled = true;
+  hintEl.textContent = '';
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+submitBtn.addEventListener('click', evaluate);
+retryBtn.addEventListener('click', reset);
+render();
+</script>
+</body>
+</html>
