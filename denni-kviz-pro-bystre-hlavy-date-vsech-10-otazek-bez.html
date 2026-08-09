@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Denní kvíz pro bystré hlavy: dáte všech 10 otázek bez zaváhání?</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 18px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: background .15s, border-color .15s;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .opt:disabled { cursor: default; }
+  #evalBtn {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  #evalBtn:hover:not(:disabled) { background: #4a6b4e; }
+  #evalBtn:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #hint { text-align: center; color: #8a6d3b; margin-top: 14px; min-height: 1.2em; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+    display: none;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+  #retryBtn {
+    display: block;
+    margin: 28px auto 0;
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  #retryBtn:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    .q { padding: 20px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Denní kvíz pro bystré hlavy: dáte všech 10 otázek bez zaváhání?</h1>
+  <p class="perex">Deset otázek napříč obory pro bystré hlavy, které si věří. Historie, věda, literatura, film, zeměpis, umění i mytologie, u každé čtyři možnosti a jen jedna správná. Průměrný řešitel jich dá pět až šest. Zvládnete všech deset bez zaváhání?</p>
+  <div id="quiz"></div>
+  <button id="evalBtn" disabled>Vyhodnotit</button>
+  <div id="hint"></div>
+  <div id="result">
+    <div id="score"></div>
+    <div id="verdict"></div>
+    <button id="retryBtn">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+const questions = [
+  { q: `Který dramatik je autorem absurdní hry Čekání na Godota?`, opts: [`Bertolt Brecht`, `Eugène Ionesco`, `Luigi Pirandello`, `Samuel Beckett`], correct: 3 },
+  { q: `Kdo je autorem románu Portrét Doriana Graye?`, opts: [`Oscar Wilde`, `Robert Louis Stevenson`, `George Bernard Shaw`, `Herbert George Wells`], correct: 0 },
+  { q: `Který vědec proslul teorií o pohybu kontinentů, tzv. kontinentálním driftu?`, opts: [`Alfred Wegener`, `Charles Lyell`, `James Hutton`, `Andrija Mohorovičić`], correct: 0 },
+  { q: `Který byzantský císař nechal v 6. století sestavit sborník římského práva Corpus iuris civilis?`, opts: [`Konstantin Veliký`, `Justinián I.`, `Theodosius I.`, `Diokletián`], correct: 1 },
+  { q: `Který japonský režisér natočil film Sedm samurajů z roku 1954?`, opts: [`Yasujiro Ozu`, `Kenji Mizoguchi`, `Hayao Miyazaki`, `Akira Kurosawa`], correct: 3 },
+  { q: `V kterém městě stojí Královská observatoř, jíž prochází nultý poledník?`, opts: [`Paříž`, `Londýn`, `Řím`, `Berlín`], correct: 1 },
+  { q: `Který vojevůdce vybudoval největší souvislou pozemní říši v dějinách lidstva?`, opts: [`Attila`, `Timur`, `Čingischán`, `Alexandr Veliký`], correct: 2 },
+  { q: `Který malíř je autorem rozměrného dvorního obrazu Las Meninas (Dvorní dámy)?`, opts: [`El Greco`, `Francisco Goya`, `Bartolomé Esteban Murillo`, `Diego Velázquez`], correct: 3 },
+  { q: `Jak se v severské mytologii nazývá obrovský jasan, jehož větve a kořeny propojují devět světů?`, opts: [`Bifröst`, `Valhalla`, `Yggdrasil`, `Ásgard`], correct: 2 },
+  { q: `Který český král vydal Dekret kutnohorský, který posílil vliv Čechů na pražské univerzitě?`, opts: [`Karel IV.`, `Václav IV.`, `Zikmund Lucemburský`, `Jiří z Poděbrad`], correct: 1 }
+];
+
+const letters = [`a)`, `b)`, `c)`, `d)`];
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`evalBtn`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+const scoreEl = document.getElementById(`score`);
+const verdictEl = document.getElementById(`verdict`);
+const retryBtn = document.getElementById(`retryBtn`);
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const qt = document.createElement(`div`);
+    qt.className = `q-text`;
+    qt.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.textContent = letters[oi] + ` ` + opt;
+      btn.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        Array.from(box.querySelectorAll(`.opt`)).forEach(b => b.classList.remove(`selected`));
+        btn.classList.add(`selected`);
+        updateEvalState();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateEvalState() {
+  const allAnswered = answers.every(a => a !== null);
+  evalBtn.disabled = !allAnswered;
+  if (allAnswered) hintEl.textContent = ``;
+}
+
+evalBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll(`.opt`);
+    opts.forEach((btn, oi) => {
+      btn.disabled = true;
+      btn.classList.remove(`selected`);
+      if (oi === questions[qi].correct) {
+        btn.classList.add(`correct`);
+      } else if (oi === answers[qi]) {
+        btn.classList.add(`wrong`);
+      }
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  evalBtn.disabled = true;
+  hintEl.textContent = ``;
+  scoreEl.textContent = score + ` z ` + questions.length;
+  verdictEl.textContent = verdictFor(score);
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+function verdictFor(score) {
+  if (score <= 3) return `Rozjezd, který zabolel. Otázky mířily napříč obory a pořádná část vás zaskočila. Nic ztraceného, všeobecný přehled se dá pilovat a den co den ho posouvat výš.`;
+  if (score <= 6) return `Solidní střed, přesně tady se pohybuje většina řešitelů. Základ máte pevný, jen na těžších otázkách vám pár faktů uteklo. K lepšímu výsledku vás dělí jedna dvě znalosti.`;
+  if (score <= 9) return `Nadprůměr, který stojí za řeč. Orientujete se v historii, vědě i kultuře a chytáky vás jen tak nerozhodí. Do plného počtu vám chybělo opravdu málo.`;
+  return `Plný počet bez zaváhání. Všech deset otázek napříč obory jste dali s přehledem, jaký se vidí zřídka. Klobouk dolů, tohle je špičková všeobecná paměť.`;
+}
+
+retryBtn.addEventListener(`click`, () => {
+  locked = false;
+  answers.fill(null);
+  resultEl.style.display = `none`;
+  hintEl.textContent = ``;
+  render();
+  updateEvalState();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+render();
+updateEvalState();
+</script>
+</body>
+</html>
