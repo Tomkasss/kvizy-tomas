@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Víte o světě opravdu všechno? Už na 1. otázce většina zaváhá</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 18px; color: #2c2c2c; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+.question-box {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.question-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; }
+.option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .15s ease;
+}
+.option:last-child { margin-bottom: 0; }
+.option:hover { background: #ede8e1; }
+.option.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.option.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.option.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.option:disabled { cursor: default; }
+#evaluate-btn, #retry-btn {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+#evaluate-btn { background: #5b7e5f; }
+#evaluate-btn:hover:not(:disabled) { background: #4a6b4e; }
+#evaluate-btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry-btn { background: #8c7b6b; }
+#retry-btn:hover { background: #756658; }
+.warning { text-align: center; color: #a0522d; margin-top: 14px; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+</style>
+</head>
+<body>
+<h1>Víte o světě opravdu všechno? Už na 1. otázce většina zaváhá</h1>
+<p class="perex">Deset otázek z historie, přírody, literatury i vědy prověří, jak široký máte rozhled. Některé odpovědi se zdají jasné, dokud nezačnete přemýšlet. Zvládnete dát víc než polovinu bodů?</p>
+
+<div id="quiz"></div>
+
+<button id="evaluate-btn" disabled>Vyhodnotit</button>
+<p class="warning" id="warning"></p>
+
+<div id="result" style="display:none;">
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="retry-btn">Zkusit znovu</button>
+</div>
+
+<script>
+const questions = [
+  {
+    q: `1. Jakou barvu mají ve skutečnosti letové zapisovače v dopravních letadlech, kterým se přezdívá černé skříňky?`,
+    options: [`oranžová`, `černá`, `stříbrná`, `tmavě modrá`],
+    correct: 0
+  },
+  {
+    q: `2. Kdo je autorem antiutopického románu 1984?`,
+    options: [`Aldous Huxley`, `Ray Bradbury`, `George Orwell`, `William Golding`],
+    correct: 2
+  },
+  {
+    q: `3. Kterým jazykem se jako úředním mluví v Brazílii?`,
+    options: [`portugalština`, `španělština`, `angličtina`, `francouzština`],
+    correct: 0
+  },
+  {
+    q: `4. Jak dlouho trvá, než světlo ze Slunce dorazí k Zemi?`,
+    options: [`1 sekundu`, `8 sekund`, `1 minutu`, `8 minut`],
+    correct: 3
+  },
+  {
+    q: `5. Který z těchto prvků má chemickou značku Fe?`,
+    options: [`fosfor`, `železo`, `fluor`, `měď`],
+    correct: 1
+  },
+  {
+    q: `6. Kolik krve má přibližně v těle dospělý člověk?`,
+    options: [`3 litry`, `12 litrů`, `5 litrů`, `8 litrů`],
+    correct: 2
+  },
+  {
+    q: `7. Kolik strun má klasická (španělská) kytara?`,
+    options: [`čtyři`, `osm`, `dvanáct`, `šest`],
+    correct: 3
+  },
+  {
+    q: `8. Kdo si roku 1876 nechal jako první patentovat telefon a je považován za jeho vynálezce?`,
+    options: [`Alexander Graham Bell`, `Guglielmo Marconi`, `Samuel Morse`, `Nikola Tesla`],
+    correct: 0
+  },
+  {
+    q: `9. Kolik chromozomů má běžná tělní buňka člověka?`,
+    options: [`23`, `46`, `44`, `48`],
+    correct: 1
+  },
+  {
+    q: `10. Kolik základních chutí rozeznává podle současné vědy lidský chuťový smysl?`,
+    options: [`tři`, `šest`, `čtyři`, `pět`],
+    correct: 3
+  }
+];
+
+const letters = [`a`, `b`, `c`, `d`];
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`evaluate-btn`);
+const warningEl = document.getElementById(`warning`);
+const resultEl = document.getElementById(`result`);
+const scoreEl = document.getElementById(`score`);
+const verdictEl = document.getElementById(`verdict`);
+const retryBtn = document.getElementById(`retry-btn`);
+
+function buildQuiz() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `question-box`;
+
+    const qt = document.createElement(`div`);
+    qt.className = `question-text`;
+    qt.textContent = item.q;
+    box.appendChild(qt);
+
+    item.options.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `option`;
+      btn.type = `button`;
+      btn.textContent = letters[oi] + `) ` + opt;
+      btn.dataset.qi = qi;
+      btn.dataset.oi = oi;
+      btn.addEventListener(`click`, function () {
+        if (locked) return;
+        answers[qi] = oi;
+        const siblings = box.querySelectorAll(`.option`);
+        siblings.forEach(s => s.classList.remove(`selected`));
+        btn.classList.add(`selected`);
+        updateEvalState();
+      });
+      box.appendChild(btn);
+    });
+
+    quizEl.appendChild(box);
+  });
+}
+
+function updateEvalState() {
+  const allAnswered = answers.every(a => a !== null);
+  evalBtn.disabled = !allAnswered;
+  if (allAnswered) warningEl.textContent = ``;
+}
+
+function verdictText(score) {
+  if (score <= 3) return `Svět se vám zatím skládá jen z několika známých střípků. Řada otázek mířila do oborů, které míjíte, a jistota chyběla. Projděte si správné odpovědi, příště se odrazíte výš.`;
+  if (score <= 6) return `Slušný základ ze školy i z běžného života ve vás zůstal. Poznáte hodně, ale u záludnějších otázek, kde se dvě možnosti nabízely stejně, jistota kolísá. Do širokého rozhledu vám chybí už jen kousek.`;
+  if (score <= 9) return `Výborně. Napříč historií, přírodou i uměním se orientujete s přehledem a nachytala vás nanejvýš jedna zdánlivě jasná otázka. Skvělý výsledek.`;
+  return `Naprostá špička. Od vesmíru přes vědu a dějiny až po umění jste nezaváhali ani jednou. Plný počet v tak různorodém kvízu nasbírá opravdu jen zlomek lidí a vy mezi ně patříte.`;
+}
+
+evalBtn.addEventListener(`click`, function () {
+  if (evalBtn.disabled) {
+    warningEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.question-box`);
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll(`.option`);
+    const chosen = answers[qi];
+    const correct = questions[qi].correct;
+    if (chosen === correct) score++;
+    opts.forEach((btn, oi) => {
+      btn.disabled = true;
+      btn.classList.remove(`selected`);
+      if (oi === correct) btn.classList.add(`correct`);
+      else if (oi === chosen) btn.classList.add(`wrong`);
+    });
+  });
+  evalBtn.style.display = `none`;
+  warningEl.textContent = ``;
+  scoreEl.textContent = score + ` z ` + questions.length;
+  verdictEl.textContent = verdictText(score);
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+retryBtn.addEventListener(`click`, function () {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  buildQuiz();
+  resultEl.style.display = `none`;
+  evalBtn.style.display = `block`;
+  evalBtn.disabled = true;
+  warningEl.textContent = ``;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+buildQuiz();
+</script>
+</body>
+</html>
