@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Školní kvíz pro každého: odpovězte na 10 otázek a já uhodnu, co jste vystudovali</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 24px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 18px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .opt:disabled { cursor: default; }
+  #evalBtn {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #evalBtn:hover { background: #4a6b4e; }
+  #evalBtn:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #warn { text-align: center; color: #a94442; margin-top: 14px; min-height: 1.2em; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+    display: none;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #retryBtn {
+    display: block;
+    margin: 28px auto 0;
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #retryBtn:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Školní kvíz pro každého: odpovězte na 10 otázek a já uhodnu, co jste vystudovali</h1>
+  <p class="perex">Deset otázek napříč školními předměty, od dějepisu a fyziky přes hudbu, přírodopis a češtinu až po umění, chemii, literaturu i zeměpis. Začínáme lehce a ke konci to pořádně přituhne. Podle počtu bodů vám tipnu, jakou úroveň vzdělání máte za sebou.</p>
+  <div id="quiz"></div>
+  <button id="evalBtn" disabled>Vyhodnotit</button>
+  <div id="warn"></div>
+  <div id="result">
+    <p id="score"></p>
+    <p id="verdict"></p>
+    <button id="retryBtn">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+  const questions = [
+    { q: `1. Která pandemie zahubila v letech 1347 až 1351 odhadem třetinu obyvatel Evropy?`,
+      opts: [`španělská chřipka`, `černá smrt`, `Justiniánský mor`, `cholera`], correct: 1 },
+    { q: `2. V jaké jednotce se udává elektrický proud?`,
+      opts: [`volt`, `ohm`, `ampér`, `watt`], correct: 2 },
+    { q: `3. Kolik kláves má standardní moderní klavír?`,
+      opts: [`88`, `76`, `61`, `96`], correct: 0 },
+    { q: `4. Jak se nazývá buněčné dělení, při kterém vznikají pohlavní buňky s polovičním počtem chromozomů?`,
+      opts: [`mitóza`, `meióza`, `osmóza`, `fotosyntéza`], correct: 1 },
+    { q: `5. Na jak dlouho jsou v České republice voleni senátoři?`,
+      opts: [`na 4 roky`, `na 5 let`, `na 8 let`, `na 6 let`], correct: 3 },
+    { q: `6. Který stavební sloh poznáme podle mohutných zdí, malých oken a půlkruhových oblouků?`,
+      opts: [`gotika`, `baroko`, `románský sloh`, `secese`], correct: 2 },
+    { q: `7. Jak se nazývá jazykovědná disciplína, která zkoumá slovní zásobu jazyka?`,
+      opts: [`lexikologie`, `morfologie`, `syntax`, `fonetika`], correct: 0 },
+    { q: `8. Jaká je chemická značka hořčíku?`,
+      opts: [`Hg`, `Mg`, `Mn`, `Hř`], correct: 1 },
+    { q: `9. Kdo je autorem románu Nana?`,
+      opts: [`Honoré de Balzac`, `Gustave Flaubert`, `Guy de Maupassant`, `Émile Zola`], correct: 3 },
+    { q: `10. Která poušť je na Zemi nejsušší?`,
+      opts: [`Sahara`, `Gobi`, `Atacama`, `Kalahari`], correct: 2 }
+  ];
+
+  const letters = [`a`, `b`, `c`, `d`];
+  const answers = new Array(questions.length).fill(null);
+  let locked = false;
+
+  const quizEl = document.getElementById(`quiz`);
+  const evalBtn = document.getElementById(`evalBtn`);
+  const warnEl = document.getElementById(`warn`);
+  const resultEl = document.getElementById(`result`);
+  const scoreEl = document.getElementById(`score`);
+  const verdictEl = document.getElementById(`verdict`);
+  const retryBtn = document.getElementById(`retryBtn`);
+
+  function render() {
+    quizEl.innerHTML = ``;
+    questions.forEach((item, qi) => {
+      const box = document.createElement(`div`);
+      box.className = `q`;
+      const qt = document.createElement(`div`);
+      qt.className = `q-text`;
+      qt.textContent = item.q;
+      box.appendChild(qt);
+      item.opts.forEach((opt, oi) => {
+        const b = document.createElement(`button`);
+        b.className = `opt`;
+        b.textContent = letters[oi] + `) ` + opt;
+        if (answers[qi] === oi) b.classList.add(`selected`);
+        b.addEventListener(`click`, () => {
+          if (locked) return;
+          answers[qi] = oi;
+          render();
+          updateEvalBtn();
+        });
+        box.appendChild(b);
+      });
+      quizEl.appendChild(box);
+    });
+  }
+
+  function updateEvalBtn() {
+    const allDone = answers.every(a => a !== null);
+    evalBtn.disabled = !allDone;
+    if (allDone) warnEl.textContent = ``;
+  }
+
+  function evaluate() {
+    if (answers.some(a => a === null)) {
+      warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+      return;
+    }
+    locked = true;
+    let score = 0;
+    const boxes = quizEl.querySelectorAll(`.q`);
+    boxes.forEach((box, qi) => {
+      const opts = box.querySelectorAll(`.opt`);
+      opts.forEach((b, oi) => {
+        b.disabled = true;
+        b.classList.remove(`selected`);
+        if (oi === questions[qi].correct) b.classList.add(`correct`);
+        else if (answers[qi] === oi) b.classList.add(`wrong`);
+      });
+      if (answers[qi] === questions[qi].correct) score++;
+    });
+    evalBtn.disabled = true;
+    scoreEl.textContent = score + ` z ` + questions.length;
+    verdictEl.textContent = verdictFor(score);
+    resultEl.style.display = `block`;
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function verdictFor(s) {
+    if (s <= 3) return `Tohle je úroveň základní školy a upřímně, i tam jste možná víc koukali z okna než na tabuli. Rozjezdové otázky se daly dát skoro poslepu, přesto se body nesešly. Zvon na konci hodiny vás vždycky zajímal víc než učivo, ale nezoufejte, na doučování nikdy není pozdě.`;
+    if (s <= 6) return `Solidní středoškolský přehled, maturitní úroveň. Základ z většiny předmětů máte pevně zažitý a lehčí a středně těžké otázky jste zvládli, jenže u těch nejtvrdších detailů z dějin, chemie a jazykovědy jistota kolísá. Vysvědčení bez trojek, ale taky bez rudého podtržení.`;
+    if (s <= 9) return `Vysokoškolská úroveň všeobecného rozhledu. Orientujete se napříč obory mnohem líp než většina lidí a nachytat vás jde jen na těch úplně nejzáludnějších otázkách. Diplom byste za tenhle výkon dostali, k plnému počtu chybělo opravdu málo.`;
+    return `Erudice akademika, ne-li rovnou polyhistora. Deset z deseti napříč deseti předměty, kde poslední otázky srazí drtivou většinu, dá jen nepatrný zlomek lidí. Tohle není náhoda ani štěstí při tipování, ale rozhled, se kterým můžete klidně učit vy ostatní. Smekáme.`;
+  }
+
+  function reset() {
+    for (let i = 0; i < answers.length; i++) answers[i] = null;
+    locked = false;
+    resultEl.style.display = `none`;
+    warnEl.textContent = ``;
+    evalBtn.disabled = true;
+    render();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evalBtn.addEventListener(`click`, evaluate);
+  retryBtn.addEventListener(`click`, reset);
+  render();
+</script>
+</body>
+</html>
