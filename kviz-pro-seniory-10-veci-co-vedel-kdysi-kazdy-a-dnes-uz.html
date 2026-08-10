@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro seniory: 10 věcí, co věděl kdysi každý, a dnes už skoro nikdo</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  max-width: 720px;
+  margin: 0 auto;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  padding: 24px;
+  line-height: 1.5;
+}
+h1 { font-size: 1.7rem; line-height: 1.25; color: #2c2c2c; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin-bottom: 8px; }
+.question {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+.option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.option:last-child { margin-bottom: 0; }
+.option:hover { background: #ede8e1; }
+.option.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.option.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.option.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.option:disabled { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hint { text-align: center; color: #8a6d3b; margin-top: 12px; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+  display: none;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 24px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#retry:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  .question { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<h1>Kvíz pro seniory: 10 věcí, co věděl kdysi každý, a dnes už skoro nikdo</h1>
+<p class="perex">Staré míry, práce na poli i fígle babiček z domácnosti bez pračky a ledničky. Deset otázek na věci, které kdysi znal na vsi opravdu každý a nad kterými dnešní mladí jen krčí rameny. Kolik z nich udržíte v paměti ještě vy?</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="hint" id="hint"></p>
+<div id="result">
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="retry">Zkusit znovu</button>
+</div>
+<script>
+const questions = [
+  { q: `Jak byla vymezena stará délková míra jedna píď?`, options: [`rozpětím mezi palcem a malíkem roztažené dlaně`, `délkou lidského chodidla`, `vzdáleností od lokte ke konečkům prstů`, `šířkou dlaně sevřené v pěst`], correct: 0 },
+  { q: `Jak velkou plochu měla zhruba stará polní míra jedno jitro?`, options: [`čtvrt hektaru`, `zhruba půl hektaru`, `celý hektar`, `dva hektary`], correct: 1 },
+  { q: `Jak se říkalo tekutině, která v máselnici zbyla poté, co se z ní stlučením oddělilo máslo?`, options: [`podmáslí`, `syrovátka`, `smetana`, `sladina`], correct: 0 },
+  { q: `Co měl hospodář na mysli, když mluvil o otavě?`, options: [`první jarní senoseč`, `obilí ponechané na poli přes zimu`, `druhou seč trávy sklizenou v témže roce`, `slámu zbylou po výmlatu`], correct: 2 },
+  { q: `Jak se nazývala slavnost, kterou se na vsi zakončovaly žně?`, options: [`přástky`, `dožínky`, `posvícení`, `ostatky`], correct: 1 },
+  { q: `Kterou světovou stranu čeština kdysi označovala slovem poledne?`, options: [`východ`, `západ`, `sever`, `jih`], correct: 3 },
+  { q: `Co znamenal ve světě předení pojem přadeno?`, options: [`svazek nevochlovaného lnu připravený k předení`, `dřevěný kříž, na který se příze při soukání navíjela`, `ustálenou míru příze smotané do jednoho svazku`, `hliněné závaží, jímž se zatěžovalo vřeteno`], correct: 2 },
+  { q: `Co se přidávalo do poslední máchací vody, aby zežloutlé bílé prádlo znovu zářilo bělobou?`, options: [`šmolka`, `dřevěný popel`, `ocet`, `jedlá soda`], correct: 0 },
+  { q: `Z kůry kterého stromu se loupalo lýko na vázání a pletení ošatek?`, options: [`z dubu`, `z břízy`, `z lípy`, `z olše`], correct: 2 },
+  { q: `Kterou bylinu si lidé cestou přikládali na drobné ranky a bodnutí hmyzem?`, options: [`kopřivu`, `heřmánek`, `mátu`, `jitrocel`], correct: 3 }
+];
+
+const verdicts = [
+  { min: 0, max: 3, text: `Pár střípků ještě drží, ale většina těch starých slov a měr už u vás zapadla prachem. Nevadí, právě proto stojí za to si je připomenout a vyprávět je dál, ať docela nezmizí.` },
+  { min: 4, max: 6, text: `Slušná porce vesnické paměti. Něco vám zůstalo z vyprávění babiček, něco ze školních lavic. Pevně stojíte nohama v obou světech, ve starém i tom dnešním.` },
+  { min: 7, max: 9, text: `Klobouk dolů. Jitro, podmáslí i přadeno vám nejsou cizí a máte v hlavě víc než dost z časů, kdy se hospodařilo bez elektřiny a lednička nahrazovala studnou. Škoda každé z těch pár chybek.` },
+  { min: 10, max: 10, text: `Naprostá dokonalost. Vy jste ta chodící kronika, po jaké se dnes musí pátrat s lupou. Tohle vědění si zaslouží předat vnoučatům, dřív než po něm zůstane jen prázdné místo.` }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+const scoreEl = document.getElementById(`score`);
+const verdictEl = document.getElementById(`verdict`);
+const retryBtn = document.getElementById(`retry`);
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `question`;
+    const qt = document.createElement(`div`);
+    qt.className = `qtext`;
+    qt.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    item.options.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `option`;
+      btn.textContent = opt;
+      if (answers[qi] === oi) btn.classList.add(`selected`);
+      btn.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        render();
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  const allAnswered = answers.every(a => a !== null);
+  submitBtn.disabled = !allAnswered;
+  if (allAnswered) hintEl.textContent = ``;
+}
+
+submitBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.question`);
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll(`.option`);
+    opts.forEach((btn, oi) => {
+      btn.disabled = true;
+      if (oi === questions[qi].correct) btn.classList.add(`correct`);
+      else if (oi === answers[qi]) btn.classList.add(`wrong`);
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  scoreEl.textContent = score + ` z ` + questions.length;
+  const v = verdicts.find(x => score >= x.min && score <= x.max);
+  verdictEl.textContent = v ? v.text : ``;
+  submitBtn.style.display = `none`;
+  hintEl.textContent = ``;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+});
+
+retryBtn.addEventListener(`click`, () => {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  resultEl.style.display = `none`;
+  submitBtn.style.display = `block`;
+  submitBtn.disabled = true;
+  hintEl.textContent = ``;
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+render();
+</script>
+</body>
+</html>
