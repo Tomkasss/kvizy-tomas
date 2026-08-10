@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz přísloví pro seniory: kdo doplní druhou půlku všech 10, mluví jako naše babičky</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 24px 16px;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.8rem; line-height: 1.25; margin: 0 0 18px; color: #2c2c2c; }
+.perex { font-size: 1.1rem; margin: 0 0 28px; color: #4a4a4a; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+.open-input {
+  width: 100%;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1rem;
+  color: #3a3a3a;
+}
+.open-input:focus { outline: none; border: 1px solid #a89e92; background: #fff; }
+.open-input:disabled { cursor: default; }
+.open-input.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.open-input.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.solution { margin-top: 12px; font-size: 1rem; color: #1e5631; display: none; }
+.solution .full { font-style: italic; }
+#submit {
+  display: block;
+  margin: 40px auto 0;
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hint { text-align: center; color: #a05050; margin-top: 12px; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+  display: none;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+#retry {
+  display: block;
+  margin: 24px auto 0;
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+#retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1></h1>
+<p class="perex"></p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<div class="hint" id="hint"></div>
+<div id="result">
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const TITLE = `Kvíz přísloví pro seniory: kdo doplní druhou půlku všech 10, mluví jako naše babičky`;
+const PEREX = `Naše babičky měly přísloví na všechno a nikdy je nenechaly viset v půli. Ukážeme vám deset začátků, vy dopište druhou půlku tak, jak se to odjakživa říká. Kdo trefí všech deset, mluví jako naše babičky.`;
+const QUESTIONS = [
+  { first: `Kovářova kobyla ...`, canonical: `chodí bosa`,
+    accepted: [`chodí bosa`, `chodíva bosa`, `bosa chodí`] },
+  { first: `Co se v mládí naučíš, ...`, canonical: `ve stáří jako když najdeš`,
+    accepted: [`ve stáří jako když najdeš`, `ve stáří jako bys našel`, `na stáří jako když najdeš`, `ve stáří jak když najdeš`] },
+  { first: `Kdo chce kam, ...`, canonical: `pomozme mu tam`,
+    accepted: [`pomozme mu tam`, `pomožme mu tam`] },
+  { first: `Tak dlouho se chodí se džbánem pro vodu, ...`, canonical: `až se ucho utrhne`,
+    accepted: [`až se ucho utrhne`, `až se utrhne ucho`, `až se ucho urve`, `až se ucho jednou utrhne`] },
+  { first: `Kdo chce s vlky žíti, ...`, canonical: `musí s nimi výti`,
+    accepted: [`musí s nimi výti`, `musí s nimi výt`, `s nimi musí výti`, `musí s nimi výt i`] },
+  { first: `Kam nechodí slunce, ...`, canonical: `tam chodí lékař`,
+    accepted: [`tam chodí lékař`, `chodí lékař`, `tam musí lékař`, `musí lékař`] },
+  { first: `Chytrému napověz, ...`, canonical: `hloupého trkni`,
+    accepted: [`hloupého trkni`, `hloupého kopni`, `hloupému trkni`] },
+  { first: `Komu není rady, ...`, canonical: `tomu není pomoci`,
+    accepted: [`tomu není pomoci`, `tomu není pomoc`] },
+  { first: `Devatero řemesel, ...`, canonical: `desátá bída`,
+    accepted: [`desátá bída`, `a desátá bída`, `desátá je bída`] },
+  { first: `Mnoho psů, ...`, canonical: `zajícova smrt`,
+    accepted: [`zajícova smrt`, `smrt zajícova`, `zajícova je smrt`] }
+];
+const RANGES = [
+  { min: 0, max: 3, text: `Přísloví vám vyklouzla z paměti a druhé půlky se rozutekly. Nevadí, jsou to poklady, které se vrací, jakmile je znovu slyšíte od svých vnoučat. Zkuste si je párkrát nahlas zopakovat a příště vám naskočí samy.` },
+  { min: 4, max: 6, text: `Slušný základ lidové moudrosti máte pevně zažitý. Ta nejomílanější přísloví doplníte bez zaváhání, u těch méně častých vám ale konec ještě uniká. Máte k babiččině řeči blízko, jen pár pořekadel dobrousit.` },
+  { min: 7, max: 9, text: `Tohle už je řeč, kterou mluvily naše babičky. Přísloví ovládáte skoro do jednoho a poznáte i ta, co se dnes slýchají zřídka. Chybí vám k dokonalosti jen kousek, ta úplně nejzáludnější druhá půlka, jako mnoho psů nebo devatero řemesel.` },
+  { min: 10, max: 10, text: `Plný počet. Doplnil jste druhou půlku všech deseti přísloví přesně tak, jak se odjakživa říkají, včetně těch nejméně omílaných o mnoha psech i devateru řemesel. Mluvíte jako naše babičky, lidová moudrost je u vás v těch nejlepších rukou. Klobouk dolů.` }
+];
+
+function normalize(s) {
+  return s.toLowerCase()
+    .normalize(`NFD`).replace(/[̀-ͯ]/g, ``)
+    .replace(/[.,;!?…]/g, ` `)
+    .replace(/\s+/g, ` `)
+    .trim();
+}
+
+const answers = new Array(QUESTIONS.length).fill(``);
+let locked = false;
+
+document.querySelector(`h1`).textContent = TITLE;
+document.querySelector(`.perex`).textContent = PEREX;
+
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+
+function render() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const qt = document.createElement(`div`);
+    qt.className = `q-text`;
+    qt.textContent = (qi + 1) + `. ` + item.first;
+    box.appendChild(qt);
+    const input = document.createElement(`input`);
+    input.type = `text`;
+    input.className = `open-input`;
+    input.setAttribute(`placeholder`, `Doplňte druhou půlku`);
+    input.addEventListener(`input`, () => {
+      if (locked) return;
+      answers[qi] = input.value;
+      updateSubmit();
+    });
+    box.appendChild(input);
+    const sol = document.createElement(`div`);
+    sol.className = `solution`;
+    box.appendChild(sol);
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  const all = answers.every(a => a.trim() !== ``);
+  submitBtn.disabled = !all;
+  if (all) hintEl.textContent = ``;
+}
+
+submitBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a.trim() === ``)) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  boxes.forEach((box, qi) => {
+    const input = box.querySelector(`.open-input`);
+    const sol = box.querySelector(`.solution`);
+    input.disabled = true;
+    const ok = QUESTIONS[qi].accepted.some(a => normalize(a) === normalize(answers[qi]));
+    if (ok) {
+      input.classList.add(`correct`);
+      score++;
+    } else {
+      input.classList.add(`wrong`);
+    }
+    sol.style.display = `block`;
+    sol.innerHTML = `Správně: <span class="full">` + QUESTIONS[qi].first.replace(` ...`, ``) + ` ` + QUESTIONS[qi].canonical + `</span>`;
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + QUESTIONS.length;
+  const r = RANGES.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`verdict`).textContent = r ? r.text : ``;
+  submitBtn.style.display = `none`;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+});
+
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = ``;
+  render();
+  submitBtn.style.display = `block`;
+  submitBtn.disabled = true;
+  resultEl.style.display = `none`;
+  hintEl.textContent = ``;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+render();
+</script>
+</body>
+</html>
