@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz: 10 zapomenutých povolání: kdo pozná 8, je už pořádně starý</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 24px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 18px; }
+  .perex { font-size: 1.1rem; margin: 0 0 28px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 16px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .opt:disabled { cursor: default; }
+  #submitBtn {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #submitBtn:hover { background: #4a6b4e; }
+  #submitBtn:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint { text-align: center; color: #8a7f72; margin: 12px 0 0; min-height: 1.2em; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+    display: none;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #retryBtn {
+    display: block;
+    margin: 28px auto 0;
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #retryBtn:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz: 10 zapomenutých povolání: kdo pozná 8, je už pořádně starý</h1>
+  <p class="perex">Kdysi měl každý kout své mistry, jejichž jména dnes zůstala nejvýš v příjmeních a muzejních vitrínách. Deset otázek na dávno zaniklá povolání. Poznáte, čím se ti lidé doopravdy živili, nebo vás pár starých názvů splete?</p>
+  <div id="quiz"></div>
+  <button id="submitBtn" disabled>Vyhodnotit</button>
+  <p class="hint" id="hint"></p>
+  <div id="result">
+    <div id="score"></div>
+    <p id="verdict"></p>
+    <button id="retryBtn">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+const questions = [
+  { q: `1. Čím se živil forman?`,
+    opts: [`a) dálkově přepravoval zboží obchodníků na těžkých koňských povozech`, `b) rozvážel poštu a cestující v dostavníku mezi poštovními stanicemi`, `c) na zemských stezkách vybíral od pocestných mýto a clo`, `d) staral se o koně a povozy v panské konírně`], correct: 0 },
+  { q: `2. Čím se živil ouklejník?`,
+    opts: [`a) lovil drobné říční rybky oukleje a jejich stříbřité šupiny dodával na výrobu umělých perel`, `b) chytal na řekách ryby a sádkoval je pro panskou kuchyni`, `c) z otavských škeblí vybíral pravé říční perly pro šperkaře`, `d) vyhrabával z rybníků a náhonů bahno a udržoval jejich hráze`], correct: 0 },
+  { q: `3. Z čeho zhotovoval nádobí konvář?`,
+    opts: [`a) z tepané mědi`, `b) z cínu`, `c) z pálené hlíny`, `d) z kovaného železa`], correct: 1 },
+  { q: `4. Jak šindelář zhotovoval kvalitní dřevěné šindele?`,
+    opts: [`a) odléval je z rozehřáté smoly do forem`, `b) lisoval je z namočených dřevěných třísek`, `c) řezal je pilou na tenké destičky`, `d) štípal je pořízem ze špalků podél dřevních vláken`], correct: 3 },
+  { q: `5. Jak si flašinetář vydělával na živobytí?`,
+    opts: [`a) opravoval a ladil kostelní varhany`, `b) za drobné hrál lidem na ulici na kolovrátek`, `c) vyráběl a prodával dřevěné píšťaly a fujary`, `d) na jarmarcích vyvolával novinky a dražby`], correct: 1 },
+  { q: `6. Čím se zabýval postřihač?`,
+    opts: [`a) stříhal a holil vlasy a vousy zákazníkům`, `b) přistřihával ovcím vlnu před předením`, `c) obřími nůžkami zastřihával vyčnívající vlas z hotového sukna`, `d) přistřihával stromky a keře v panských sadech`], correct: 2 },
+  { q: `7. Co bylo řemeslem dehtaře?`,
+    opts: [`a) v lesní peci vyháněl ze dřeva dehet a smolu k impregnaci`, `b) z naříznutých borovic sbíral pryskyřici na kalafunu a terpentýn`, `c) v peci vypaloval z vápence nehašené vápno`, `d) tavil ze sklářského písku a popela syrové sklo`], correct: 0 },
+  { q: `8. Jaká práce patřila panskému drábovi?`,
+    opts: [`a) vedl panské účty a vybíral desátky a daně`, `b) v panské kuchyni řídil čeleď a zásoby`, `c) staral se o panské koně a lovecké psy`, `d) naháněl poddané na robotu a dohlížel na jejich práci`], correct: 3 },
+  { q: `9. Co bylo řemeslem flusaře?`,
+    opts: [`a) v huti tavil z rudy surové železo`, `b) z dřevěného popela vyluhoval a vyvařoval potaš pro skláře a mydláře`, `c) z lůje a popela vařil mýdlo a svíčky`, `d) ze slámy a hadrů vařil papírovinu`], correct: 1 },
+  { q: `10. Co vyráběl prýmkař?`,
+    opts: [`a) krajky paličkované z lněných nití`, `b) provazy a motouzy stáčené z konopí`, `c) ozdobné lemovky, střapce a třásně našívané na oděvy a nábytek`, `d) stuhy a pentle tkané z hedvábí`], correct: 2 }
+];
+
+const verdicts = [
+  { min: 0, max: 3, text: `Svět zaniklých řemesel vám zůstal skrytý. Většina těch profesí vymizela dávno a jejich názvy dnes znějí jako cizí řeč. Nevadí, aspoň teď víte, čím se protloukali naši předci.` },
+  { min: 4, max: 6, text: `Slušný průměr. Pár starých povolání jste odhalili a tušíte, jak se kdysi žilo a pracovalo, ale u méně známých názvů jste tápali mezi podobnými řemesly. K pravému pamětníkovi vám ještě kousek chybí.` },
+  { min: 7, max: 9, text: `Výborně. Kdo dal aspoň osm, ten se ve světě starých řemesel vyzná jako málokdo a nese v hlavě pořádný kus zapomenutého světa. Tak dobrý přehled o zaniklých profesích mívají opravdu jen pamětníci starých časů.` },
+  { min: 10, max: 10, text: `Klobouk dolů, mistře. Plný počet zvládne jen hrstka. Rozeznáte flusaře od dehtaře a drába od formana, jako byste mezi nimi sám žil. Staré řemeslo ve vás dýchá dál a jeho paměť předáváte dnešnímu světu.` }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById('quiz');
+const submitBtn = document.getElementById('submitBtn');
+const hintEl = document.getElementById('hint');
+const resultEl = document.getElementById('result');
+const scoreEl = document.getElementById('score');
+const verdictEl = document.getElementById('verdict');
+const retryBtn = document.getElementById('retryBtn');
+
+function render() {
+  quizEl.innerHTML = '';
+  questions.forEach((item, qi) => {
+    const box = document.createElement('div');
+    box.className = 'q';
+    const qt = document.createElement('p');
+    qt.className = 'q-text';
+    qt.textContent = item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = opt;
+      if (answers[qi] === oi) btn.classList.add('selected');
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        answers[qi] = oi;
+        render();
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    box.dataset.qi = qi;
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  const allAnswered = answers.every(a => a !== null);
+  submitBtn.disabled = !allAnswered;
+  hintEl.textContent = '';
+}
+
+function evaluate() {
+  if (!answers.every(a => a !== null)) {
+    hintEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll('.q');
+  boxes.forEach((box, qi) => {
+    const btns = box.querySelectorAll('.opt');
+    btns.forEach((btn, oi) => {
+      btn.disabled = true;
+      btn.classList.remove('selected');
+      if (oi === questions[qi].correct) btn.classList.add('correct');
+      else if (answers[qi] === oi) btn.classList.add('wrong');
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  scoreEl.textContent = score + ' z ' + questions.length;
+  const v = verdicts.find(x => score >= x.min && score <= x.max);
+  verdictEl.textContent = v ? v.text : '';
+  submitBtn.style.display = 'none';
+  hintEl.textContent = '';
+  resultEl.style.display = 'block';
+  resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function reset() {
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  locked = false;
+  resultEl.style.display = 'none';
+  submitBtn.style.display = 'block';
+  submitBtn.disabled = true;
+  hintEl.textContent = '';
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+submitBtn.addEventListener('click', evaluate);
+retryBtn.addEventListener('click', reset);
+render();
+</script>
+</body>
+</html>
