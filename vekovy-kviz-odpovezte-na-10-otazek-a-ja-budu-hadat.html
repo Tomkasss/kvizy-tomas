@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Věkový kvíz: odpovězte na 10 otázek a já budu hádat, jestli vám je spíš 20, 40, 50 nebo 70</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  max-width: 720px;
+  margin: 0 auto;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  padding: 24px;
+  line-height: 1.5;
+}
+h1 { font-size: 1.7rem; line-height: 1.25; color: #2c2c2c; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin-bottom: 8px; }
+.question {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+.option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.option:last-child { margin-bottom: 0; }
+.option:hover { background: #ede8e1; }
+.option.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.option.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.option.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.option:disabled { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hint { text-align: center; color: #8a6d3b; margin-top: 12px; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+  display: none;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 24px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#retry:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  .question { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<h1>Věkový kvíz: odpovězte na 10 otázek a já budu hádat, jestli vám je spíš 20, 40, 50 nebo 70</h1>
+<p class="perex">Značky, sladkosti, pořady i všední zvyky ze socialistického Československa v deseti otázkách. Čím víc jich poznáte, tím jasnější obrázek. Na konci podle skóre odhadnu, jestli je vám spíš dvacet, čtyřicet, padesát, nebo sedmdesát.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="hint" id="hint"></p>
+<div id="result">
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="retry">Zkusit znovu</button>
+</div>
+<script>
+const questions = [
+  { q: `Který automobil byl za socialismu nejrozšířenějším osobním vozem v československých domácnostech?`, options: [`Wartburg 353`, `Trabant 601`, `Tatra 613`, `Škoda 120`], correct: 3 },
+  { q: `Který časopis je nejstarším dosud vycházejícím českým časopisem pro děti?`, options: [`Mateřídouška`, `Sluníčko`, `ABC`, `Ohníček`], correct: 0 },
+  { q: `Ve kterém roce se změnil oficiální název státu na Československou socialistickou republiku (ČSSR)?`, options: [`1948`, `1953`, `1960`, `1968`], correct: 2 },
+  { q: `Co je Fidorka?`, options: [`kulatá oplatka polévaná čokoládou`, `tvrdý ovocný bonbon`, `kávová tyčinka`, `dutá čokoládová figurka`], correct: 0 },
+  { q: `Čím se ve světě proslavil oděvní podnik OP Prostějov?`, options: [`pracovními montérkami`, `pánskými obleky`, `dámskými plavkami`, `kojeneckým oblečením`], correct: 1 },
+  { q: `Který den slavilo socialistické Československo jako Den osvobození, hlavní státní svátek konce druhé světové války?`, options: [`5. května`, `8. května`, `9. května`, `12. května`], correct: 2 },
+  { q: `V jaké atletické disciplíně získala Dana Zátopková zlato na olympiádě v Helsinkách roku 1952?`, options: [`hod oštěpem`, `skok do výšky`, `běh na 800 metrů`, `vrh koulí`], correct: 0 },
+  { q: `Na jaký účel putoval výtěžek z televizní loterie Matesa, celým názvem Malé televizní sázení?`, options: [`na sport a tělovýchovu`, `na dětské domovy`, `na obnovu kulturních památek`, `na výstavbu sídlišť`], correct: 2 },
+  { q: `Jak se za socialismu oficiálně nazýval sbor uniformovaných strážců pořádku, jehož hlídky dohlížely na klid v ulicích i na silniční provoz?`, options: [`Pohraniční stráž`, `Hradní stráž`, `Lidové milice`, `Veřejná bezpečnost`], correct: 3 },
+  { q: `Co byl Vitacit, po kterém dětem barvěl jazyk?`, options: [`ovocný sirup do vody`, `ovocná limonáda v prášku`, `tvrdé ovocné bonbony`, `šumivá vitaminová tableta`], correct: 1 }
+];
+
+const verdicts = [
+  { min: 0, max: 3, text: `Tipuju vám tak kolem dvacítky. Socialistické Československo pro vás není vzpomínka, ale učebnice dějepisu. Značky, pořady i zvyky z té doby znáte leda z vyprávění a většina otázek vám přišla jako z jiného světa. A přesně tak to má u nejmladší generace vypadat.` },
+  { min: 4, max: 6, text: `Řekl bych, že je vám zhruba čtyřicet. Něco vám naskočilo samo, u zbytku jste tápali. Kus té éry jste ještě jako dítě zahlédli nebo znáte z rodinných historek, ale všední život v ČSSR jste na vlastní kůži nezažili. Typický výsledek středního ročníku.` },
+  { min: 7, max: 9, text: `Podle skóre vám bude kolem padesáti. Dobové reálie máte srovnané, sladkosti, pořady i drobnosti všedního dne vám nejsou cizí a k plnému počtu chybělo jen pár detailů, které si dnes vybaví málokdo. Tohle už mladší nedají.` },
+  { min: 10, max: 10, text: `Plný počet, takže vám tipuju sedmdesát nebo víc. Tohle jste nezískali čtením, ale tím, že jste to všechno prožili na vlastní kůži, od limonády v prášku přes obleky z Prostějova až po nedělní televizní losování. Ostřílený pamětník, kterého nachytá málokdo.` }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+const scoreEl = document.getElementById(`score`);
+const verdictEl = document.getElementById(`verdict`);
+const retryBtn = document.getElementById(`retry`);
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `question`;
+    const qt = document.createElement(`div`);
+    qt.className = `qtext`;
+    qt.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    item.options.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `option`;
+      btn.textContent = opt;
+      if (answers[qi] === oi) btn.classList.add(`selected`);
+      btn.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        render();
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  const allAnswered = answers.every(a => a !== null);
+  submitBtn.disabled = !allAnswered;
+  if (allAnswered) hintEl.textContent = ``;
+}
+
+submitBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.question`);
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll(`.option`);
+    opts.forEach((btn, oi) => {
+      btn.disabled = true;
+      if (oi === questions[qi].correct) btn.classList.add(`correct`);
+      else if (oi === answers[qi]) btn.classList.add(`wrong`);
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  scoreEl.textContent = score + ` z ` + questions.length;
+  const v = verdicts.find(x => score >= x.min && score <= x.max);
+  verdictEl.textContent = v ? v.text : ``;
+  submitBtn.style.display = `none`;
+  hintEl.textContent = ``;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+});
+
+retryBtn.addEventListener(`click`, () => {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  resultEl.style.display = `none`;
+  submitBtn.style.display = `block`;
+  submitBtn.disabled = true;
+  hintEl.textContent = ``;
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+render();
+</script>
+</body>
+</html>
