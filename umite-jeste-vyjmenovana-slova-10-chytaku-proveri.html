@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Umíte ještě vyjmenovaná slova? 10 chytáků prověří, jak jste na tom s pravopisem</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 24px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 18px; }
+  .perex { font-size: 1.1rem; margin: 0 0 28px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 16px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .opt:disabled { cursor: default; }
+  #submitBtn {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #submitBtn:hover { background: #4a6b4e; }
+  #submitBtn:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint { text-align: center; color: #8a7f72; margin: 12px 0 0; min-height: 1.2em; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+    display: none;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #retryBtn {
+    display: block;
+    margin: 28px auto 0;
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #retryBtn:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Umíte ještě vyjmenovaná slova? 10 chytáků prověří, jak jste na tom s pravopisem</h1>
+  <p class="perex">Zdánlivě je to učivo druhé třídy, jenže právě u vyjmenovaných slov a jejich příbuzných dospělí chybují nejčastěji. Deset vět a dvojic, kde o správnosti rozhoduje jediné i nebo y. Poznáte, kam patří tvrdé a kam měkké?</p>
+  <div id="quiz"></div>
+  <button id="submitBtn" disabled>Vyhodnotit</button>
+  <p class="hint" id="hint"></p>
+  <div id="result">
+    <div id="score"></div>
+    <p id="verdict"></p>
+    <button id="retryBtn">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+const questions = [
+  { q: `1. Doplňte správné slovo: Na jaře začali ptáci ___ hnízda vysoko v korunách stromů.`,
+    opts: [`a) výt`, `b) vyt`, `c) vít`, `d) vit`], correct: 2 },
+  { q: `2. Doplňte správný tvar: Ráno se ___ studenou vodou a je hned svěží.`,
+    opts: [`a) myje`, `b) mýje`, `c) mije`, `d) míje`], correct: 0 },
+  { q: `3. Doplňte správné slovo: Nad hlavní lodí kostela se tyčila štíhlá ___ s malým zvonem.`,
+    opts: [`a) výška`, `b) vížka`, `c) víška`, `d) vyška`], correct: 1 },
+  { q: `4. Malá sova, jejíž houkání kdysi lidé pokládali za předzvěst neštěstí, se správně píše:`,
+    opts: [`a) syček`, `b) sícek`, `c) síček`, `d) sýček`], correct: 3 },
+  { q: `5. Ve které z těchto vět je pravopisná chyba?`,
+    opts: [`a) Pod jezem se točil nebezpečný vír.`, `b) V noci se z lesa ozval houkavý výr.`, `c) Strhl ho vír zábavy a na povinnosti docela zapomněl.`, `d) Celý svět mu tehdy připadal jako jeden veliký výr.`], correct: 3 },
+  { q: `6. Doplňte správné slovo: U výběhu se děti tlačily a se zájmem sledovaly, jak si ___ tlapkami oplachuje potravu v napajedle.`,
+    opts: [`a) mýval`, `b) míval`, `c) myval`, `d) mival`], correct: 0 },
+  { q: `7. Hořká bylina, ze které se odedávna vyrábí absint, se správně píše:`,
+    opts: [`a) peliněk`, `b) pelyněk`, `c) pelýněk`, `d) pelinek`], correct: 1 },
+  { q: `8. Doplňte správné slovo: Pevné vlákno z ___ pod kůrou lípy se dřív používalo k pletení košíků a rohoží.`,
+    opts: [`a) líčí`, `b) ličí`, `c) lýčí`, `d) lyčí`], correct: 2 },
+  { q: `9. Ve které z těchto vět je pravopisná chyba?`,
+    opts: [`a) Fanoušci po vítězném gólu vískali radostí.`, `b) Matka dítěti něžně vískala ve vlasech.`, `c) Opice trpělivě vískala svému mláděti v kožichu.`, `d) Sourozenci si o přestávce navzájem vískali ve vlasech.`], correct: 0 },
+  { q: `10. Doplňte správné slovo: Na hladině rybníka plavala černá ___ s bílou lysinou na čele.`,
+    opts: [`a) líska`, `b) lýska`, `c) liska`, `d) lyska`], correct: 3 }
+];
+
+const verdicts = [
+  { min: 0, max: 3, text: `Ve vyjmenovaných slovech a jejich příbuzných máte základní mezery. Tvrdé a měkké i vám splývá hlavně u dvojic, které se liší významem, a u méně obvyklých slov. Nic ztraceného, stačí si osvěžit pár řad vyjmenovaných slov a příště rozdíl uhlídáte.` },
+  { min: 4, max: 6, text: `Průměrný pisatel se pohybuje přesně tady. Běžná vyjmenovaná slova zvládáte, ale zákeřné významové dvojice a odvozeniny vás dokážou nachytat. Cit pro pravopis máte slušný, k jistotě vám schází doladit ta nejzrádnější slova.` },
+  { min: 7, max: 9, text: `Nadprůměrný pravopisný cit. Poradil jste si i s pastmi, na kterých hromadně chybují dospělí, a rozlišíte slova, jež se liší jediným písmenem. K plnému počtu vám scházel jen krůček u nejzáludnějších dvojic.` },
+  { min: 10, max: 10, text: `Pravopisný nadstandard a vzácnost. Bezpečně rozlišujete i ty nejméně obvyklé významové dvojice a méně známá vyjmenovaná slova. S pravopisem si hravě poradíte tam, kde většina dospělých tápe.` }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById('quiz');
+const submitBtn = document.getElementById('submitBtn');
+const hintEl = document.getElementById('hint');
+const resultEl = document.getElementById('result');
+const scoreEl = document.getElementById('score');
+const verdictEl = document.getElementById('verdict');
+const retryBtn = document.getElementById('retryBtn');
+
+function render() {
+  quizEl.innerHTML = '';
+  questions.forEach((item, qi) => {
+    const box = document.createElement('div');
+    box.className = 'q';
+    const qt = document.createElement('p');
+    qt.className = 'q-text';
+    qt.textContent = item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = opt;
+      if (answers[qi] === oi) btn.classList.add('selected');
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        answers[qi] = oi;
+        render();
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    box.dataset.qi = qi;
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  const allAnswered = answers.every(a => a !== null);
+  submitBtn.disabled = !allAnswered;
+  hintEl.textContent = '';
+}
+
+function evaluate() {
+  if (!answers.every(a => a !== null)) {
+    hintEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll('.q');
+  boxes.forEach((box, qi) => {
+    const btns = box.querySelectorAll('.opt');
+    btns.forEach((btn, oi) => {
+      btn.disabled = true;
+      btn.classList.remove('selected');
+      if (oi === questions[qi].correct) btn.classList.add('correct');
+      else if (answers[qi] === oi) btn.classList.add('wrong');
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  scoreEl.textContent = score + ' z ' + questions.length;
+  const v = verdicts.find(x => score >= x.min && score <= x.max);
+  verdictEl.textContent = v ? v.text : '';
+  submitBtn.style.display = 'none';
+  hintEl.textContent = '';
+  resultEl.style.display = 'block';
+  resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function reset() {
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  locked = false;
+  resultEl.style.display = 'none';
+  submitBtn.style.display = 'block';
+  submitBtn.disabled = true;
+  hintEl.textContent = '';
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+submitBtn.addEventListener('click', evaluate);
+retryBtn.addEventListener('click', reset);
+render();
+</script>
+</body>
+</html>
