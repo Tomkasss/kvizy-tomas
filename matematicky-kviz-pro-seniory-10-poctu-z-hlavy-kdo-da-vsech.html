@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matematický kvíz pro seniory: 10 počtů z hlavy. Kdo dá všech 10, počítá jako ve 30</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  max-width: 720px;
+  margin: 0 auto;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  padding: 24px;
+  line-height: 1.5;
+}
+h1 { font-size: 1.7rem; line-height: 1.25; color: #2c2c2c; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin-bottom: 8px; }
+.question {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+.answer-input {
+  width: 100%;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+}
+.answer-input:focus { outline: none; border: 1px solid #a89e92; background: #fff; }
+.answer-input.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.answer-input.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.answer-input:disabled { cursor: default; }
+.solution { margin-top: 10px; font-size: 1rem; color: #1e5631; display: none; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hint { text-align: center; color: #8a6d3b; margin-top: 12px; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+  display: none;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 24px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#retry:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  .question { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<h1>Matematický kvíz pro seniory: 10 počtů z hlavy. Kdo dá všech 10, počítá jako ve 30</h1>
+<p class="perex">Deset příkladů čistě z hlavy, žádná kalkulačka ani tužka. Násobení dvojciferných čísel, procenta z nekulatých základů, druhá mocnina i záludná řada. Kdo zvládne všech deset, počítá jako člověk v nejlepších počtářských letech. Jdete do toho?</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="hint" id="hint"></p>
+<div id="result">
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="retry">Zkusit znovu</button>
+</div>
+<script>
+const questions = [
+  { q: `Kolik je 15 % z 260?`, answers: [`39`] },
+  { q: `Kolik je 12 × 14?`, answers: [`168`] },
+  { q: `Kolik je 9 × 7 + 8 × 5?`, answers: [`103`] },
+  { q: `Kolik je 18 × 17?`, answers: [`306`] },
+  { q: `Kolik je 12 % z 350?`, answers: [`42`] },
+  { q: `Kolik je 13²?`, answers: [`169`] },
+  { q: `Jaké číslo pokračuje v řadě 4, 5, 9, 14, 23, 37?`, answers: [`60`] },
+  { q: `Kolik je 25 % z 244?`, answers: [`61`] },
+  { q: `Kolik je 18 % z 450?`, answers: [`81`] },
+  { q: `Kolik je 391 ÷ 17?`, answers: [`23`] }
+];
+
+const verdicts = [
+  { min: 0, max: 3, text: `Dnes čísla vzdorovala. Násobení přes dvě cifry a procenta z nekulatého základu vás zaskočila a mezivýsledky se v hlavě rozutekly. Vaše počtářská hlava teď pracuje zhruba jako v 70 letech. Nic ztraceného: počítání z hlavy je sval, který posílíte pár příklady denně.` },
+  { min: 4, max: 6, text: `Poctivý střed. Jednodušší příklady jste dali s jistotou, u řetězených operací a nekulatých procent jste zaváhali. Počítáte jako člověk kolem 55 až 60 let, základ je pevný a hlava spolehlivě pracuje. Kousek tréninku a posunete se o pásmo výš.` },
+  { min: 7, max: 9, text: `Výborný výkon. Dvojciferné násobení, procenta i druhé mocniny zvládáte zpaměti tam, kde většina okamžitě sahá po mobilu. Počítáte jako člověk kolem 40 až 45 let a jen drobné klopýtnutí vás dělí od plného počtu. Tahle hlava rozhodně nezahálí.` },
+  { min: 10, max: 10, text: `Naprostá špička. Deset příkladů z hlavy bez jediné chyby, od dvojciferného násobení přes procenta a mocninu až po záludnou řadu. Počítáte jako ve 30 a v přímém souboji byste přebili leckterého třicátníka s kalkulačkou v ruce. Tomuhle myšlení stáří opravdu nic neubralo.` }
+];
+
+const inputs = [];
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+const scoreEl = document.getElementById(`score`);
+const verdictEl = document.getElementById(`verdict`);
+const retryBtn = document.getElementById(`retry`);
+
+function normalize(s) {
+  return s.trim().toLowerCase().normalize(`NFD`).replace(/[̀-ͯ]/g, ``).replace(/\s+/g, ` `);
+}
+
+function render() {
+  quizEl.innerHTML = ``;
+  inputs.length = 0;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `question`;
+    const qt = document.createElement(`div`);
+    qt.className = `qtext`;
+    qt.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    const inp = document.createElement(`input`);
+    inp.type = `text`;
+    inp.className = `answer-input`;
+    inp.setAttribute(`inputmode`, `numeric`);
+    inp.setAttribute(`autocomplete`, `off`);
+    inp.addEventListener(`input`, updateSubmit);
+    box.appendChild(inp);
+    const sol = document.createElement(`div`);
+    sol.className = `solution`;
+    box.appendChild(sol);
+    inputs.push({ inp, sol });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  const allAnswered = inputs.every(x => x.inp.value.trim() !== ``);
+  submitBtn.disabled = !allAnswered;
+  if (allAnswered) hintEl.textContent = ``;
+}
+
+submitBtn.addEventListener(`click`, () => {
+  if (inputs.some(x => x.inp.value.trim() === ``)) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  inputs.forEach((x, qi) => {
+    x.inp.disabled = true;
+    const val = normalize(x.inp.value);
+    const ok = questions[qi].answers.some(a => normalize(a) === val);
+    if (ok) {
+      x.inp.classList.add(`correct`);
+      score++;
+    } else {
+      x.inp.classList.add(`wrong`);
+      x.sol.textContent = `Správně: ` + questions[qi].answers[0];
+      x.sol.style.display = `block`;
+    }
+  });
+  scoreEl.textContent = score + ` z ` + questions.length;
+  const v = verdicts.find(y => score >= y.min && score <= y.max);
+  verdictEl.textContent = v ? v.text : ``;
+  submitBtn.style.display = `none`;
+  hintEl.textContent = ``;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+});
+
+retryBtn.addEventListener(`click`, () => {
+  locked = false;
+  resultEl.style.display = `none`;
+  submitBtn.style.display = `block`;
+  submitBtn.disabled = true;
+  hintEl.textContent = ``;
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+render();
+</script>
+</body>
+</html>
