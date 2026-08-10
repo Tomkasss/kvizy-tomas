@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lehký kvíz pro seniory: kdo dá 8/10, tomu zůstala hlava svěží i po 60</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 24px 16px;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.8rem; line-height: 1.25; margin: 0 0 18px; color: #2c2c2c; }
+.perex { font-size: 1.1rem; margin: 0 0 28px; color: #4a4a4a; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1rem;
+  color: #3a3a3a;
+  cursor: pointer;
+  transition: background .15s;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+#submit {
+  display: block;
+  margin: 40px auto 0;
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hint { text-align: center; color: #a05050; margin-top: 12px; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+  display: none;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+#retry {
+  display: block;
+  margin: 24px auto 0;
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+#retry:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1></h1>
+<p class="perex"></p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<div class="hint" id="hint"></div>
+<div id="result">
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const TITLE = `Lehký kvíz pro seniory: kdo dá 8/10, tomu zůstala hlava svěží i po 60`;
+const PEREX = `Deset otázek z přírody, dějin, hudby, umění, jazyka i zeměpisu. U každé čtyři možnosti a jen jedna platí. Žádná rychlost ani chytáky, jen klidný rozhled. Kdo dá osm a víc, prokáže svěží hlavu. Pusťte se do toho v pohodě, milí senioři.`;
+const QUESTIONS = [
+  { q: `Do které skupiny živočichů patří rak říční?`,
+    options: [`ryby`, `korýši`, `měkkýši`, `hmyz`], correct: 1 },
+  { q: `Který vojevůdce překročil se svým vojskem řeku Rubikon a údajně přitom pronesl slova „Kostky jsou vrženy"?`,
+    options: [`Nero`, `Augustus`, `Hannibal`, `Julius Caesar`], correct: 3 },
+  { q: `Kdo je autorem dobrodružného románu Robinson Crusoe?`,
+    options: [`Daniel Defoe`, `Jonathan Swift`, `Jules Verne`, `Robert Louis Stevenson`], correct: 0 },
+  { q: `Ve které části lidského těla vzniká hlas?`,
+    options: [`v plicích`, `v jícnu`, `v hrtanu`, `v průdušnici`], correct: 2 },
+  { q: `Který skladatel je autorem serenády Malá noční hudba?`,
+    options: [`Ludwig van Beethoven`, `Johann Sebastian Bach`, `Joseph Haydn`, `Wolfgang Amadeus Mozart`], correct: 3 },
+  { q: `Jak se nazývají plody dubu?`,
+    options: [`bukvice`, `šišky`, `žaludy`, `kaštany`], correct: 2 },
+  { q: `Co na Zemi způsobuje pravidelné střídání přílivu a odlivu?`,
+    options: [`rotace Země kolem vlastní osy`, `gravitační působení Měsíce`, `teplé a studené mořské proudy`, `převládající větry nad oceány`], correct: 1 },
+  { q: `Který umělec je považován za nejvýznamnějšího představitele pop-artu?`,
+    options: [`Andy Warhol`, `Jackson Pollock`, `Salvador Dalí`, `Pablo Picasso`], correct: 0 },
+  { q: `Co znamená slovo renomé?`,
+    options: [`dobrá pověst, dobré jméno`, `písemná stížnost`, `slavnostní hostina`, `tajná dohoda`], correct: 0 },
+  { q: `Které velkoměsto se rozkládá na dvou kontinentech, v Evropě i Asii zároveň?`,
+    options: [`Athény`, `Káhira`, `Istanbul`, `Řím`], correct: 2 }
+];
+const RANGES = [
+  { min: 0, max: 3, text: `Dnešní forma vás možná trochu zradila, ale žádná tragédie. Otázky sahaly do spousty různých oborů a některé byly úmyslně chytřejší, než vypadaly. Vraťte se ke kvízu jindy v klidu a uvidíte, že to půjde líp.` },
+  { min: 4, max: 6, text: `Slušný průměr, řadu oborů máte pevně v hlavě a zaváhali jste jen u těžších otázek. Kousek vás dělí od osmičky, kterou slibuje titulek. Ještě dvě tři správné odpovědi navíc a jste za vodou.` },
+  { min: 7, max: 9, text: `Výborně, tohle je přesně ta svěží hlava i po šedesátce, kterou slibuje název kvízu. Osm a víc znamená, že vám myšlení slouží na jedničku a rozhled máte široký napříč obory. Klobouk dolů.` },
+  { min: 10, max: 10, text: `Naprostá plná trefa. Všechny obory jste zvládli bez jediného zaváhání. Vaše hlava je v perfektní kondici a mohl by vám ji závidět leckdo o generaci mladší.` }
+];
+
+const answers = new Array(QUESTIONS.length).fill(null);
+let locked = false;
+
+document.querySelector(`h1`).textContent = TITLE;
+document.querySelector(`.perex`).textContent = PEREX;
+
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+
+function render() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const qt = document.createElement(`div`);
+    qt.className = `q-text`;
+    qt.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    item.options.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.textContent = opt;
+      btn.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        Array.from(box.querySelectorAll(`.opt`)).forEach(b => b.classList.remove(`selected`));
+        btn.classList.add(`selected`);
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  const all = answers.every(a => a !== null);
+  submitBtn.disabled = !all;
+  if (all) hintEl.textContent = ``;
+}
+
+submitBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll(`.opt`);
+    opts.forEach((btn, oi) => {
+      btn.disabled = true;
+      if (oi === QUESTIONS[qi].correct) btn.classList.add(`correct`);
+      if (oi === answers[qi] && answers[qi] !== QUESTIONS[qi].correct) btn.classList.add(`wrong`);
+    });
+    if (answers[qi] === QUESTIONS[qi].correct) score++;
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + QUESTIONS.length;
+  const r = RANGES.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`verdict`).textContent = r ? r.text : ``;
+  submitBtn.style.display = `none`;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+});
+
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  render();
+  submitBtn.style.display = `block`;
+  submitBtn.disabled = true;
+  resultEl.style.display = `none`;
+  hintEl.textContent = ``;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+render();
+</script>
+</body>
+</html>
