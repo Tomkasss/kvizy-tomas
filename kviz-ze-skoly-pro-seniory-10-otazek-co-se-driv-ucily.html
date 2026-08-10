@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz ze školy pro seniory: 10 otázek, co se dřív učily. Vzpomenete si?</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  max-width: 720px;
+  margin: 0 auto;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  padding: 24px;
+  line-height: 1.5;
+}
+h1 { font-size: 1.7rem; line-height: 1.25; color: #2c2c2c; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin-bottom: 8px; }
+.question {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+.option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.option:last-child { margin-bottom: 0; }
+.option:hover { background: #ede8e1; }
+.option.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.option.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.option.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.option:disabled { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hint { text-align: center; color: #8a6d3b; margin-top: 12px; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+  display: none;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 24px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#retry:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  .question { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<h1>Kvíz ze školy pro seniory: 10 otázek, co se dřív učily. Vzpomenete si?</h1>
+<p class="perex">Pamatujete na časy u tabule s křídou a houbou, kdy se známky zapisovaly do žákovské? Zkuste deset otázek z předmětů, které se kdysi běžně probíraly, a uvidíte, kolik toho ve vás po těch letech ještě zůstalo.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="hint" id="hint"></p>
+<div id="result">
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="retry">Zkusit znovu</button>
+</div>
+<script>
+const questions = [
+  { q: `Kdo je autorem opery Rusalka?`, options: [`Bedřich Smetana`, `Leoš Janáček`, `Antonín Dvořák`, `Bohuslav Martinů`], correct: 2 },
+  { q: `Který vitamin je nezbytný pro srážení krve?`, options: [`vitamin C`, `vitamin K`, `vitamin D`, `vitamin A`], correct: 1 },
+  { q: `Jak se nazývá kladně nabitý iont?`, options: [`anion`, `proton`, `izotop`, `kation`], correct: 3 },
+  { q: `Který vojevůdce ve 4. století před naším letopočtem dobyl rozlehlou Perskou říši?`, options: [`Hannibal`, `Filip II. Makedonský`, `Alexandr Makedonský`, `Julius Caesar`], correct: 2 },
+  { q: `Na které vrstvě oka vzniká převrácený obraz pozorovaného předmětu?`, options: [`sítnice`, `rohovka`, `duhovka`, `čočka`], correct: 0 },
+  { q: `Kterou fyzikální veličinu vyjadřuje jednotka coulomb?`, options: [`elektrický náboj`, `elektrický proud`, `elektrické napětí`, `elektrický odpor`], correct: 0 },
+  { q: `Který umělecký sloh se na přelomu 18. a 19. století vrátil k jednoduchosti a vzorům antiky?`, options: [`rokoko`, `klasicismus`, `romantismus`, `baroko`], correct: 1 },
+  { q: `Kdo je autorem nejstarší české kroniky, latinsky psané Kroniky české?`, options: [`Dalimil`, `Přibík Pulkava z Radenína`, `Václav Hájek z Libočan`, `Kosmas`], correct: 3 },
+  { q: `Kdo je autorem básnické sbírky Písně otroka?`, options: [`Jan Neruda`, `Jaroslav Vrchlický`, `Vítězslav Hálek`, `Svatopluk Čech`], correct: 3 },
+  { q: `Jak se nazývá nepřímé pojmenování založené na vnější podobnosti, například „moře písku"?`, options: [`přirovnání`, `personifikace`, `metafora`, `metonymie`], correct: 2 }
+];
+
+const verdicts = [
+  { min: 0, max: 3, text: `Školní léta se ve vás pořádně zaprášila. Většina předmětů vám z hlavy dávno vyprchala, ale nic není ztraceno. Stačí sáhnout po staré učebnici nebo encyklopedii a příště se bodů sejde víc.` },
+  { min: 4, max: 6, text: `Slušný průměr člověka, který ve škole zas tolik nezahálel. Něco vám drží pevně, jinde už jsou vzpomínky rozostřené. Kdysi jste tuhle látku uměli líp a základ ve vás pořád je.` },
+  { min: 7, max: 9, text: `Výborný výkon. Napříč předměty se ztratíte jen výjimečně a nad většinou vrstevníků máte pořádný náskok. K plnému počtu vám scházel jen krůček a školní léta ve vás zjevně zanechala pořádnou stopu.` },
+  { min: 10, max: 10, text: `Plný počet, samé jedničky. To, co se dřív běžně učilo, máte v malíčku, jako byste ze školní lavice vstali teprve včera. Klobouk dolů, tohle by dnes svedl málokdo.` }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+const scoreEl = document.getElementById(`score`);
+const verdictEl = document.getElementById(`verdict`);
+const retryBtn = document.getElementById(`retry`);
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `question`;
+    const qt = document.createElement(`div`);
+    qt.className = `qtext`;
+    qt.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    item.options.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `option`;
+      btn.textContent = opt;
+      if (answers[qi] === oi) btn.classList.add(`selected`);
+      btn.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        render();
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  const allAnswered = answers.every(a => a !== null);
+  submitBtn.disabled = !allAnswered;
+  if (allAnswered) hintEl.textContent = ``;
+}
+
+submitBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.question`);
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll(`.option`);
+    opts.forEach((btn, oi) => {
+      btn.disabled = true;
+      if (oi === questions[qi].correct) btn.classList.add(`correct`);
+      else if (oi === answers[qi]) btn.classList.add(`wrong`);
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  scoreEl.textContent = score + ` z ` + questions.length;
+  const v = verdicts.find(x => score >= x.min && score <= x.max);
+  verdictEl.textContent = v ? v.text : ``;
+  submitBtn.style.display = `none`;
+  hintEl.textContent = ``;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+});
+
+retryBtn.addEventListener(`click`, () => {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  resultEl.style.display = `none`;
+  submitBtn.style.display = `block`;
+  submitBtn.disabled = true;
+  hintEl.textContent = ``;
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+render();
+</script>
+</body>
+</html>
