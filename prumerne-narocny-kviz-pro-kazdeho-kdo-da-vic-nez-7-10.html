@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Průměrně náročný kvíz pro každého. Kdo dá víc než 7/10, je chytřejší než průměr</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 40px 16px;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.btn {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  background: #5b7e5f;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+.btn:hover { background: #4a6b4e; }
+.btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+.btn.retry { background: #8c7b6b; }
+.btn.retry:hover { background: #756658; }
+.warn { text-align: center; color: #a3524f; margin-top: 14px; min-height: 1.2em; }
+.result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+}
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+.rtext { font-size: 1rem; color: #4a4a4a; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Průměrně náročný kvíz pro každého. Kdo dá víc než 7/10, je chytřejší než průměr</h1>
+<p class="perex">Deset otázek napříč obory, od dějin a přírodních věd po umění a zeměpis. Nic se nepočítá, rozhoduje jen všeobecný přehled. Průměrný člověk zvládne pět až šest. Kdo dá víc než sedm, řadí se prokazatelně nad průměr.</p>
+<div id="quiz"></div>
+<button class="btn" id="submit" disabled>Vyhodnotit</button>
+<div class="warn" id="warn"></div>
+<div id="result"></div>
+</div>
+<script>
+const questions = [
+  { q: `1. Rozluštění kterého starověkého písma umožnil nález Rosettské desky?`, opts: [`sumerské klínové písmo`, `fénické písmo`, `egyptské hieroglyfy`, `mínojské lineární písmo B`], correct: 2 },
+  { q: `2. Který přírodovědec zformuloval základní zákony dědičnosti na základě pokusů s hrachem?`, opts: [`Charles Darwin`, `Gregor Mendel`, `Louis Pasteur`, `Carl Linné`], correct: 1 },
+  { q: `3. Kolik hráčů jednoho týmu je při basketbalovém zápase současně na hřišti?`, opts: [`šest`, `sedm`, `čtyři`, `pět`], correct: 3 },
+  { q: `4. Který bůh byl ve staroegyptské mytologii vládcem podsvětí a soudcem mrtvých?`, opts: [`Anubis`, `Re`, `Horus`, `Osiris`], correct: 3 },
+  { q: `5. Jaká je základní jednotka termodynamické teploty v soustavě SI?`, opts: [`kelvin`, `stupeň Celsia`, `stupeň Fahrenheita`, `joule`], correct: 0 },
+  { q: `6. Která země darovala Spojeným státům Sochu svobody?`, opts: [`Velká Británie`, `Nizozemsko`, `Francie`, `Itálie`], correct: 2 },
+  { q: `7. Kdo je autorem nástěnné malby Poslední večeře z konce 15. století?`, opts: [`Leonardo da Vinci`, `Michelangelo Buonarroti`, `Rafael Santi`, `Sandro Botticelli`], correct: 0 },
+  { q: `8. Ve kterém městě se nachází umělecké muzeum Prado?`, opts: [`Barcelona`, `Madrid`, `Lisabon`, `Sevilla`], correct: 1 },
+  { q: `9. Která spisovatelka je autorkou románu Pýcha a předsudek?`, opts: [`Jane Austenová`, `Charlotte Brontëová`, `Emily Brontëová`, `Mary Shelleyová`], correct: 0 },
+  { q: `10. Která africká země má v současnosti nejvíce obyvatel?`, opts: [`Egypt`, `Etiopie`, `Nigérie`, `Jihoafrická republika`], correct: 2 }
+];
+
+const evalRanges = [
+  { min: 0, max: 3, text: `Všeobecný přehled zatím pokulhává pod průměrem. Otázky sahaly do řady různých oborů a hned několik z nich vás poslalo vedle. Nezoufejte, každá z nich se dá doučit a s odstupem se skóre posune výš.` },
+  { min: 4, max: 6, text: `Přesně kolem průměru. Tady se pohybuje průměrný řešitel a vy jste se mezi něj zařadili. Půlku otázek jste dali s jistotou, u zbytku rozhodly těsné nabídky. Solidní přehled, který drží krok s většinou.` },
+  { min: 7, max: 9, text: `Nad průměrem, přesně jak slibuje titulek. Víc než sedm bodů u otázek napříč tolika obory dá jen menšina, a vy mezi ni patříte. Jste prokazatelně chytřejší než průměr a k plnému počtu chybělo opravdu málo.` },
+  { min: 10, max: 10, text: `Naprostá špička. Deset z deseti napříč dějinami, vědou, uměním i zeměpisem zvládne jen zlomek lidí. Tohle není náhoda ani štěstí při tipování, ale rozhled, který vás staví jednoznačně nad průměr.` }
+];
+
+const letters = [`a`, `b`, `c`, `d`];
+const quizEl = document.getElementById('quiz');
+const submitBtn = document.getElementById('submit');
+const warnEl = document.getElementById('warn');
+const resultEl = document.getElementById('result');
+let locked = false;
+const answers = new Array(questions.length).fill(-1);
+const optRefs = [];
+
+questions.forEach((item, i) => {
+  const box = document.createElement('div');
+  box.className = 'q';
+  const qt = document.createElement('div');
+  qt.className = 'q-text';
+  qt.textContent = item.q;
+  box.appendChild(qt);
+  const refs = [];
+  item.opts.forEach((opt, j) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.type = 'button';
+    btn.textContent = letters[j] + `) ` + opt;
+    btn.addEventListener('click', () => {
+      if (locked) return;
+      answers[i] = j;
+      refs.forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      updateState();
+    });
+    box.appendChild(btn);
+    refs.push(btn);
+  });
+  optRefs.push(refs);
+  quizEl.appendChild(box);
+});
+
+function allAnswered() {
+  return answers.every(a => a !== -1);
+}
+
+function updateState() {
+  if (locked) return;
+  submitBtn.disabled = !allAnswered();
+  if (allAnswered()) warnEl.textContent = '';
+}
+
+submitBtn.addEventListener('click', () => {
+  if (locked) return;
+  if (!allAnswered()) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  questions.forEach((item, i) => {
+    const chosen = answers[i];
+    const correct = item.correct;
+    if (chosen === correct) score++;
+    optRefs[i].forEach((btn, j) => {
+      btn.disabled = true;
+      if (j === correct) btn.classList.add('correct');
+      else if (j === chosen) btn.classList.add('wrong');
+    });
+  });
+
+  const box = document.createElement('div');
+  box.className = 'result';
+  const sc = document.createElement('div');
+  sc.className = 'score';
+  sc.textContent = score + ` z ` + questions.length;
+  box.appendChild(sc);
+  const rt = document.createElement('div');
+  rt.className = 'rtext';
+  const range = evalRanges.find(r => score >= r.min && score <= r.max);
+  rt.textContent = range ? range.text : '';
+  box.appendChild(rt);
+  const retry = document.createElement('button');
+  retry.className = 'btn retry';
+  retry.textContent = `Zkusit znovu`;
+  retry.addEventListener('click', () => location.reload());
+  box.appendChild(retry);
+  resultEl.appendChild(box);
+
+  submitBtn.style.display = 'none';
+  warnEl.textContent = '';
+  box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+</script>
+</body>
+</html>
