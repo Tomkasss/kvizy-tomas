@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test pro seniory: matematika střední školy z hlavy</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 40px 16px;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+input.answer {
+  width: 100%;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+}
+input.answer.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+input.answer.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.solution { margin-top: 12px; font-size: .98rem; color: #1e5631; }
+.btn {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  background: #5b7e5f;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+.btn:hover { background: #4a6b4e; }
+.btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+.btn.retry { background: #8c7b6b; }
+.btn.retry:hover { background: #756658; }
+.warn { text-align: center; color: #a3524f; margin-top: 14px; min-height: 1.2em; }
+.result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+}
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+.rtext { font-size: 1rem; color: #4a4a4a; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test pro seniory: matematika střední školy z hlavy. Kdo dá víc než 8/10, má mozek jako zamlada</h1>
+<p class="perex">Deset příkladů středoškolské matematiky čistě z hlavy, žádná tužka ani kalkulačka. Procenta, mocniny, odmocniny, kvadratická rovnice i logaritmus. Kdo dá víc než 8 z 10, má početní hlavu svěží jako zamlada. Jdete do toho?</p>
+<div id="quiz"></div>
+<button class="btn" id="submit" disabled>Vyhodnotit</button>
+<div class="warn" id="warn"></div>
+<div id="result"></div>
+</div>
+<script>
+const questions = [
+  { q: `1. Kolik je pátý člen posloupnosti 3, 6, 12, 24, ...?`, a: [`48`] },
+  { q: `2. Kolik je 21²?`, a: [`441`] },
+  { q: `3. Kolik je dvanáctý člen posloupnosti 7, 11, 15, 19, ...?`, a: [`51`] },
+  { q: `4. Kolik je 27 × 13?`, a: [`351`] },
+  { q: `5. Zboží za 640 korun zdraží o 15 procent. Kolik korun stojí po zdražení?`, a: [`736`] },
+  { q: `6. Kolik měří přepona pravoúhlého trojúhelníku s odvěsnami 8 a 15?`, a: [`17`] },
+  { q: `7. Kolik je větší kořen rovnice x² − 8x + 15 = 0?`, a: [`5`] },
+  { q: `8. Kolik je druhá odmocnina z 324?`, a: [`18`] },
+  { q: `9. Kolik je log₂ 16?`, a: [`4`] },
+  { q: `10. Kolik různých trojciferných čísel lze sestavit z číslic 1 až 9, pokud se žádná číslice neopakuje?`, a: [`504`] }
+];
+
+const evalRanges = [
+  { min: 0, max: 3, text: `Dnes čísla vzdorovala. Mocniny, procenta z nekulatého základu i příklady z vyšších ročníků se v hlavě rozutekly dřív, než z nich vypadl výsledek. Početní bystrost teď jede na úspornou obrátku. Nic ztraceného: počítání z hlavy je sval jako každý jiný a pár příkladů denně ho rychle probudí.` },
+  { min: 4, max: 6, text: `Poctivý střed. Násobení, jednodušší posloupnosti a základní počty jste dali s jistotou, ale u kvadratické rovnice, logaritmu nebo kombinatoriky vám střední škola odpověď nenapověděla. Základ držíte pevně a hlava spolehlivě pracuje. Kousek tréninku a posunete se o pásmo výš.` },
+  { min: 7, max: 9, text: `Výborný výkon. Mocniny, odmocniny, procentní počet i příklady z vyšších ročníků řešíte zpaměti tam, kde většina okamžitě sahá po mobilu. Od splnění slibu z titulku vás dělí jediné klopýtnutí. Tahle početní hlava má k mladické svěžesti opravdu blízko.` },
+  { min: 10, max: 10, text: `Naprostá špička. Deset oborů středoškolské matematiky z hlavy bez jediné chyby, od posloupností přes kvadratickou rovnici a logaritmus až po kombinatoriku. Tohle je přesně ten výsledek, který titulek slibuje: máte mozek jako zamlada a v přímém souboji byste přebili leckterého maturanta s kalkulačkou v ruce.` }
+];
+
+function normalize(s) {
+  return s.toString().trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ');
+}
+
+const quizEl = document.getElementById('quiz');
+const submitBtn = document.getElementById('submit');
+const warnEl = document.getElementById('warn');
+const resultEl = document.getElementById('result');
+let locked = false;
+const inputs = [];
+
+questions.forEach((item, i) => {
+  const box = document.createElement('div');
+  box.className = 'q';
+  const qt = document.createElement('div');
+  qt.className = 'q-text';
+  qt.textContent = item.q;
+  box.appendChild(qt);
+  const inp = document.createElement('input');
+  inp.className = 'answer';
+  inp.type = 'text';
+  inp.setAttribute('inputmode', 'numeric');
+  inp.setAttribute('autocomplete', 'off');
+  inp.addEventListener('input', updateState);
+  box.appendChild(inp);
+  const sol = document.createElement('div');
+  sol.className = 'solution';
+  sol.style.display = 'none';
+  box.appendChild(sol);
+  inputs.push({ inp, sol });
+  quizEl.appendChild(box);
+});
+
+function allAnswered() {
+  return inputs.every(o => o.inp.value.trim() !== '');
+}
+
+function updateState() {
+  if (locked) return;
+  submitBtn.disabled = !allAnswered();
+  if (allAnswered()) warnEl.textContent = '';
+}
+
+submitBtn.addEventListener('click', () => {
+  if (locked) return;
+  if (!allAnswered()) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  inputs.forEach((o, i) => {
+    o.inp.disabled = true;
+    const val = normalize(o.inp.value);
+    const ok = questions[i].a.some(ans => normalize(ans) === val);
+    if (ok) {
+      o.inp.classList.add('correct');
+      score++;
+    } else {
+      o.inp.classList.add('wrong');
+      o.sol.style.display = 'block';
+      o.sol.textContent = `Správná odpověď: ` + questions[i].a[0];
+    }
+  });
+
+  const box = document.createElement('div');
+  box.className = 'result';
+  const sc = document.createElement('div');
+  sc.className = 'score';
+  sc.textContent = score + ` z ` + questions.length;
+  box.appendChild(sc);
+  const rt = document.createElement('div');
+  rt.className = 'rtext';
+  const range = evalRanges.find(r => score >= r.min && score <= r.max);
+  rt.textContent = range ? range.text : '';
+  box.appendChild(rt);
+  const retry = document.createElement('button');
+  retry.className = 'btn retry';
+  retry.textContent = `Zkusit znovu`;
+  retry.addEventListener('click', () => location.reload());
+  box.appendChild(retry);
+  resultEl.appendChild(box);
+
+  submitBtn.style.display = 'none';
+  warnEl.textContent = '';
+  box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+</script>
+</body>
+</html>
