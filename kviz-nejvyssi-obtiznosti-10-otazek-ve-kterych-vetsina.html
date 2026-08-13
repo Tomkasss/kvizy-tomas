@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz nejvyšší obtížnosti: většina nedá ani polovinu</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 40px 16px;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.btn {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  background: #5b7e5f;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+.btn:hover { background: #4a6b4e; }
+.btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+.btn.retry { background: #8c7b6b; }
+.btn.retry:hover { background: #756658; }
+.warn { text-align: center; color: #a3524f; margin-top: 14px; min-height: 1.2em; }
+.result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+}
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+.rtext { font-size: 1rem; color: #4a4a4a; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz nejvyšší obtížnosti: 10 otázek, ve kterých většina lidí nedá správně ani polovinu</h1>
+<p class="perex">Deset otázek nastavených na nejvyšší obtížnost. Napříč obory, mimo školní jádro, kde nerozhoduje obecná kategorie, ale přesné jméno nebo detail. Většina řešitelů tu nedá správně ani pět. Kolik zvládnete vy?</p>
+<div id="quiz"></div>
+<button class="btn" id="submit" disabled>Vyhodnotit</button>
+<div class="warn" id="warn"></div>
+<div id="result"></div>
+</div>
+<script>
+const questions = [
+  { q: `1. Který severský bůh přišel o ruku v tlamě vlka Fenrira?`, opts: [`Baldr`, `Bragi`, `Heimdall`, `Týr`], correct: 3 },
+  { q: `2. Který archanděl podle Lukášova evangelia zvěstoval Panně Marii narození Ježíše?`, opts: [`Gabriel`, `Michael`, `Rafael`, `Uriel`], correct: 0 },
+  { q: `3. Který myslitel je považován za zakladatele stoické filozofie?`, opts: [`Epikúros`, `Zénón z Kitia`, `Seneca`, `Epiktétos`], correct: 1 },
+  { q: `4. Do kterého živočišného kmene patří korály, medúzy a sasanky?`, opts: [`ostnokožci`, `žahavci`, `měkkýši`, `ploštěnci`], correct: 1 },
+  { q: `5. Kdo je autorem románu Buddenbrookovi?`, opts: [`Hermann Hesse`, `Heinrich Böll`, `Thomas Mann`, `Robert Musil`], correct: 2 },
+  { q: `6. Který režisér natočil film Osm a půl?`, opts: [`Federico Fellini`, `Michelangelo Antonioni`, `Luchino Visconti`, `Vittorio De Sica`], correct: 0 },
+  { q: `7. Který vzácný plyn dává výbojkovým trubicím jejich charakteristické červenooranžové světlo?`, opts: [`argon`, `krypton`, `xenon`, `neon`], correct: 3 },
+  { q: `8. Který malíř vyzdobil freskami kapli rodu Scrovegniů, zvanou též Arenská kaple, v Padově?`, opts: [`Cimabue`, `Giotto`, `Duccio di Buoninsegna`, `Masaccio`], correct: 1 },
+  { q: `9. Který skladatel je autorem jednoaktové opery Modrovousův hrad?`, opts: [`Zoltán Kodály`, `Leoš Janáček`, `Béla Bartók`, `Igor Stravinskij`], correct: 2 },
+  { q: `10. Který astronom jako první změřil vzdálenost k jiné hvězdě metodou roční paralaxy v roce 1838?`, opts: [`Friedrich Bessel`, `Friedrich Struve`, `William Herschel`, `Thomas Henderson`], correct: 0 }
+];
+
+const evalRanges = [
+  { min: 0, max: 3, text: `Tvrdá desítka vás dostala. Tyhle otázky nemíří na obecné povědomí, ale na přesné jméno a detail, a ten se schová i lidem se slušným rozhledem. Není proč věšet hlavu, tady propadá většina.` },
+  { min: 4, max: 6, text: `Dostat se nad polovinu je na téhle obtížnosti výkon, který zvládne jen menšina. Máte široký záběr napříč obory a poznáte i to, co běžně mizí ze školního jádra.` },
+  { min: 7, max: 9, text: `Výjimečný výsledek. Orientujete se v mytologii, umění, přírodních vědách i historii tak, že vás nachytá jen pár nejzáludnějších detailů. Tohle skóre vidíme opravdu zřídka.` },
+  { min: 10, max: 10, text: `Absolutní špička. Deset z deseti na kvízu, kde většina nedá ani pět, znamená mimořádnou paměť a rozhled napříč všemi obory. Klobouk dolů.` }
+];
+
+const letters = [`a`, `b`, `c`, `d`];
+const quizEl = document.getElementById('quiz');
+const submitBtn = document.getElementById('submit');
+const warnEl = document.getElementById('warn');
+const resultEl = document.getElementById('result');
+let locked = false;
+const answers = new Array(questions.length).fill(-1);
+const optRefs = [];
+
+questions.forEach((item, i) => {
+  const box = document.createElement('div');
+  box.className = 'q';
+  const qt = document.createElement('div');
+  qt.className = 'q-text';
+  qt.textContent = item.q;
+  box.appendChild(qt);
+  const refs = [];
+  item.opts.forEach((opt, j) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.type = 'button';
+    btn.textContent = letters[j] + `) ` + opt;
+    btn.addEventListener('click', () => {
+      if (locked) return;
+      answers[i] = j;
+      refs.forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      updateState();
+    });
+    box.appendChild(btn);
+    refs.push(btn);
+  });
+  optRefs.push(refs);
+  quizEl.appendChild(box);
+});
+
+function allAnswered() {
+  return answers.every(a => a !== -1);
+}
+
+function updateState() {
+  if (locked) return;
+  submitBtn.disabled = !allAnswered();
+  if (allAnswered()) warnEl.textContent = '';
+}
+
+submitBtn.addEventListener('click', () => {
+  if (locked) return;
+  if (!allAnswered()) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  questions.forEach((item, i) => {
+    const chosen = answers[i];
+    const correct = item.correct;
+    if (chosen === correct) score++;
+    optRefs[i].forEach((btn, j) => {
+      btn.disabled = true;
+      if (j === correct) btn.classList.add('correct');
+      else if (j === chosen) btn.classList.add('wrong');
+    });
+  });
+
+  const box = document.createElement('div');
+  box.className = 'result';
+  const sc = document.createElement('div');
+  sc.className = 'score';
+  sc.textContent = score + ` z ` + questions.length;
+  box.appendChild(sc);
+  const rt = document.createElement('div');
+  rt.className = 'rtext';
+  const range = evalRanges.find(r => score >= r.min && score <= r.max);
+  rt.textContent = range ? range.text : '';
+  box.appendChild(rt);
+  const retry = document.createElement('button');
+  retry.className = 'btn retry';
+  retry.textContent = `Zkusit znovu`;
+  retry.addEventListener('click', () => location.reload());
+  box.appendChild(retry);
+  resultEl.appendChild(box);
+
+  submitBtn.style.display = 'none';
+  warnEl.textContent = '';
+  box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+</script>
+</body>
+</html>
