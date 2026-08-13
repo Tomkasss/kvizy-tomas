@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test slovní zásoby z češtiny: kdo pozná aspoň 8 z 10 odborných slov, ten má perfektní přehled</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 24px 16px;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.8rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; margin: 0 0 28px; color: #3a3a3a; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .15s;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt.locked { cursor: default; }
+#eval-btn, #retry-btn {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  color: #fff;
+  cursor: pointer;
+}
+#eval-btn { background: #5b7e5f; }
+#eval-btn:hover { background: #4a6b4e; }
+#eval-btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry-btn { background: #8c7b6b; }
+#retry-btn:hover { background: #756658; }
+.hint { text-align: center; color: #8a5a5a; margin-top: 14px; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test slovní zásoby z češtiny: kdo pozná aspoň 8 z 10 odborných slov, ten má perfektní přehled</h1>
+<p class="perex">Deset slov z lékařství, práva, hudby, malířství i staré češtiny. Znějí učeně, ale jejich přesný význam zná málokdo. U každého vyberte jedno ze čtyř vysvětlení. Kdo trefí aspoň osm, má opravdu perfektní přehled.</p>
+<div id="quiz"></div>
+<button id="eval-btn" disabled>Vyhodnotit</button>
+<p class="hint" id="hint"></p>
+<div id="result" style="display:none;">
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="retry-btn">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  { q: `Co znamená slovo „kšaft"?`, opts: [`dlužní úpis, jímž se kdysi stvrzovala půjčka peněz`, `závěť, tedy poslední pořízení o majetku pro případ smrti`, `smlouva o prodeji či směně pozemku mezi sousedy`, `věno, které nevěsta přinášela ženichovi do manželství`], correct: 1 },
+  { q: `Co znamená přídavné jméno „nonšalantní"?`, opts: [`nenucený, ležérně bezstarostný`, `okázale honosný a nákladný`, `upjatý a křečovitě formální`, `podezíravý a ostražitý vůči okolí`], correct: 0 },
+  { q: `Co znamená sloveso „pošírovat"?`, opts: [`prudce opéci maso na rozpálené pánvi dokřupava`, `naložit maso do koření a oleje před tepelnou úpravou`, `povařit potravinu v tekutině těsně pod bodem varu`, `zapéci pokrm v troubě dozlatova pod vrstvou sýra`], correct: 2 },
+  { q: `Co označuje hudební výraz „pizzicato"?`, opts: [`postupné zesilování tónu do plné síly`, `náhlé zpomalení tempa v závěru skladby`, `tlumené hraní s nasazeným dusítkem`, `hra drnkáním prsty na struny bez použití smyčce`], correct: 3 },
+  { q: `Co znamená slovo „verbíř"?`, opts: [`polní ranhojič ošetřující raněné vojáky`, `ten, kdo najímal a naháněl nové vojáky do vojska`, `velitel malého jízdního oddílu`, `vojenský posel roznášející rozkazy mezi pluky`], correct: 1 },
+  { q: `Co znamená lékařský termín „epistaxe"?`, opts: [`krvácení z nosní sliznice`, `náhlá ztráta hlasu při zánětu hrtanu`, `nadměrné slzení a pálení očí`, `hvízdavé, ztížené dýchání při zúžení průdušek`], correct: 0 },
+  { q: `Co označuje malířský pojem „sfumato"?`, opts: [`nanášení barvy v silných, plastických vrstvách`, `rytí kresby do vlhké omítky ostrým hrotem`, `měkké, mlhavé zjemnění přechodů mezi barvami a tóny`, `malba jasnými, ostře ohraničenými barevnými plochami`], correct: 2 },
+  { q: `Co znamená lingvistický pojem „kalk"?`, opts: [`přejaté slovo ponechané v původní cizí podobě`, `slovo napodobující svým zněním přírodní zvuk`, `nově vytvořené, dosud neustálené slovo`, `výraz vzniklý doslovným překladem cizího slova část po části`], correct: 3 },
+  { q: `Co znamená právní pojem „cese"?`, opts: [`postoupení pohledávky jinému věřiteli`, `prominutí dluhu ze strany věřitele`, `převzetí dluhu jinou osobou místo dlužníka`, `odklad splatnosti dohodnutý s dlužníkem`], correct: 0 },
+  { q: `Co znamená pojem „aporie"?`, opts: [`obecně přijímaná, nijak nedokazovaná výchozí pravda`, `zdánlivě správný, ve skutečnosti však klamný úsudek`, `neřešitelný rozpor, bezvýchodná a slepá otázka`, `vyvrácení protivníka jeho vlastními slovy`], correct: 2 }
+];
+const letters = [`a`, `b`, `c`, `d`];
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval-btn`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+
+questions.forEach((item, qi) => {
+  const box = document.createElement(`div`);
+  box.className = `q`;
+  const qt = document.createElement(`p`);
+  qt.className = `q-text`;
+  qt.textContent = (qi + 1) + `. ` + item.q;
+  box.appendChild(qt);
+  item.opts.forEach((opt, oi) => {
+    const btn = document.createElement(`button`);
+    btn.className = `opt`;
+    btn.textContent = letters[oi] + `) ` + opt;
+    btn.addEventListener(`click`, () => {
+      if (locked) return;
+      answers[qi] = oi;
+      Array.from(box.querySelectorAll(`.opt`)).forEach(b => b.classList.remove(`selected`));
+      btn.classList.add(`selected`);
+      updateBtn();
+    });
+    box.appendChild(btn);
+  });
+  quizEl.appendChild(box);
+});
+
+function updateBtn() {
+  evalBtn.disabled = answers.some(a => a === null);
+}
+
+evalBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  hintEl.textContent = ``;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll(`.opt`);
+    opts.forEach((b, oi) => {
+      b.classList.add(`locked`);
+      b.classList.remove(`selected`);
+      if (oi === questions[qi].correct) b.classList.add(`correct`);
+      if (oi === answers[qi] && answers[qi] !== questions[qi].correct) b.classList.add(`wrong`);
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  document.getElementById(`score`).textContent = score + ` z 10`;
+  document.getElementById(`verdict`).textContent = verdictText(score);
+  evalBtn.style.display = `none`;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+function verdictText(s) {
+  if (s <= 3) return `Odborná a knižní slova vám zatím unikají. Vaše slovní zásoba pokryje běžný den, ale jakmile řeč zabrousí do medicíny, práva nebo umění, jistota mizí. Dobrá zpráva je, že přesně tahle slova se dají snadno dohnat čtením.`;
+  if (s <= 6) return `Solidní průměr. Část výrazů znáte přesně, u ostatních jste volili podle citu a občas se strefili. Máte slušný základ, na perfektní přehled ale ještě pár slov chybí.`;
+  if (s <= 9) return `Výborný výsledek. Rozumíte i pojmům, které většina lidí zná jen matně, a rozlišujete jemné významové odstíny napříč obory. Kdo z vás dosáhl osmi a více, může si právem říkat, že má perfektní přehled.`;
+  return `Naprostá dokonalost. Trefili jste všech deset od lékařství přes hudbu až po filozofii a nezaváhali ani u nejzáludnějších výrazů. Takhle bohatou a přesnou slovní zásobu má opravdu jen hrstka lidí.`;
+}
+
+document.getElementById(`retry-btn`).addEventListener(`click`, () => {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  quizEl.querySelectorAll(`.opt`).forEach(b => b.classList.remove(`selected`, `correct`, `wrong`, `locked`));
+  resultEl.style.display = `none`;
+  evalBtn.style.display = `block`;
+  evalBtn.disabled = true;
+  hintEl.textContent = ``;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+</script>
+</body>
+</html>
