@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro chytré seniory. Kdo dá více než 8/10, překoná i dnešní třicátníky</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 24px 16px;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.8rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; margin: 0 0 28px; color: #3a3a3a; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .15s;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt.locked { cursor: default; }
+#eval-btn, #retry-btn {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  color: #fff;
+  cursor: pointer;
+}
+#eval-btn { background: #5b7e5f; }
+#eval-btn:hover { background: #4a6b4e; }
+#eval-btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry-btn { background: #8c7b6b; }
+#retry-btn:hover { background: #756658; }
+.hint { text-align: center; color: #8a5a5a; margin-top: 14px; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro chytré seniory. Kdo dá více než 8/10, překoná i dnešní třicátníky</h1>
+<p class="perex">Deset otázek vás provede zeměpisem, historií, přírodními vědami i kulturou. Některé zvládnete takřka bez přemýšlení, u jiných si budete muset vzpomínku pořádně vydolovat. Kdo tu nasbírá víc než osm bodů, prokáže rozhled, jakým se dnešní třicátníci pochlubit nedokážou.</p>
+<div id="quiz"></div>
+<button id="eval-btn" disabled>Vyhodnotit</button>
+<p class="hint" id="hint"></p>
+<div id="result" style="display:none;">
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="retry-btn">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  { q: `Ke kterému státu patří přístavní město Ceuta na severním pobřeží Afriky, které je od svého mateřského území oddělené mořem?`, opts: [`Maroko`, `Portugalsko`, `Španělsko`, `Francie`], correct: 2 },
+  { q: `Na svazích které sopky se zpočátku opevnili vzbouření gladiátoři vedení Spartakem?`, opts: [`Etna`, `Vesuv`, `Stromboli`, `Vulcano`], correct: 1 },
+  { q: `Která kněžna byla roku 921 uškrcena na hradišti Tetín?`, opts: [`Drahomíra`, `Emma`, `Ludmila`, `Doubravka`], correct: 2 },
+  { q: `Ve které žláze s vnitřní sekrecí vzniká hormon tyroxin?`, opts: [`štítná žláza`, `slinivka břišní`, `nadledviny`, `podvěsek mozkový`], correct: 0 },
+  { q: `Který chemický prvek je hmotnostně nejrozšířenější v zemské kůře?`, opts: [`kyslík`, `křemík`, `železo`, `hliník`], correct: 0 },
+  { q: `Jakou jednotkou se v soustavě SI vyjadřuje elektrický odpor?`, opts: [`volt`, `ampér`, `watt`, `ohm`], correct: 3 },
+  { q: `Který italský skladatel je autorem opery Lazebník sevillský?`, opts: [`Giacomo Puccini`, `Gaetano Donizetti`, `Gioachino Rossini`, `Vincenzo Bellini`], correct: 2 },
+  { q: `Kdo je autorem románu Anna Kareninová?`, opts: [`Fjodor Michajlovič Dostojevskij`, `Lev Nikolajevič Tolstoj`, `Ivan Sergejevič Turgeněv`, `Anton Pavlovič Čechov`], correct: 1 },
+  { q: `Co vyjadřuje přídavné jméno sardonický?`, opts: [`jízlivě posměšný`, `přehnaně sentimentální`, `naivně důvěřivý`, `klidně vyrovnaný`], correct: 0 },
+  { q: `Která malířka proslulá svými autoportréty tvořila po vážném úrazu páteře, jejž utrpěla při dopravní nehodě?`, opts: [`Georgia O'Keeffe`, `Tamara de Lempicka`, `Marie Laurencin`, `Frida Kahlo`], correct: 3 }
+];
+const letters = [`a`, `b`, `c`, `d`];
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval-btn`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+
+questions.forEach((item, qi) => {
+  const box = document.createElement(`div`);
+  box.className = `q`;
+  const qt = document.createElement(`p`);
+  qt.className = `q-text`;
+  qt.textContent = (qi + 1) + `. ` + item.q;
+  box.appendChild(qt);
+  item.opts.forEach((opt, oi) => {
+    const btn = document.createElement(`button`);
+    btn.className = `opt`;
+    btn.textContent = letters[oi] + `) ` + opt;
+    btn.addEventListener(`click`, () => {
+      if (locked) return;
+      answers[qi] = oi;
+      Array.from(box.querySelectorAll(`.opt`)).forEach(b => b.classList.remove(`selected`));
+      btn.classList.add(`selected`);
+      updateBtn();
+    });
+    box.appendChild(btn);
+  });
+  quizEl.appendChild(box);
+});
+
+function updateBtn() {
+  evalBtn.disabled = answers.some(a => a === null);
+}
+
+evalBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  hintEl.textContent = ``;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll(`.opt`);
+    opts.forEach((b, oi) => {
+      b.classList.add(`locked`);
+      b.classList.remove(`selected`);
+      if (oi === questions[qi].correct) b.classList.add(`correct`);
+      if (oi === answers[qi] && answers[qi] !== questions[qi].correct) b.classList.add(`wrong`);
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  document.getElementById(`score`).textContent = score + ` z 10`;
+  document.getElementById(`verdict`).textContent = verdictText(score);
+  evalBtn.style.display = `none`;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+function verdictText(s) {
+  if (s <= 3) return `Tentokrát to nesedlo a řada otázek mířila do koutů, kam se běžně nechodí. Nic ztraceného. Vezměte si dvě tři jména, která vás zaujala, a příště je poznáte na první dobrou.`;
+  if (s <= 6) return `Solidní průměr, přesně tam, kde se pohybuje většina lidí. Základní přehled napříč obory držíte, jen nejzáludnější otázky vás připravily o pár bodů.`;
+  if (s <= 9) return `Výrazně nadprůměrný rozhled. Orientujete se v historii, přírodních vědách i kultuře s přesností, která není samozřejmá. A pokud jste dosáhli devíti bodů, splnili jste přesně to, co slibuje titulek: překonali jste většinu dnešních třicátníků.`;
+  return `Naprostá špička. Ani jediné zaváhání, a to i u otázek, u kterých většina lidí tápe. Takový všeobecný přehled se dnes vidí málokdy a mladší ročníky za vámi v tomto kvízu jednoznačně zaostávají.`;
+}
+
+document.getElementById(`retry-btn`).addEventListener(`click`, () => {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  quizEl.querySelectorAll(`.opt`).forEach(b => b.classList.remove(`selected`, `correct`, `wrong`, `locked`));
+  resultEl.style.display = `none`;
+  evalBtn.style.display = `block`;
+  evalBtn.disabled = true;
+  hintEl.textContent = ``;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+</script>
+</body>
+</html>
