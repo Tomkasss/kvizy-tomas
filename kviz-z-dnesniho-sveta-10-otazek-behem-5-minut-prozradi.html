@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz z dnešního světa: 10 otázek během 5 minut prozradí, jak dobře se orientujete</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 24px 16px;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.8rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; margin: 0 0 28px; color: #3a3a3a; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .15s;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt.locked { cursor: default; }
+#eval-btn, #retry-btn {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  color: #fff;
+  cursor: pointer;
+}
+#eval-btn { background: #5b7e5f; }
+#eval-btn:hover { background: #4a6b4e; }
+#eval-btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry-btn { background: #8c7b6b; }
+#retry-btn:hover { background: #756658; }
+.hint { text-align: center; color: #8a5a5a; margin-top: 14px; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz z dnešního světa: 10 otázek během 5 minut prozradí, jak dobře se orientujete</h1>
+<p class="perex">Deset otázek o dnešním světě: státy a měny, mezinárodní instituce, věda i naše planeta. U každé čtyři možnosti a jen jedna správná. Průměrný člověk dá pět až šest, na plný počet dosáhne jen menšina. Pět minut vám bohatě stačí.</p>
+<div id="quiz"></div>
+<button id="eval-btn" disabled>Vyhodnotit</button>
+<p class="hint" id="hint"></p>
+<div id="result" style="display:none;">
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="retry-btn">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  { q: `Jak se jmenuje evropský družicový navigační systém, který provozuje Evropská unie jako obdobu amerického GPS?`, opts: [`Galileo`, `GLONASS`, `BeiDou`, `NavIC`], correct: 0 },
+  { q: `Který plyn z lidské činnosti nejvíce přispívá k současnému globálnímu oteplování?`, opts: [`metan`, `oxid uhličitý`, `ozon`, `oxid siřičitý`], correct: 1 },
+  { q: `Co sdružuje mezinárodní organizace OPEC?`, opts: [`země vyvážející zemní plyn`, `země těžící zlato`, `země vyvážející ropu`, `země produkující kávu`], correct: 2 },
+  { q: `Ve kterém městě sídlí Světová zdravotnická organizace (WHO)?`, opts: [`New York`, `Vídeň`, `Brusel`, `Ženeva`], correct: 3 },
+  { q: `Kolik hvězd je na vlajce Evropské unie?`, opts: [`27`, `12`, `15`, `25`], correct: 1 },
+  { q: `Kterou měnou se platí v Jihoafrické republice?`, opts: [`rand`, `šilink`, `pula`, `cedi`], correct: 0 },
+  { q: `Která elementární částice, jejíž existenci fyzici potvrdili v roce 2012, dodává hmotě její hmotnost?`, opts: [`neutrino`, `foton`, `Higgsův boson`, `kvark`], correct: 2 },
+  { q: `Ve kterém městě se každoročně předává Nobelova cena za mír?`, opts: [`Stockholm`, `Kodaň`, `Helsinky`, `Oslo`], correct: 3 },
+  { q: `Která hora je nejvyšší na severoamerickém kontinentě?`, opts: [`Denali`, `Mount Whitney`, `Mount Logan`, `Pikes Peak`], correct: 0 },
+  { q: `Ve kterém nizozemském městě sídlí Mezinárodní soudní dvůr, hlavní soudní orgán OSN?`, opts: [`Amsterodam`, `Rotterdam`, `Haag`, `Utrecht`], correct: 2 }
+];
+const letters = [`a`, `b`, `c`, `d`];
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval-btn`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+
+questions.forEach((item, qi) => {
+  const box = document.createElement(`div`);
+  box.className = `q`;
+  const qt = document.createElement(`p`);
+  qt.className = `q-text`;
+  qt.textContent = (qi + 1) + `. ` + item.q;
+  box.appendChild(qt);
+  item.opts.forEach((opt, oi) => {
+    const btn = document.createElement(`button`);
+    btn.className = `opt`;
+    btn.textContent = letters[oi] + `) ` + opt;
+    btn.addEventListener(`click`, () => {
+      if (locked) return;
+      answers[qi] = oi;
+      Array.from(box.querySelectorAll(`.opt`)).forEach(b => b.classList.remove(`selected`));
+      btn.classList.add(`selected`);
+      updateBtn();
+    });
+    box.appendChild(btn);
+  });
+  quizEl.appendChild(box);
+});
+
+function updateBtn() {
+  evalBtn.disabled = answers.some(a => a === null);
+}
+
+evalBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  hintEl.textContent = ``;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll(`.opt`);
+    opts.forEach((b, oi) => {
+      b.classList.add(`locked`);
+      b.classList.remove(`selected`);
+      if (oi === questions[qi].correct) b.classList.add(`correct`);
+      if (oi === answers[qi] && answers[qi] !== questions[qi].correct) b.classList.add(`wrong`);
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  document.getElementById(`score`).textContent = score + ` z 10`;
+  document.getElementById(`verdict`).textContent = verdictText(score);
+  evalBtn.style.display = `none`;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+function verdictText(s) {
+  if (s <= 3) return `V mapě dnešního světa se zatím pohybujete spíš po paměti a nadpisech ze zpráv. Otázky sáhly do zeměpisu, institucí, vědy i ekonomiky naráz a hned několik vás poslalo vedle. Nic se neděje, projděte si správné odpovědi a příště zamíříte výš.`;
+  if (s <= 6) return `Přesně tady se drží většina lidí, kteří dění ve světě sledují okem diváka večerních zpráv. Známější fakta trefíte, ale jakmile přijde na sídlo instituce, cizí měnu nebo současnou vědu, jistota kolísá. Solidní přehled, který drží krok s většinou.`;
+  if (s <= 9) return `Výborná orientace. Napříč státy, organizacemi i vědou čtete dnešní svět mnohem jistěji než většina lidí a nachytat vás šlo jen na těch nejzáludnějších otázkách. K plnému počtu vám chyběl jediný krok.`;
+  return `Naprostá špička. Od navigace a měn přes mezinárodní instituce až po částicovou fyziku a nejvyšší hory jste prošli bez jediného zaváhání. Takhle kompletní přehled o tom, jak je dnešní svět uspořádaný, má opravdu jen zlomek lidí.`;
+}
+
+document.getElementById(`retry-btn`).addEventListener(`click`, () => {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  quizEl.querySelectorAll(`.opt`).forEach(b => b.classList.remove(`selected`, `correct`, `wrong`, `locked`));
+  resultEl.style.display = `none`;
+  evalBtn.style.display = `block`;
+  evalBtn.disabled = true;
+  hintEl.textContent = ``;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+</script>
+</body>
+</html>
