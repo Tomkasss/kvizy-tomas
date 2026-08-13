@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test věku pro lidi 60+: odpovězte na 10 otázek a já budu tipovat, jaký jste ročník</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 24px 16px;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.8rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; margin: 0 0 28px; color: #3a3a3a; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .15s;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt.locked { cursor: default; }
+#eval-btn, #retry-btn {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  color: #fff;
+  cursor: pointer;
+}
+#eval-btn { background: #5b7e5f; }
+#eval-btn:hover { background: #4a6b4e; }
+#eval-btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry-btn { background: #8c7b6b; }
+#retry-btn:hover { background: #756658; }
+.hint { text-align: center; color: #8a5a5a; margin-top: 14px; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test věku pro lidi 60+: odpovězte na 10 otázek a já budu tipovat, jaký jste ročník</h1>
+<p class="perex">Ročníky 60+, tohle je vaše hřiště. Odpovězte na deset otázek na věci a vzpomínky od poválečných let po osmdesátá a podle toho, kolik jich ještě poznáte, vám na konci tipnu, jaký jste ročník. Vyšší skóre, starší tip.</p>
+<div id="quiz"></div>
+<button id="eval-btn" disabled>Vyhodnotit</button>
+<p class="hint" id="hint"></p>
+<div id="result" style="display:none;">
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="retry-btn">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  { q: `Který z těchto pracích prášků vyráběl tradiční podnik Rakona?`, opts: [`Palmex`, `Tix`, `Azúr`, `Ida`], correct: 1 },
+  { q: `Co ve skutečnosti udává stupňovitost piva, tedy údaj jako desítka nebo dvanáctka na etiketě?`, opts: [`obsah alkoholu v procentech`, `množství cukrů (extraktu) v mladině ještě před kvašením`, `teplotu, při které pivo kvasí`, `počet týdnů zrání piva v ležáckém sklepě`], correct: 1 },
+  { q: `Která první dáma československého šansonu proslula písněmi Levandulová a Čerešně?`, opts: [`Eva Pilarová`, `Judita Čeřovská`, `Hana Hegerová`, `Naďa Urbánková`], correct: 2 },
+  { q: `Který chlapec ve Foglarově Záhadě hlavolamu ukryl do ježka v kleci nákres svého vynálezu?`, opts: [`Mirek Dušín`, `Losna`, `Široko`, `Jan Tleskač`], correct: 3 },
+  { q: `Kdo byl hlavní tváří a moderátorem Hovorů H, vůbec první československé televizní talk show z konce 60. let?`, opts: [`Miroslav Horníček`, `Jiří Sovák`, `Vladimír Menšík`, `Felix Holzmann`], correct: 0 },
+  { q: `Jaký drogistický výrobek se po desetiletí prodával pod značkou Kalodont?`, opts: [`vlasová voda`, `zubní pasta`, `kolínská voda`, `pleťový krém`], correct: 1 },
+  { q: `Který film režiséra Ladislava Rychmana z roku 1964 bývá označován za vůbec první český filmový muzikál?`, opts: [`Kdyby tisíc klarinetů`, `Dáma na kolejích`, `Starci na chmelu`, `Limonádový Joe`], correct: 2 },
+  { q: `Který československý brankář se stal senzací hokejového Kanadského poháru 1976 a jeho zákroky uváděly v úžas i hvězdy NHL?`, opts: [`Jiří Holeček`, `Jiří Crha`, `Jiří Králík`, `Vladimír Dzurilla`], correct: 3 },
+  { q: `Jak se jmenoval proslulý aerodynamický motorový vůz z Kopřivnice, který od roku 1936 spojoval Prahu a Bratislavu?`, opts: [`Slovenská strela`, `Moravská strela`, `Modrý šíp`, `Tatra expres`], correct: 0 },
+  { q: `Jak se vžil název pro rychlík, s nímž v roce 1951 strojvedoucí u Aše úmyslně projel přes hranice do americké okupační zóny v Německu?`, opts: [`Expres na Západ`, `Vlak naděje`, `Vlak svobody`, `Únikový vlak`], correct: 2 }
+];
+const letters = [`a`, `b`, `c`, `d`];
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval-btn`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+
+questions.forEach((item, qi) => {
+  const box = document.createElement(`div`);
+  box.className = `q`;
+  const qt = document.createElement(`p`);
+  qt.className = `q-text`;
+  qt.textContent = (qi + 1) + `. ` + item.q;
+  box.appendChild(qt);
+  item.opts.forEach((opt, oi) => {
+    const btn = document.createElement(`button`);
+    btn.className = `opt`;
+    btn.textContent = letters[oi] + `) ` + opt;
+    btn.addEventListener(`click`, () => {
+      if (locked) return;
+      answers[qi] = oi;
+      Array.from(box.querySelectorAll(`.opt`)).forEach(b => b.classList.remove(`selected`));
+      btn.classList.add(`selected`);
+      updateBtn();
+    });
+    box.appendChild(btn);
+  });
+  quizEl.appendChild(box);
+});
+
+function updateBtn() {
+  evalBtn.disabled = answers.some(a => a === null);
+}
+
+evalBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  hintEl.textContent = ``;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll(`.opt`);
+    opts.forEach((b, oi) => {
+      b.classList.add(`locked`);
+      b.classList.remove(`selected`);
+      if (oi === questions[qi].correct) b.classList.add(`correct`);
+      if (oi === answers[qi] && answers[qi] !== questions[qi].correct) b.classList.add(`wrong`);
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  document.getElementById(`score`).textContent = score + ` z 10`;
+  document.getElementById(`verdict`).textContent = verdictText(score);
+  evalBtn.style.display = `none`;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+function verdictText(s) {
+  if (s <= 3) return `Podle skóre vám tipuji ročník kolem roku 1965 nebo mladší. Poznali jste hlavně to novější a snadnější, kdežto tvrdší reálie poválečných let vám nic neříkají. Tady se obvykle scházejí mladší ročníky, které tuhle dobu naplno neprožily.`;
+  if (s <= 6) return `Podle skóre vám tipuji ročník zhruba 1957 až 1964. Poctivý střed pamětníka. Půlku věcí máte živě v paměti, u těch dávnějších jste ale zaváhali. Přesně tady se pohybuje většina těch, kdo socialistický všední den zažili, ale na úplně nejstarší kousky už bylo trochu brzy.`;
+  if (s <= 9) return `Podle skóre vám tipuji ročník zhruba 1950 až 1956. Výborný výkon. Poznáváte i méně omílané věci, které mladším nic neříkají, od Foglara přes šanson až po brankářskou legendu a strelu z Kopřivnice. K plnému počtu vám chybělo opravdu jen pár drobností.`;
+  return `Podle skóre vám tipuji ročník kolem roku 1945 až 1950. Plný počet, který dá jen menšina. Trefili jste i to nejstarší a nejtěžší, včetně aerodynamické strely z třicátých let a ašského vlaku svobody z roku 1951. Takový přehled prozrazuje pamětníka, který nejstarší poválečné Československo má pod kůží. Klobouk dolů.`;
+}
+
+document.getElementById(`retry-btn`).addEventListener(`click`, () => {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  quizEl.querySelectorAll(`.opt`).forEach(b => b.classList.remove(`selected`, `correct`, `wrong`, `locked`));
+  resultEl.style.display = `none`;
+  evalBtn.style.display = `block`;
+  evalBtn.disabled = true;
+  hintEl.textContent = ``;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+</script>
+</body>
+</html>
