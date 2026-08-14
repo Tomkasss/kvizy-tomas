@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test školních znalostí: 10 otázek ze ZŠ, na kterých už dnešní dospělí často pohoří</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  max-width: 720px;
+  margin: 0 auto;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  padding: 24px 16px 60px;
+  line-height: 1.55;
+}
+h1 { font-size: 1.7rem; line-height: 1.25; color: #2c2c2c; margin: 8px 0 18px; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin-bottom: 28px; }
+.question-box {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; }
+.option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .15s;
+}
+.option:last-child { margin-bottom: 0; }
+.option:hover { background: #ede8e1; }
+.option.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.option.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.option.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.option:disabled { cursor: default; }
+#evaluate, #retry {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  color: #fff;
+  cursor: pointer;
+}
+#evaluate { background: #5b7e5f; }
+#evaluate:hover { background: #4a6b4e; }
+#evaluate:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry { background: #8c7b6b; }
+#retry:hover { background: #756658; }
+.hint { text-align: center; color: #8a7f72; margin-top: 12px; font-style: italic; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+  display: none;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+</style>
+</head>
+<body>
+<h1>Test školních znalostí: 10 otázek ze ZŠ, na kterých už dnešní dospělí často pohoří</h1>
+<div class="perex">Čeština, dějepis, fyzika i přírodopis. Látku ze základní školy jste kdysi uměli, jenže roky ji z hlavy pomalu vymazaly. Deset otázek napříč předměty prověří, kolik vám doopravdy zůstalo. Tužku nechte být, stačí paměť.</div>
+
+<div id="quiz"></div>
+
+<button id="evaluate" disabled>Vyhodnotit</button>
+<div class="hint" id="hint"></div>
+
+<div id="result">
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="retry">Zkusit znovu</button>
+</div>
+
+<script>
+const questions = [
+  { q: `Jaká je jednotka síly v soustavě SI?`,
+    options: [`joule`, `newton`, `watt`, `pascal`], correct: 1 },
+  { q: `Kolik pádů má čeština?`,
+    options: [`pět`, `šest`, `osm`, `sedm`], correct: 3 },
+  { q: `Jak se nazývá výsledek dělení dvou čísel?`,
+    options: [`podíl`, `součin`, `rozdíl`, `součet`], correct: 0 },
+  { q: `Který ostrov je svou rozlohou největší ve Středozemním moři?`,
+    options: [`Sardinie`, `Kypr`, `Kréta`, `Sicílie`], correct: 3 },
+  { q: `Kdo je autorem tragédie Othello?`,
+    options: [`William Shakespeare`, `Molière`, `Victor Hugo`, `Johann Wolfgang Goethe`], correct: 0 },
+  { q: `Který panovnický rod byl první domácí (původem českou) panovnickou dynastií v Čechách?`,
+    options: [`Přemyslovci`, `Lucemburkové`, `Habsburkové`, `Jagellonci`], correct: 0 },
+  { q: `Jak se souhrnně označují jednobuněční živočichové, například trepka velká nebo měňavka?`,
+    options: [`měkkýši`, `obojživelníci`, `prvoci`, `korýši`], correct: 2 },
+  { q: `Jak se nazývá malířský žánr zobrazující uspořádání neživých předmětů?`,
+    options: [`krajinomalba`, `portrét`, `akt`, `zátiší`], correct: 3 },
+  { q: `Které znaménko v notovém zápisu ruší platnost křížku nebo béčka?`,
+    options: [`koruna`, `odrážka`, `repetice`, `houslový klíč`], correct: 1 },
+  { q: `Jakou chemickou značku má stříbro?`,
+    options: [`Sn`, `Si`, `Ag`, `Sb`], correct: 2 }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById('quiz');
+const evaluateBtn = document.getElementById('evaluate');
+const hintEl = document.getElementById('hint');
+const resultEl = document.getElementById('result');
+const scoreEl = document.getElementById('score');
+const verdictEl = document.getElementById('verdict');
+const retryBtn = document.getElementById('retry');
+const letters = ['a', 'b', 'c', 'd'];
+
+function render() {
+  quizEl.innerHTML = '';
+  questions.forEach((item, qi) => {
+    const box = document.createElement('div');
+    box.className = 'question-box';
+    const qt = document.createElement('div');
+    qt.className = 'q-text';
+    qt.textContent = (qi + 1) + '. ' + item.q;
+    box.appendChild(qt);
+    item.options.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'option';
+      btn.textContent = letters[oi] + ') ' + opt;
+      if (answers[qi] === oi) btn.classList.add('selected');
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        answers[qi] = oi;
+        render();
+        updateEvaluate();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateEvaluate() {
+  const allAnswered = answers.every(a => a !== null);
+  evaluateBtn.disabled = !allAnswered;
+}
+
+evaluateBtn.addEventListener('click', () => {
+  if (answers.some(a => a === null)) {
+    hintEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll('.question-box');
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll('.option');
+    opts.forEach((btn, oi) => {
+      btn.disabled = true;
+      btn.classList.remove('selected');
+      if (oi === questions[qi].correct) btn.classList.add('correct');
+      else if (answers[qi] === oi) btn.classList.add('wrong');
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  showResult(score);
+});
+
+function showResult(score) {
+  scoreEl.textContent = score + ' z 10';
+  let text = '';
+  if (score <= 3) text = 'Základní škola je opravdu dávno pryč a spolu s ní i většina její látky. Přesně tady titulek trefil hřebíček na hlavičku, na těchto otázkách dnešní dospělí pohoří houfně. Nic ztraceného, stačí sáhnout po staré učebnici a příště přidat.';
+  else if (score <= 6) text = 'Průměr, ke kterému se hlásí většina dospělých. Něco vám v hlavě pevně drží, jinde už paměť tápe a lehčí otázky vás zachránily před horším koncem. Do školních lavic byste se ještě vraceli s rozpaky, ale základ ve vás je.';
+  else if (score <= 9) text = 'Silný výkon, který svede jen menšina. Napříč předměty se ztratíte málokdy a látku ze základky jste rozhodně nezahodili u posledního vysvědčení. K plnému počtu vám scházel jediný krůček.';
+  else text = 'Naprostá výhra. Čeština, dějepis, přírodopis i ta zákeřná chemie, všechno sedí. Ze školních let vám zůstalo tolik, že byste se klidně mohli postavit před tabuli sami. Tohle dnes svede opravdu jen hrstka dospělých.';
+  verdictEl.textContent = text;
+  resultEl.style.display = 'block';
+  evaluateBtn.style.display = 'none';
+  hintEl.textContent = '';
+  resultEl.scrollIntoView({ behavior: 'smooth' });
+}
+
+retryBtn.addEventListener('click', () => {
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  locked = false;
+  resultEl.style.display = 'none';
+  evaluateBtn.style.display = 'block';
+  render();
+  updateEvaluate();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+render();
+updateEvaluate();
+</script>
+</body>
+</html>
