@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test moderních slov: mladí je používají denně a senioři často nedají ani 5/10</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 24px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 18px; }
+  .perex { font-size: 1.1rem; margin: 0 0 28px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 16px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .opt:disabled { cursor: default; }
+  #submitBtn {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #submitBtn:hover { background: #4a6b4e; }
+  #submitBtn:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint { text-align: center; color: #8a7f72; margin: 12px 0 0; min-height: 1.2em; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+    display: none;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #retryBtn {
+    display: block;
+    margin: 28px auto 0;
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #retryBtn:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test moderních slov: mladí je používají denně a senioři často nedají ani 5/10</h1>
+  <p class="perex">Rizz, flexit, glazing nebo delulu. Tahle slova mají mladí plná ústa, jenže na seniora působí jako cizí řeč. Deset výrazů z mluvy dnešních teenagerů ukáže, jestli držíte krok, nebo vám ujel vlak.</p>
+  <div id="quiz"></div>
+  <button id="submitBtn" disabled>Vyhodnotit</button>
+  <p class="hint" id="hint"></p>
+  <div id="result">
+    <div id="score"></div>
+    <p id="verdict"></p>
+    <button id="retryBtn">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+const questions = [
+  { q: `1. Co znamená slangové slovo „rizz"?`,
+    opts: [`a) obratnost při utrácení peněz`, `b) schopnost někoho okouzlit a sbalit`, `c) sebejistota při mluvení na veřejnosti`, `d) smysl pro humor za každé situace`], correct: 1 },
+  { q: `2. Co dělá člověk, který někoho „glazuje"?`,
+    opts: [`a) lísá se mu a ve všem mu přitakává`, `b) pomlouvá ho za zády`, `c) přehnaně a nekriticky ho vychvaluje`, `d) napodobuje jeho styl a názory`], correct: 2 },
+  { q: `3. Co dělá člověk, který „flexí"?`,
+    opts: [`a) chlubí se a předvádí, co má`, `b) protahuje se a cvičí`, `c) couvá a mění názor`, `d) v klidu odpočívá`], correct: 0 },
+  { q: `4. Co dělá člověk, který „yapuje"?`,
+    opts: [`a) pořád si na něco stěžuje`, `b) mluví sprostě a uráží ostatní`, `c) rychle přeskakuje z tématu na téma`, `d) pořád mele a nemůže přestat mluvit`], correct: 3 },
+  { q: `5. Co znamená, když mladí o něčím výkonu řeknou „slay"?`,
+    opts: [`a) že to bylo trapné`, `b) že to zvládl naprosto skvěle`, `c) že to nakonec vzdal`, `d) že to bylo průměrné`], correct: 1 },
+  { q: `6. Koho mladí označí slovem „simp"?`,
+    opts: [`a) člověka, který je hloupý a naivní`, `b) člověka, který si ze všech utahuje`, `c) člověka, který se přehnaně dvoří někomu, kdo se mu líbí`, `d) člověka, který nemá žádné přátele`], correct: 2 },
+  { q: `7. Co znamená, když mladí řeknou, že si někdo „ztratil aura points"?`,
+    opts: [`a) že se ztrapnil a klesl v očích okolí`, `b) že přišel o svou vnitřní energii a vyrovnanost`, `c) že ztratil přehled o tom, co se kolem děje`, `d) že se s někým rozhádal a přišel o kamaráda`], correct: 0 },
+  { q: `8. Když mladý zhodnotí film slovem „mid", jak se mu líbil?`,
+    opts: [`a) byl to jeho nejoblíbenější film`, `b) byl vyloženě špatný a nudný`, `c) byl neuvěřitelně napínavý`, `d) byl průměrný, nic zvláštního`], correct: 3 },
+  { q: `9. Co vystihuje slovo „delulu"?`,
+    opts: [`a) být pořád unavený a bez nálady`, `b) žít v nereálných představách a iluzích`, `c) bezhlavě se do někoho zamilovat`, `d) být na všechny milý a vstřícný`], correct: 1 },
+  { q: `10. Co mladí myslí tím, že k někomu „dostali ick"?`,
+    opts: [`a) že se do něj bezhlavě zamilovali`, `b) že se s ním chtějí co nejdřív usmířit`, `c) že k němu najednou pocítili odpor a znechucení`, `d) že jim začal být úplně lhostejný`], correct: 2 }
+];
+
+const verdicts = [
+  { min: 0, max: 3, text: `Slang dnešních mladých vám očividně uniká. Většina těchhle slov vám nic neříká a v rozhovoru s teenagerem byste asi tápali. Jazykově patříte spíš ke starší generaci a moderní mluva vás míjí.` },
+  { min: 4, max: 6, text: `Něco jste pochytili, nejspíš z internetu nebo od mladších v rodině, ale k plynulému porozumění to ještě není. Pár nejznámějších výrazů znáte, u těch novějších ale narazíte.` },
+  { min: 7, max: 9, text: `Slovník mladých máte v malíku a s Gen Z byste si bez potíží popovídali. Držíte krok s tím, jak se dnes mluví, a jen výjimečně vás nějaký výraz zaskočí.` },
+  { min: 10, max: 10, text: `Perfektní výsledek. Slang mladé generace ovládáte naprosto suverénně a v mluvě dnešních teenagerů se pohybujete jako ryba ve vodě. Tohle jazykově patří jednoznačně mezi mladé.` }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById('quiz');
+const submitBtn = document.getElementById('submitBtn');
+const hintEl = document.getElementById('hint');
+const resultEl = document.getElementById('result');
+const scoreEl = document.getElementById('score');
+const verdictEl = document.getElementById('verdict');
+const retryBtn = document.getElementById('retryBtn');
+
+function render() {
+  quizEl.innerHTML = '';
+  questions.forEach((item, qi) => {
+    const box = document.createElement('div');
+    box.className = 'q';
+    const qt = document.createElement('p');
+    qt.className = 'q-text';
+    qt.textContent = item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = opt;
+      if (answers[qi] === oi) btn.classList.add('selected');
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        answers[qi] = oi;
+        render();
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    box.dataset.qi = qi;
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  const allAnswered = answers.every(a => a !== null);
+  submitBtn.disabled = !allAnswered;
+  hintEl.textContent = '';
+}
+
+function evaluate() {
+  if (!answers.every(a => a !== null)) {
+    hintEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll('.q');
+  boxes.forEach((box, qi) => {
+    const btns = box.querySelectorAll('.opt');
+    btns.forEach((btn, oi) => {
+      btn.disabled = true;
+      btn.classList.remove('selected');
+      if (oi === questions[qi].correct) btn.classList.add('correct');
+      else if (answers[qi] === oi) btn.classList.add('wrong');
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  scoreEl.textContent = score + ' z ' + questions.length;
+  const v = verdicts.find(x => score >= x.min && score <= x.max);
+  verdictEl.textContent = v ? v.text : '';
+  submitBtn.style.display = 'none';
+  hintEl.textContent = '';
+  resultEl.style.display = 'block';
+  resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function reset() {
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  locked = false;
+  resultEl.style.display = 'none';
+  submitBtn.style.display = 'block';
+  submitBtn.disabled = true;
+  hintEl.textContent = '';
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+submitBtn.addEventListener('click', evaluate);
+retryBtn.addEventListener('click', reset);
+render();
+</script>
+</body>
+</html>
