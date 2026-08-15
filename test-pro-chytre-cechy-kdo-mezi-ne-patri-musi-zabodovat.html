@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test pro chytré Čechy. Kdo mezi ně patří, musí zabodovat aspoň u 7 z 10 otázek</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 24px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 18px; }
+  .perex { font-size: 1.1rem; margin: 0 0 28px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 16px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .opt:disabled { cursor: default; }
+  #submitBtn {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #submitBtn:hover { background: #4a6b4e; }
+  #submitBtn:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint { text-align: center; color: #8a7f72; margin: 12px 0 0; min-height: 1.2em; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+    display: none;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #retryBtn {
+    display: block;
+    margin: 28px auto 0;
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #retryBtn:hover { background: #756658; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test pro chytré Čechy. Kdo mezi ně patří, musí zabodovat aspoň u 7 z 10 otázek</h1>
+  <p class="perex">Deset otázek napříč obory prověří šíři vašeho rozhledu, od hudby a malířství přes dějiny a jazyk až po vesmír, chemii a lidské tělo. Laik posbírá pár bodů, ale sedmičku a výš uhraje jen ten, komu opravdu zůstal široký přehled. Kdo zvládne aspoň sedm, právem se řadí mezi chytré Čechy.</p>
+  <div id="quiz"></div>
+  <button id="submitBtn" disabled>Vyhodnotit</button>
+  <p class="hint" id="hint"></p>
+  <div id="result">
+    <div id="score"></div>
+    <p id="verdict"></p>
+    <button id="retryBtn">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+const questions = [
+  { q: `1. Který skladatel je autorem expresionistické opery Wozzeck?`,
+    opts: [`a) Richard Strauss`, `b) Alban Berg`, `c) Igor Stravinskij`, `d) Arnold Schönberg`], correct: 1 },
+  { q: `2. Ve které části nefronu se z primární moči zpětně vstřebává veškerá glukóza a většina vody?`,
+    opts: [`a) Henleova klička`, `b) Bowmanův váček`, `c) proximální tubulus`, `d) sběrací kanálek`], correct: 2 },
+  { q: `3. Který chemický prvek byl objeven nejdříve ve slunečním spektru a teprve o desítky let později i na Zemi?`,
+    opts: [`a) helium`, `b) vodík`, `c) neon`, `d) argon`], correct: 0 },
+  { q: `4. Kterému státu patří souostroví Galapágy?`,
+    opts: [`a) Peru`, `b) Ekvádor`, `c) Kolumbie`, `d) Chile`], correct: 1 },
+  { q: `5. Který malíř je autorem surrealistického obrazu Persistence paměti?`,
+    opts: [`a) René Magritte`, `b) Joan Miró`, `c) Max Ernst`, `d) Salvador Dalí`], correct: 3 },
+  { q: `6. Jak se v literární teorii označuje ozdobný přívlastek?`,
+    opts: [`a) epiteton`, `b) epifora`, `c) epigram`, `d) epizeuxis`], correct: 0 },
+  { q: `7. Který panovník nastoupil roku 1526 na český trůn jako první z rodu Habsburků?`,
+    opts: [`a) Maxmilián II.`, `b) Rudolf II.`, `c) Ferdinand I.`, `d) Leopold I.`], correct: 2 },
+  { q: `8. Který římský císař byl roku 476 sesazen germánským vojevůdcem Odoakerem, což se tradičně pokládá za zánik západořímské říše?`,
+    opts: [`a) Iulius Nepos`, `b) Theodosius I.`, `c) Konstantin XI.`, `d) Romulus Augustulus`], correct: 3 },
+  { q: `9. Jak se nazývá mezní hmotnost, nad níž se bílý trpaslík zhroutí, protože ho už neudrží tlak degenerovaného plynu?`,
+    opts: [`a) Chandrasekharova mez`, `b) Eddingtonova mez`, `c) Rocheova mez`, `d) Schwarzschildův poloměr`], correct: 0 },
+  { q: `10. Který dramatik je autorem klasicistní tragikomedie Cid?`,
+    opts: [`a) Jean Racine`, `b) Molière`, `c) Pierre Corneille`, `d) Victor Hugo`], correct: 2 }
+];
+
+const verdicts = [
+  { min: 0, max: 3, text: `Přehled máte spíš mlhavý a řada otázek vás zaskočila. Nic ztraceného, ale k tomu, co dělá „chytrého Čecha", vede ještě kus cesty. Zkuste číst napříč obory, ne jen v tom svém.` },
+  { min: 4, max: 6, text: `Slušný průměr. V oborech, které vám sedí, se orientujete dobře, jinde vás chytly těsné pasti. Do elitní skupiny to ještě není, ale nemáte k ní daleko.` },
+  { min: 7, max: 9, text: `Výborně. Prokázali jste široký a hluboký rozhled, který dnes zvládne málokdo. Právem se řadíte mezi chytré Čechy.` },
+  { min: 10, max: 10, text: `Naprostá špička. Trefili jste i vražedné otázky, na kterých ztroskotá drtivá většina. Klobouk dolů, tenhle test byl stavěný tak, aby plný počet dal jen skutečný erudovaný znalec.` }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById('quiz');
+const submitBtn = document.getElementById('submitBtn');
+const hintEl = document.getElementById('hint');
+const resultEl = document.getElementById('result');
+const scoreEl = document.getElementById('score');
+const verdictEl = document.getElementById('verdict');
+const retryBtn = document.getElementById('retryBtn');
+
+function render() {
+  quizEl.innerHTML = '';
+  questions.forEach((item, qi) => {
+    const box = document.createElement('div');
+    box.className = 'q';
+    const qt = document.createElement('p');
+    qt.className = 'q-text';
+    qt.textContent = item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = opt;
+      if (answers[qi] === oi) btn.classList.add('selected');
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        answers[qi] = oi;
+        render();
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    box.dataset.qi = qi;
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  const allAnswered = answers.every(a => a !== null);
+  submitBtn.disabled = !allAnswered;
+  hintEl.textContent = '';
+}
+
+function evaluate() {
+  if (!answers.every(a => a !== null)) {
+    hintEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll('.q');
+  boxes.forEach((box, qi) => {
+    const btns = box.querySelectorAll('.opt');
+    btns.forEach((btn, oi) => {
+      btn.disabled = true;
+      btn.classList.remove('selected');
+      if (oi === questions[qi].correct) btn.classList.add('correct');
+      else if (answers[qi] === oi) btn.classList.add('wrong');
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  scoreEl.textContent = score + ' z ' + questions.length;
+  const v = verdicts.find(x => score >= x.min && score <= x.max);
+  verdictEl.textContent = v ? v.text : '';
+  submitBtn.style.display = 'none';
+  hintEl.textContent = '';
+  resultEl.style.display = 'block';
+  resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function reset() {
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  locked = false;
+  resultEl.style.display = 'none';
+  submitBtn.style.display = 'block';
+  submitBtn.disabled = true;
+  hintEl.textContent = '';
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+submitBtn.addEventListener('click', evaluate);
+retryBtn.addEventListener('click', reset);
+render();
+</script>
+</body>
+</html>
