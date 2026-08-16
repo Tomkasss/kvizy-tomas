@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz školních znalostí: zkuste 10 otázek a já zase zkusím hádat, jestli máte maturitu, vysokou nebo učňák</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 32px 16px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.8rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 18px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.locked .opt { cursor: default; }
+#submit, #retry {
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit { background: #5b7e5f; }
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry { background: #8c7b6b; }
+#retry:hover { background: #756658; }
+.warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+  border-top: 4px solid #5b7e5f;
+  display: none;
+}
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+.verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.45rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz školních znalostí: zkuste 10 otázek a já zase zkusím hádat, jestli máte maturitu, vysokou nebo učňák</h1>
+<p class="perex">Deset otázek napříč školními předměty, od češtiny po hudební nauku. Nejtěžší otázky čekají až v závěru. Podle počtu bodů vám na konci zkusím tipnout, jestli to vypadá na učňák, na maturitu, nebo na vysokou školu.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="warn" id="warn" style="display:none">Odpovězte prosím na všechny otázky</p>
+<div id="result">
+  <p class="score" id="score"></p>
+  <p class="verdict" id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  { q: `1. Kterou fyzikální veličinu vyjadřuje podíl vykonané práce a času?`,
+    o: [`a) energii`, `b) výkon`, `c) sílu`, `d) tlak`], a: 1 },
+  { q: `2. Jaký je chemický název sloučeniny se vzorcem CaCO3?`,
+    o: [`a) oxid vápenatý`, `b) uhličitan vápenatý`, `c) uhličitan sodný`, `d) síran vápenatý`], a: 1 },
+  { q: `3. Se kterým pádem se pojí předložka „skrz"?`,
+    o: [`a) s 2. pádem`, `b) se 3. pádem`, `c) se 4. pádem`, `d) se 7. pádem`], a: 2 },
+  { q: `4. Který anglický vojevůdce vládl po popravě krále Karla I. jako lord protektor?`,
+    o: [`a) Thomas Fairfax`, `b) Oliver Cromwell`, `c) Robert Walpole`, `d) Vilém Oranžský`], a: 1 },
+  { q: `5. Který šlechtický rod byl roku 995 vyvražděn na hradišti Libice?`,
+    o: [`a) Vršovci`, `b) Vítkovci`, `c) Slavníkovci`, `d) Přemyslovci`], a: 2 },
+  { q: `6. Jak se nazývá technika výzdoby fasád, při níž se proškrabáním horní vrstvy omítky odkrývá odlišně zbarvená vrstva spodní?`,
+    o: [`a) sgrafito`, `b) freska`, `c) mozaika`, `d) štuk`], a: 0 },
+  { q: `7. Kdo napsal romaneto Svatý Xaverius?`,
+    o: [`a) Jakub Arbes`, `b) Jan Neruda`, `c) Julius Zeyer`, `d) Karel Sabina`], a: 0 },
+  { q: `8. Která hora je nejvyšším vrcholem Balkánského poloostrova?`,
+    o: [`a) Olymp`, `b) Triglav`, `c) Korab`, `d) Musala`], a: 3 },
+  { q: `9. Jak se v biologii nazývá jev, kdy živočich pohlavně dospěje, aniž opustí larvální podobu?`,
+    o: [`a) neotenie`, `b) diapauza`, `c) metamorfóza`, `d) partenogeneze`], a: 0 },
+  { q: `10. Kterou durovou stupnici poznáme podle jediného křížku v předznamenání?`,
+    o: [`a) F dur`, `b) B dur`, `c) D dur`, `d) G dur`], a: 3 }
+];
+
+var VERDICTS = [
+  { min: 0, max: 4, t: `Otázky sice vyrostly ze školních osnov, jenže právě názvy, letopočty a odborné termíny se z hlavy vytrácejí nejrychleji ze všeho, pokud je člověk v práci ani doma denně nepotřebuje. Čtyři body a méně proto neznamenají slabou hlavu, spíš praxi, která si za ta léta ukládala jiné věci. Tipuji si u vás výuční list.` },
+  { min: 5, max: 7, t: `Nadpoloviční výsledek znamená, že jste kromě úvodních otázek zvládli i pásmo, kde už nestačí obecné povědomí a je potřeba si vybavit konkrétní pojem. Takhle si školní látku udrží člověk, který teoretickými předměty prošel do hloubky a něco z nich mu zůstalo i roky po škole. Tipuji si u vás maturitu.` },
+  { min: 8, max: 9, t: `Osm a víc bodů znamená, že jste uspěli i v závěrečné trojici, kam běžný školní přehled sám nedosáhne a kde rozhoduje, jestli si člověk látku dál doplňoval po svém. Tipuji si u vás vysokou školu.` },
+  { min: 10, max: 10, t: `Plný počet se povede málokomu, protože poslední otázky míří do hudební nauky a do biologie nad rámec povinné výuky, a tam se člověk dostane hlavně vlastním zájmem. Tipuji si u vás vysokou školu a k ní návyk číst i mimo vlastní obor.` }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var locked = false;
+var quizEl = document.getElementById('quiz');
+var submitEl = document.getElementById('submit');
+var warnEl = document.getElementById('warn');
+var resultEl = document.getElementById('result');
+
+function build() {
+  quizEl.innerHTML = '';
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement('div');
+    box.className = 'q';
+    var qt = document.createElement('p');
+    qt.className = 'q-text';
+    qt.textContent = item.q;
+    box.appendChild(qt);
+    item.o.forEach(function (opt, oi) {
+      var b = document.createElement('button');
+      b.className = 'opt';
+      b.type = 'button';
+      b.textContent = opt;
+      b.addEventListener('click', function () {
+        if (locked) return;
+        answers[qi] = oi;
+        var sibs = box.querySelectorAll('.opt');
+        for (var i = 0; i < sibs.length; i++) sibs[i].classList.remove('selected');
+        b.classList.add('selected');
+        refresh();
+      });
+      box.appendChild(b);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function refresh() {
+  var done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+  if (done) warnEl.style.display = 'none';
+}
+
+submitEl.addEventListener('click', function () {
+  if (submitEl.disabled) { warnEl.style.display = 'block'; return; }
+  locked = true;
+  var score = 0;
+  var boxes = quizEl.querySelectorAll('.q');
+  for (var i = 0; i < boxes.length; i++) {
+    boxes[i].classList.add('locked');
+    var opts = boxes[i].querySelectorAll('.opt');
+    var correct = QUESTIONS[i].a;
+    if (answers[i] === correct) score++;
+    for (var j = 0; j < opts.length; j++) {
+      opts[j].classList.remove('selected');
+      if (j === correct) opts[j].classList.add('correct');
+      else if (j === answers[i]) opts[j].classList.add('wrong');
+    }
+  }
+  document.getElementById('score').textContent = score + ' z ' + QUESTIONS.length;
+  var v = VERDICTS.find(function (x) { return score >= x.min && score <= x.max; });
+  document.getElementById('verdict').textContent = v ? v.t : '';
+  submitEl.disabled = true;
+  resultEl.style.display = 'block';
+  resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+document.getElementById('retry').addEventListener('click', function () {
+  answers = new Array(QUESTIONS.length).fill(null);
+  locked = false;
+  resultEl.style.display = 'none';
+  warnEl.style.display = 'none';
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+build();
+refresh();
+</script>
+</body>
+</html>
