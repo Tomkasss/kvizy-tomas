@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rychlý test cizích slov v češtině: za 5 minut zjistíte, jestli máte dobrou slovní zásobu</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 32px 16px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.8rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 18px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.locked .opt { cursor: default; }
+#submit, #retry {
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit { background: #5b7e5f; }
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry { background: #8c7b6b; }
+#retry:hover { background: #756658; }
+.warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+  border-top: 4px solid #5b7e5f;
+  display: none;
+}
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+.verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.45rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Rychlý test cizích slov v češtině: za 5 minut zjistíte, jestli máte dobrou slovní zásobu</h1>
+<p class="perex">Přejatá slova čteme v novinách denně a většinou jim rozumíme jen zhruba. Deset otázek prověří, jestli u nich trefíte přesný význam, nebo jen ten přibližný. Sedm bodů a víc znamená opravdu dobrou slovní zásobu.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="warn" id="warn" style="display:none">Odpovězte prosím na všechny otázky</p>
+<div id="result">
+  <p class="score" id="score"></p>
+  <p class="verdict" id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  { q: `1. Co znamená slovo „litografie"?`,
+    o: [`a) tisk z měděné desky, do níž se kresba vyryje ostrým hrotem`, `b) tisk z kamenné desky, na kterou se kresba nanáší mastnou křídou`, `c) tisk přes jemnou tkaninu, skrz kterou se barva protlačuje na papír`, `d) tisk z dřevěné desky, v níž se okolí kresby vyřeže dláty`], a: 1 },
+  { q: `2. Co označuje slovo „nostrifikace"?`,
+    o: [`a) ověření pravosti razítek a podpisů na dokladu vydaném v cizině`, `b) překlad úředního dokladu pořízený soudním tlumočníkem`, `c) úřední uznání zahraničního vysvědčení za rovnocenné tuzemskému`, `d) přijímací zkouška, kterou skládají uchazeči přicházející ze zahraničí`], a: 2 },
+  { q: `3. Co je meliorace?`,
+    o: [`a) střídání plodin na poli podle předem stanoveného pořadí`, `b) scelení drobných pozemků různých vlastníků do velkých lánů`, `c) ponechání pole jednu sezonu ležet ladem kvůli obnově živin`, `d) úprava pozemku odvodněním nebo zavlažováním kvůli úrodnosti`], a: 3 },
+  { q: `4. Co se skrývá pod slovem „etiologie"?`,
+    o: [`a) nauka o tom, jaké příčiny stojí za vznikem nemoci`, `b) určení choroby na základě provedených vyšetření`, `c) přehled dosavadních nemocí pacienta a jeho rodiny`, `d) odhad toho, jak se bude nemoc dál vyvíjet`], a: 0 },
+  { q: `5. Co označuje slovo „precedens"?`,
+    o: [`a) předběžné opatření soudu platné do konečného rozsudku`, `b) dřívější rozhodnutí, jímž se řídí pozdější podobné případy`, `c) rozhodnutí soudu, proti kterému se už nelze odvolat`, `d) pravidlo, že starší zákon má přednost před novějším`], a: 1 },
+  { q: `6. Co je rondo?`,
+    o: [`a) skladba, v níž jeden hlas opakuje melodii druhého se zpožděním`, `b) sled tanečních vět spojených do jednoho celku`, `c) skladba, v níž se jediné téma opakuje pokaždé pozměněné`, `d) skladba, v níž se hlavní téma vrací mezi odlišnými díly`], a: 3 },
+  { q: `7. Co se skrývá pod slovem „introspekce"?`,
+    o: [`a) sklon uzavírat se do sebe a vyhýbat se společnosti`, `b) schopnost vžít se do pocitů a myšlení druhého člověka`, `c) pozorování a rozbor vlastních myšlenek a pocitů`, `d) rozbor snů, v nichž se hledá skrytý obsah`], a: 2 },
+  { q: `8. Co znamená slovo „saldo"?`,
+    o: [`a) celkový objem obchodů uzavřených za dané období`, `b) rozdíl mezi nákupní a prodejní cenou zboží u obchodníka`, `c) poplatek, který si banka účtuje za vedení účtu`, `d) rozdíl mezi příjmy a výdaji, tedy konečný zůstatek`], a: 3 },
+  { q: `9. Co je dementi?`,
+    o: [`a) veřejné popření zprávy, která se předtím objevila`, `b) omluva otištěná na žádost poškozeného člověka`, `c) oprava chybného údaje uveřejněná v dalším vydání`, `d) vyjádření, které si dotčený smí sám otisknout`], a: 0 },
+  { q: `10. Co označuje slovo „interpelace"?`,
+    o: [`a) návrh, kterým poslanci vyzvou vládu k odstoupení`, `b) úřední dotaz poslance směřovaný na člena vlády`, `c) poslanecký návrh na změnu projednávaného zákona`, `d) právo poslance mluvit v rozpravě bez omezení času`], a: 1 }
+];
+
+var VERDICTS = [
+  { min: 0, max: 3, t: `Vaše slovní zásoba drží pohromadě běžnou mluvu a hlavní zpravodajství, u přejatých slov ale spoléháte na to, co vyplyne z okolní věty. Jakmile text zajde do práva, financí nebo medicíny, přesný obsah slova vám unikne a čtete ho jen přibližně. Vyplatí se u neznámého výrazu zastavit a jeho význam si ověřit ve slovníku cizích slov.` },
+  { min: 4, max: 6, t: `Máte slovní zásobu, jakou má většina dospělých Čechů. Rozumíte přejatým slovům z oborů, které sami potkáváte, u ostatních trefíte zhruba polovinu. Delší komentář i úřední dopis přečtete bez potíží, místy si ale význam domýšlíte z kontextu a někdy vedle.` },
+  { min: 7, max: 9, t: `Vaše slovní zásoba je znatelně nadprůměrná a neopírá se jen o jeden obor. Poznáte i slova, u kterých se většina lidí spokojí s přibližným významem, a rozlišíte dvojice, které se běžně pletou. Odborněji psaný článek, smlouvu i recenzi z kulturní rubriky zvládnete bez slovníku.` },
+  { min: 10, max: 10, t: `Plný počet zvládne opravdu málokdo. Vaše slovní zásoba pokrývá přejatá slova napříč obory od medicíny přes finance až po umění a patří do ní i výrazy, které většina lidí zná jen z titulků. Poradíte si s jakýmkoli textem psaným pro dospělého čtenáře, odborné články nevyjímaje.` }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var locked = false;
+var quizEl = document.getElementById('quiz');
+var submitEl = document.getElementById('submit');
+var warnEl = document.getElementById('warn');
+var resultEl = document.getElementById('result');
+
+function build() {
+  quizEl.innerHTML = '';
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement('div');
+    box.className = 'q';
+    var qt = document.createElement('p');
+    qt.className = 'q-text';
+    qt.textContent = item.q;
+    box.appendChild(qt);
+    item.o.forEach(function (opt, oi) {
+      var b = document.createElement('button');
+      b.className = 'opt';
+      b.type = 'button';
+      b.textContent = opt;
+      b.addEventListener('click', function () {
+        if (locked) return;
+        answers[qi] = oi;
+        var sibs = box.querySelectorAll('.opt');
+        for (var i = 0; i < sibs.length; i++) sibs[i].classList.remove('selected');
+        b.classList.add('selected');
+        refresh();
+      });
+      box.appendChild(b);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function refresh() {
+  var done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+  if (done) warnEl.style.display = 'none';
+}
+
+submitEl.addEventListener('click', function () {
+  if (submitEl.disabled) { warnEl.style.display = 'block'; return; }
+  locked = true;
+  var score = 0;
+  var boxes = quizEl.querySelectorAll('.q');
+  for (var i = 0; i < boxes.length; i++) {
+    boxes[i].classList.add('locked');
+    var opts = boxes[i].querySelectorAll('.opt');
+    var correct = QUESTIONS[i].a;
+    if (answers[i] === correct) score++;
+    for (var j = 0; j < opts.length; j++) {
+      opts[j].classList.remove('selected');
+      if (j === correct) opts[j].classList.add('correct');
+      else if (j === answers[i]) opts[j].classList.add('wrong');
+    }
+  }
+  document.getElementById('score').textContent = score + ' z ' + QUESTIONS.length;
+  var v = VERDICTS.find(function (x) { return score >= x.min && score <= x.max; });
+  document.getElementById('verdict').textContent = v ? v.t : '';
+  submitEl.disabled = true;
+  resultEl.style.display = 'block';
+  resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+document.getElementById('retry').addEventListener('click', function () {
+  answers = new Array(QUESTIONS.length).fill(null);
+  locked = false;
+  resultEl.style.display = 'none';
+  warnEl.style.display = 'none';
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+build();
+refresh();
+</script>
+</body>
+</html>
