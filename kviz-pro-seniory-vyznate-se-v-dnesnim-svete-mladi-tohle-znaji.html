@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz pro seniory: vyznáte se v dnešním světě? Mladí tohle znají, ale pro lidi 60+ bývá problém dát aspoň 6/10</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 32px 16px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.8rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 18px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.locked .opt { cursor: default; }
+#submit, #retry {
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit { background: #5b7e5f; }
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry { background: #8c7b6b; }
+#retry:hover { background: #756658; }
+.warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+  border-top: 4px solid #5b7e5f;
+  display: none;
+}
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+.verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.45rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro seniory: vyznáte se v dnešním světě? Mladí tohle znají, ale pro lidi 60+ bývá problém dát aspoň 6/10</h1>
+<p class="perex">Deset otázek na věci, které se do běžného života dostaly během posledních let. Míchá se v nich technika, auta, zdraví, sport i zábava. Šest a víc bodů znamená, že vám dnešní svět rozhodně neutíká.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="warn" id="warn" style="display:none">Odpovězte prosím na všechny otázky</p>
+<div id="result">
+  <p class="score" id="score"></p>
+  <p class="verdict" id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  { q: `1. V které zemi vznikla aplikace TikTok?`,
+    o: [`a) v Japonsku`, `b) v Jižní Koreji`, `c) v Číně`, `d) ve Spojených státech`], a: 2 },
+  { q: `2. K čemu slouží připojení přes VPN?`,
+    o: [`a) k automatickému zálohování fotografií a dokumentů na vzdálené úložiště`, `b) k vedení internetového provozu přes cizí server, který skryje polohu uživatele`, `c) k rozšíření dosahu domácí wi-fi do vzdálenějších místností bytu`, `d) k vyhledání a odstranění škodlivého programu, který se dostal do zařízení`], a: 1 },
+  { q: `3. Která energetická třída je nejúspornější na energetickém štítku nové pračky nebo chladničky?`,
+    o: [`a) A++`, `b) A`, `c) A+++`, `d) A+`], a: 1 },
+  { q: `4. Co znamená označení PHEV u osobního automobilu?`,
+    o: [`a) auto poháněné výhradně elektřinou z baterie, bez spalovacího motoru`, `b) auto se spalovacím motorem, jehož baterie se dobíjí pouze za jízdy`, `c) auto poháněné vodíkem v palivových článcích`, `d) auto se spalovacím motorem a baterií, kterou lze dobít ze zásuvky`], a: 3 },
+  { q: `5. Jak se jmenuje česká streamovací platforma, která vznikla spojením služeb Voyo a O2 TV?`,
+    o: [`a) Oneplay`, `b) Prima+`, `c) Telly`, `d) Skylink Live TV`], a: 0 },
+  { q: `6. Co znamená zkratka feat. v názvu písně?`,
+    o: [`a) že jde o coververzi skladby jiného interpreta`, `b) že skladba vyšla i v upravené taneční verzi`, `c) že na skladbě hostuje ještě další interpret`, `d) že skladba zazněla ve filmu nebo v seriálu`], a: 2 },
+  { q: `7. Na kterou nemoc je v Evropské unii registrovaný lék Ozempic?`,
+    o: [`a) cukrovka 1. typu`, `b) vysoká hladina cholesterolu v krvi`, `c) cukrovka 2. typu`, `d) dna`], a: 2 },
+  { q: `8. Co je Roblox?`,
+    o: [`a) internetový obchod, ve kterém se kupují a stahují počítačové hry`, `b) online platforma, na které si hry vytvářejí a sdílejí sami hráči`, `c) služba pro živé sledování zápasů profesionálních hráčů`, `d) aplikace na stavbu modelů z plastových stavebnic`], a: 1 },
+  { q: `9. Co je padel?`,
+    o: [`a) míčová hra pro čtyři hráče na kurtu obehnaném skleněnými stěnami`, `b) závod horských kol ve dvojicích na uzavřeném okruhu v lese`, `c) běžecký závod v terénu s překážkami rozmístěnými po celé trati`, `d) hra podobná pozemnímu hokeji, která se hraje na písku`], a: 0 },
+  { q: `10. Co je eSIM?`,
+    o: [`a) SIM karta určená jen pro mobilní data při cestách do zahraničí`, `b) SIM karta s vlastní pamětí na uložení kontaktů a zpráv`, `c) SIM karta se šifrováním, které chrání hovory před odposlechem`, `d) SIM karta zabudovaná v telefonu, kterou operátor aktivuje na dálku`], a: 3 }
+];
+
+var VERDICTS = [
+  { min: 0, max: 3, t: `Novinky posledních let vás zatím míjely a k laťce šesti bodů z titulku to bylo daleko. Většina pojmů z tohoto kvízu se do běžného života dostala potichu a bez vysvětlování, takže se není čemu divit. Projděte si správné odpovědi a hned budete vědět, co se skrývá za označením na spotřebičích, za zkratkami u aut i za názvy služeb, o kterých se dnes běžně mluví.` },
+  { min: 4, max: 5, t: `Tady se pohybuje většina lidí, kteří dění sledují ze zpráv a z rozhovorů v rodině. Známější pojmy trefíte a k laťce šesti bodů vám chybělo jen kousek. Jistota kolísá tam, kde jde o zkratky a značky, které se nikde nevysvětlují a člověk je pochytí jedině tak, že na ně sám narazí. Základní přehled o dnešním světě máte, jen mu chybí pár posledních dílků.` },
+  { min: 6, max: 7, t: `Laťku z titulku jste zdolali a to se povede jen menšině. V dnešním světě se pohybujete jistě: rozumíte tomu, co se děje v technice, ve zdravotnictví i v zábavě, a nezaskočí vás ani pojmy, které se objevily teprve nedávno. Tři až čtyři otázky vám sice utekly, jenže právě na těch ztroskotá i leckdo mnohem mladší.` },
+  { min: 8, max: 10, t: `Laťku šesti bodů jste překonali s rezervou a to je výsledek, jaký dá jen zlomek lidí bez ohledu na věk. Od technologií a médií přes zdraví a auta až po sport, který se u nás rozjel teprve nedávno, se orientujete opravdu do šířky. Na tolik bodů už pouhý odhad nestačí, takhle do šířky se vyzná jen ten, kdo dění kolem sebe sleduje a zajímá se o něj. Šest bodů z titulku je proti vašemu výsledku jen rozcvička.` }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var locked = false;
+var quizEl = document.getElementById('quiz');
+var submitEl = document.getElementById('submit');
+var warnEl = document.getElementById('warn');
+var resultEl = document.getElementById('result');
+
+function build() {
+  quizEl.innerHTML = '';
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement('div');
+    box.className = 'q';
+    var qt = document.createElement('p');
+    qt.className = 'q-text';
+    qt.textContent = item.q;
+    box.appendChild(qt);
+    item.o.forEach(function (opt, oi) {
+      var b = document.createElement('button');
+      b.className = 'opt';
+      b.type = 'button';
+      b.textContent = opt;
+      b.addEventListener('click', function () {
+        if (locked) return;
+        answers[qi] = oi;
+        var sibs = box.querySelectorAll('.opt');
+        for (var i = 0; i < sibs.length; i++) sibs[i].classList.remove('selected');
+        b.classList.add('selected');
+        refresh();
+      });
+      box.appendChild(b);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function refresh() {
+  var done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+  if (done) warnEl.style.display = 'none';
+}
+
+submitEl.addEventListener('click', function () {
+  if (submitEl.disabled) { warnEl.style.display = 'block'; return; }
+  locked = true;
+  var score = 0;
+  var boxes = quizEl.querySelectorAll('.q');
+  for (var i = 0; i < boxes.length; i++) {
+    boxes[i].classList.add('locked');
+    var opts = boxes[i].querySelectorAll('.opt');
+    var correct = QUESTIONS[i].a;
+    if (answers[i] === correct) score++;
+    for (var j = 0; j < opts.length; j++) {
+      opts[j].classList.remove('selected');
+      if (j === correct) opts[j].classList.add('correct');
+      else if (j === answers[i]) opts[j].classList.add('wrong');
+    }
+  }
+  document.getElementById('score').textContent = score + ' z ' + QUESTIONS.length;
+  var v = VERDICTS.find(function (x) { return score >= x.min && score <= x.max; });
+  document.getElementById('verdict').textContent = v ? v.t : '';
+  submitEl.disabled = true;
+  resultEl.style.display = 'block';
+  resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+document.getElementById('retry').addEventListener('click', function () {
+  answers = new Array(QUESTIONS.length).fill(null);
+  locked = false;
+  resultEl.style.display = 'none';
+  warnEl.style.display = 'none';
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+build();
+refresh();
+</script>
+</body>
+</html>
