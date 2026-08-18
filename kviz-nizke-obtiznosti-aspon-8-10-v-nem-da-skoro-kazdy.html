@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz nízké obtížnosti: aspoň 8/10 v něm dá skoro každý. Troufnete si i vy?</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.8rem; line-height: 1.35; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .question {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.5; }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+    line-height: 1.4;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover { background: #ede8e1; }
+  .option.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .option.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .option.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .locked .option { cursor: default; }
+  .locked .option:hover { background: #f7f4f0; }
+  .locked .option.selected:hover { background: #dcd3c7; }
+  .locked .option.correct:hover { background: #d4edda; }
+  .locked .option.wrong:hover { background: #f8d7da; }
+  #submit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #warning { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; display: none; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+    display: none;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+  #retry {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #retry:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.45rem; }
+    .question { padding: 20px; }
+    #submit, #retry { width: 100%; padding: 16px 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz nízké obtížnosti: aspoň 8/10 v něm dá skoro každý. Troufnete si i vy?</h1>
+  <p class="perex">Deset otázek napříč obory, u každé čtyři možnosti a jediná správná. Žádné počítání ani číselné řady, jen běžný přehled, jaký si člověk odnese ze školy a z života. Osmička tu bývá spíš pravidlem, i když jedna otázka je znatelně tvrdší než zbytek. Zvládnete to taky?</p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <p id="warning">Odpovězte prosím na všechny otázky</p>
+  <div id="result">
+    <p id="score"></p>
+    <p id="verdict"></p>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var QUESTIONS = [
+  {
+    q: `1. Ze které části stromu se získává koření skořice?`,
+    options: [`a) z kořene`, `b) z plodů`, `c) z kůry`, `d) z listů`],
+    correct: 2
+  },
+  {
+    q: `2. Ze srsti kterého zvířete se získává jemné vlákno zvané kašmír?`,
+    options: [`a) z lamy`, `b) z kozy`, `c) z ovce`, `d) z králíka`],
+    correct: 1
+  },
+  {
+    q: `3. Ve kterém městě jezdí nejstarší metro na evropské pevnině?`,
+    options: [`a) Paříž`, `b) Budapešť`, `c) Berlín`, `d) Vídeň`],
+    correct: 1
+  },
+  {
+    q: `4. V jakém sportu se jezdí o Zlatou přilbu města Pardubic?`,
+    options: [`a) motokros`, `b) cyklistika`, `c) automobilové závody`, `d) plochá dráha`],
+    correct: 3
+  },
+  {
+    q: `5. Které zvíře je vyobrazeno ve znaku Moravy?`,
+    options: [`a) lev`, `b) orlice`, `c) medvěd`, `d) tur`],
+    correct: 1
+  },
+  {
+    q: `6. Z jakého mléka se vyrábí sýr rokfór?`,
+    options: [`a) ovčí`, `b) kravské`, `c) kozí`, `d) buvolí`],
+    correct: 0
+  },
+  {
+    q: `7. Které římské bohyni odpovídá řecká Afrodita?`,
+    options: [`a) Minerva`, `b) Diana`, `c) Juno`, `d) Venuše`],
+    correct: 3
+  },
+  {
+    q: `8. Ve kterém městě měla světovou premiéru Mozartova opera Don Giovanni?`,
+    options: [`a) Vídeň`, `b) Milán`, `c) Praha`, `d) Salcburk`],
+    correct: 2
+  },
+  {
+    q: `9. Kdo napsal divadelní hry Racek a Višňový sad?`,
+    options: [`a) Anton Pavlovič Čechov`, `b) Nikolaj Vasiljevič Gogol`, `c) Ivan Sergejevič Turgeněv`, `d) Maxim Gorkij`],
+    correct: 0
+  },
+  {
+    q: `10. Který kov se vyrábí z horniny zvané bauxit?`,
+    options: [`a) měď`, `b) olovo`, `c) hliník`, `d) zinek`],
+    correct: 2
+  }
+];
+
+var VERDICTS = [
+  { min: 0, max: 3, text: `Nanejvýš tři body z deseti jsou na kvíz, ve kterém většina řešitelů dosáhne na osmičku, nezvykle málo. Otázky, které vám utekly, přitom nemířily nikam do hloubky, šlo o věci, které se běžně někde mihnou. Projděte si je ještě jednou a uvidíte, že příště to bude výrazně lepší.` },
+  { min: 4, max: 6, text: `Půlka až šest bodů z deseti, jenže laťka je tady nasazená na osmičku. U několika otázek vás svedla varianta, která zněla logicky, ale správná nebyla. K oné slibované osmičce vám nechybí žádné velké studium, spíš jen pár drobností navíc.` },
+  { min: 7, max: 9, text: `Sedm až devět bodů z deseti je přesně tam, kam kvíz mířil, a osmička uprostřed tohoto pásma je tu nejčastějším výsledkem. Úvodní snadnější otázky jste vzali s jistotou a body jste ztratili jen tam, kde se nabízela lákavější varianta než ta správná. K plnému počtu vám chyběl krok nebo dva.` },
+  { min: 10, max: 10, text: `Všech deset z deseti, čistý štít bez jediného zaváhání. Prošli jste i tou nejtvrdší otázkou celého kvízu, na které řada řešitelů ztrácí, a nenechali jste se svést ani tam, kde nejnabízenější odpověď není ta správná. V kvízu tohohle ražení není plný počet nic výjimečného, ale zvládnout ho bez jediného zaváhání dokáže přesto jen menší část lidí.` }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var locked = false;
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warningEl = document.getElementById(`warning`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryEl = document.getElementById(`retry`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `question`;
+
+    var text = document.createElement(`p`);
+    text.className = `q-text`;
+    text.textContent = item.q;
+    box.appendChild(text);
+
+    item.options.forEach(function (opt, oi) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `option`;
+      btn.textContent = opt;
+      btn.addEventListener(`click`, function () {
+        if (locked) return;
+        answers[qi] = oi;
+        var siblings = box.querySelectorAll(`.option`);
+        for (var i = 0; i < siblings.length; i++) {
+          siblings[i].classList.remove(`selected`);
+        }
+        btn.classList.add(`selected`);
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  var complete = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !complete;
+  if (complete) warningEl.style.display = `none`;
+}
+
+function evaluate() {
+  if (locked) return;
+  var complete = answers.every(function (a) { return a !== null; });
+  if (!complete) {
+    warningEl.style.display = `block`;
+    return;
+  }
+  locked = true;
+  warningEl.style.display = `none`;
+  submitEl.disabled = true;
+
+  var score = 0;
+  var boxes = quizEl.querySelectorAll(`.question`);
+  for (var qi = 0; qi < QUESTIONS.length; qi++) {
+    var box = boxes[qi];
+    box.classList.add(`locked`);
+    var opts = box.querySelectorAll(`.option`);
+    var correct = QUESTIONS[qi].correct;
+    var chosen = answers[qi];
+    opts[correct].classList.add(`correct`);
+    if (chosen === correct) {
+      score++;
+    } else {
+      opts[chosen].classList.add(`wrong`);
+    }
+  }
+
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score >= VERDICTS[v].min && score <= VERDICTS[v].max) {
+      verdictEl.textContent = VERDICTS[v].text;
+      break;
+    }
+  }
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  locked = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.style.display = `none`;
+  warningEl.style.display = `none`;
+  submitEl.disabled = true;
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+retryEl.addEventListener(`click`, reset);
+build();
+</script>
+</body>
+</html>
