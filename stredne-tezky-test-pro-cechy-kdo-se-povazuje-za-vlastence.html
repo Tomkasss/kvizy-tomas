@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Středně těžký test pro Čechy: kdo se považuje za vlastence, měl by dát aspoň 8/10</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover:not(:disabled) { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  #vyhodnotit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover:not(:disabled) { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #hlaska { text-align: center; color: #8c3a3a; margin-top: 14px; font-size: .95rem; min-height: 1.2em; }
+  #vysledek {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+    border-top: 4px solid #5b7e5f;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #znovu {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #znovu:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Středně těžký test pro Čechy: kdo se považuje za vlastence, měl by dát aspoň 8/10</h1>
+  <p class="perex">Deset otázek o českých horách, svátcích, filmu, poezii, legiích, dostizích, hudbě i ústavě. Průměrný Čech tu obvykle nasbírá pět bodů. Kdo o sobě říká, že je vlastenec, měl by mít aspoň osm z deseti.</p>
+
+  <div id="kviz"></div>
+
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <div id="hlaska"></div>
+
+  <div id="vysledek">
+    <div id="skore"></div>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var otazky = [
+  {
+    zneni: `1. Ve kterém pohoří leží hora Milešovka?`,
+    varianty: [`Krušné hory`, `České středohoří`, `Doupovské hory`, `Lužické hory`],
+    spravna: 1
+  },
+  {
+    zneni: `2. Na který den připadá v Česku státní svátek Den slovanských věrozvěstů Cyrila a Metoděje?`,
+    varianty: [`3. července`, `4. července`, `5. července`, `6. července`],
+    spravna: 2
+  },
+  {
+    zneni: `3. Kdo režíroval film Pelíšky?`,
+    varianty: [`Jan Hřebejk`, `Jan Svěrák`, `David Ondříček`, `Ondřej Trojan`],
+    spravna: 0
+  },
+  {
+    zneni: `4. Kdo je autorem básnické sbírky Zpěvy páteční?`,
+    varianty: [`Vítězslav Hálek`, `Svatopluk Čech`, `Josef Václav Sládek`, `Jan Neruda`],
+    spravna: 3
+  },
+  {
+    zneni: `5. Kdo je autorem pětidílného Slovníku česko-německého?`,
+    varianty: [`Josef Dobrovský`, `Josef Jungmann`, `Pavel Josef Šafařík`, `František Ladislav Čelakovský`],
+    spravna: 1
+  },
+  {
+    zneni: `6. Ve kterém roce svedly československé legie bitvu u Zborova?`,
+    varianty: [`1915`, `1916`, `1917`, `1918`],
+    spravna: 2
+  },
+  {
+    zneni: `7. Kolikrát zvítězil žokej Josef Váňa starší ve Velké pardubické v sedle?`,
+    varianty: [`šestkrát`, `sedmkrát`, `osmkrát`, `devětkrát`],
+    spravna: 2
+  },
+  {
+    zneni: `8. Kdo je autorem baletu Špalíček?`,
+    varianty: [`Bohuslav Martinů`, `Vítězslav Novák`, `Zdeněk Fibich`, `Josef Suk`],
+    spravna: 0
+  },
+  {
+    zneni: `9. Na jak dlouhé funkční období je jmenován soudce Ústavního soudu České republiky?`,
+    varianty: [`sedm let`, `osm let`, `deset let`, `dvanáct let`],
+    spravna: 2
+  },
+  {
+    zneni: `10. Jak se jmenoval první automobil vyrobený v Kopřivnici?`,
+    varianty: [`Meteor`, `Wien`, `Rennzweier`, `Präsident`],
+    spravna: 3
+  }
+];
+
+var hodnoceniTexty = [
+  { min: 0, max: 3, text: `Na laťku osmi bodů to zatím nestačí ani zdaleka. České reálie znáte v obrysech, které nabídla škola, ale jakmile se otázka zeptá na konkrétní jméno, rok nebo číslo, odpověď se ztrácí. Vlastenectví se tady měří znalostí, a ta se dá dohnat.` },
+  { min: 4, max: 6, text: `Tohle je výsledek průměrného dospělého Čecha, přesně podle očekávání. Poznáte to, co je na očích, ale u přesnějších otázek jste odpovídali spíš citem než jistotou. K osmi bodům, které si nárokuje vlastenec, vám chybí ta hlubší vrstva, kde končí obecný přehled a začíná skutečný zájem.` },
+  { min: 7, max: 9, text: `Laťku jste buď splnili, nebo o ni jen škrtli. Sedm bodů znamená těsně pod, osm a devět už znamená, že se za vlastence můžete označovat právem: orientujete se v české historii, kultuře i ústavních reáliích a nespoléháte přitom na pár nejomílanějších faktů. Na plný počet vám chyběla drobnost.` },
+  { min: 10, max: 10, text: `Plný počet zvládne jen menšina. Nezaváhali jste ani u baletu, ani u funkčního období ústavního soudce, ani u prvního vozu z Kopřivnice. Osm bodů byla laťka pro vlastence, vy jste ji přeskočili s rezervou a znalost českých reálií máte na úrovni, kterou už běžné vzdělání nevysvětlí.` }
+];
+
+var odpovedi = new Array(otazky.length).fill(null);
+var vyhodnoceno = false;
+
+var kvizEl = document.getElementById('kviz');
+var vyhodnotitBtn = document.getElementById('vyhodnotit');
+var hlaskaEl = document.getElementById('hlaska');
+var vysledekEl = document.getElementById('vysledek');
+var skoreEl = document.getElementById('skore');
+var hodnoceniEl = document.getElementById('hodnoceni');
+var znovuBtn = document.getElementById('znovu');
+
+function vykresli() {
+  kvizEl.innerHTML = '';
+  otazky.forEach(function (o, i) {
+    var box = document.createElement('div');
+    box.className = 'otazka';
+
+    var zneni = document.createElement('p');
+    zneni.className = 'zneni';
+    zneni.textContent = o.zneni;
+    box.appendChild(zneni);
+
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement('button');
+      btn.className = 'varianta';
+      btn.type = 'button';
+      btn.textContent = v;
+      btn.setAttribute('data-o', i);
+      btn.setAttribute('data-v', j);
+      btn.addEventListener('click', function () {
+        if (vyhodnoceno) return;
+        odpovedi[i] = j;
+        var sourozenci = box.querySelectorAll('.varianta');
+        for (var k = 0; k < sourozenci.length; k++) {
+          sourozenci[k].classList.remove('vybrana');
+        }
+        btn.classList.add('vybrana');
+        hlaskaEl.textContent = '';
+        aktualizujTlacitko();
+      });
+      box.appendChild(btn);
+    });
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function aktualizujTlacitko() {
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  vyhodnotitBtn.disabled = !hotovo;
+}
+
+vyhodnotitBtn.addEventListener('click', function () {
+  if (vyhodnotitBtn.disabled) {
+    hlaskaEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  vyhodnoceno = true;
+  var skore = 0;
+
+  var boxy = kvizEl.querySelectorAll('.otazka');
+  for (var i = 0; i < boxy.length; i++) {
+    var tlacitka = boxy[i].querySelectorAll('.varianta');
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove('vybrana');
+      if (j === otazky[i].spravna) {
+        tlacitka[j].classList.add('spravna');
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add('spatna');
+      }
+    }
+    if (odpovedi[i] === otazky[i].spravna) skore++;
+  }
+
+  skoreEl.textContent = skore + ' z ' + otazky.length;
+  for (var h = 0; h < hodnoceniTexty.length; h++) {
+    if (skore >= hodnoceniTexty[h].min && skore <= hodnoceniTexty[h].max) {
+      hodnoceniEl.textContent = hodnoceniTexty[h].text;
+      break;
+    }
+  }
+
+  vyhodnotitBtn.disabled = true;
+  hlaskaEl.textContent = '';
+  vysledekEl.style.display = 'block';
+  vysledekEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+znovuBtn.addEventListener('click', function () {
+  odpovedi = new Array(otazky.length).fill(null);
+  vyhodnoceno = false;
+  vysledekEl.style.display = 'none';
+  hlaskaEl.textContent = '';
+  vykresli();
+  aktualizujTlacitko();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+vykresli();
+aktualizujTlacitko();
+</script>
+</body>
+</html>
