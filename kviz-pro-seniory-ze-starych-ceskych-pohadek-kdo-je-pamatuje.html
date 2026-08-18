@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro seniory ze starých českých pohádek. Kdo je pamatuje, dá v něm 10/10</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.8rem; line-height: 1.35; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .question {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.5; }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+    line-height: 1.4;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover { background: #ede8e1; }
+  .option.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .option.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .option.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .locked .option { cursor: default; }
+  .locked .option:hover { background: #f7f4f0; }
+  .locked .option.selected:hover { background: #dcd3c7; }
+  .locked .option.correct:hover { background: #d4edda; }
+  .locked .option.wrong:hover { background: #f8d7da; }
+  #submit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #warning { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; display: none; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+    display: none;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+  #retry {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #retry:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.45rem; }
+    .question { padding: 20px; }
+    #submit, #retry { width: 100%; padding: 16px 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz pro seniory ze starých českých pohádek. Kdo je pamatuje, dá v něm 10/10</h1>
+  <p class="perex">Staré české pohádky jste viděli dřív než vaše vnoučata. Deset otázek z filmů, televize, divadla i loutkových scén, večerníčků, knížek a písniček prověří, co vám z nich po letech zůstalo v hlavě.</p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <p id="warning">Odpovězte prosím na všechny otázky</p>
+  <div id="result">
+    <p id="score"></p>
+    <p id="verdict"></p>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var QUESTIONS = [
+  {
+    q: `1. Který autor napsal knihu Nezbedné pohádky?`,
+    options: [`a) Vladislav Vančura`, `b) Jan Werich`, `c) Josef Lada`, `d) František Hrubín`],
+    correct: 2
+  },
+  {
+    q: `2. Který herec ztvárnil v seriálu Arabela pana Majera?`,
+    options: [`a) Josef Bláha`, `b) Vladimír Menšík`, `c) Lubomír Lipský`, `d) Josef Vinklář`],
+    correct: 1
+  },
+  {
+    q: `3. Jak se jmenuje bábinka, která v loutkovém světě Spejbla a Hurvínka pečuje o Máničku?`,
+    options: [`a) paní Kateřina`, `b) paní Karolína`, `c) paní Antonie`, `d) paní Barbora`],
+    correct: 0
+  },
+  {
+    q: `4. Podle které klasické pohádky vznikl film Byl jednou jeden král?`,
+    options: [`a) O dvanácti měsíčkách`, `b) Sůl nad zlato`, `c) Chytrá horákyně`, `d) Sedmero krkavců`],
+    correct: 1
+  },
+  {
+    q: `5. Kdo je autorem kresleného chlapce z úvodní znělky Večerníčku?`,
+    options: [`a) Zdeněk Smetana`, `b) Kamil Lhoták`, `c) Vladimír Jiránek`, `d) Radek Pilař`],
+    correct: 3
+  },
+  {
+    q: `6. Kdo napsal divadelní hru Hrátky s čertem?`,
+    options: [`a) Jan Drda`, `b) Josef Kainar`, `c) Jaroslav Kvapil`, `d) Vítězslav Nezval`],
+    correct: 0
+  },
+  {
+    q: `7. Kdo složil hudbu k písničkám z filmu Ať žijí duchové?`,
+    options: [`a) Karel Svoboda`, `b) Zdeněk Svěrák`, `c) Jaroslav Uhlíř`, `d) Petr Skoumal`],
+    correct: 2
+  },
+  {
+    q: `8. Kdo režíroval filmovou pohádku Panna a netvor?`,
+    options: [`a) Karel Kachyňa`, `b) Juraj Herz`, `c) Antonín Moskalyk`, `d) Václav Vorlíček`],
+    correct: 1
+  },
+  {
+    q: `9. Kdo hrál prince ve filmové pohádce Šíleně smutná princezna?`,
+    options: [`a) Jiří Korn`, `b) Petr Spálený`, `c) Karel Černoch`, `d) Václav Neckář`],
+    correct: 3
+  },
+  {
+    q: `10. Jak se jmenuje třetí z vysloužilých vojáků ve filmové pohádce Tři veteráni vedle Pankráce a Serváce?`,
+    options: [`a) Bonifác`, `b) Ignác`, `c) Bimbác`, `d) Brumbác`],
+    correct: 2
+  }
+];
+
+var VERDICTS = [
+  { min: 0, max: 3, text: `Staré pohádky vám běžely spíš jako pozadí nedělního odpoledne. Tituly vám něco říkají, ale jména tvůrců, herců a postav se v paměti neusadila. Pusťte si některou z klasik znovu a uvidíte, kolik se vám při ní vybaví.` },
+  { min: 4, max: 6, text: `Poctivý průměr a přesně to, co dnes obvykle zvládne dospělý, který staré pohádky zná jen okrajově. Slavné tituly poznáte a děj si vybavíte, jenže u režisérů, skladatelů a jmen postav znalost končí.` },
+  { min: 7, max: 9, text: `Tady se schází pamětník starých českých pohádek. Prošly vám nejen filmy a jejich děj, ale i lidé za kamerou a za notami. Na plný počet vám chybí jen ta poslední vrstva podrobností, kterou si běžně pamatuje málokdo.` },
+  { min: 10, max: 10, text: `Přesně jak slibuje titulek, plný počet dá ten, kdo staré české pohádky opravdu pamatuje. Tvůrce, hudbu i jména postav máte v hlavě tak, jak byly, a takový výsledek se povede jen menšině řešitelů.` }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var locked = false;
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warningEl = document.getElementById(`warning`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryEl = document.getElementById(`retry`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `question`;
+
+    var text = document.createElement(`p`);
+    text.className = `q-text`;
+    text.textContent = item.q;
+    box.appendChild(text);
+
+    item.options.forEach(function (opt, oi) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `option`;
+      btn.textContent = opt;
+      btn.addEventListener(`click`, function () {
+        if (locked) return;
+        answers[qi] = oi;
+        var siblings = box.querySelectorAll(`.option`);
+        for (var i = 0; i < siblings.length; i++) {
+          siblings[i].classList.remove(`selected`);
+        }
+        btn.classList.add(`selected`);
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  var complete = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !complete;
+  if (complete) warningEl.style.display = `none`;
+}
+
+function evaluate() {
+  if (locked) return;
+  var complete = answers.every(function (a) { return a !== null; });
+  if (!complete) {
+    warningEl.style.display = `block`;
+    return;
+  }
+  locked = true;
+  warningEl.style.display = `none`;
+  submitEl.disabled = true;
+
+  var score = 0;
+  var boxes = quizEl.querySelectorAll(`.question`);
+  for (var qi = 0; qi < QUESTIONS.length; qi++) {
+    var box = boxes[qi];
+    box.classList.add(`locked`);
+    var opts = box.querySelectorAll(`.option`);
+    var correct = QUESTIONS[qi].correct;
+    var chosen = answers[qi];
+    opts[correct].classList.add(`correct`);
+    if (chosen === correct) {
+      score++;
+    } else {
+      opts[chosen].classList.add(`wrong`);
+    }
+  }
+
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score >= VERDICTS[v].min && score <= VERDICTS[v].max) {
+      verdictEl.textContent = VERDICTS[v].text;
+      break;
+    }
+  }
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  locked = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.style.display = `none`;
+  warningEl.style.display = `none`;
+  submitEl.disabled = true;
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+retryEl.addEventListener(`click`, reset);
+build();
+</script>
+</body>
+</html>
