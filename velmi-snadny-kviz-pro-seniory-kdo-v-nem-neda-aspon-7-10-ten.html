@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Velmi snadný kvíz pro seniory: kdo v něm nedá aspoň 7/10, ten už stárne</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  input[type="text"] {
+    width: 100%;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+  }
+  #vyhodnotit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.4em; }
+  #vysledek {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+    border-top: 4px solid #5b7e5f;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #znovu {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #znovu:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Velmi snadný kvíz pro seniory: kdo v něm nedá aspoň 7/10, ten už stárne</h1>
+  <p class="perex">Deset otázek napříč obory, nic přehnaně odborného. Většina z nich vám bude povědomá už od školy nebo z běžného života, jen u pár nabídek se vyplatí číst pozorně. Laťka je sedm bodů. Kdo ji přeskočí, má hlavu pořád v pořádku. Tak do toho, na čas se tu nehraje.</p>
+
+  <div id="otazky"></div>
+
+  <div id="obal-vyhodnotit">
+    <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  </div>
+  <p id="hlaska"></p>
+
+  <div id="vysledek">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var otazky = [
+  {
+    zneni: `1. Jakou měnou se platilo v Nizozemsku před zavedením eura?`,
+    varianty: [`escudo`, `gulden`, `markka`, `frank`],
+    spravna: 1
+  },
+  {
+    zneni: `2. Čím včely v úlu krmí larvy v prvních třech dnech po vylíhnutí?`,
+    varianty: [`mateří kašičkou`, `medem`, `pylem`, `cukerným roztokem`],
+    spravna: 0
+  },
+  {
+    zneni: `3. Čím se u vznětového motoru zapaluje palivo ve válci?`,
+    varianty: [`elektrickou jiskrou ze zapalovací svíčky`, `horkými výfukovými plyny vrácenými zpět do válce`, `teplem silně stlačeného vzduchu`, `žhavicí svíčkou, která vstříknuté palivo zapaluje`],
+    spravna: 2
+  },
+  {
+    zneni: `4. Ze zámotku housenky kterého motýla se získává přírodní hedvábí?`,
+    varianty: [`bourovec borový`, `přástevník americký`, `bourec morušový`, `lišaj smrtihlav`],
+    spravna: 2
+  },
+  {
+    zneni: `5. Jakou veličinu udává jednotka lux?`,
+    varianty: [`světelný tok`, `osvětlení`, `svítivost`, `elektrický odpor`],
+    spravna: 1
+  },
+  {
+    zneni: `6. Kdo napsal humoristický román Saturnin?`,
+    varianty: [`Jaroslav Žák`, `Miloslav Švandrlík`, `Zdeněk Jirotka`, `Josef Škvorecký`],
+    spravna: 2
+  },
+  {
+    zneni: `7. Kdo se stal prvním prezidentem Slovenské republiky po rozdělení Československa?`,
+    varianty: [`Michal Kováč`, `Rudolf Schuster`, `Ivan Gašparovič`, `Andrej Kiska`],
+    spravna: 0
+  },
+  {
+    zneni: `8. Jak se nazývá poslední neděle před Velikonoční nedělí?`,
+    varianty: [`Kýchavá neděle`, `Družebná neděle`, `Smrtná neděle`, `Květná neděle`],
+    spravna: 3
+  },
+  {
+    zneni: `9. Jak se odborně nazývá zánět mozkových blan?`,
+    varianty: [`encefalitida`, `myelitida`, `neuritida`, `meningitida`],
+    spravna: 3
+  },
+  {
+    zneni: `10. Které koření se získává ze sušených blizen květu?`,
+    varianty: [`šafrán`, `hřebíček`, `kurkuma`, `badyán`],
+    spravna: 0
+  }
+];
+
+var hodnoceni = [
+  { min: 0, max: 3, text: `Na laťku sedmi bodů to tentokrát nestačilo. Tenhle druh znalostí se ale neztrácí, jen zapadne hlouběji, a vrací se zpátky rychleji, než by člověk čekal. Projděte si správné odpovědi v klidu a zkuste kvíz za pár týdnů znovu, rozdíl bývá znát.` },
+  { min: 4, max: 6, text: `K sedmičce, kterou slibuje titulek, chybí jen kousek. Základ je zjevně pevný, jenže otázky mířily do deseti různých koutů, od motoru přes svátky až po koření, a taková šíře potrápí každého. Pár otázek denně, čtení a hovory s lidmi tenhle malý odstup doženou docela rychle.` },
+  { min: 7, max: 9, text: `Laťka sedmi bodů je přeskočená, a s rezervou. Otázky pocházejí z oborů, které spolu nemají vůbec nic společného, a uspět napříč nimi znamená mít rozhled široký a hlavně pořád živý. Titulek tedy odpovídá jasně: tohle není výsledek někoho, kdo by ztrácel formu.` },
+  { min: 10, max: 10, text: `Plný počet. V téhle desítce byly položky, u kterých se běžně chybuje, a hned několik dalších mělo nabídky natolik těsné, že nedávaly nic zadarmo. Deset z deseti tady znamená znalosti srovnané a hlavně po ruce. Klobouk dolů.` }
+];
+
+var odpovedi = new Array(otazky.length).fill(null);
+var vyhodnoceno = false;
+
+var boxOtazky = document.getElementById(`otazky`);
+var btnVyhodnotit = document.getElementById(`vyhodnotit`);
+var hlaska = document.getElementById(`hlaska`);
+var boxVysledek = document.getElementById(`vysledek`);
+var elSkore = document.getElementById(`skore`);
+var elHodnoceni = document.getElementById(`hodnoceni`);
+var btnZnovu = document.getElementById(`znovu`);
+
+function vykresli() {
+  boxOtazky.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var div = document.createElement(`div`);
+    div.className = `otazka`;
+
+    var p = document.createElement(`p`);
+    p.className = `zneni`;
+    p.textContent = o.zneni;
+    div.appendChild(p);
+
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement(`button`);
+      btn.className = `varianta`;
+      btn.type = `button`;
+      btn.textContent = String.fromCharCode(97 + j) + `) ` + v;
+      btn.addEventListener(`click`, function () {
+        if (vyhodnoceno) { return; }
+        odpovedi[i] = j;
+        var sourozenci = div.querySelectorAll(`.varianta`);
+        for (var k = 0; k < sourozenci.length; k++) {
+          sourozenci[k].classList.remove(`vybrana`);
+        }
+        btn.classList.add(`vybrana`);
+        obnovTlacitko();
+      });
+      div.appendChild(btn);
+    });
+
+    boxOtazky.appendChild(div);
+  });
+}
+
+function obnovTlacitko() {
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  btnVyhodnotit.disabled = !hotovo;
+  if (hotovo) { hlaska.textContent = ``; }
+}
+
+document.getElementById(`obal-vyhodnotit`).addEventListener(`click`, function () {
+  if (btnVyhodnotit.disabled && !vyhodnoceno) {
+    hlaska.textContent = `Odpovězte prosím na všechny otázky`;
+  }
+});
+
+btnVyhodnotit.addEventListener(`click`, function () {
+  if (btnVyhodnotit.disabled) { return; }
+  vyhodnoceno = true;
+  var skore = 0;
+  var boxy = boxOtazky.querySelectorAll(`.otazka`);
+
+  otazky.forEach(function (o, i) {
+    var tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove(`vybrana`);
+      if (j === o.spravna) {
+        tlacitka[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === o.spravna) { skore++; }
+  });
+
+  btnVyhodnotit.disabled = true;
+  elSkore.textContent = skore + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore >= hodnoceni[h].min && skore <= hodnoceni[h].max) {
+      elHodnoceni.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+  boxVysledek.style.display = `block`;
+  boxVysledek.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+btnZnovu.addEventListener(`click`, function () {
+  odpovedi = new Array(otazky.length).fill(null);
+  vyhodnoceno = false;
+  boxVysledek.style.display = `none`;
+  hlaska.textContent = ``;
+  vykresli();
+  obnovTlacitko();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+vykresli();
+obnovTlacitko();
+</script>
+</body>
+</html>
