@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz pro seniory 70+: jestli si tohle pamatujete, váš mozek šlape i v důchodu</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 32px 16px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .opt:disabled { cursor: default; }
+  #submit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+  #result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 32px;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+  #again {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #again:hover { background: #756658; }
+  .hidden { display: none; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .q { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz pro seniory 70+: jestli si tohle pamatujete, váš mozek šlape i v důchodu</h1>
+  <p class="perex">Deset otázek na jména, značky a místa, která vaše generace potkávala denně: televize a film, sport, hudba, doprava i cesta do vesmíru. Mladší u toho tápou, vy máte náskok. Zjistěte, kolik toho máte pořád v hlavě.</p>
+
+  <div id="quiz"></div>
+
+  <button id="submit" disabled>Vyhodnotit</button>
+  <p id="warn" class="hidden">Odpovězte prosím na všechny otázky</p>
+
+  <div id="result" class="hidden">
+    <p id="score"></p>
+    <p id="verdict"></p>
+    <button id="again">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var QUESTIONS = [
+  { q: `1. Který podnik vyráběl tramvaje Tatra T3?`,
+    o: [`ČKD Praha`, `Tatra Kopřivnice`, `Škoda Plzeň`, `Vagonka Studénka`], a: 0 },
+  { q: `2. Kdo vstřelil jediný gól Československa ve finále mistrovství světa 1962?`,
+    o: [`Adolf Scherer`, `Jozef Kadraba`, `Josef Masopust`, `Andrej Kvašňák`], a: 2 },
+  { q: `3. Kdo režíroval pohádku Pyšná princezna?`,
+    o: [`Martin Frič`, `Otakar Vávra`, `Václav Vorlíček`, `Bořivoj Zeman`], a: 3 },
+  { q: `4. Ve kterém roce začala sériová výroba automobilu Škoda 1000 MB?`,
+    o: [`1959`, `1964`, `1968`, `1972`], a: 1 },
+  { q: `5. Kdo složil hudbu k písni Lady Carneval?`,
+    o: [`Karel Svoboda`, `Jindřich Brabec`, `Zdeněk Marat`, `Bohuslav Ondráček`], a: 0 },
+  { q: `6. Kdo režíroval původní seriál Nemocnice na kraji města?`,
+    o: [`Antonín Moskalyk`, `Jaroslav Dudek`, `František Filip`, `Evžen Sokolovský`], a: 1 },
+  { q: `7. Ve kterém městě sídlil národní podnik Meopta, výrobce fotoaparátů Flexaret?`,
+    o: [`Hradec Králové`, `Vsetín`, `Rožnov pod Radhoštěm`, `Přerov`], a: 3 },
+  { q: `8. Na palubě které kosmické lodi letěl do vesmíru Vladimír Remek?`,
+    o: [`Sojuz 26`, `Sojuz 28`, `Sojuz 30`, `Sojuz 33`], a: 1 },
+  { q: `9. Ve kterém roce byl v Praze otevřen obchodní dům Kotva?`,
+    o: [`1968`, `1971`, `1975`, `1981`], a: 2 },
+  { q: `10. Ve kterém roce začalo v Československu pravidelné rozhlasové vysílání?`,
+    o: [`1920`, `1922`, `1923`, `1927`], a: 2 }
+];
+
+var LETTERS = [`a`, `b`, `c`, `d`];
+
+var VERDICTS = [
+  { min: 0, max: 3, text: `Vzpomínky máte, ale vybavují se pomalu a část odpovědí padla spíš tipem. Ve srovnání s vrstevníky se držíte ve spodní třetině, protože tohle jsou věci, které vaše generace potkávala denně. Dobrá zpráva: jakmile si projdete správné odpovědi, většina jmen vám naskočí zpátky sama. Paměť je tam, jen potřebuje častěji zaměstnat.` },
+  { min: 4, max: 6, text: `Přesně tady se pohybuje typický řešitel vaší generace. Jména a značky poznáváte spolehlivě, o řadu bodů jste přišli u přesných letopočtů, což je nejběžnější slabé místo. Mozek vám šlape v normálním pracovním tempu, dnešní třicátník by proti vám v těchto otázkách skončil zhruba na polovině vašeho výsledku.` },
+  { min: 7, max: 9, text: `Nadprůměr. Nespoléháte jen na to, že si na věc matně vzpomenete, ale dokážete si k ní přiřadit i konkrétní rok, jméno autora nebo podnik. Tahle schopnost propojovat dva údaje dohromady bývá to první, co se s věkem vytrácí, a vám zjevně zůstala. Mezi vrstevníky patříte do nejlepší pětiny a většinu mladších byste v tomhle kvízu porazili o několik délek.` },
+  { min: 10, max: 10, text: `Plný počet zvládne jen menšina. Znamená to, že si držíte nejen vzpomínky na dobu, kterou jste prožili, ale i přesnost v datech a jménech, tedy paměť, jaká se běžně připisuje lidem v nejlepších pracovních letech. Váš mozek nejenže v důchodu šlape, on pracuje ve výborném tempu. Zkuste kvíz dát vnoučatům, srovnání bude poučné.` }
+];
+
+var answers = [];
+var locked = false;
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var againEl = document.getElementById(`again`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+
+    var txt = document.createElement(`p`);
+    txt.className = `q-text`;
+    txt.textContent = item.q;
+    box.appendChild(txt);
+
+    item.o.forEach(function (opt, oi) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `opt`;
+      btn.textContent = LETTERS[oi] + `) ` + opt;
+      btn.setAttribute(`data-q`, String(qi));
+      btn.setAttribute(`data-o`, String(oi));
+      btn.addEventListener(`click`, onPick);
+      box.appendChild(btn);
+    });
+
+    quizEl.appendChild(box);
+  });
+}
+
+function onPick(e) {
+  if (locked) { return; }
+  var btn = e.currentTarget;
+  var qi = parseInt(btn.getAttribute(`data-q`), 10);
+  var oi = parseInt(btn.getAttribute(`data-o`), 10);
+  answers[qi] = oi;
+
+  var box = btn.parentNode;
+  var opts = box.getElementsByClassName(`opt`);
+  for (var i = 0; i < opts.length; i++) {
+    opts[i].classList.remove(`sel`);
+  }
+  btn.classList.add(`sel`);
+  refresh();
+}
+
+function answeredAll() {
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    if (typeof answers[i] !== `number`) { return false; }
+  }
+  return true;
+}
+
+function refresh() {
+  if (answeredAll()) {
+    submitEl.disabled = false;
+    warnEl.classList.add(`hidden`);
+  } else {
+    submitEl.disabled = true;
+  }
+}
+
+function evaluate() {
+  if (!answeredAll()) {
+    warnEl.classList.remove(`hidden`);
+    return;
+  }
+  locked = true;
+  var score = 0;
+  var boxes = quizEl.getElementsByClassName(`q`);
+
+  for (var qi = 0; qi < QUESTIONS.length; qi++) {
+    var opts = boxes[qi].getElementsByClassName(`opt`);
+    var correct = QUESTIONS[qi].a;
+    var picked = answers[qi];
+    if (picked === correct) { score++; }
+
+    for (var oi = 0; oi < opts.length; oi++) {
+      opts[oi].disabled = true;
+      opts[oi].classList.remove(`sel`);
+      if (oi === correct) {
+        opts[oi].classList.add(`correct`);
+      } else if (oi === picked) {
+        opts[oi].classList.add(`wrong`);
+      }
+    }
+  }
+
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score >= VERDICTS[v].min && score <= VERDICTS[v].max) {
+      verdictEl.textContent = VERDICTS[v].text;
+      break;
+    }
+  }
+
+  submitEl.disabled = true;
+  resultEl.classList.remove(`hidden`);
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  answers = [];
+  locked = false;
+  resultEl.classList.add(`hidden`);
+  warnEl.classList.add(`hidden`);
+  submitEl.disabled = true;
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+againEl.addEventListener(`click`, reset);
+build();
+</script>
+</body>
+</html>
