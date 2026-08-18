@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test ze slov, která jsme už zapomněli: senioři možná ještě dají více než 7/10</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.locked .opt { cursor: default; }
+.locked .opt:hover { background: #f7f4f0; }
+.locked .opt.sel:hover { background: #dcd3c7; }
+.locked .opt.correct:hover { background: #d4edda; }
+.locked .opt.wrong:hover { background: #f8d7da; }
+#submit, #retry {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  color: #fff;
+  cursor: pointer;
+}
+#submit { background: #5b7e5f; }
+#submit:hover:enabled { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry { background: #8c7b6b; }
+#retry:hover { background: #756658; }
+.warn { text-align: center; color: #a05252; margin-top: 14px; font-size: .95rem; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 32px;
+}
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 14px; }
+.verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+.hidden { display: none; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q, #result { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test ze slov, která jsme už zapomněli: senioři možná ještě dají více než 7/10</h1>
+<p class="perex">Slova, která se u nás kdysi říkala denně, z dnešní řeči zmizela. Deset z nich tu čeká na vysvětlení. Průměrný Čech středního věku posbírá tak pět bodů. Kdo pamatuje starší časy, může se dostat přes sedm.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warn" class="warn hidden">Odpovězte prosím na všechny otázky</p>
+<div id="result" class="hidden">
+  <p class="score" id="score"></p>
+  <p class="verdict" id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  {
+    q: `1. Co označovalo slovo „klanice“?`,
+    o: [`železný kruh, jímž se připínalo oje k jařmu`,
+        `prkennou desku tvořící dno žebřinového vozu`,
+        `svislou tyč po straně vozu, která držela náklad`,
+        `dřevěnou páku k utahování brzdového řetězu vozu`],
+    a: 2
+  },
+  {
+    q: `2. Co označuje slovo „cícha“?`,
+    o: [`velkou a těžkou péřovou peřinu`,
+        `plátěný povlak natahovaný na peřinu`,
+        `velký polštář kladený pod hlavu přes šířku lůžka`,
+        `prošívaný přehoz, kterým se zakrývala ustlaná postel`],
+    a: 1
+  },
+  {
+    q: `3. Koho lidé dříve označovali slovem „hokynář“?`,
+    o: [`podomního obchodníka, který nabízel zboží dům od domu`,
+        `překupníka, který na trhu skupoval dobytek od sedláků`,
+        `nájemce, který ve městě vybíral poplatky z prodejních stánků`,
+        `drobného obchodníka s potravinami a smíšeným zbožím`],
+    a: 3
+  },
+  {
+    q: `4. Co označuje slovo „prejt“?`,
+    o: [`masovou směs, kterou se plní jitrnice a jelita`,
+        `vyškvařené sádlo s usmaženými škvarky`,
+        `uzené maso zavěšené v komíně k dlouhému uchování`,
+        `očištěná střeva připravená k plnění`],
+    a: 0
+  },
+  {
+    q: `5. Co označovalo slovo „štoudev“?`,
+    o: [`plochou dřevěnou mísu na hnětení těsta`,
+        `větší dřevěnou nádobu na způsob menší kádě`,
+        `hliněný džbán s úzkým hrdlem na mléko`,
+        `kamenné koryto na vodu u kuchyňských kamen`],
+    a: 1
+  },
+  {
+    q: `6. Co označuje slovo „kvitance“?`,
+    o: [`písemný slib dlužníka, že peníze v určený den vrátí`,
+        `smlouvu o pronájmu pozemku uzavřenou na určitý počet let`,
+        `potvrzení věřitele o tom, že dluh byl zaplacen`,
+        `úřední výzvu k zaplacení dlužné částky`],
+    a: 2
+  },
+  {
+    q: `7. Co označuje slovo „šibřinky“?`,
+    o: [`letní slavnost s ohňostrojem konanou na návsi`,
+        `posvícenskou hostinu s koláči a muzikou`,
+        `předvánoční obchůzku maskovaných postav po staveních`,
+        `masopustní maškarní zábavu s předem daným tématem`],
+    a: 3
+  },
+  {
+    q: `8. Co označuje slovo „povříslo“?`,
+    o: [`dřevěné hrábě, jimiž se shrabovaly klasy za sekáči`,
+        `provaz ze zkroucených stébel, kterým se vázaly snopy`,
+        `plachtu, do níž se sbírala posekaná tráva`,
+        `kožené pouzdro s brouskem zavěšené sekáči u pasu`],
+    a: 1
+  },
+  {
+    q: `9. Co označovalo slovo „krejzlík“?`,
+    o: [`široký hustě nařasený límec kolem krku`,
+        `krajkový čepec vázaný stuhou pod bradou`,
+        `naškrobenou manžetu připínanou k rukávu košile`,
+        `úzkou vestu bez rukávů nošenou pod kabátem`],
+    a: 0
+  },
+  {
+    q: `10. Co označovalo slovo „psotník“?`,
+    o: [`hnisavý zánět kůže provázený vysokou horečkou`,
+        `horečnaté onemocnění šířící se ze zkažené vody`,
+        `náhlé křeče, jimiž trpěly hlavně malé děti`,
+        `dlouhodobou plicní chorobu s vykašláváním krve`],
+    a: 2
+  }
+];
+
+var BANDS = [
+  { min: 0, max: 3, text: `Zapomenutá slovní zásoba se zatím drží daleko. Pár výrazů se možná někde mihlo, ale jistota u nich nebyla a rozhodovala náhoda. Ke slíbené sedmičce má tenhle výsledek hodně daleko, zato právě přibylo deset slov, která ještě před pár desítkami let znal skoro každý.` },
+  { min: 4, max: 6, text: `Přesně to, co v tomhle testu posbírá běžný řešitel. Několik starých slov drží pevně, u ostatních rozhodoval cit a chvíli to bylo o vlásek. Do pásma, které slibuje titulek, scházelo pár bodů, takže stará slovní zásoba tu pořád je, jen už trochu tlumeně.` },
+  { min: 7, max: 9, text: `Tady už se výsledek dotýká toho, co slibuje titulek. Sedm bodů je hranice, přes kterou se dostane málokdo, a v hlavě zůstala slova, která z běžné řeči zmizela a dnes je většina lidí nedokáže vysvětlit. Stará slovní zásoba nevybledla, jen pár nejvzácnějších výrazů si ještě drží odstup.` },
+  { min: 10, max: 10, text: `Plný počet, a ten se povede jen menšině i mezi těmi, kdo tahle slova zažili. Neuspěl ani jeden z nabízených podobných významů a jemné rozdíly, kde se dnes tápe, jsou tu rozeznané do posledního. Zapomenutá čeština je tady celá a nepoškozená.` }
+];
+
+var LETTERS = [`a) `, `b) `, `c) `, `d) `];
+var picked = [];
+var done = false;
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryEl = document.getElementById(`retry`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  picked = [];
+  done = false;
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    picked.push(null);
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    box.setAttribute(`data-q`, String(i));
+    var p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = QUESTIONS[i].q;
+    box.appendChild(p);
+    for (var j = 0; j < QUESTIONS[i].o.length; j++) {
+      var btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.type = `button`;
+      btn.textContent = LETTERS[j] + QUESTIONS[i].o[j];
+      btn.setAttribute(`data-q`, String(i));
+      btn.setAttribute(`data-o`, String(j));
+      btn.addEventListener(`click`, onPick);
+      box.appendChild(btn);
+    }
+    quizEl.appendChild(box);
+  }
+  submitEl.disabled = true;
+  warnEl.classList.add(`hidden`);
+  resultEl.classList.add(`hidden`);
+}
+
+function onPick(e) {
+  if (done) return;
+  var qi = parseInt(e.currentTarget.getAttribute(`data-q`), 10);
+  var oi = parseInt(e.currentTarget.getAttribute(`data-o`), 10);
+  picked[qi] = oi;
+  var box = quizEl.querySelector(`.q[data-q="` + qi + `"]`);
+  var opts = box.querySelectorAll(`.opt`);
+  for (var k = 0; k < opts.length; k++) opts[k].classList.remove(`sel`);
+  e.currentTarget.classList.add(`sel`);
+  refresh();
+}
+
+function allAnswered() {
+  for (var i = 0; i < picked.length; i++) if (picked[i] === null) return false;
+  return true;
+}
+
+function refresh() {
+  var ok = allAnswered();
+  submitEl.disabled = !ok;
+  if (ok) warnEl.classList.add(`hidden`);
+}
+
+function evaluate() {
+  if (!allAnswered()) {
+    warnEl.classList.remove(`hidden`);
+    return;
+  }
+  done = true;
+  var score = 0;
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    var box = quizEl.querySelector(`.q[data-q="` + i + `"]`);
+    box.classList.add(`locked`);
+    var opts = box.querySelectorAll(`.opt`);
+    var correct = QUESTIONS[i].a;
+    if (picked[i] === correct) score++;
+    for (var j = 0; j < opts.length; j++) {
+      opts[j].classList.remove(`sel`);
+      if (j === correct) opts[j].classList.add(`correct`);
+      else if (j === picked[i]) opts[j].classList.add(`wrong`);
+    }
+  }
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  var txt = ``;
+  for (var b = 0; b < BANDS.length; b++) {
+    if (score >= BANDS[b].min && score <= BANDS[b].max) txt = BANDS[b].text;
+  }
+  verdictEl.textContent = txt;
+  resultEl.classList.remove(`hidden`);
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+retryEl.addEventListener(`click`, function () {
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+</script>
+</body>
+</html>
