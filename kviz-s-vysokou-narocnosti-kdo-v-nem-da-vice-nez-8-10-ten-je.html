@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz s vysokou náročností: kdo v něm dá více než 8/10, ten je kapacita</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  #vyhodnotit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #hlaska { text-align: center; color: #8a5a5a; margin-top: 14px; font-size: .95rem; min-height: 1.2em; }
+  #vysledek {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 32px;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+  #znovu {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #znovu:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz s vysokou náročností: kdo v něm dá více než 8/10, ten je kapacita</h1>
+  <p class="perex">Deset otázek napříč obory a v každé nabídce stojí varianty, které znějí stejně věrohodně jako ta správná. Průměrný řešitel se zastaví někde kolem poloviny. Kdo dá víc než osm bodů z deseti, patří do úzké skupiny kapacit.</p>
+  <div id="kviz"></div>
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+  <div id="vysledek">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var otazky = [
+  {
+    text: `1. Ve kterém městě stojí bazilika San Vitale, proslulá byzantskými mozaikami ze 6. století?`,
+    varianty: [`a) Benátky`, `b) Palermo`, `c) Milán`, `d) Ravenna`],
+    spravna: 3
+  },
+  {
+    text: `2. Která šachová figura se při tahu pohybuje ve tvaru písmene L?`,
+    varianty: [`a) jezdec`, `b) střelec`, `c) věž`, `d) dáma`],
+    spravna: 0
+  },
+  {
+    text: `3. Který ruský car přenesl hlavní město z Moskvy do Petrohradu?`,
+    varianty: [`a) Ivan IV. Hrozný`, `b) Petr I. Veliký`, `c) Alexandr I.`, `d) Mikuláš II.`],
+    spravna: 1
+  },
+  {
+    text: `4. Který římský císař dal postavit val napříč dnešním Skotskem?`,
+    varianty: [`a) Hadrián`, `b) Antoninus Pius`, `c) Traján`, `d) Marcus Aurelius`],
+    spravna: 1
+  },
+  {
+    text: `5. Pod kterou horou pramení řeka Morava?`,
+    varianty: [`a) Praděd`, `b) Králický Sněžník`, `c) Lysá hora`, `d) Smrk`],
+    spravna: 1
+  },
+  {
+    text: `6. Kolik písmen má dnešní řecká abeceda?`,
+    varianty: [`a) 20`, `b) 22`, `c) 24`, `d) 26`],
+    spravna: 2
+  },
+  {
+    text: `7. Který lékař objevil lidské krevní skupiny a získal za ně Nobelovu cenu?`,
+    varianty: [`a) Karl Landsteiner`, `b) Paul Ehrlich`, `c) Alexander Fleming`, `d) Emil von Behring`],
+    spravna: 0
+  },
+  {
+    text: `8. Z listů které rostliny se získává textilní vlákno sisal?`,
+    varianty: [`a) juka`, `b) lenovník`, `c) agáve`, `d) ananasovník`],
+    spravna: 2
+  },
+  {
+    text: `9. Jak se jmenuje Ódinův osminohý kůň?`,
+    varianty: [`a) Grani`, `b) Skinfaxi`, `c) Gullfaxi`, `d) Sleipnir`],
+    spravna: 3
+  },
+  {
+    text: `10. Ve které zemi se platí měnou lari?`,
+    varianty: [`a) Arménie`, `b) Moldavsko`, `c) Gruzie`, `d) Ázerbájdžán`],
+    spravna: 2
+  }
+];
+
+var hodnoceni = [
+  { min: 0, max: 3, text: `Laťka byla nastavená vysoko a nabídky odpovědí dělaly přesně to, k čemu byly postavené. Vedle správné odpovědi pokaždé stálo něco, co znělo stejně dobře, a právě tam se cesta zlomila. Tři body a méně u kvízu tohoto kalibru nikoho neusvědčují z neznalosti, jen ukazují, kde se hranice zatím láme.` },
+  { min: 4, max: 6, text: `Tady končí největší část řešitelů a je to očekávaný výsledek. Část nabízených pastí jste prokoukli, jinde vás dostala varianta nalepená na správné odpovědi. Solidní všeobecný přehled, k hranici osmi bodů ale ještě kus chybí.` },
+  { min: 7, max: 9, text: `Výborný výkon. Sedm i osm bodů přitom pořád zůstává pod hranicí, kterou slibuje titulek, takže k titulu kapacity chybělo doslova pár odpovědí. Devět bodů už tuhle hranici překračuje a řadí vás mezi kapacity, protože devítka v takhle nastavené desítce znamená, že jste se neztratili ani u nejzrádnějších dvojic odpovědí.` },
+  { min: 10, max: 10, text: `Absolutní špička. Plný počet v kvízu, kde je ke správné odpovědi v každé nabídce přilepená past, se povede jen nepatrnému zlomku lidí. Tohle není náhoda ani štěstí při tipování, ale záběr, který titulek popisuje slovem kapacita zcela doslova. Smekáme.` }
+];
+
+var odpovedi = new Array(otazky.length).fill(null);
+var vyhodnoceno = false;
+
+var kvizEl = document.getElementById('kviz');
+var vyhodnotitEl = document.getElementById('vyhodnotit');
+var hlaskaEl = document.getElementById('hlaska');
+var vysledekEl = document.getElementById('vysledek');
+var skoreEl = document.getElementById('skore');
+var hodnoceniEl = document.getElementById('hodnoceni');
+var znovuEl = document.getElementById('znovu');
+
+function postav() {
+  kvizEl.innerHTML = '';
+  otazky.forEach(function (o, i) {
+    var box = document.createElement('div');
+    box.className = 'otazka';
+
+    var zneni = document.createElement('p');
+    zneni.className = 'zneni';
+    zneni.textContent = o.text;
+    box.appendChild(zneni);
+
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'varianta';
+      btn.textContent = v;
+      btn.setAttribute('data-o', String(i));
+      btn.setAttribute('data-v', String(j));
+      btn.addEventListener('click', function () {
+        if (vyhodnoceno) { return; }
+        odpovedi[i] = j;
+        var sourozenci = box.querySelectorAll('.varianta');
+        for (var k = 0; k < sourozenci.length; k++) {
+          sourozenci[k].classList.remove('vybrana');
+        }
+        btn.classList.add('vybrana');
+        obnovTlacitko();
+      });
+      box.appendChild(btn);
+    });
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function obnovTlacitko() {
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  vyhodnotitEl.disabled = !hotovo;
+  if (hotovo) { hlaskaEl.textContent = ''; }
+}
+
+vyhodnotitEl.addEventListener('click', function () {
+  if (vyhodnotitEl.disabled) {
+    hlaskaEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  vyhodnoceno = true;
+  var skore = 0;
+  var boxy = kvizEl.querySelectorAll('.otazka');
+  for (var i = 0; i < boxy.length; i++) {
+    var tlacitka = boxy[i].querySelectorAll('.varianta');
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove('vybrana');
+      if (j === otazky[i].spravna) {
+        tlacitka[j].classList.add('spravna');
+      } else if (odpovedi[i] === j) {
+        tlacitka[j].classList.add('spatna');
+      }
+    }
+    if (odpovedi[i] === otazky[i].spravna) { skore++; }
+  }
+  vyhodnotitEl.disabled = true;
+  skoreEl.textContent = skore + ' z ' + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore >= hodnoceni[h].min && skore <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+  vysledekEl.style.display = 'block';
+  vysledekEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+znovuEl.addEventListener('click', function () {
+  odpovedi = new Array(otazky.length).fill(null);
+  vyhodnoceno = false;
+  vysledekEl.style.display = 'none';
+  hlaskaEl.textContent = '';
+  postav();
+  obnovTlacitko();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+postav();
+obnovTlacitko();
+</script>
+</body>
+</html>
