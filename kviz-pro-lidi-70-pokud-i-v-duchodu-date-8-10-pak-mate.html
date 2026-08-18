@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro lidi 70+: pokud i v důchodu dáte 8/10, pak máte nestárnoucí mozek</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #8a5a5a; margin-top: 14px; font-size: .95rem; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+  border-top: 4px solid #5b7e5f;
+  display: none;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+#again {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#again:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro lidi 70+: pokud i v důchodu dáte 8/10, pak máte nestárnoucí mozek</h1>
+<p class="perex">Devět otázek napříč obory a jedna na čistý úsudek. Žádné počítání, žádný spěch. Projděte je v klidu, poznamenejte si odpovědi a teprve potom se podívejte na výsledky. Osm správných je hranice, za kterou už začíná něco výjimečného.</p>
+
+<div id="quiz"></div>
+
+<button id="submit" disabled>Vyhodnotit</button>
+<div id="warn"></div>
+
+<div id="result">
+  <div id="score"></div>
+  <p id="verdict"></p>
+  <button id="again">Zkusit znovu</button>
+</div>
+</div>
+
+<script>
+var QUESTIONS = [
+  {
+    q: `1. Který průliv odděluje dánský ostrov Sjælland od švédské pevniny?`,
+    o: [`a) Kattegat`, `b) Öresund`, `c) Skagerrak`, `d) Velký Belt`],
+    c: 1
+  },
+  {
+    q: `2. Jak se v myslivecké mluvě nazývají uši srnčí a jelení zvěře?`,
+    o: [`a) světla`, `b) slechy`, `c) běhy`, `d) lopaty`],
+    c: 1
+  },
+  {
+    q: `3. Ve kterém americkém městě byl v roce 1968 zastřelen Martin Luther King?`,
+    o: [`a) Atlanta`, `b) Dallas`, `c) Memphis`, `d) Birmingham`],
+    c: 2
+  },
+  {
+    q: `4. Jak se jmenoval lunární modul, ve kterém v roce 1969 přistáli první lidé na Měsíci?`,
+    o: [`a) Columbia`, `b) Aurora`, `c) Eagle`, `d) Falcon`],
+    c: 2
+  },
+  {
+    q: `5. Co znamená podstatné jméno úhona?`,
+    o: [`a) újma, poškození`, `b) výtka, pokárání`, `c) námaha, dřina`, `d) nesnáz, potíž`],
+    c: 0
+  },
+  {
+    q: `6. Co jistě platí, jestliže všichni žáci této třídy nosí brýle a nikdo, kdo nosí brýle, nesedí v poslední lavici?`,
+    o: [`a) Někteří žáci této třídy sedí v poslední lavici.`, `b) Žádný žák této třídy nesedí v poslední lavici.`, `c) Každý, kdo nosí brýle, je žákem této třídy.`, `d) Ze zadání nelze nic jistě určit.`],
+    c: 1
+  },
+  {
+    q: `7. Který státní svátek připadá v Česku na 28. září?`,
+    o: [`a) Den vzniku samostatného československého státu`, `b) Den slovanských věrozvěstů Cyrila a Metoděje`, `c) Den boje za svobodu a demokracii a Mezinárodní den studentstva`, `d) Den české státnosti`],
+    c: 3
+  },
+  {
+    q: `8. Podle projektu kterého architekta byla postavena budova Národního divadla v Praze?`,
+    o: [`a) Josef Zítek`, `b) Josef Fanta`, `c) Antonín Balšánek`, `d) Jan Kotěra`],
+    c: 0
+  },
+  {
+    q: `9. Jak se jmenoval kůň dona Quijota?`,
+    o: [`a) Bukefalos`, `b) Marengo`, `c) Rocinante`, `d) Incitatus`],
+    c: 2
+  },
+  {
+    q: `10. Ve kterém městě sídlí Mezinárodní olympijský výbor?`,
+    o: [`a) Ženeva`, `b) Bern`, `c) Curych`, `d) Lausanne`],
+    c: 3
+  }
+];
+
+var VERDICTS = [
+  { min: 0, max: 3, text: `Vybavování dnes vázlo a několik okruhů zůstalo mimo dosah. Není to nic nezvratného, paměť reaguje na zátěž v každém věku. Přečtěte si denně kousek textu, který vás donutí zastavit se a přemýšlet, a příště vyjde jiné číslo.` },
+  { min: 4, max: 6, text: `Základ drží pevně. Zaváhání přišla tam, kde se proti sobě postavily dvě blízké možnosti a bylo potřeba je odlišit v detailu. To je věc přesnosti, ne úbytku: nejrychleji pomůže trénink na konkrétní jméno místo obecné kategorie.` },
+  { min: 7, max: 7, text: `Velmi solidní výsledek. Většinu oborů máte v ruce a podobně znějící nabídka vás svedla jen výjimečně. K osmičce, kterou slibuje titulek, chyběl jediný bod.` },
+  { min: 8, max: 9, text: `Přesně to, o čem mluví titulek. Osm a víc bodů znamená hlavu, která se rozhoduje rychle i přesně a nenechá se strhnout lákavější variantou.` },
+  { min: 10, max: 10, text: `Nestárnoucí mozek v čisté podobě. Devět věcných otázek napříč obory i úloha na logické vyvozování, tedy dvě schopnosti, které spolu obvykle nechodí ruku v ruce, a ani jedno zaváhání. Deset z deseti znamená, že vás nesvedla ani jedna z připravených pastí.` }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var locked = false;
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var againEl = document.getElementById(`again`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var t = document.createElement(`p`);
+    t.className = `q-text`;
+    t.textContent = item.q;
+    box.appendChild(t);
+    item.o.forEach(function (opt, oi) {
+      var b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = opt;
+      b.setAttribute(`data-q`, String(qi));
+      b.setAttribute(`data-o`, String(oi));
+      b.addEventListener(`click`, function () { pick(qi, oi); });
+      box.appendChild(b);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function pick(qi, oi) {
+  if (locked) { return; }
+  answers[qi] = oi;
+  var boxes = quizEl.getElementsByClassName(`q`);
+  var btns = boxes[qi].getElementsByClassName(`opt`);
+  for (var i = 0; i < btns.length; i++) {
+    if (i === oi) { btns[i].classList.add(`selected`); }
+    else { btns[i].classList.remove(`selected`); }
+  }
+  refresh();
+}
+
+function refresh() {
+  var done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+  if (done) { warnEl.textContent = ``; }
+}
+
+function evaluate() {
+  if (locked) { return; }
+  if (answers.some(function (a) { return a === null; })) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  warnEl.textContent = ``;
+  var score = 0;
+  var boxes = quizEl.getElementsByClassName(`q`);
+  QUESTIONS.forEach(function (item, qi) {
+    var btns = boxes[qi].getElementsByClassName(`opt`);
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].disabled = true;
+      btns[i].classList.remove(`selected`);
+      if (i === item.c) { btns[i].classList.add(`correct`); }
+      else if (i === answers[qi]) { btns[i].classList.add(`wrong`); }
+    }
+    if (answers[qi] === item.c) { score++; }
+  });
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  var v = ``;
+  VERDICTS.forEach(function (band) {
+    if (score >= band.min && score <= band.max) { v = band.text; }
+  });
+  verdictEl.textContent = v;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  locked = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.style.display = `none`;
+  warnEl.textContent = ``;
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+againEl.addEventListener(`click`, reset);
+
+build();
+refresh();
+</script>
+</body>
+</html>
