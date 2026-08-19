@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Velký test matematiky pro seniory: 10 příkladů ukáže, jestli byste neměli v důchodu více trénovat mozek</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 32px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  input.answer {
+    display: block;
+    width: 100%;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+  }
+  input.answer:focus { outline: none; background: #ede8e1; border: 1px solid #a89e92; }
+  input.answer.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; font-weight: bold; }
+  input.answer.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; font-weight: bold; }
+  .solution { margin: 14px 0 0; font-size: 1rem; color: #1e5631; }
+  #submit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #hint { text-align: center; color: #8c7b6b; margin-top: 14px; font-size: 1rem; }
+  #result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+    border-top: 4px solid #5b7e5f;
+    display: none;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #retry {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #retry:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .q { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Velký test matematiky pro seniory: 10 příkladů ukáže, jestli byste neměli v důchodu více trénovat mozek</h1>
+  <p class="perex">Deset příkladů bez kalkulačky, bez tužky a bez papíru, všechno se počítá v hlavě. Procenta, mocniny, zlomek, převod jednotek i řada s ukrytým pravidlem. Podle počtu bodů se na konci dozvíte, jestli byste měli v důchodu počítání trénovat víc.</p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <p id="hint"></p>
+  <div id="result">
+    <p id="score"></p>
+    <p id="verdict"></p>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var QUESTIONS = [
+  { text: `1. Kolik metrů čtverečních měří obdélníková zahrada o rozměrech 26 a 15 metrů?`, answers: [`390`] },
+  { text: `2. Kolik je 45 % z 320?`, answers: [`144`] },
+  { text: `3. Kolik hodin mají tři týdny?`, answers: [`504`] },
+  { text: `4. Kolik je 17² + 8²?`, answers: [`353`] },
+  { text: `5. Sedm stejných balení váží dohromady 371 gramů. Kolik gramů váží čtyři taková balení?`, answers: [`212`] },
+  { text: `6. Za tři stejné knihy a jednu dražší za 340 korun bylo zaplaceno 1 015 korun. Kolik korun stála jedna ze tří stejných knih?`, answers: [`225`] },
+  { text: `7. Čtyři pětiny nákladu tvoří 480 kilogramů. Kolik kilogramů váží celý náklad?`, answers: [`600`] },
+  { text: `8. Kolik je 576 ÷ 18?`, answers: [`32`] },
+  { text: `9. Za kolik minut ujede vlak 234 kilometrů průměrnou rychlostí 78 kilometrů za hodinu?`, answers: [`180`] },
+  { text: `10. Které číslo pokračuje v řadě 2, 4, 12, 48?`, answers: [`240`] }
+];
+
+var VERDICTS = [
+  { min: 0, max: 3, text: `Na otázku z titulku odpovídá tenhle výsledek bez okolků: ano, počítání zpaměti si u vás zaslouží pravidelné místo v týdnu. Tři body a méně přitom obvykle neznamenají, že byste postupy neznali. Spíš se stalo, že první krok jste spočítali dobře, jenže během druhého jste o jeho výsledek přišli a delší úloha tím spadla celá. Doporučení je nudné, zato funguje: vyberte si jeden druh úlohy z tohoto testu, třeba procenta, a týden si z něj dávejte denně tři příklady. Příští týden vyměňte procenta za dělení dvojciferným číslem, pak za převod jednotek a nakonec za slovní úlohu. Až projdete čtyři druhy, pusťte si těchto deset příkladů ještě jednou.` },
+  { min: 4, max: 6, text: `Půlka bodů, a odpověď na titulek zní: trénovat ano, ale ne všechno. Polovinu úloh jste vyřešili, takže samotné počítání vám slouží. Body jste ztratili tam, kde se k výsledku nedá dojít rovnou a musíte si nejdřív dopočítat něco, co v zadání vůbec nestojí: celek ze zlomku, čas z rychlosti, hodiny z týdnů. To není o rychlosti, ale o trpělivosti s postupem. Doporučení: vezměte si tři úlohy, které vám dnes nevyšly, a rozeberte je znovu krok za krokem, každý krok napsaný na papíře, dokud vám celý řetěz nezůstane v hlavě sám od sebe. Pak si třikrát týdně dejte pět příkladů přesně toho druhu, který vás zastavil. Ostatní druhy zatím nechte být, z těch už víc nevytěžíte.` },
+  { min: 7, max: 9, text: `Sedm až devět bodů znamená, že odpověď na titulek je u vás spíš ne. Víc trénovat nepotřebujete, má smysl trénovat jinak. Procenta, druhé mocniny i slovní úlohy o několika krocích vám vyšly, a to jsou přesně ty typy, které se z hlavy počítají nejhůř. Chybějící bod nebo dva jste nechali tam, kde se před samotným počítáním musí nejdřív odhalit pravidlo nebo se celá úloha musí obrátit naruby. Doporučení: přestaňte si zadávat příklady, které dáte do deseti vteřin, a jděte po tom, u čeho se musíte zastavit. Dvakrát týdně čtvrthodina řad s proměnlivým násobitelem, úloh s neznámou nebo přepočtů rychlosti a času vám udrží formu líp než každodenní kolo snadných počtů.` },
+  { min: 10, max: 10, text: `Plný počet, takže na otázku z titulku si odpovídáte sami: v počítání z hlavy vás nemá kdo poučovat. Prošli jste převodem jednotek, procenty, druhými mocninami, přímou úměrou, zlomkem počítaným pozpátku i řadou, ve které se násobitel s každým členem mění, a ani u jedné úlohy vám čísla po cestě neutekla. Doporučení: takhle nastavená hlava se neudrží opakováním toho, co už umí, ale zadáním, u kterého napoprvé neuspěje. Jednou týdně si dejte jedinou úlohu, která vás doopravdy zabrzdí: procento z procenta, rozdělení částky mezi tři nestejné podíly, sudoku na nejvyšší obtížnosti nebo slovní úlohu, kterou musíte nejdřív přepsat do rovnice. Jedna taková vydá za dvacet příkladů, které máte hotové dřív, než je dočtete.` }
+];
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var hintEl = document.getElementById(`hint`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryEl = document.getElementById(`retry`);
+var inputs = [];
+var locked = false;
+
+function normalize(value) {
+  return String(value)
+    .toLowerCase()
+    .normalize(`NFD`)
+    .replace(/[\u0300-\u036f]/g, ``)
+    .replace(/[\s\u00a0\u202f]/g, ``)
+    .replace(/[.,]$/, ``)
+    .trim();
+}
+
+function build() {
+  quizEl.innerHTML = ``;
+  inputs = [];
+  locked = false;
+  QUESTIONS.forEach(function (q, i) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+
+    var p = document.createElement(`p`);
+    p.className = `q-text`;
+    p.textContent = q.text;
+    box.appendChild(p);
+
+    var input = document.createElement(`input`);
+    input.className = `answer`;
+    input.type = `text`;
+    input.setAttribute(`inputmode`, `numeric`);
+    input.setAttribute(`autocomplete`, `off`);
+    input.setAttribute(`aria-label`, `Odpověď na otázku ` + (i + 1));
+    input.placeholder = `Napište odpověď`;
+    input.addEventListener(`input`, refresh);
+    box.appendChild(input);
+    inputs.push(input);
+
+    var sol = document.createElement(`p`);
+    sol.className = `solution`;
+    sol.style.display = `none`;
+    box.appendChild(sol);
+    q.solutionEl = sol;
+
+    quizEl.appendChild(box);
+  });
+  refresh();
+  resultEl.style.display = `none`;
+  hintEl.textContent = ``;
+}
+
+function allAnswered() {
+  return inputs.every(function (input) { return input.value.trim() !== ``; });
+}
+
+function refresh() {
+  if (locked) { return; }
+  submitEl.disabled = !allAnswered();
+  if (submitEl.disabled === false) { hintEl.textContent = ``; }
+}
+
+function evaluate() {
+  if (locked) { return; }
+  if (!allAnswered()) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  hintEl.textContent = ``;
+  var score = 0;
+  QUESTIONS.forEach(function (q, i) {
+    var input = inputs[i];
+    var given = normalize(input.value);
+    var ok = q.answers.some(function (a) { return normalize(a) === given; });
+    input.disabled = true;
+    if (ok) {
+      score = score + 1;
+      input.classList.add(`correct`);
+      q.solutionEl.style.display = `none`;
+    } else {
+      input.classList.add(`wrong`);
+      q.solutionEl.textContent = `Správná odpověď: ` + q.answers[0];
+      q.solutionEl.style.display = `block`;
+    }
+  });
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  var band = VERDICTS.filter(function (v) { return score >= v.min && score <= v.max; })[0];
+  verdictEl.textContent = band ? band.text : ``;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+retryEl.addEventListener(`click`, function () {
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+</script>
+</body>
+</html>
