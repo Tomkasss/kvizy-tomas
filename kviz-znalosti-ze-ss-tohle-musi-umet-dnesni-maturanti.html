@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz znalostí ze SŠ: tohle musí umět dnešní maturanti a většina dospělých nedá ani 7/10</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 36px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.5; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  .textpole {
+    width: 100%;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+  }
+  #vyhodnotit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hlaska { text-align: center; color: #8c5b5b; margin-top: 14px; font-size: .95rem; }
+  #vysledek {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 40px;
+    display: none;
+  }
+  .skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  .hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+  #znovu {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #znovu:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="nadpis"></h1>
+  <p class="perex" id="perex"></p>
+  <div id="kviz"></div>
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p class="hlaska" id="hlaska"></p>
+  <div id="vysledek">
+    <p class="skore" id="skore"></p>
+    <p class="hodnoceni" id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var NADPIS = `Kvíz znalostí ze SŠ: tohle musí umět dnešní maturanti a většina dospělých nedá ani 7/10`;
+var PEREX = `Deset otázek napříč středoškolskými předměty, od češtiny a dějepisu přes přírodní vědy a zeměpis až po umění, literaturu a základy společenských věd. Maturitní laťka tohoto kvízu leží na sedmi bodech. Dosáhnete na ni líp než dnešní maturitní ročník?`;
+
+var OTAZKY = [
+  {
+    zneni: `1. Kolik hlasů z 200 poslanců je nutných ke schválení ústavního zákona v Poslanecké sněmovně?`,
+    varianty: [`a) 100`, `b) 101`, `c) 120`, `d) 134`],
+    spravna: 2
+  },
+  {
+    zneni: `2. Jak se nazývá dlouhý výběžek nervové buňky, který vede vzruch směrem od těla buňky k dalším buňkám?`,
+    varianty: [`a) dendrit`, `b) axon`, `c) synapse`, `d) myelin`],
+    spravna: 1
+  },
+  {
+    zneni: `3. Které z těchto slov nevzniklo skládáním?`,
+    varianty: [`a) tlakoměr`, `b) rukopis`, `c) vodopád`, `d) zednictví`],
+    spravna: 3
+  },
+  {
+    zneni: `4. Jak se nazýval nejvyšší úřad římské republiky, do kterého se volili vždy dva muži na jeden rok?`,
+    varianty: [`a) konzul`, `b) prétor`, `c) tribun lidu`, `d) kvestor`],
+    spravna: 0
+  },
+  {
+    zneni: `5. Který půdní typ vzniká na vápencovém a dolomitovém podloží a vyznačuje se vysokým podílem půdního skeletu?`,
+    varianty: [`a) černozem`, `b) rendzina`, `c) podzol`, `d) hnědozem`],
+    spravna: 1
+  },
+  {
+    zneni: `6. Jak se nazývá jev, při němž vlnění proniká za překážkou i do oblasti geometrického stínu?`,
+    varianty: [`a) ohyb`, `b) lom`, `c) interference`, `d) polarizace`],
+    spravna: 0
+  },
+  {
+    zneni: `7. Který zákon říká, že stejné objemy plynů obsahují za stejné teploty a tlaku stejný počet molekul?`,
+    varianty: [`a) Boyleův-Mariottův zákon`, `b) Gay-Lussacův zákon`, `c) Daltonův zákon`, `d) Avogadrův zákon`],
+    spravna: 3
+  },
+  {
+    zneni: `8. Který malíř je považován za vůdčí osobnost fauvismu?`,
+    varianty: [`a) Wassily Kandinsky`, `b) Marc Chagall`, `c) Henri Matisse`, `d) Amedeo Modigliani`],
+    spravna: 2
+  },
+  {
+    zneni: `9. Kdo je autorem básnické skladby Noc s Hamletem?`,
+    varianty: [`a) František Halas`, `b) František Hrubín`, `c) Vladimír Holan`, `d) Jaroslav Seifert`],
+    spravna: 2
+  },
+  {
+    zneni: `10. Kdo je autorem spisu O duchu zákonů?`,
+    varianty: [`a) Jean-Jacques Rousseau`, `b) Charles Louis Montesquieu`, `c) Voltaire`, `d) John Locke`],
+    spravna: 1
+  }
+];
+
+var HODNOCENI = [
+  { min: 0, max: 3, text: `Maturitní laťka tohoto kvízu leží na sedmi bodech a vaše skóre zůstalo hluboko pod ní. Tři a méně bodů znamená, že středoškolská látka ve vás přežila jen v hrubých obrysech. Na přesná fakta a odborné termíny, na kterých kvíz stojí, to zatím nestačí.` },
+  { min: 4, max: 6, text: `Zhruba polovina bodů, a přesně tady končí většina dospělých řešitelů. Na maturitní laťku sedmi bodů vám chybí jeden až tři body, což není propast, ale pár kroků. Vaše školní znalosti tedy zůstaly použitelné, jen už nesahají tak hluboko, jak by u maturity musely. Průměr dospělých jste zvládli, maturanta ještě ne.` },
+  { min: 7, max: 9, text: `Maturitní laťku sedmi bodů jste překonali a to se v tomhle kvízu nepovede každému. Váš výsledek odpovídá pásmu, ve kterém se pohybují čerství maturanti, ne průměrní dospělí. Do plného počtu vám zbývá jeden až tři body a právě ty oddělují velmi dobrý výsledek od výjimečného.` },
+  { min: 10, max: 10, text: `Plný počet, deset z deseti, a to je v tomhle nastavení vzácné i mezi maturanty. Laťku sedmi bodů jste nepřekonali o kousek, ale s velkou rezervou. Takový výsledek už neměří maturitní úroveň, ale znalosti, které vydržely dlouho po škole a drží se napříč všemi obory zadání. Klobouk dolů.` }
+];
+
+var odpovedi = new Array(OTAZKY.length).fill(null);
+var hotovo = false;
+
+var elKviz = document.getElementById(`kviz`);
+var elVyhodnotit = document.getElementById(`vyhodnotit`);
+var elHlaska = document.getElementById(`hlaska`);
+var elVysledek = document.getElementById(`vysledek`);
+var elSkore = document.getElementById(`skore`);
+var elHodnoceni = document.getElementById(`hodnoceni`);
+var elZnovu = document.getElementById(`znovu`);
+
+document.getElementById(`nadpis`).textContent = NADPIS;
+document.getElementById(`perex`).textContent = PEREX;
+
+function vykresli() {
+  elKviz.innerHTML = ``;
+  OTAZKY.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    var z = document.createElement(`p`);
+    z.className = `zneni`;
+    z.textContent = o.zneni;
+    box.appendChild(z);
+
+    o.varianty.forEach(function (v, j) {
+      var b = document.createElement(`button`);
+      b.className = `varianta`;
+      b.type = `button`;
+      b.textContent = v;
+      b.setAttribute(`data-otazka`, String(i));
+      b.setAttribute(`data-varianta`, String(j));
+      b.addEventListener(`click`, function () {
+        if (hotovo) { return; }
+        odpovedi[i] = j;
+        var vsechny = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < vsechny.length; k++) {
+          vsechny[k].classList.remove(`vybrana`);
+        }
+        b.classList.add(`vybrana`);
+        zkontrolujPripravenost();
+      });
+      box.appendChild(b);
+    });
+
+    elKviz.appendChild(box);
+  });
+}
+
+function zkontrolujPripravenost() {
+  var vse = odpovedi.every(function (o) { return o !== null; });
+  elVyhodnotit.disabled = !vse;
+  if (vse) { elHlaska.textContent = ``; }
+}
+
+elVyhodnotit.addEventListener(`click`, function () {
+  if (hotovo) { return; }
+  if (!odpovedi.every(function (o) { return o !== null; })) {
+    elHlaska.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  hotovo = true;
+  elHlaska.textContent = ``;
+
+  var body = 0;
+  var boxy = elKviz.querySelectorAll(`.otazka`);
+  OTAZKY.forEach(function (o, i) {
+    var tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove(`vybrana`);
+      if (j === o.spravna) {
+        tlacitka[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === o.spravna) { body++; }
+  });
+
+  elVyhodnotit.disabled = true;
+  elSkore.textContent = body + ` z ` + OTAZKY.length;
+
+  var text = ``;
+  for (var h = 0; h < HODNOCENI.length; h++) {
+    if (body >= HODNOCENI[h].min && body <= HODNOCENI[h].max) {
+      text = HODNOCENI[h].text;
+      break;
+    }
+  }
+  elHodnoceni.textContent = text;
+  elVysledek.style.display = `block`;
+  elVysledek.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+elZnovu.addEventListener(`click`, function () {
+  odpovedi = new Array(OTAZKY.length).fill(null);
+  hotovo = false;
+  elVysledek.style.display = `none`;
+  elVyhodnotit.disabled = true;
+  elHlaska.textContent = ``;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+vykresli();
+</script>
+</body>
+</html>
