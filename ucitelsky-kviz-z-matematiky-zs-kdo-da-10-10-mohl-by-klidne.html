@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Učitelský kvíz z matematiky ZŠ: kdo dá 10/10, mohl by klidně vyučovat na 2. stupni</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 32px 16px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .txt {
+    width: 100%;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+  }
+  .txt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .txt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .sol { margin-top: 14px; font-size: 1rem; }
+  .sol.ok { color: #1e5631; }
+  .sol.no { color: #721c24; }
+  #eval, #again {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #eval:hover { background: #4a6b4e; }
+  #eval:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #again { background: #8c7b6b; }
+  #again:hover { background: #756658; }
+  #warn { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.4em; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+    display: none;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .q { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Učitelský kvíz z matematiky ZŠ: kdo dá 10/10, mohl by klidně vyučovat na 2. stupni</h1>
+  <p class="perex">Deset úloh z učiva šesté až deváté třídy, počítá se jen v hlavě a na papíře. Geometrie, procenta, úměrnost i dělitelnost, a kalkulačka zůstává zavřená. Kdo dá plný počet, mohl by se klidně postavit před tabuli na druhém stupni.</p>
+  <div id="quiz"></div>
+  <button id="eval" disabled>Vyhodnotit</button>
+  <div id="warn"></div>
+  <div id="result">
+    <p id="score"></p>
+    <p id="verdict"></p>
+    <button id="again">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var QUESTIONS = [
+  {
+    q: `1. Čtverec má obvod 36 centimetrů. Kolik centimetrů čtverečních měří jeho obsah?`,
+    type: `choice`,
+    options: [`81`, `72`, `144`, `324`],
+    correct: 0
+  },
+  {
+    q: `2. Šest stejně výkonných bagrů vyhloubí základy stavby za 12 dní. Za kolik dní vyhloubí stejné základy osm takových bagrů?`,
+    type: `choice`,
+    options: [`10`, `6`, `8`, `9`],
+    correct: 3
+  },
+  {
+    q: `3. Ve třídě je 12 chlapců s průměrnou výškou 160 centimetrů a 18 dívek s průměrnou výškou 155 centimetrů. Kolik centimetrů měří průměrná výška celé třídy?`,
+    type: `choice`,
+    options: [`157,5`, `157`, `156`, `158`],
+    correct: 1
+  },
+  {
+    q: `4. Jakou hodnotu má výraz (x + 5)² − (x − 5)² pro x = 12?`,
+    type: `text`,
+    accept: [`240`],
+    show: `240`
+  },
+  {
+    q: `5. V trojúhelníku ABC měří úhel u vrcholu A 42 stupňů a úhel u vrcholu B je o 18 stupňů větší než úhel u vrcholu C. Kolik stupňů měří úhel u vrcholu B?`,
+    type: `choice`,
+    options: [`69`, `87`, `78`, `60`],
+    correct: 2
+  },
+  {
+    q: `6. Vklad 40 000 korun se úročí 5 procenty ročně, připsané úroky se dále úročí spolu s vkladem a daň se neodvádí. Kolik korun bude na účtu po dvou letech?`,
+    type: `text`,
+    accept: [`44100`, `44100kc`, `44100korun`],
+    show: `44100`
+  },
+  {
+    q: `7. Obdélníkový pozemek o rozměrech 84 metrů a 126 metrů se má beze zbytku rozdělit na stejné čtvercové parcely co největší velikosti. Kolik metrů měří strana jedné parcely?`,
+    type: `choice`,
+    options: [`21`, `14`, `63`, `42`],
+    correct: 3
+  },
+  {
+    q: `8. Na mapě v měřítku 1 : 50 000 má rybník tvar obdélníku o rozměrech 2 centimetry a 3 centimetry. Kolik hektarů měří jeho skutečná plocha?`,
+    type: `text`,
+    accept: [`150`, `150ha`],
+    show: `150`
+  },
+  {
+    q: `9. Přední kolo jízdního kola má průměr 65 centimetrů a počítá se s hodnotou π = 3,14. Kolik metrů toto kolo ujede při 120 otáčkách, zaokrouhleno na celé metry?`,
+    type: `choice`,
+    options: [`490`, `245`, `234`, `204`],
+    correct: 1
+  },
+  {
+    q: `10. Kolik centimetrů čtverečních měří povrch pravidelného čtyřbokého jehlanu, jehož podstavná hrana měří 14 centimetrů a výška 24 centimetrů?`,
+    type: `text`,
+    accept: [`896`, `896cm2`],
+    show: `896`
+  }
+];
+
+var LETTERS = [`a)`, `b)`, `c)`, `d)`];
+
+var BANDS = [
+  {
+    min: 0, max: 3,
+    text: `Učivo druhého stupně je u vás zasuté hluboko. Většina úloh v tomhle kvízu žádá dva kroky za sebou nebo si nejdřív dopočítat údaj, který v zadání vůbec nestojí, a stačí jediný chybný mezivýsledek, aby padl celý výpočet. K učitelské laťce, tedy osmi až devíti bodům, vám schází nejméně pět bodů a mezi vámi a ní leží ještě celé střední pásmo čtyř až šesti bodů. Vezměte si jeden okruh, třeba obvody a obsahy, a projděte si ho od vzorce po slovní úlohu.`
+  },
+  {
+    min: 4, max: 6,
+    text: `Čtyři až šest bodů z deseti, tedy výsledek ve středním pásmu škály. Kvíz je stavěný tak, že vedle sebe stojí úlohy na jediný krok a úlohy, kde se musí nejdřív dopočítat pomocný rozměr nebo přepočítat mezi délkou a plochou, a ten druhý typ je znatelně náročnější. Do učitelského pásma osmi až devíti bodů vám chybí dva až čtyři body, na plný počet čtyři až šest.`
+  },
+  {
+    min: 7, max: 9,
+    text: `Silný výsledek. Učitelská laťka leží na osmi až devíti bodech, takže s devíti nebo osmi body na ní stojíte, se sedmi body vám k ní schází jediný bod. Kvíz přitom u uzavřených otázek schválně nabízí i varianty postavené na typické chybě, takže takový počet bodů se náhodou netrefí. Na plný počet vám zbývá jeden až tři body a vyplatí se je hledat tam, kde jste si u výsledku nebyli jistí.`
+  },
+  {
+    min: 10, max: 10,
+    text: `Plný počet, a ten je vzácný i mezi lidmi, kteří matematiku denně používají. Prošli jste bez zaváhání rovinnou geometrií, nepřímou úměrností, váženým průměrem, algebraickým vzorcem, úhly v trojúhelníku, složeným úročením, největším společným dělitelem, měřítkem, kružnicí i povrchem jehlanu, tedy prakticky celou osnovou druhého stupně. Titulek splněn beze zbytku: s takovým výsledkem byste matematiku na druhém stupni klidně mohli učit a žáci by vás na žádné z těchto úloh nenachytali.`
+  }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var locked = false;
+
+var quizEl = document.getElementById(`quiz`);
+var evalBtn = document.getElementById(`eval`);
+var againBtn = document.getElementById(`again`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+
+function norm(s) {
+  return String(s)
+    .toLowerCase()
+    .normalize(`NFD`)
+    .replace(/[̀-ͯ]/g, ``)
+    .replace(/\s+/g, ``)
+    .replace(/,/g, `.`);
+}
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+
+    var p = document.createElement(`p`);
+    p.className = `q-text`;
+    p.textContent = item.q;
+    box.appendChild(p);
+
+    if (item.type === `choice`) {
+      item.options.forEach(function (opt, oi) {
+        var b = document.createElement(`button`);
+        b.type = `button`;
+        b.className = `opt`;
+        b.textContent = LETTERS[oi] + ` ` + opt;
+        b.addEventListener(`click`, function () {
+          if (locked) { return; }
+          answers[qi] = oi;
+          var sibs = box.querySelectorAll(`.opt`);
+          for (var i = 0; i < sibs.length; i++) { sibs[i].classList.remove(`sel`); }
+          b.classList.add(`sel`);
+          refresh();
+        });
+        box.appendChild(b);
+      });
+    } else {
+      var input = document.createElement(`input`);
+      input.type = `text`;
+      input.className = `txt`;
+      input.setAttribute(`inputmode`, `numeric`);
+      input.setAttribute(`placeholder`, `Napište odpověď`);
+      input.addEventListener(`input`, function () {
+        if (locked) { return; }
+        var v = input.value.trim();
+        answers[qi] = v === `` ? null : v;
+        refresh();
+      });
+      box.appendChild(input);
+    }
+
+    var sol = document.createElement(`div`);
+    sol.className = `sol`;
+    sol.style.display = `none`;
+    box.appendChild(sol);
+
+    quizEl.appendChild(box);
+  });
+}
+
+function allAnswered() {
+  for (var i = 0; i < answers.length; i++) {
+    if (answers[i] === null) { return false; }
+  }
+  return true;
+}
+
+function refresh() {
+  evalBtn.disabled = !allAnswered();
+  if (evalBtn.disabled === false) { warnEl.textContent = ``; }
+}
+
+function isCorrect(qi) {
+  var item = QUESTIONS[qi];
+  if (item.type === `choice`) { return answers[qi] === item.correct; }
+  var given = norm(answers[qi]);
+  for (var i = 0; i < item.accept.length; i++) {
+    if (norm(item.accept[i]) === given) { return true; }
+  }
+  return false;
+}
+
+function evaluate() {
+  if (!allAnswered()) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  var score = 0;
+  var boxes = quizEl.querySelectorAll(`.q`);
+
+  QUESTIONS.forEach(function (item, qi) {
+    var box = boxes[qi];
+    var ok = isCorrect(qi);
+    if (ok) { score++; }
+    var sol = box.querySelector(`.sol`);
+
+    if (item.type === `choice`) {
+      var opts = box.querySelectorAll(`.opt`);
+      for (var i = 0; i < opts.length; i++) {
+        opts[i].classList.remove(`sel`);
+        opts[i].disabled = true;
+        if (i === item.correct) { opts[i].classList.add(`correct`); }
+        else if (i === answers[qi]) { opts[i].classList.add(`wrong`); }
+      }
+      if (!ok) {
+        sol.className = `sol no`;
+        sol.textContent = `Správná odpověď: ` + LETTERS[item.correct] + ` ` + item.options[item.correct];
+        sol.style.display = `block`;
+      } else {
+        sol.className = `sol ok`;
+        sol.textContent = `Správně`;
+        sol.style.display = `block`;
+      }
+    } else {
+      var input = box.querySelector(`.txt`);
+      input.disabled = true;
+      input.classList.add(ok ? `correct` : `wrong`);
+      sol.className = ok ? `sol ok` : `sol no`;
+      sol.textContent = ok ? `Správně` : `Správná odpověď: ` + item.show;
+      sol.style.display = `block`;
+    }
+  });
+
+  var band = BANDS[0];
+  for (var b = 0; b < BANDS.length; b++) {
+    if (score >= BANDS[b].min && score <= BANDS[b].max) { band = BANDS[b]; }
+  }
+
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  verdictEl.textContent = band.text;
+  evalBtn.disabled = true;
+  warnEl.textContent = ``;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  locked = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.style.display = `none`;
+  warnEl.textContent = ``;
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+evalBtn.addEventListener(`click`, evaluate);
+againBtn.addEventListener(`click`, reset);
+
+build();
+refresh();
+</script>
+</body>
+</html>
