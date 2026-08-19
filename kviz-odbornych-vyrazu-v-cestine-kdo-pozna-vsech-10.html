@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz odborných výrazů v češtině: kdo pozná všech 10, ten je jazykový mistr</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .question {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+    line-height: 1.45;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .locked .opt { cursor: default; }
+  #submit, #retry {
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #submit { background: #5b7e5f; }
+  #submit:hover:not(:disabled) { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #retry { background: #8c7b6b; }
+  #retry:hover { background: #756658; }
+  #warning { text-align: center; color: #a04040; margin-top: 14px; font-size: .95rem; display: none; }
+  #result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+    border-top: 4px solid #5b7e5f;
+    display: none;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 14px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+  @media (max-width: 767px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .question { padding: 20px; }
+    #submit, #retry { width: 100%; padding: 16px 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz odborných výrazů v češtině: kdo pozná všech 10, ten je jazykový mistr</h1>
+  <p class="perex">Deset odborných výrazů z různých oborů, které se v češtině běžně objevují, ale jejich přesný význam málokdo trefí. U každého vyberte jedno ze čtyř vysvětlení. Kdo pozná všech deset, zaslouží si titul jazykového mistra.</p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <p id="warning">Odpovězte prosím na všechny otázky</p>
+  <div id="result">
+    <p id="score"></p>
+    <p id="verdict"></p>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var QUESTIONS = [
+  {
+    q: `1. Co znamená výraz „interregnum“?`,
+    options: [
+      `doba, kdy za nezletilého panovníka vládne určený zástupce`,
+      `doba mezi koncem vlády panovníka a nástupem dalšího`,
+      `doba, po kterou panovník vládne společně se svým nástupcem`,
+      `zákaz církevních obřadů uvalený papežem na celou zemi`
+    ],
+    correct: 1
+  },
+  {
+    q: `2. Co znamená výraz „endemit“?`,
+    options: [
+      `druh žijící přirozeně jen na jednom omezeném území a nikde jinde`,
+      `druh, který kdysi obýval rozsáhlá území a dnes přežívá na zbytcích`,
+      `druh zavlečený člověkem do krajiny, v níž původně vůbec nežil`,
+      `druh, který se dokáže uchytit prakticky v kterémkoli koutě světa`
+    ],
+    correct: 0
+  },
+  {
+    q: `3. Co znamená výraz „paréza“?`,
+    options: [
+      `mimovolné záškuby svalů, které nelze potlačit vůlí`,
+      `ztráta citlivosti v celé postižené oblasti těla`,
+      `otok, který vznikne nahromaděním tekutiny ve tkáni`,
+      `oslabená hybnost, tedy jen částečné ochrnutí`
+    ],
+    correct: 3
+  },
+  {
+    q: `4. Co znamená výraz „kavitace“?`,
+    options: [
+      `postupné rozrušování povrchu kovu chemickým působením okolí`,
+      `rozkmitání součásti, jejíž vlastní frekvence se shodne s budicí`,
+      `vznik a zánik parních bublin v kapalině při poklesu tlaku`,
+      `porušení materiálu po mnoha opakovaných zatíženích`
+    ],
+    correct: 2
+  },
+  {
+    q: `5. Co znamená výraz „solipsismus“?`,
+    options: [
+      `názor, že o okolní skutečnosti nelze s jistotou poznat vůbec nic`,
+      `učení, podle nějž veškeré naše poznání pochází ze smyslů`,
+      `názor, že jisté je pouze vlastní vědomí, vnější svět nikoli`,
+      `přesvědčení, že dějiny nutně směřují k předem danému cíli`
+    ],
+    correct: 2
+  },
+  {
+    q: `6. Co znamená výraz „derogace“?`,
+    options: [
+      `zrušení právního předpisu či jeho části novějším předpisem`,
+      `doba mezi vyhlášením předpisu a dnem, kdy nabude účinnosti`,
+      `závazný výklad zákona podaný soudem nejvyšší instance`,
+      `vrácení schváleného zákona zákonodárnému sboru hlavou státu`
+    ],
+    correct: 0
+  },
+  {
+    q: `7. Co znamená výraz „melisma“?`,
+    options: [
+      `melodická ozdoba tvořená rychlým střídáním dvou sousedních tónů`,
+      `stále opakovaný basový motiv, nad nímž se rozvíjí melodie`,
+      `melodický motiv zopakovaný na jiné tónové výšce`,
+      `skupina několika tónů zpívaná na jedinou slabiku textu`
+    ],
+    correct: 3
+  },
+  {
+    q: `8. Co znamená výraz „anakolut“?`,
+    options: [
+      `vypuštění slova, které lze snadno doplnit z kontextu`,
+      `porušení stavby věty, kdy druhá část nenavazuje na první`,
+      `vsuvka volně vložená doprostřed rozestavěné věty`,
+      `smíšení dvou ustálených spojení do jednoho chybného obratu`
+    ],
+    correct: 1
+  },
+  {
+    q: `9. Co znamená výraz „ážio“?`,
+    options: [
+      `příplatek nad jmenovitou hodnotu cenného papíru nebo mince`,
+      `částka, o kterou cena zaostává za jmenovitou hodnotou`,
+      `sleva poskytnutá odběrateli za zaplacení faktury před lhůtou`,
+      `odměna obchodníka za zprostředkování burzovního obchodu`
+    ],
+    correct: 0
+  },
+  {
+    q: `10. Co znamená výraz „enkaustika“?`,
+    options: [
+      `malba do čerstvé vlhké omítky, s níž barva po zaschnutí splyne`,
+      `malba voskovými barvami, které se teplem zapouštějí do podkladu`,
+      `barvení látky, při němž se vzor nanáší voskem, jenž barvu nepropustí`,
+      `obraz sestavený z drobných barevných kamínků a skleněných kostiček`
+    ],
+    correct: 1
+  }
+];
+
+var VERDICTS = [
+  { min: 0, max: 3, text: `Odborné výrazy zatím míjíte. U většiny slov jste se rozhodovali podle zvuku a nabízená vysvětlení si byla příliš podobná na to, aby cit stačil. Titul jazykového mistra je odsud daleko, zato deset přesných významů právě přibylo.` },
+  { min: 4, max: 6, text: `Přesně to, co v tomhle kvízu posbírá běžný řešitel. Několik výrazů držíte pevně, u ostatních jste sáhli po tom nejpravděpodobněji znějícím a někdy vedle. Slušný základ, na mistrovský titul to ale zatím nestačí.` },
+  { min: 7, max: 9, text: `Výborný výsledek, jaký sem dotáhne opravdu sečtělý čtenář. Rozeznali jste i dvojice, kde se běžně chybuje, a přesný odstín významu vám neunikl. K mistrovskému titulu chybělo jen pár slov.` },
+  { min: 10, max: 10, text: `Plný počet, a ten se v tomhle kvízu povede jen hrstce lidí. Neuspěl proti vám ani jeden z těsných podobných významů a všech deset výrazů jste určili bez zaváhání. Titul jazykového mistra je váš právem.` }
+];
+
+var answers = [];
+var evaluated = false;
+var quizEl = document.getElementById('quiz');
+var submitEl = document.getElementById('submit');
+var warningEl = document.getElementById('warning');
+var resultEl = document.getElementById('result');
+var scoreEl = document.getElementById('score');
+var verdictEl = document.getElementById('verdict');
+var retryEl = document.getElementById('retry');
+
+function build() {
+  quizEl.innerHTML = '';
+  answers = [];
+  evaluated = false;
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    answers.push(null);
+    var box = document.createElement('div');
+    box.className = 'question';
+    var p = document.createElement('p');
+    p.className = 'qtext';
+    p.textContent = QUESTIONS[i].q;
+    box.appendChild(p);
+    for (var j = 0; j < QUESTIONS[i].options.length; j++) {
+      var btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.type = 'button';
+      btn.textContent = QUESTIONS[i].options[j];
+      btn.setAttribute('data-q', String(i));
+      btn.setAttribute('data-o', String(j));
+      btn.addEventListener('click', onPick);
+      box.appendChild(btn);
+    }
+    quizEl.appendChild(box);
+  }
+  submitEl.disabled = true;
+  warningEl.style.display = 'none';
+  resultEl.style.display = 'none';
+}
+
+function onPick(e) {
+  if (evaluated) return;
+  var btn = e.currentTarget;
+  var qi = parseInt(btn.getAttribute('data-q'), 10);
+  var oi = parseInt(btn.getAttribute('data-o'), 10);
+  answers[qi] = oi;
+  var box = btn.parentNode;
+  var opts = box.getElementsByClassName('opt');
+  for (var k = 0; k < opts.length; k++) {
+    opts[k].classList.remove('selected');
+  }
+  btn.classList.add('selected');
+  updateSubmit();
+}
+
+function allAnswered() {
+  for (var i = 0; i < answers.length; i++) {
+    if (answers[i] === null) return false;
+  }
+  return true;
+}
+
+function updateSubmit() {
+  if (allAnswered()) {
+    submitEl.disabled = false;
+    warningEl.style.display = 'none';
+  } else {
+    submitEl.disabled = true;
+  }
+}
+
+submitEl.addEventListener('click', function () {
+  if (!allAnswered()) {
+    warningEl.style.display = 'block';
+    return;
+  }
+  evaluated = true;
+  var score = 0;
+  var boxes = quizEl.getElementsByClassName('question');
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    var box = boxes[i];
+    box.classList.add('locked');
+    var opts = box.getElementsByClassName('opt');
+    for (var j = 0; j < opts.length; j++) {
+      opts[j].classList.remove('selected');
+      if (j === QUESTIONS[i].correct) {
+        opts[j].classList.add('correct');
+      } else if (j === answers[i]) {
+        opts[j].classList.add('wrong');
+      }
+    }
+    if (answers[i] === QUESTIONS[i].correct) score++;
+  }
+  scoreEl.textContent = score + ' z ' + QUESTIONS.length;
+  var text = '';
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score >= VERDICTS[v].min && score <= VERDICTS[v].max) {
+      text = VERDICTS[v].text;
+      break;
+    }
+  }
+  verdictEl.textContent = text;
+  submitEl.disabled = true;
+  warningEl.style.display = 'none';
+  resultEl.style.display = 'block';
+  resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+retryEl.addEventListener('click', function () {
+  build();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+build();
+</script>
+</body>
+</html>
