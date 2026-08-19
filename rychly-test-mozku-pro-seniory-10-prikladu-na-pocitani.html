@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rychlý test mozku pro seniory: 10 příkladů na počítání z hlavy odhalí, jak vám pracuje mozek v důchodu</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zadani { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.5; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+input[type="text"] {
+  display: block;
+  width: 100%;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+}
+input[type="text"]:focus { outline: none; background: #ede8e1; border: 1px solid #a89e92; }
+input.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; font-weight: bold; }
+input.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; font-weight: bold; }
+.reseni { margin-top: 14px; font-size: 1rem; line-height: 1.5; }
+.reseni.ok { color: #1e5631; }
+.reseni.chyba { color: #721c24; }
+#vyhodnotit, #znovu {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#znovu { background: #8c7b6b; }
+#znovu:hover { background: #756658; }
+#hlaska { text-align: center; color: #721c24; margin-top: 14px; font-size: 1rem; min-height: 1.2em; }
+#vysledek {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+  border-top: 4px solid #5b7e5f;
+  display: none;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+@media (max-width: 767px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka, #vysledek { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Rychlý test mozku pro seniory: 10 příkladů na počítání z hlavy odhalí, jak vám pracuje mozek v důchodu</h1>
+<p class="perex">Tužku, papír ani kalkulačku teď nepotřebujete, deset příkladů se počítá jenom v hlavě. Počítání zpaměti nejrychleji ukáže, jak vám to po šedesátce běhá. Nejdou po sobě od nejlehčího k nejtěžšímu, ten váš zádrhel může přijít kdekoliv. Kolik dáte vy?</p>
+
+<div id="otazky"></div>
+
+<div id="hlaska"></div>
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+
+<div id="vysledek">
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+
+<script>
+var OTAZKY = [
+  { zadani: `1. Kolik je 14 × 18?`, spravne: [`252`] },
+  { zadani: `2. Kolik je 16 % z 275?`, spravne: [`44`] },
+  { zadani: `3. Kolik je 15² − 11²?`, spravne: [`104`] },
+  { zadani: `4. Kolik je 24 × 3 + 96 ÷ 4?`, spravne: [`96`] },
+  { zadani: `5. Kolik je pět osmin z 344?`, spravne: [`215`] },
+  { zadani: `6. Kolik připadne na větší díl při rozdělení čísla 2 800 v poměru 3 : 4?`, spravne: [`1 600`, `1600`] },
+  { zadani: `7. Které číslo je o 47 menší než trojnásobek čísla 96?`, spravne: [`241`] },
+  { zadani: `8. Kolik je 513 ÷ 19?`, spravne: [`27`] },
+  { zadani: `9. Kolik je 8 000 − 2 465 − 1 738?`, spravne: [`3 797`, `3797`] },
+  { zadani: `10. Které číslo patří na místo otazníku v řadě 5, 6, 12, 13, 26, 27, ?`, spravne: [`54`] }
+];
+
+var HODNOCENI = [
+  { min: 0, max: 3, text: `Počtářská bystrost dnes běžela na půl plynu. Dvojciferné násobení a procenta z nekulatého základu vás zaskočila a mezivýsledky se v hlavě rozpadly dřív, než jste je stihli dopočítat do konce. Nejčastější příčina není hlava, ale nedostatek cviku: mozek si na kalkulačku v mobilu zvykne během pár měsíců. Konkrétní krok: každý den si zpaměti spočítejte tři příklady na dvojciferné násobení a výsledek si nechte v hlavě, než ho zkontrolujete. Po třech týdnech zkuste tenhle test znovu.` },
+  { min: 4, max: 6, text: `Střed tabulky a přesně to, co v tomhle testu vyjde většině řešitelů. Nejlehčí příklady jste dali s jistotou, ale u řetězení tří operací, zlomku z nekulatého čísla nebo poměru vám odpověď utekla. To ukazuje, že samotný počet umíte, jen se ztrácí pracovní paměť, tedy schopnost podržet mezivýsledek a zároveň počítat dál. Konkrétní krok: počítejte nahlas nebo po krocích a mezivýsledek si vždy jednou zopakujte, než jdete dál. Tenhle jediný návyk posouvá výsledek zpravidla o celé pásmo.` },
+  { min: 7, max: 9, text: `Výborný výkon. Dvojciferné násobení, procenta z nekulatého základu, mocniny i nekulaté dělení řešíte zpaměti tam, kde ostatní bez rozmýšlení vyťukají příklad do kalkulačky v telefonu, a mezivýsledky vám v hlavě drží pevně. Klopýtnutí jste nasbírali nejspíš u dvou nejdelších příkladů, kde se drží víc mezivýsledků naráz, tedy u odčítání dvou čtyřciferných čísel za sebou a u řady, kde se pravidlo mění ob člen. Konkrétní krok: zkuste si příště úmyslně těžké příklady na konec, když už je hlava unavená, a zvyšte laťku na dělení čtyřciferných čísel nebo na dělení se zbytkem.` },
+  { min: 10, max: 10, text: `Naprostá špička, kterou zvládne opravdu jen hrstka řešitelů. Bez jediné chyby jste prošli od dvojciferného násobení přes zlomek z nekulatého čísla a poměr až po nekulaté dělení a řadu se střídavým pravidlem. To znamená, že pracovní paměť, pozornost i početní rutina vám fungují společně, a právě jejich souhra bývá první, co při nedostatku podnětů vázne. Konkrétní krok: udržujte tenhle výkon náročnějším materiálem, tedy násobením dvou trojciferných čísel zpaměti, počítáním s pěti- a šesticifernými čísly nebo šachem, protože sval, který se nepoužívá, měkne i v nejlepší formě.` }
+];
+
+var vyhodnoceno = false;
+
+function normalizuj(s) {
+  return String(s)
+    .toLowerCase()
+    .normalize(`NFD`)
+    .replace(/[\u0300-\u036f]/g, ``)
+    .replace(/[\s.,]/g, ``)
+    .trim();
+}
+
+var obal = document.getElementById(`otazky`);
+var vstupy = [];
+
+OTAZKY.forEach(function (o, i) {
+  var box = document.createElement(`div`);
+  box.className = `otazka`;
+
+  var p = document.createElement(`p`);
+  p.className = `zadani`;
+  p.textContent = o.zadani;
+  box.appendChild(p);
+
+  var input = document.createElement(`input`);
+  input.type = `text`;
+  input.setAttribute(`inputmode`, `numeric`);
+  input.setAttribute(`autocomplete`, `off`);
+  input.placeholder = `Napište výsledek`;
+  input.addEventListener(`input`, prekresliTlacitko);
+  box.appendChild(input);
+  vstupy.push(input);
+
+  var reseni = document.createElement(`p`);
+  reseni.className = `reseni`;
+  reseni.style.display = `none`;
+  box.appendChild(reseni);
+  o._reseni = reseni;
+
+  obal.appendChild(box);
+});
+
+var tlacitko = document.getElementById(`vyhodnotit`);
+var hlaska = document.getElementById(`hlaska`);
+
+function vseZodpovezeno() {
+  return vstupy.every(function (v) { return normalizuj(v.value) !== ``; });
+}
+
+function prekresliTlacitko() {
+  if (vyhodnoceno) { return; }
+  tlacitko.disabled = !vseZodpovezeno();
+  if (!tlacitko.disabled) { hlaska.textContent = ``; }
+}
+
+tlacitko.addEventListener(`click`, function () {
+  if (vyhodnoceno) { return; }
+  if (!vseZodpovezeno()) {
+    hlaska.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  vyhodnoceno = true;
+  hlaska.textContent = ``;
+  tlacitko.disabled = true;
+
+  var skore = 0;
+  OTAZKY.forEach(function (o, i) {
+    var input = vstupy[i];
+    var zadano = normalizuj(input.value);
+    var ok = o.spravne.some(function (s) { return normalizuj(s) === zadano; });
+    input.disabled = true;
+    if (ok) {
+      skore++;
+      input.className = `spravna`;
+      o._reseni.className = `reseni ok`;
+      o._reseni.textContent = `Správně`;
+    } else {
+      input.className = `spatna`;
+      o._reseni.className = `reseni chyba`;
+      o._reseni.textContent = `Správná odpověď: ` + o.spravne[0];
+    }
+    o._reseni.style.display = `block`;
+  });
+
+  document.getElementById(`skore`).textContent = skore + ` z ` + OTAZKY.length;
+  var text = ``;
+  HODNOCENI.forEach(function (h) {
+    if (skore >= h.min && skore <= h.max) { text = h.text; }
+  });
+  document.getElementById(`hodnoceni`).textContent = text;
+
+  var vysledek = document.getElementById(`vysledek`);
+  vysledek.style.display = `block`;
+  vysledek.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+document.getElementById(`znovu`).addEventListener(`click`, function () {
+  vyhodnoceno = false;
+  OTAZKY.forEach(function (o, i) {
+    var input = vstupy[i];
+    input.value = ``;
+    input.disabled = false;
+    input.className = ``;
+    o._reseni.style.display = `none`;
+    o._reseni.textContent = ``;
+  });
+  document.getElementById(`vysledek`).style.display = `none`;
+  hlaska.textContent = ``;
+  tlacitko.disabled = true;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+</script>
+</body>
+</html>
