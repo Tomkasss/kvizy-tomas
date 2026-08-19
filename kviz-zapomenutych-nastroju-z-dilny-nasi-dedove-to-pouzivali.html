@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz zapomenutých nástrojů z dílny. Naši dědové to používali každý den, ale mladá generace často nezná ani 6/10</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 32px 16px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+    line-height: 1.4;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .opt:disabled { cursor: default; }
+  #submit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; min-height: 1.2em; }
+  #result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 32px;
+    display: none;
+  }
+  .score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 14px; }
+  .verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+  #retry {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #retry:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    .q, #result { padding: 20px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz zapomenutých nástrojů z dílny. Naši dědové to používali každý den, ale mladá generace často nezná ani 6/10</h1>
+  <p class="perex">Na ponku dědů ležely kusy železa a dřeva, jejichž jména dnes většina lidí nezná, a každý z nich měl svůj přesný úkol. Deset otázek napříč řemesly ukáže, kolik toho ze staré dílny ještě poznáte.</p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <p id="warn"></p>
+  <div id="result">
+    <p class="score" id="score"></p>
+    <p class="verdict" id="verdict"></p>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var QUESTIONS = [
+  {
+    q: `1. K čemu klempíři sloužilo pájedlo?`,
+    opts: [`k vyžíhání plechu, aby se snáz ohýbal`, `k vypálení rzi a starého nátěru z plechu`, `k roztavení cínu a spojení dvou plechových dílů`, `k propálení otvorů do tenkého plechu`],
+    correct: 2
+  },
+  {
+    q: `2. K čemu tesařovi sloužila širočina?`,
+    opts: [`ke štípání polen na otop`, `k otesávání kulatiny do hranolu po jedné rovné ploše`, `k odsekávání větví z pokáceného kmene`, `k vysekávání dlabů pro čepy v trámu`],
+    correct: 1
+  },
+  {
+    q: `3. K čemu kovář používal kuželový roh kovadliny?`,
+    opts: [`ke stáčení železa do kroužků a oblouků`, `k prosekávání otvorů do rozžhaveného plechu`, `k odsekávání okují z hotového výkovku`, `k upevnění kovadliny do dřevěného špalku`],
+    correct: 0
+  },
+  {
+    q: `4. K čemu zedníkovi sloužila spárovačka?`,
+    opts: [`k nabrání malty a jejímu rozprostření na cihlu`, `k rozmíchání malty ve džberu před zděním`, `k utlačení a vyhlazení malty ve spáře mezi cihlami`, `k odsekání přebytečné malty vytlačené zpod cihly`],
+    correct: 2
+  },
+  {
+    q: `5. Kterým nástrojem se před vrtáním do kovu označovalo místo vrtu, aby vrták po hladké ploše neujel?`,
+    opts: [`sekáčem`, `důlčíkem`, `průbojníkem`, `raznicí`],
+    correct: 1
+  },
+  {
+    q: `6. K čemu sloužila babka při údržbě kosy?`,
+    opts: [`jako kovadlinka, na níž se kladívkem roztepávalo ostří`, `jako brousek, kterým se ostří obtahovalo přímo na louce`, `jako dřevěné pouzdro s vodou nošené u pasu`, `jako klín, kterým se kosa upevňovala do kosiště`],
+    correct: 0
+  },
+  {
+    q: `7. K čemu sloužil sedlářský koník?`,
+    opts: [`k tvarování mokré kůže do oblého sedla`, `k prořezání drážky pro šev v tlusté kůži`, `ke stáčení a voskování dratve`, `k sevření šité kůže mezi dřevěné čelisti`],
+    correct: 3
+  },
+  {
+    q: `8. K čemu truhlář používal rejsek?`,
+    opts: [`k vyměření a vyznačení pravého úhlu`, `k proměření tloušťky prkna po celé délce`, `k narýsování čáry rovnoběžné s hranou dřeva`, `k přenesení sklonu úkosu z jednoho prkna na druhé`],
+    correct: 2
+  },
+  {
+    q: `9. K čemu kameníkovi sloužila pemrlice?`,
+    opts: [`k rovnoměrnému zdrsnění povrchu kamene údery hrotů`, `k rozštípnutí kamenného bloku na menší díly`, `k obkreslování opakovaných ozdobných tvarů na kámen`, `k vyleštění opracované plochy do hladka`],
+    correct: 0
+  },
+  {
+    q: `10. K čemu dřevorubci sloužila sapina?`,
+    opts: [`ke svážení klád z prudkého svahu`, `k odkornění pokáceného kmene`, `k zaklínění řezu, aby v něm pila neuvázla`, `k otáčení a přitahování kmenů hákem nasazeným na násadě`],
+    correct: 3
+  }
+];
+
+var LETTERS = [`a)`, `b)`, `c)`, `d)`];
+
+var VERDICTS = [
+  { max: 3, text: `Stará dílna vám zůstala za zavřenými dveřmi. Tohle nářadí je pro vás skupina bezejmenných železných kusů a dřevěných násad, u kterých se dá leda hádat. S takovým výsledkem ale nejste sami, mladší ročníky se k šesti bodům obvykle vůbec nedostanou.` },
+  { max: 6, text: `Něco vám z dílny utkvělo, ale spíš obrysy než jistota. Dokážete odhadnout, k čemu je nástroj zhruba dobrý, jenže u příbuzných kusů z téhož řemesla tápete. Ve staré dílně jste spíš návštěva než někdo, kdo tam měl své místo u ponku.` },
+  { max: 9, text: `Tohle je skóre člověka, který starou dílnu opravdu zažil. Poznáte nářadí napříč řemesly, od zednické spárovačky přes tesařskou širočinu až po nástroje kameníka a dřevorubce, a víte, jaký úkon se s ním dělal. Nad mladou generací máte náskok, který se z videí nedožene.` },
+  { max: 10, text: `Klobouk dolů. Plný počet dá jen menšina a vy patříte mezi ty, kdo měli většinu toho nářadí v ruce, a ne jen za sklem. Rozeznáte nástroje, jejichž jména dnes většina lidí zná nanejvýš z muzejní vitríny, a to už svede málokdo.` }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var locked = false;
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryEl = document.getElementById(`retry`);
+
+function build() {
+  quizEl.textContent = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+
+    var qt = document.createElement(`p`);
+    qt.className = `q-text`;
+    qt.textContent = item.q;
+    box.appendChild(qt);
+
+    item.opts.forEach(function (opt, oi) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `opt`;
+      btn.textContent = LETTERS[oi] + ` ` + opt;
+      btn.setAttribute(`data-q`, String(qi));
+      btn.setAttribute(`data-o`, String(oi));
+      btn.addEventListener(`click`, onPick);
+      box.appendChild(btn);
+    });
+
+    quizEl.appendChild(box);
+  });
+}
+
+function onPick(ev) {
+  if (locked) { return; }
+  var btn = ev.currentTarget;
+  var qi = parseInt(btn.getAttribute(`data-q`), 10);
+  var oi = parseInt(btn.getAttribute(`data-o`), 10);
+  answers[qi] = oi;
+
+  var box = btn.parentNode;
+  var opts = box.querySelectorAll(`.opt`);
+  for (var i = 0; i < opts.length; i++) {
+    opts[i].classList.remove(`selected`);
+  }
+  btn.classList.add(`selected`);
+
+  refreshSubmit();
+}
+
+function refreshSubmit() {
+  var done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+  if (done) { warnEl.textContent = ``; }
+}
+
+function evaluate() {
+  if (locked) { return; }
+  var done = answers.every(function (a) { return a !== null; });
+  if (!done) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  warnEl.textContent = ``;
+
+  var score = 0;
+  var boxes = quizEl.querySelectorAll(`.q`);
+  for (var qi = 0; qi < QUESTIONS.length; qi++) {
+    var opts = boxes[qi].querySelectorAll(`.opt`);
+    var correct = QUESTIONS[qi].correct;
+    if (answers[qi] === correct) { score++; }
+    for (var oi = 0; oi < opts.length; oi++) {
+      opts[oi].classList.remove(`selected`);
+      opts[oi].disabled = true;
+      if (oi === correct) {
+        opts[oi].classList.add(`correct`);
+      } else if (oi === answers[qi]) {
+        opts[oi].classList.add(`wrong`);
+      }
+    }
+  }
+
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+
+  var text = VERDICTS[VERDICTS.length - 1].text;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score <= VERDICTS[v].max) { text = VERDICTS[v].text; break; }
+  }
+  verdictEl.textContent = text;
+
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  locked = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.style.display = `none`;
+  warnEl.textContent = ``;
+  submitEl.disabled = true;
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+retryEl.addEventListener(`click`, reset);
+build();
+</script>
+</body>
+</html>
