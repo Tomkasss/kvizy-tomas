@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz úplně ze všeho: kdo v něm dá aspoň 7/10, ten si drží skvělý všeobecný přehled</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+.question {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.option:last-child { margin-bottom: 0; }
+.option:hover { background: #ede8e1; }
+.option.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.option.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.option.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.locked .option { cursor: default; }
+.locked .option:hover { background: #f7f4f0; }
+.locked .option.selected:hover { background: #dcd3c7; }
+.locked .option.correct:hover { background: #d4edda; }
+.locked .option.wrong:hover { background: #f8d7da; }
+.textinput {
+  width: 100%;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+}
+#submit, #retry {
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit { background: #5b7e5f; }
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry { background: #8c7b6b; }
+#retry:hover { background: #756658; }
+.warning { text-align: center; color: #a04040; margin-top: 14px; min-height: 1.4em; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 32px;
+  display: none;
+}
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 14px; }
+.verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .question { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz úplně ze všeho: kdo v něm dá aspoň 7/10, ten si drží skvělý všeobecný přehled</h1>
+<p class="perex">Deset otázek, které skáčou z přírody na jazyky, z mytologie do chemie a odtud rovnou na mapu. Žádné počítání z hlavy, jen to, co víte. Sedm správných odpovědí je hranice, za kterou se dostane menšina řešitelů.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="warning" id="warning"></p>
+<div id="result">
+  <p class="score" id="score"></p>
+  <p class="verdict" id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  {
+    q: `1. Ze které rostliny se získává koření vanilka?`,
+    options: [`z palmy`, `z orchideje`, `z vavřínu`, `z bambusu`],
+    correct: 1
+  },
+  {
+    q: `2. Který živočich je největším žijícím plazem?`,
+    options: [`anakonda velká`, `varan komodský`, `krajta mřížkovaná`, `krokodýl mořský`],
+    correct: 3
+  },
+  {
+    q: `3. Kdo v roce 1815 předvedl pražské honoraci svůj parní vůz v Královské oboře?`,
+    options: [`Prokop Diviš`, `Josef Božek`, `Jan Perner`, `Josef Ressel`],
+    correct: 1
+  },
+  {
+    q: `4. Jak se jmenuje kopí boha Ódina, které podle mýtů nikdy nemine cíl?`,
+    options: [`Draupnir`, `Mjölnir`, `Gungnir`, `Skidbladnir`],
+    correct: 2
+  },
+  {
+    q: `5. Se kterými dvěma jazyky tvoří maďarština nejužší větev uralské jazykové rodiny?`,
+    options: [`s finštinou a estonštinou`, `s chantyjštinou a mansijštinou`, `s komijštinou a udmurtštinou`, `s něnečtinou a selkupštinou`],
+    correct: 1
+  },
+  {
+    q: `6. Kdo byl vrchním velitelem spojeneckých sil při vylodění v Normandii?`,
+    options: [`Dwight Eisenhower`, `Bernard Montgomery`, `George Patton`, `Omar Bradley`],
+    correct: 0
+  },
+  {
+    q: `7. Z kůry kterého stromu pochází předchůdce aspirinu?`,
+    options: [`z dubu`, `z břízy`, `z vrby`, `z jasanu`],
+    correct: 2
+  },
+  {
+    q: `8. Přes kterou mořskou úžinu má vést dlouho plánovaný most, který by poprvé napojil Sicílii na zbytek Itálie?`,
+    options: [`Otrantskou`, `Bonifáckou`, `Sicilskou`, `Messinskou`],
+    correct: 3
+  },
+  {
+    q: `9. Které dvě kyseliny se mísí, aby vznikla lučavka královská?`,
+    options: [`dusičná a chlorovodíková`, `sírová a chlorovodíková`, `dusičná a sírová`, `fluorovodíková a chlorovodíková`],
+    correct: 0
+  },
+  {
+    q: `10. Jak se jmenuje studený nárazový vítr, který se v zimě řítí z pevniny na chorvatské pobřeží Jadranu?`,
+    options: [`mistrál`, `fén`, `bóra`, `sirocco`],
+    correct: 2
+  }
+];
+
+var VERDICTS = [
+  { min: 0, max: 3, text: `Všeobecný přehled je zatím spíš úzký. Otázky přeskakovaly mezi obory rychleji, než se dá stihnout přeladit, a většina z nich narazila na místo, kde znalost chybí. Není to ostuda, protože takhle široký záběr srazí spoustu lidí, ale k hranici, o které mluví titulek, vede ještě pořádný kus cesty.` },
+  { min: 4, max: 6, text: `Průměrný výsledek, přesně tam, kde se pohybuje běžný řešitel. V oborech, které jsou vám blízké, jste zabodovali, jinde vás dostaly těsné varianty. Základní přehled tedy máte, na hranici sedmi bodů a označení skvělý ale chybělo pár správně tipnutých detailů.` },
+  { min: 7, max: 9, text: `Přesně tohle titulek slibuje. Sedm a víc bodů znamená, že se orientujete napříč přírodou, jazyky, dějinami i zeměpisem a nenachytaly vás ani otázky, kde jsou dvě nabídky prakticky nalepené na sobě. Držíte si skutečně skvělý všeobecný přehled a patříte do menšiny, která se přes tuhle laťku dostane.` },
+  { min: 10, max: 10, text: `Naprostá špička. Plný počet u kvízu, který střídá obory od otázky k otázce a kde u několika z nich stojí správná odpověď těsně vedle nastražené, dá jen zlomek lidí. Váš všeobecný přehled je výjimečně široký a rozhodně to není náhoda ani štěstí při tipování.` }
+];
+
+var LETTERS = [`a)`, `b)`, `c)`, `d)`];
+var answers = new Array(QUESTIONS.length).fill(null);
+var evaluated = false;
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warningEl = document.getElementById(`warning`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryEl = document.getElementById(`retry`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `question`;
+    box.id = `q` + qi;
+
+    var title = document.createElement(`p`);
+    title.className = `qtext`;
+    title.textContent = item.q;
+    box.appendChild(title);
+
+    item.options.forEach(function (opt, oi) {
+      var btn = document.createElement(`button`);
+      btn.className = `option`;
+      btn.type = `button`;
+      btn.textContent = LETTERS[oi] + ` ` + opt;
+      btn.setAttribute(`data-q`, String(qi));
+      btn.setAttribute(`data-o`, String(oi));
+      btn.addEventListener(`click`, function () {
+        if (evaluated) { return; }
+        answers[qi] = oi;
+        var siblings = box.querySelectorAll(`.option`);
+        for (var i = 0; i < siblings.length; i++) {
+          siblings[i].classList.remove(`selected`);
+        }
+        btn.classList.add(`selected`);
+        refresh();
+      });
+      box.appendChild(btn);
+    });
+
+    quizEl.appendChild(box);
+  });
+}
+
+function refresh() {
+  var done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+  if (done) { warningEl.textContent = ``; }
+}
+
+submitEl.addEventListener(`click`, function () {
+  if (submitEl.disabled) {
+    warningEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  evaluate();
+});
+
+function evaluate() {
+  evaluated = true;
+  var score = 0;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.getElementById(`q` + qi);
+    box.classList.add(`locked`);
+    var opts = box.querySelectorAll(`.option`);
+    for (var i = 0; i < opts.length; i++) {
+      opts[i].classList.remove(`selected`);
+      if (i === item.correct) {
+        opts[i].classList.add(`correct`);
+      } else if (i === answers[qi]) {
+        opts[i].classList.add(`wrong`);
+      }
+    }
+    if (answers[qi] === item.correct) { score++; }
+  });
+
+  submitEl.disabled = true;
+  warningEl.textContent = ``;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  var text = ``;
+  VERDICTS.forEach(function (v) {
+    if (score >= v.min && score <= v.max) { text = v.text; }
+  });
+  verdictEl.textContent = text;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+retryEl.addEventListener(`click`, function () {
+  evaluated = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.style.display = `none`;
+  warningEl.textContent = ``;
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+refresh();
+</script>
+</body>
+</html>
