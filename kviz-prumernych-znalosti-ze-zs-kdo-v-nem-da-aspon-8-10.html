@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz průměrných znalostí ze ZŠ: kdo v něm dá aspoň 8/10, prošel by základkou s jedničkami</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .locked .opt { cursor: default; }
+  #submit, #retry {
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #submit { background: #5b7e5f; }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #retry { background: #8c7b6b; }
+  #retry:hover { background: #756658; }
+  #warning { text-align: center; color: #8c3a3a; margin-top: 14px; font-size: .95rem; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+  .hidden { display: none; }
+  @media (max-width: 767px) {
+    body { padding: 16px; }
+    .q, #result { padding: 20px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz průměrných znalostí ze ZŠ: kdo v něm dá aspoň 8/10, prošel by základkou s jedničkami</h1>
+  <p class="perex">Deset otázek přesně z toho, co se probírá na základní škole: čeština, dějepis, zeměpis, přírodopis, fyzika, chemie, literatura, hudební a výtvarná výchova. Průměr vychází někde kolem šesti bodů. Osm a víc znamená vysvědčení se samými jedničkami.</p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <p id="warning" class="hidden">Odpovězte prosím na všechny otázky</p>
+  <div id="result" class="hidden">
+    <p id="score"></p>
+    <p id="verdict"></p>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var QUESTIONS = [
+  { q: `Jak se odborně nazývá přenos tepla prouděním kapaliny nebo plynu?`,
+    o: [`kondukce`, `konvekce`, `radiace`, `difuze`], a: 1 },
+  { q: `Jak zní latinský název 6. pádu?`,
+    o: [`dativ`, `vokativ`, `lokál`, `instrumentál`], a: 2 },
+  { q: `Na kterém poloostrově leží pevninská část Dánska?`,
+    o: [`Skandinávský`, `Bretaňský`, `Kolský`, `Jutský`], a: 3 },
+  { q: `Jak se nazývá samice prasete divokého?`,
+    o: [`bachyně`, `daněla`, `laň`, `srna`], a: 0 },
+  { q: `Jak se nazývá metoda, kterou se z mořské vody v mělkých nádržích na slunci získává kuchyňská sůl?`,
+    o: [`filtrace`, `destilace`, `krystalizace`, `sublimace`], a: 2 },
+  { q: `Kdo složil Slovanské tance?`,
+    o: [`Bedřich Smetana`, `Antonín Dvořák`, `Leoš Janáček`, `Zdeněk Fibich`], a: 1 },
+  { q: `Kdo napsal Staré řecké báje a pověsti?`,
+    o: [`Eduard Petiška`, `Vojtěch Zamarovský`, `Jan Drda`, `Václav Čtvrtek`], a: 0 },
+  { q: `Do které řeky se vlévá řeka Morava?`,
+    o: [`Labe`, `Odra`, `Tisa`, `Dunaj`], a: 3 },
+  { q: `Který panovník vešel do českých dějin jako zimní král?`,
+    o: [`Fridrich Falcký`, `Matyáš Habsburský`, `Ferdinand II. Štýrský`, `Maxmilián I. Bavorský`], a: 0 },
+  { q: `Který český malíř je autorem původní kalendářní desky pražského orloje?`,
+    o: [`Mikoláš Aleš`, `Josef Mánes`, `Alfons Mucha`, `Václav Brožík`], a: 1 }
+];
+
+var LETTERS = [`a`, `b`, `c`, `d`];
+
+var VERDICTS = [
+  { min: 0, max: 3, text: `Tady by to na vysvědčení skřípalo. Základní učivo se z hlavy vytratilo skoro celé a u tabule by následovala trojka až čtyřka. Nic se neděje, většina těchhle věcí se v běžném životě roky nepoužije.` },
+  { min: 4, max: 6, text: `Přesně tady se pohybuje běžný řešitel a sem spadne největší část lidí. Zhruba polovinu učiva máte pořád zafixovanou, u druhé jste váhali nebo hádali. Kdyby se teď psalo vysvědčení, vyšly by z toho solidní dvojky s pár trojkami.` },
+  { min: 7, max: 7, text: `Těsně pod metou. K hranici, kterou slibuje titulek, vám chybí jediný bod, a to je ta nejhorší možná vzdálenost. Sedm bodů je nadprůměr, na samé jedničky to ale ještě nestačí. Stačilo neuhnout u jedné jediné otázky.` },
+  { min: 8, max: 10, text: `Tohle je přesně ta hranice z titulku. Osm a víc bodů znamená vysvědčení se samými jedničkami, deset bodů pak plný počet, na který dosáhne jen menšina řešitelů. Zvládli jste přírodovědné i humanitní předměty najednou, včetně těch otázek, kde se nabízené možnosti liší jen o vlásek, a přesně na těch většina lidí ztrácí.` }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var evaluated = false;
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warningEl = document.getElementById(`warning`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryEl = document.getElementById(`retry`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(p);
+    item.o.forEach(function (opt, oi) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `opt`;
+      btn.textContent = LETTERS[oi] + `) ` + opt;
+      btn.addEventListener(`click`, function () { pick(qi, oi); });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function pick(qi, oi) {
+  if (evaluated) { return; }
+  answers[qi] = oi;
+  var box = quizEl.children[qi];
+  var btns = box.querySelectorAll(`.opt`);
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].classList.toggle(`selected`, i === oi);
+  }
+  refresh();
+}
+
+function refresh() {
+  var done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+  if (done) { warningEl.classList.add(`hidden`); }
+}
+
+function evaluate() {
+  if (!answers.every(function (a) { return a !== null; })) {
+    warningEl.classList.remove(`hidden`);
+    return;
+  }
+  evaluated = true;
+  var score = 0;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = quizEl.children[qi];
+    box.classList.add(`locked`);
+    var btns = box.querySelectorAll(`.opt`);
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.remove(`selected`);
+      btns[i].disabled = true;
+      if (i === item.a) { btns[i].classList.add(`correct`); }
+      else if (i === answers[qi]) { btns[i].classList.add(`wrong`); }
+    }
+    if (answers[qi] === item.a) { score++; }
+  });
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score >= VERDICTS[v].min && score <= VERDICTS[v].max) {
+      verdictEl.textContent = VERDICTS[v].text;
+      break;
+    }
+  }
+  submitEl.classList.add(`hidden`);
+  warningEl.classList.add(`hidden`);
+  resultEl.classList.remove(`hidden`);
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  evaluated = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  build();
+  resultEl.classList.add(`hidden`);
+  submitEl.classList.remove(`hidden`);
+  submitEl.disabled = true;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+retryEl.addEventListener(`click`, reset);
+build();
+</script>
+</body>
+</html>
