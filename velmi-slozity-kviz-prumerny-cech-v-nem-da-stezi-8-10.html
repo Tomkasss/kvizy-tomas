@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Velmi složitý kvíz: průměrný Čech v něm dá stěží 8/10</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 32px 16px 64px;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.5; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .locked .opt { cursor: default; }
+  .locked .opt:hover { background: #f7f4f0; }
+  .locked .opt.sel:hover { background: #dcd3c7; }
+  .locked .opt.correct:hover { background: #d4edda; }
+  .locked .opt.wrong:hover { background: #f8d7da; }
+  #submit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+  #retry {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #retry:hover { background: #756658; }
+  .hidden { display: none; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .q { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="title"></h1>
+  <p class="perex" id="perex"></p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <p id="warn" class="hidden">Odpovězte prosím na všechny otázky</p>
+  <div id="result" class="hidden">
+    <p id="score"></p>
+    <p id="verdict"></p>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var TITLE = `Velmi složitý kvíz: průměrný Čech v něm dá stěží 8/10`;
+var PEREX = `Deset otázek napříč obory, kde se sype i ten, kdo si na svůj rozhled potrpí. Heraldika, meteorologie, astronomie, dějiny objevných plaveb i antická mytologie. Průměrný Čech se v téhle desítce k osmi bodům dostane jen stěží.`;
+
+var QUESTIONS = [
+  { q: `Ve kterém roce se odehrál první ročník Davisova poháru?`,
+    opts: [`1877`, `1891`, `1900`, `1913`], correct: 2 },
+  { q: `Přeměnou které horniny vzniká mramor?`,
+    opts: [`pískovce`, `žuly`, `vápence`, `čediče`], correct: 2 },
+  { q: `V muzeu kterého města byl Picassův obraz Guernica uložen až do svého předání Španělsku v roce 1981?`,
+    opts: [`Paříže`, `Londýna`, `Ženevy`, `New Yorku`], correct: 3 },
+  { q: `Pod svrchovanost kterého státu spadají podle mezinárodní smlouvy z roku 1920 Špicberky?`,
+    opts: [`Norska`, `Islandu`, `Dánska`, `Ruska`], correct: 0 },
+  { q: `Kdo je autorem knihy Bohatství národů?`,
+    opts: [`David Ricardo`, `Adam Smith`, `John Maynard Keynes`, `Karel Marx`], correct: 1 },
+  { q: `Jak se nazývá čára spojující na povětrnostní mapě místa se stejným tlakem vzduchu?`,
+    opts: [`izohalina`, `izobata`, `izobara`, `izohypsa`], correct: 2 },
+  { q: `Který symbol je ve třetím poli velkého státního znaku České republiky?`,
+    opts: [`moravská orlice`, `český dvouocasý lev`, `svatováclavská orlice`, `slezská orlice`], correct: 3 },
+  { q: `Kolem které planety obíhá měsíc Triton?`,
+    opts: [`Uranu`, `Neptunu`, `Saturnu`, `Jupiteru`], correct: 1 },
+  { q: `Která loď Magalhãesovy flotily se pokusila vrátit do Španělska přes Tichý oceán a byla zajata Portugalci?`,
+    opts: [`Trinidad`, `Concepción`, `San Antonio`, `Santiago`], correct: 0 },
+  { q: `Která řecká bohyně byla bohyní úsvitu?`,
+    opts: [`Éós`, `Iris`, `Seléné`, `Hébé`], correct: 0 }
+];
+
+var VERDICTS = [
+  { min: 0, max: 3, text: `Tahle desítka si svůj název zaslouží a tentokrát si podala i vás. Nešlo o kategorie, ale o přesnosti, letopočet, město, jméno lodi ve druhé řadě, a u většiny otázek byly nabídnuté možnosti postavené hodně blízko sebe. Berte výsledek jako pozvánku k dalšímu kolu, ne jako ortel.` },
+  { min: 4, max: 6, text: `Přesně tady se drží průměrný Čech. Rozjezd a střední pásmo jste zvládli, ale otázky, kde nestačí trefit obor a je potřeba konkrétní detail, vás odřízly od vyšších pater. Solidní výsledek u kvízu, kde se osm bodů dává opravdu stěží.` },
+  { min: 7, max: 9, text: `Výborně. Osmibodovou hranici, kterou titulek označuje za sotva dosažitelnou, jste buď těsně minuli, nebo dokonce překonali. Takový výsledek znamená, že váš přehled sahá výrazně za školní osnovy a že vás nesrazily ani otázky, kde všechny čtyři možnosti byly skutečné a věrohodné.` },
+  { min: 10, max: 10, text: `Plný počet, a to je u téhle desítky vzácnost. Zvládli jste heraldický detail státního znaku, mapovou čáru stejného tlaku vzduchu, největší Neptunův měsíc, dlouhé americké vyhnanství slavného protiválečného plátna i jméno lodi, která se z Magalhãesovy flotily jako jediná pokusila vrátit domů napříč Tichým oceánem. Ke stěží dosažitelným osmi bodům jste přidali ještě dva navíc.` }
+];
+
+var LETTERS = [`a`, `b`, `c`, `d`];
+var answers = [];
+var locked = false;
+
+var titleEl = document.getElementById(`title`);
+var perexEl = document.getElementById(`perex`);
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryEl = document.getElementById(`retry`);
+
+titleEl.textContent = TITLE;
+perexEl.textContent = PEREX;
+
+function build() {
+  quizEl.innerHTML = ``;
+  answers = [];
+  locked = false;
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    answers.push(null);
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var qt = document.createElement(`p`);
+    qt.className = `q-text`;
+    qt.textContent = (i + 1) + `. ` + QUESTIONS[i].q;
+    box.appendChild(qt);
+    for (var j = 0; j < QUESTIONS[i].opts.length; j++) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `opt`;
+      btn.textContent = LETTERS[j] + `) ` + QUESTIONS[i].opts[j];
+      btn.setAttribute(`data-q`, String(i));
+      btn.setAttribute(`data-o`, String(j));
+      btn.addEventListener(`click`, onPick);
+      box.appendChild(btn);
+    }
+    quizEl.appendChild(box);
+  }
+  submitEl.disabled = true;
+  warnEl.classList.add(`hidden`);
+  resultEl.classList.add(`hidden`);
+}
+
+function onPick(e) {
+  if (locked) { return; }
+  var qi = parseInt(e.currentTarget.getAttribute(`data-q`), 10);
+  var oi = parseInt(e.currentTarget.getAttribute(`data-o`), 10);
+  answers[qi] = oi;
+  var box = quizEl.children[qi];
+  var btns = box.querySelectorAll(`.opt`);
+  for (var k = 0; k < btns.length; k++) {
+    btns[k].classList.remove(`sel`);
+  }
+  e.currentTarget.classList.add(`sel`);
+  updateSubmit();
+}
+
+function allAnswered() {
+  for (var i = 0; i < answers.length; i++) {
+    if (answers[i] === null) { return false; }
+  }
+  return true;
+}
+
+function updateSubmit() {
+  if (allAnswered()) {
+    submitEl.disabled = false;
+    warnEl.classList.add(`hidden`);
+  } else {
+    submitEl.disabled = true;
+  }
+}
+
+submitEl.addEventListener(`click`, function () {
+  if (!allAnswered()) {
+    warnEl.classList.remove(`hidden`);
+    return;
+  }
+  locked = true;
+  var score = 0;
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    var box = quizEl.children[i];
+    box.classList.add(`locked`);
+    var btns = box.querySelectorAll(`.opt`);
+    var corr = QUESTIONS[i].correct;
+    if (answers[i] === corr) { score++; }
+    for (var j = 0; j < btns.length; j++) {
+      btns[j].classList.remove(`sel`);
+      if (j === corr) {
+        btns[j].classList.add(`correct`);
+      } else if (j === answers[i]) {
+        btns[j].classList.add(`wrong`);
+      }
+    }
+  }
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  var text = ``;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score >= VERDICTS[v].min && score <= VERDICTS[v].max) {
+      text = VERDICTS[v].text;
+    }
+  }
+  verdictEl.textContent = text;
+  resultEl.classList.remove(`hidden`);
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+retryEl.addEventListener(`click`, function () {
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+</script>
+</body>
+</html>
