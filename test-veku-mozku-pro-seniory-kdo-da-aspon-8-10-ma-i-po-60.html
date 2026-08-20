@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test věku mozku pro seniory: kdo dá aspoň 8/10, má i po 60 mozek jako ve 30</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 36px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+  line-height: 1.5;
+}
+.opt:hover:not(:disabled) { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.good { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.bad { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#submit:hover:not(:disabled) { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 40px;
+  display: none;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 14px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#again {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#again:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test věku mozku pro seniory: kdo dá aspoň 8/10, má i po 60 mozek jako ve 30</h1>
+<p class="perex">Deset otázek napříč obory, od zvířat přes stará řemesla až po dávnou architekturu, a k tomu kus logiky bez jediného počítání. Podle počtu bodů se dozvíte, na kolik let váš mozek právě pracuje.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warn"></p>
+<div id="result">
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="again">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const QUESTIONS = [
+  { q: `Do které skupiny savců patří zebra?`, opts: [`sudokopytníci`, `lichokopytníci`, `přežvýkavci`, `mozolnatci`], correct: 1 },
+  { q: `Ve kterém sportu se soutěží o Pohár Ameriky?`, opts: [`golf`, `veslování`, `jachting`, `motorismus`], correct: 2 },
+  { q: `K čemu sloužil na venkově nástroj zvaný trdlice?`, opts: [`k lámání usušených lněných stonků na pazdeří`, `k válení a hlazení vypraného prádla místo žehličky`, `k drcení sušených švestek a hrušek na ovocnou kaši`, `k tlučení máku a koření v hluboké dřevěné nádobě`], correct: 0 },
+  { q: `Kdo napsal román Paní Bovaryová?`, opts: [`Honoré de Balzac`, `Gustave Flaubert`, `Guy de Maupassant`, `Émile Zola`], correct: 1 },
+  { q: `Ve které zemi byl vynalezen kompas?`, opts: [`Egypt`, `Řecko`, `Čína`, `Persie`], correct: 2 },
+  { q: `Pekař je k mouce jako tkadlec k čemu?`, opts: [`příze`, `tkalcovský stav`, `sukno`, `člunek`], correct: 0 },
+  { q: `Který řecký bůh byl zosobněním samotného spánku a otcem boha snů?`, opts: [`Morfeus`, `Thanatos`, `Kronos`, `Hypnos`], correct: 3 },
+  { q: `Jak se nazývá židovský sedmiramenný svícen?`, opts: [`menora`, `chanukija`, `mezuza`, `šofar`], correct: 0 },
+  { q: `Ve kterém století vzniklo Braillovo písmo?`, opts: [`17. století`, `18. století`, `19. století`, `20. století`], correct: 2 },
+  { q: `Který antický sloupový řád má hlavici zdobenou listy akantu?`, opts: [`dórský`, `iónský`, `toskánský`, `korintský`], correct: 3 }
+];
+
+const LETTERS = [`a`, `b`, `c`, `d`];
+
+const VERDICTS = [
+  { min: 0, max: 3, text: `Věk mozku kolem 70 až 75 let. Otázky vás zaskočily hlavně tam, kde bylo potřeba vytáhnout něco, co jste dlouho nepoužili. Není to ztráta, jen zapadlé police. Přečtěte si správné odpovědi nahlas a všimněte si, u kterých dvojic variant jste váhali nejdéle.` },
+  { min: 4, max: 6, text: `Věk mozku kolem 55 až 65 let. Znalosti z běžných oborů máte v pořádku, ale u těsných dvojic variant jste zaváhali. Pomůže cokoli, co nutí mozek rozlišovat detaily, třeba luštění, čtení nebo nová trasa na procházku.` },
+  { min: 7, max: 7, text: `Věk mozku kolem 45 let. Svěží hlava s dobrým rozhledem. Chybí vám poslední krok: přesnost tam, kde se dvě odpovědi liší o vlásek.` },
+  { min: 8, max: 9, text: `Věk mozku kolem 30 let. To je přesně ta hranice z názvu. Takový výsledek už neodpovídá kalendáři, ale trénované hlavě, která si drží přesnost i u těsných dvojic.` },
+  { min: 10, max: 10, text: `Věk mozku kolem 25 let. Plný počet zvládne jen menšina řešitelů. Poznali jste zařazení zvířete, staré řemeslo, francouzského romanopisce i antickou hlavici a k tomu jste ustáli analogii, která svádí ke špatné variantě.` }
+];
+
+const answers = new Array(QUESTIONS.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const submitEl = document.getElementById(`submit`);
+const warnEl = document.getElementById(`warn`);
+const resultEl = document.getElementById(`result`);
+const scoreEl = document.getElementById(`score`);
+const verdictEl = document.getElementById(`verdict`);
+const againEl = document.getElementById(`again`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const title = document.createElement(`p`);
+    title.className = `q-text`;
+    title.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(title);
+    item.opts.forEach(function (opt, oi) {
+      const btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `opt`;
+      btn.textContent = LETTERS[oi] + `) ` + opt;
+      btn.addEventListener(`click`, function () {
+        if (locked) return;
+        answers[qi] = oi;
+        const siblings = box.querySelectorAll(`.opt`);
+        for (let i = 0; i < siblings.length; i++) siblings[i].classList.remove(`sel`);
+        btn.classList.add(`sel`);
+        warnEl.textContent = ``;
+        refresh();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function refresh() {
+  const done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+}
+
+submitEl.addEventListener(`click`, function () {
+  if (locked) return;
+  if (!answers.every(function (a) { return a !== null; })) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  QUESTIONS.forEach(function (item, qi) {
+    const opts = boxes[qi].querySelectorAll(`.opt`);
+    for (let i = 0; i < opts.length; i++) {
+      opts[i].disabled = true;
+      opts[i].classList.remove(`sel`);
+    }
+    opts[item.correct].classList.add(`good`);
+    if (answers[qi] === item.correct) {
+      score++;
+    } else {
+      opts[answers[qi]].classList.add(`bad`);
+    }
+  });
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  let text = ``;
+  for (let i = 0; i < VERDICTS.length; i++) {
+    if (score >= VERDICTS[i].min && score <= VERDICTS[i].max) { text = VERDICTS[i].text; break; }
+  }
+  verdictEl.textContent = text;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+againEl.addEventListener(`click`, function () {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  resultEl.style.display = `none`;
+  warnEl.textContent = ``;
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+refresh();
+</script>
+</body>
+</html>
