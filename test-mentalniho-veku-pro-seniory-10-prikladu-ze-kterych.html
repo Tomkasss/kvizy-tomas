@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test mentálního věku pro seniory: 10 příkladů, ze kterých musíte zvladnou alespoň 6</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 32px 16px 64px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zadani { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  #vyhodnotit, #znovu {
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit { background: #5b7e5f; }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; }
+  #znovu:hover { background: #756658; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.4em; }
+  #vysledek {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    .otazka, #vysledek { padding: 20px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test mentálního věku pro seniory: 10 příkladů, ze kterých musíte zvladnou alespoň 6</h1>
+  <p class="perex">Deset otázek pro seniory z deseti různých oborů, od přírody a zeměpisu přes techniku, jazyk a sport až po literaturu a logickou úvahu. Šest správných je hranice, kterou slibuje titulek, a podle výsledku se na konci dozvíte, na kolik let vaše hlava pracuje. Kolik jich zvládnete vy?</p>
+
+  <div id="kviz"></div>
+
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+
+  <div id="vysledek">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var otazky = [
+  {
+    text: `1. Který herec ztvárnil poručíka Mika Stonea v seriálu V ulicích San Francisca?`,
+    varianty: [`a) Karl Malden`, `b) Telly Savalas`, `c) Dennis Weaver`, `d) Peter Falk`],
+    spravna: 0
+  },
+  {
+    text: `2. Jak se jmenuje zimní sport, při kterém závodník sjíždí ledovou dráhu vleže na břiše a hlavou napřed?`,
+    varianty: [`a) saně`, `b) skeleton`, `c) boby`, `d) biatlon`],
+    spravna: 1
+  },
+  {
+    text: `3. Z jaké horniny je tvořena Pravčická brána?`,
+    varianty: [`a) žula`, `b) vápenec`, `c) pískovec`, `d) čedič`],
+    spravna: 2
+  },
+  {
+    text: `4. Co znamená sloveso „brojit"?`,
+    varianty: [`a) potají někoho pomlouvat za jeho zády`, `b) ostře vystupovat proti něčemu`, `c) horlivě někoho k něčemu přemlouvat`, `d) marně se pokoušet něco napravit`],
+    spravna: 1
+  },
+  {
+    text: `5. Ve které geologické éře vyhynuli trilobiti?`,
+    varianty: [`a) starohory`, `b) druhohory`, `c) prvohory`, `d) třetihory`],
+    spravna: 2
+  },
+  {
+    text: `6. Kdo je autorem románu Zbabělci?`,
+    varianty: [`a) Ota Pavel`, `b) Ludvík Vaculík`, `c) Arnošt Lustig`, `d) Josef Škvorecký`],
+    spravna: 3
+  },
+  {
+    text: `7. Kterým plynem byla naplněna vzducholoď Hindenburg, jež v roce 1937 shořela při přistání v Lakehurstu?`,
+    varianty: [`a) vodík`, `b) hélium`, `c) svítiplyn`, `d) horký vzduch`],
+    spravna: 0
+  },
+  {
+    text: `8. Jak se jmenoval athénský král, Théseův otec, který se vrhl do moře, když na synově lodi spatřil černé plachty?`,
+    varianty: [`a) Aigeus`, `b) Mínós`, `c) Priamos`, `d) Peleus`],
+    spravna: 0
+  },
+  {
+    text: `9. Kterému státu patří ostrov Bornholm?`,
+    varianty: [`a) Švédsku`, `b) Německu`, `c) Polsku`, `d) Dánsku`],
+    spravna: 3
+  },
+  {
+    text: `10. Které slovo patří na místo otazníku: ROMÁN je ke KAPITOLE jako DIVADELNÍ HRA je k ?`,
+    varianty: [`a) replice`, `b) scénáři`, `c) dějství`, `d) oponě`],
+    spravna: 2
+  }
+];
+
+var hodnoceni = [
+  { min: 0, max: 3, text: `Mentální věk kolem 70 let. Hlava tentokrát pracovala pomaleji, než by si zasloužila, a na šest bodů z titulku to nestačilo. Většina otázek přitom nebyla o vzdělání, ale o tom, jestli si vybavíte, co dávno víte. Zkuste kvíz znovu v klidu a bez spěchu, výsledek bývá napodruhé znatelně jiný.` },
+  { min: 4, max: 5, text: `Mentální věk kolem 60 let. Solidní jádro znalostí tu je, ale laťka šesti bodů z titulku vám o kousek utekla. Body nejčastěji utíkají u otázek, kde se dvě varianty liší jediným detailem, a právě ty rozhodují o posunu do vyššího pásma. Stačí u nich zpomalit a přečíst si všechny čtyři možnosti do konce.` },
+  { min: 6, max: 7, text: `Mentální věk kolem 50 let. Laťku šesti bodů jste splnili a výkon má zdravé jádro i šířku, protože otázky mířily do deseti různých oborů. Zaváhání se objevilo jen tam, kde byla mezi variantami nastražená past. To je výsledek, se kterým můžete být spokojení.` },
+  { min: 8, max: 9, text: `Mentální věk kolem 40 let. Laťku šesti bodů jste překonali s rezervou a prokázali široký záběr od přírodovědy přes techniku až po jazyk a logiku. Chybička padla nanejvýš tam, kde se dvě varianty lišily jedinou nuancí. Takový výsledek svědčí o hlavě, která si drží svěžest a pružnost.` },
+  { min: 10, max: 10, text: `Mentální věk kolem 30 let. Plný počet, tedy ani jedno klopýtnutí v deseti různých oborech. Zvládli jste geologii, mytologii, literaturu, sport i verbální analogii a nenaletěli jste ani na plyn ve vzducholodi. Šest bodů z titulku jste přestřelili o celé čtyři. Klobouk dolů.` }
+];
+
+var odpovedi = new Array(otazky.length).fill(null);
+var vyhodnoceno = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var vyhodnotitEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function postavKviz() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    var zadani = document.createElement(`p`);
+    zadani.className = `zadani`;
+    zadani.textContent = o.text;
+    box.appendChild(zadani);
+
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `varianta`;
+      btn.textContent = v;
+      btn.setAttribute(`data-otazka`, String(i));
+      btn.setAttribute(`data-varianta`, String(j));
+      btn.addEventListener(`click`, function () {
+        if (vyhodnoceno) { return; }
+        odpovedi[i] = j;
+        var sourozenci = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < sourozenci.length; k++) {
+          sourozenci[k].classList.remove(`vybrana`);
+        }
+        btn.classList.add(`vybrana`);
+        obnovTlacitko();
+      });
+      box.appendChild(btn);
+    });
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function obnovTlacitko() {
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  vyhodnotitEl.disabled = !hotovo;
+  if (hotovo) { hlaskaEl.textContent = ``; }
+}
+
+function vyhodnot() {
+  if (vyhodnoceno) { return; }
+  if (!odpovedi.every(function (o) { return o !== null; })) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  vyhodnoceno = true;
+  hlaskaEl.textContent = ``;
+
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  otazky.forEach(function (o, i) {
+    var tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove(`vybrana`);
+      if (j === o.spravna) {
+        tlacitka[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === o.spravna) { body++; }
+  });
+
+  vyhodnotitEl.disabled = true;
+  skoreEl.textContent = body + ` z ` + otazky.length;
+  var text = ``;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body >= hodnoceni[h].min && body <= hodnoceni[h].max) {
+      text = hodnoceni[h].text;
+      break;
+    }
+  }
+  hodnoceniEl.textContent = text;
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function znovu() {
+  odpovedi = new Array(otazky.length).fill(null);
+  vyhodnoceno = false;
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  postavKviz();
+  obnovTlacitko();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+vyhodnotitEl.addEventListener(`click`, vyhodnot);
+znovuEl.addEventListener(`click`, znovu);
+
+postavKviz();
+obnovTlacitko();
+</script>
+</body>
+</html>
