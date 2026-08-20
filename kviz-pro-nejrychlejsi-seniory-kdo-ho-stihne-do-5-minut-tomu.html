@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro nejrychlejší seniory: kdo ho stihne do 5 minut, tomu šlape mozek jako ve 30</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 20px 16px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 18px; color: #2c2c2c; }
+  .perex { font-size: 1.1rem; margin: 0 0 28px; color: #4a4a4a; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 12px;
+    cursor: pointer;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .opt:disabled { cursor: default; }
+  #evalBtn {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #evalBtn:hover { background: #4a6b4e; }
+  #evalBtn:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint { text-align: center; color: #8a2b2b; margin-top: 14px; min-height: 1.2em; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 28px;
+    display: none;
+  }
+  .score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+  .verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+  #retryBtn {
+    display: block;
+    margin: 28px auto 0;
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #retryBtn:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    .q { padding: 20px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz pro nejrychlejší seniory: kdo ho stihne do 5 minut, tomu šlape mozek jako ve 30</h1>
+  <p class="perex">Deset otázek, sedm z různých oborů a tři na logiku a pozornost. Časový limit je pět minut. Podle počtu správných odpovědí vám na konci vyjde věk vašeho mozku. Zvládnete to v limitu?</p>
+  <div id="quiz"></div>
+  <button id="evalBtn" disabled>Vyhodnotit</button>
+  <div class="hint" id="hint"></div>
+  <div id="result">
+    <div class="score" id="score"></div>
+    <div class="verdict" id="verdict"></div>
+    <button id="retryBtn">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+const questions = [
+  { q: `Hlavním městem které země je Vientiane?`,
+    opts: [`Kambodža`, `Laos`, `Vietnam`, `Barma`], correct: 1 },
+  { q: `Kdo napsal román Sekyra?`,
+    opts: [`Ota Pavel`, `Bohumil Hrabal`, `Ludvík Vaculík`, `Josef Škvorecký`], correct: 2 },
+  { q: `Které z těchto tvrzení říká přesně totéž co věta „Bez deštníku ven nechodím"?`,
+    opts: [`Vždycky, když jdu ven, mám s sebou deštník`, `Vždycky, když mám s sebou deštník, jdu ven`, `Když nejdu ven, deštník s sebou nemám`, `Většinou, když jdu ven, mám s sebou deštník`], correct: 0 },
+  { q: `Kdo uvedl v roce 1891 do provozu první elektrickou dráhu na pražské Letné?`,
+    opts: [`František Křižík`, `Emil Kolben`, `Josef Božek`, `Jan Perner`], correct: 0 },
+  { q: `Stojíte čelem k severu. Uděláte čelem vzad a potom se otočíte o čtvrt otáčky doleva. Kterým světovým směrem se teď díváte?`,
+    opts: [`na sever`, `na jih`, `na západ`, `na východ`], correct: 3 },
+  { q: `Kdo navrhl brněnskou vilu Tugendhat?`,
+    opts: [`Ludwig Mies van der Rohe`, `Le Corbusier`, `Walter Gropius`, `Bohuslav Fuchs`], correct: 0 },
+  { q: `Ve kterém roce prolétla Halleyova kometa naposledy kolem Slunce?`,
+    opts: [`1978`, `1986`, `1990`, `1994`], correct: 1 },
+  { q: `V které disciplíně vybojoval Bedřich Šupčík první československou olympijskou zlatou medaili?`,
+    opts: [`běh na 110 metrů překážek`, `vzpírání`, `šplh na laně`, `hod diskem`], correct: 2 },
+  { q: `Kdo složil operetu Polská krev?`,
+    opts: [`Rudolf Friml`, `Jára Beneš`, `Rudolf Piskáček`, `Oskar Nedbal`], correct: 3 },
+  { q: `Anna tvrdí, že Bára lže. Bára tvrdí, že obě dívky mluví pravdu. Kdo z nich má pravdu?`,
+    opts: [`obě mluví pravdu`, `pravdu mluví jen Anna`, `pravdu mluví jen Bára`, `nelze určit, která z nich mluví pravdu`], correct: 1 }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+const quizEl = document.getElementById('quiz');
+const evalBtn = document.getElementById('evalBtn');
+const hintEl = document.getElementById('hint');
+const letters = ['a', 'b', 'c', 'd'];
+
+function render() {
+  quizEl.innerHTML = '';
+  questions.forEach((item, qi) => {
+    const box = document.createElement('div');
+    box.className = 'q';
+    const qt = document.createElement('div');
+    qt.className = 'q-text';
+    qt.textContent = (qi + 1) + '. ' + item.q;
+    box.appendChild(qt);
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = letters[oi] + ') ' + opt;
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        answers[qi] = oi;
+        Array.from(box.querySelectorAll('.opt')).forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        updateBtn();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateBtn() {
+  const allAnswered = answers.every(a => a !== null);
+  evalBtn.disabled = !allAnswered;
+  if (allAnswered) hintEl.textContent = '';
+}
+
+function evaluate() {
+  if (answers.some(a => a === null)) {
+    hintEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll('.q');
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll('.opt');
+    opts.forEach((btn, oi) => {
+      btn.disabled = true;
+      btn.classList.remove('selected');
+      if (oi === questions[qi].correct) btn.classList.add('correct');
+      else if (oi === answers[qi]) btn.classList.add('wrong');
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  showResult(score);
+}
+
+function showResult(score) {
+  const total = questions.length;
+  document.getElementById('score').textContent = score + ' z ' + total;
+  let text = '';
+  if (score <= 3) {
+    text = `Tři a méně bodů v pětiminutovém limitu odpovídá věku mozku kolem 70 až 75 let. Čas tlačil a část otázek stihla utéct dřív, než jste stačili zapátrat v paměti. Nic ztraceného, tempo se dá trénovat a při druhém průchodu bývá číslo znatelně nižší.`;
+  } else if (score <= 6) {
+    text = `Čtyři až šest bodů získaných v pětiminutovém limitu odpovídá věku mozku zhruba 55 až 60 let. Tady končí většina řešitelů. Polovinu jste měli hned, u zbytku jste váhali mezi dvěma variantami a limit hrál proti vám. Solidní výsledek se zjevnou rezervou nahoru.`;
+  } else if (score <= 9) {
+    text = `Sedm až devět bodů stihnutých za pět minut odpovídá věku mozku kolem 40 až 45 let. Jména, letopočty i logické úlohy vám naskakovaly svižně a těsné distraktory jste z větší části prokoukli. Do plného počtu chybělo opravdu málo.`;
+  } else {
+    text = `Deset bodů z deseti v pětiminutovém limitu odpovídá věku mozku rovných 30 let, tedy přesně tomu, co slibuje titulek. Plný počet a ještě v limitu zvládne jen menšina řešitelů. Za takový výsledek si zasloužíte upřímný obdiv.`;
+  }
+  document.getElementById('verdict').textContent = text;
+  const result = document.getElementById('result');
+  result.style.display = 'block';
+  evalBtn.style.display = 'none';
+  result.scrollIntoView({ behavior: 'smooth' });
+}
+
+function retry() {
+  locked = false;
+  answers.fill(null);
+  document.getElementById('result').style.display = 'none';
+  evalBtn.style.display = 'block';
+  evalBtn.disabled = true;
+  hintEl.textContent = '';
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+evalBtn.addEventListener('click', evaluate);
+document.getElementById('retryBtn').addEventListener('click', retry);
+render();
+</script>
+</body>
+</html>
