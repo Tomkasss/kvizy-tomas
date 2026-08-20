@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test znalostí o ČSSR: dnešní generace často nedá ani 7/10 a je to ostuda</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 32px 16px 64px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  #vyhodnotit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.4em; }
+  #vysledek {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+    border-top: 4px solid #5b7e5f;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #znovu {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #znovu:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test znalostí o ČSSR: dnešní generace často nedá ani 7/10 a je to ostuda</h1>
+  <p class="perex">Deset otázek na reálie Československé socialistické republiky napříč obory. Politika, hospodářství, doprava, energetika, zahraniční obchod, sport i státní symbolika. Varianty se drží těsně u sebe a hranici sedmi bodů překročí jen část řešitelů.</p>
+  <div id="kviz"></div>
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+  <div id="vysledek" style="display:none">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var otazky = [
+  {
+    zneni: `1. Jak zněl oficiální název armády socialistického Československa?`,
+    varianty: [`Československá národní armáda`, `Československá lidová armáda`, `Československá socialistická armáda`, `Lidové ozbrojené síly Československa`],
+    spravna: 1
+  },
+  {
+    zneni: `2. Jaká zkratka patřila v ČSSR státnímu dopravci meziměstských autobusových linek?`,
+    varianty: [`ČSD`, `ČAD`, `ČSAO`, `ČSAD`],
+    spravna: 3
+  },
+  {
+    zneni: `3. Se kterou svazovou republikou Sovětského svazu měla Československá socialistická republika společnou státní hranici?`,
+    varianty: [`s Ukrajinskou SSR`, `s Běloruskou SSR`, `s Moldavskou SSR`, `s Litevskou SSR`],
+    spravna: 0
+  },
+  {
+    zneni: `4. Který československý podnik zahraničního obchodu zajišťoval vývoz vozů Škoda a motocyklů Jawa na zahraniční trhy?`,
+    varianty: [`Mototechna`, `Omnipol`, `Strojexport`, `Motokov`],
+    spravna: 3
+  },
+  {
+    zneni: `5. Jak se od roku 1969 jmenoval nejvyšší zákonodárný sbor Československa?`,
+    varianty: [`Národní shromáždění`, `Federální shromáždění`, `Sněmovna lidu`, `Sněmovna národů`],
+    spravna: 1
+  },
+  {
+    zneni: `6. Kde byla uvedena do provozu první československá jaderná elektrárna?`,
+    varianty: [`v Dukovanech`, `v Mochovcích`, `v Temelíně`, `v Jaslovských Bohunicích`],
+    spravna: 3
+  },
+  {
+    zneni: `7. Kdo v prosinci 1987 vystřídal Gustáva Husáka v čele Komunistické strany Československa?`,
+    varianty: [`Lubomír Štrougal`, `Vasil Biľak`, `Miloš Jakeš`, `Ladislav Adamec`],
+    spravna: 2
+  },
+  {
+    zneni: `8. Na čem v socialistickém Československu závisel věk odchodu žen do starobního důchodu?`,
+    varianty: [`na počtu vychovaných dětí`, `na počtu let odpracovaných v jednom podniku`, `na věku manžela`, `na tom, zda pracovala na plný, nebo na zkrácený úvazek`],
+    spravna: 0
+  },
+  {
+    zneni: `9. Kterému československému týmu se na letních olympijských hrách v Moskvě 1980 podařilo získat zlaté medaile?`,
+    varianty: [`házenkářům`, `fotbalistům`, `basketbalistům`, `volejbalistům`],
+    spravna: 1
+  },
+  {
+    zneni: `10. Co bylo ve státním znaku ČSSR vyobrazeno na štítku na hrudi lva?`,
+    varianty: [`slovenský dvojkříž na trojvrší`, `zkřížené srp a kladivo`, `modrý Kriváň se zlatým plamenem`, `rudá pěticípá hvězda`],
+    spravna: 2
+  }
+];
+
+var hodnoceni = [
+  { max: 3, text: `Československá socialistická republika je pro vás zatím zavřená kapitola. Zkratky státních podniků, uspořádání republiky i její symbolika splývají dohromady a jistoty tu bylo poskrovnu. Projděte si správné odpovědi, pár z nich už příště padne samo.` },
+  { max: 6, text: `Poctivý průměr, přesně tady končí většina řešitelů. Základní obrysy státu, jeho armády a hospodářství znáte, ale jakmile přijde na konkrétní letopočet, obec nebo detail státního znaku, jistota kolísá. Sedmý bod zůstal na dosah.` },
+  { max: 9, text: `Výborný výkon a hranice, přes kterou se dostane menšina. Reálie ČSSR znáte napříč obory, od zákonodárného sboru přes jadernou energetiku až po podniky zahraničního obchodu. K plnému počtu vám scházelo jen pár otázek, nejspíš těch, kde se dvě varianty držely těsně u sebe.` },
+  { max: 10, text: `Plný počet, výsledek, který se v tomhle testu objeví jen výjimečně. Nezaskočilo vás ani olympijské zlato z Moskvy, ani vrch se zlatým plamenem na hrudi lva. O socialistickém Československu víte víc než drtivá většina lidí, kteří tenhle test otevřou. Klobouk dolů.` }
+];
+
+var pismena = [`a) `, `b) `, `c) `, `d) `];
+var odpovedi = new Array(otazky.length).fill(null);
+var vyhodnoceno = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var vyhodnotitEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function vykresli() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var p = document.createElement(`p`);
+    p.className = `zneni`;
+    p.textContent = o.zneni;
+    box.appendChild(p);
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `varianta`;
+      btn.textContent = pismena[j] + v;
+      btn.setAttribute(`data-otazka`, String(i));
+      btn.setAttribute(`data-varianta`, String(j));
+      btn.addEventListener(`click`, function () {
+        if (vyhodnoceno) { return; }
+        odpovedi[i] = j;
+        var vsechny = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < vsechny.length; k++) {
+          vsechny[k].classList.remove(`vybrana`);
+        }
+        btn.classList.add(`vybrana`);
+        hlaskaEl.textContent = ``;
+        aktualizujTlacitko();
+      });
+      box.appendChild(btn);
+    });
+    kvizEl.appendChild(box);
+  });
+}
+
+function aktualizujTlacitko() {
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  vyhodnotitEl.disabled = !hotovo;
+}
+
+vyhodnotitEl.addEventListener(`click`, function () {
+  if (vyhodnotitEl.disabled) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  vyhodnoceno = true;
+  var skore = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  otazky.forEach(function (o, i) {
+    var tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove(`vybrana`);
+      if (j === o.spravna) {
+        tlacitka[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === o.spravna) { skore++; }
+  });
+  vyhodnotitEl.disabled = true;
+  hlaskaEl.textContent = ``;
+  skoreEl.textContent = skore + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+znovuEl.addEventListener(`click`, function () {
+  vyhodnoceno = false;
+  odpovedi = new Array(otazky.length).fill(null);
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  vykresli();
+  aktualizujTlacitko();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+vykresli();
+aktualizujTlacitko();
+</script>
+</body>
+</html>
