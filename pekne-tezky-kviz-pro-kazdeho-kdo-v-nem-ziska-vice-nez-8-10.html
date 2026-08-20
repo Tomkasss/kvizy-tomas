@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pěkně těžký kvíz pro každého: kdo v něm získá více než 8/10, patří mezi elitu</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 32px 16px 64px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.5; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta[disabled] { cursor: default; }
+  #vyhodnotit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.2em; }
+  #vysledek {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+  #znovu {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #znovu:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 20px 8px 48px; }
+    .otazka, #vysledek { padding: 20px 16px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Pěkně těžký kvíz pro každého: kdo v něm získá více než 8/10, patří mezi elitu</h1>
+  <p class="perex">Deset otázek z deseti různých oborů, od pravěkých nálezů po stavbu hudebních nástrojů. Většina řešitelů se zastaví někde kolem poloviny. Devátý a desátý bod si vybojuje jen málokdo, a přesně ti patří mezi elitu.</p>
+  <div id="kviz"></div>
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p class="hlaska" id="hlaska"></p>
+  <div id="vysledek">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var otazky = [
+  {
+    text: `1. Ve které dnešní zemi leží historické území Lotrinsko?`,
+    varianty: [`a) Belgie`, `b) Německo`, `c) Francie`, `d) Lucembursko`],
+    spravna: 2
+  },
+  {
+    text: `2. Kterého světce prohlásil papež Pavel VI. v roce 1964 hlavním patronem Evropy?`,
+    varianty: [`a) svatý Benedikt z Nursie`, `b) svatý František z Assisi`, `c) svatý Augustin`, `d) svatý Martin z Tours`],
+    spravna: 0
+  },
+  {
+    text: `3. Které dvě země společně vyvinuly nadzvukové dopravní letadlo Concorde?`,
+    varianty: [`a) Francie a Německo`, `b) Francie a Velká Británie`, `c) Francie a Itálie`, `d) Francie a Spojené státy`],
+    spravna: 1
+  },
+  {
+    text: `4. Kdo byl posledním panovníkem Rakouska-Uherska?`,
+    varianty: [`a) František Josef I.`, `b) Karel I.`, `c) Ferdinand I. Dobrotivý`, `d) František Ferdinand d'Este`],
+    spravna: 1
+  },
+  {
+    text: `5. Ve které zemi byla nalezena kostra australopitéka zvaná Lucy?`,
+    varianty: [`a) Etiopie`, `b) Keňa`, `c) Tanzanie`, `d) Jihoafrická republika`],
+    spravna: 0
+  },
+  {
+    text: `6. Ve které oblasti Sluneční soustavy obíhá trpasličí planeta Pluto?`,
+    varianty: [`a) Oortův oblak`, `b) Kuiperův pás`, `c) hlavní pás planetek`, `d) rozptýlený disk`],
+    spravna: 1
+  },
+  {
+    text: `7. Ve kterém městě se konaly zimní olympijské hry v roce 1984?`,
+    varianty: [`a) Innsbruck`, `b) Calgary`, `c) Sarajevo`, `d) Lake Placid`],
+    spravna: 2
+  },
+  {
+    text: `8. Kdo napsal divadelní hru Domeček pro panenky?`,
+    varianty: [`a) August Strindberg`, `b) Henrik Ibsen`, `c) Anton Pavlovič Čechov`, `d) Gerhart Hauptmann`],
+    spravna: 1
+  },
+  {
+    text: `9. Kdo navrhl Guggenheimovo muzeum v Bilbau?`,
+    varianty: [`a) Norman Foster`, `b) Zaha Hadid`, `c) Renzo Piano`, `d) Frank Gehry`],
+    spravna: 3
+  },
+  {
+    text: `10. Z jakého dřeva se tradičně zhotovuje prut houslového smyčce?`,
+    varianty: [`a) z javoru`, `b) ze smrku`, `c) z ebenu`, `d) z fernambuku`],
+    spravna: 3
+  }
+];
+
+var hodnoceni = [
+  { min: 0, max: 3, text: `Tenhle kvíz nešetřil nikoho. Otázky nemíří na obecné povědomí, ale na jedno konkrétní jméno, jedno místo nebo jeden technický detail, a nabízené varianty jsou schválně nalepené těsně vedle sebe. Tady propadá velká část lidí, takže se nic neděje. Elitní pásmo je odsud daleko, ale to platí skoro pro všechny.` },
+  { min: 4, max: 6, text: `Přesně sem dopadá většina řešitelů. Máte slušný rozhled napříč obory a část těsných variant jste prokoukli, jenže u těch nejtvrdších detailů z církevních dějin, architektury nebo stavby nástrojů kvíz zavřel dveře. Poctivý průměrný výsledek na těžké lize.` },
+  { min: 7, max: 8, text: `Velmi silný výkon, který většinu pole nechává za sebou. Prošli jste zeměpisem, technikou i literaturou a většinu těsných dvojic jste rozpletli správně. Ty dvě tři, které vám utekly, patří k místům, kde padá skoro každý. Na hranici, o které mluví titulek, jste ale těsně nedosáhli: k elitě chybí ještě ten devátý bod, a právě ten odděluje výborný přehled od skutečně výjimečného.` },
+  { min: 9, max: 10, text: `Tohle je to pásmo nad 8/10, které titulek slibuje. Devět bodů znamená, že jste se přes deset odlišných oborů probojovali prakticky bez zaváhání, včetně otázek, kde většina lidí jen odhaduje. Deset bodů je naprostá špička a u kvízu, kde ani jedna otázka nebyla zadarmo a kde poslední z nich dá jen zlomek lidí, se takový výsledek tipováním netrefí. Patříte mezi elitu.` }
+];
+
+var odpovedi = new Array(otazky.length).fill(null);
+var vyhodnoceno = false;
+
+var kvizEl = document.getElementById('kviz');
+var tlacitkoEl = document.getElementById('vyhodnotit');
+var hlaskaEl = document.getElementById('hlaska');
+var vysledekEl = document.getElementById('vysledek');
+var skoreEl = document.getElementById('skore');
+var hodnoceniEl = document.getElementById('hodnoceni');
+var znovuEl = document.getElementById('znovu');
+
+function postav() {
+  kvizEl.innerHTML = '';
+  otazky.forEach(function (o, i) {
+    var box = document.createElement('div');
+    box.className = 'otazka';
+    var zneni = document.createElement('p');
+    zneni.className = 'zneni';
+    zneni.textContent = o.text;
+    box.appendChild(zneni);
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'varianta';
+      btn.textContent = v;
+      btn.addEventListener('click', function () {
+        if (vyhodnoceno) return;
+        odpovedi[i] = j;
+        var vsechny = box.querySelectorAll('.varianta');
+        for (var k = 0; k < vsechny.length; k++) {
+          vsechny[k].classList.remove('vybrana');
+        }
+        btn.classList.add('vybrana');
+        hlaskaEl.textContent = '';
+        zkontrolujHotovo();
+      });
+      box.appendChild(btn);
+    });
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujHotovo() {
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  tlacitkoEl.disabled = !hotovo;
+}
+
+tlacitkoEl.addEventListener('click', function () {
+  if (tlacitkoEl.disabled) {
+    hlaskaEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  if (vyhodnoceno) return;
+  vyhodnoceno = true;
+  var skore = 0;
+  var boxy = kvizEl.querySelectorAll('.otazka');
+  otazky.forEach(function (o, i) {
+    var vsechny = boxy[i].querySelectorAll('.varianta');
+    for (var j = 0; j < vsechny.length; j++) {
+      vsechny[j].classList.remove('vybrana');
+      vsechny[j].disabled = true;
+      if (j === o.spravna) {
+        vsechny[j].classList.add('spravna');
+      } else if (j === odpovedi[i]) {
+        vsechny[j].classList.add('spatna');
+      }
+    }
+    if (odpovedi[i] === o.spravna) skore++;
+  });
+  skoreEl.textContent = skore + ' z ' + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore >= hodnoceni[h].min && skore <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+  tlacitkoEl.disabled = true;
+  vysledekEl.style.display = 'block';
+  vysledekEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+znovuEl.addEventListener('click', function () {
+  odpovedi = new Array(otazky.length).fill(null);
+  vyhodnoceno = false;
+  vysledekEl.style.display = 'none';
+  hlaskaEl.textContent = '';
+  tlacitkoEl.disabled = true;
+  postav();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+postav();
+</script>
+</body>
+</html>
