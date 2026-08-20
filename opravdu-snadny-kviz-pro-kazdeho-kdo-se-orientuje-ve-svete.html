@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Opravdu snadný kvíz pro každého: kdo se orientuje ve světe kolem sebe, dá v pohodě 8/10</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; line-height: 1.65; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zadani { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+    line-height: 1.4;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  #vyhodnotit, #znovu {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; }
+  #znovu:hover { background: #756658; }
+  #hlaska { text-align: center; color: #8a5b5b; margin: 14px 0 0; font-size: .95rem; min-height: 1.2em; }
+  #vysledek {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 40px;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.7; margin: 0; }
+  @media (max-width: 767px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Opravdu snadný kvíz pro každého: kdo se orientuje ve světe kolem sebe, dá v pohodě 8/10</h1>
+  <p class="perex">Deset otázek z deseti oborů, u každé čtyři možnosti a jediná správná. Nic se nepočítá, stačí to, co člověk pochytí z novin, z cestování a z běžného života. Osm bodů je meta, na kterou dosáhne každý, kdo se dívá kolem sebe.</p>
+
+  <div id="kviz"></div>
+
+  <button id="vyhodnotit" type="button" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+
+  <div id="vysledek">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu" type="button">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var otazky = [
+  {
+    q: `Z jaké luštěniny se připravuje pomazánka hummus?`,
+    o: [`čočka`, `fazole`, `cizrna`, `hrách`],
+    s: 2
+  },
+  {
+    q: `Na území kterého dnešního státu leží zbytky starověkého města Babylon?`,
+    o: [`Egypt`, `Írán`, `Sýrie`, `Irák`],
+    s: 3
+  },
+  {
+    q: `Jak se nazývá básnická forma o čtrnácti verších, kterou proslavil William Shakespeare?`,
+    o: [`balada`, `elegie`, `sonet`, `óda`],
+    s: 2
+  },
+  {
+    q: `Ve které zemi byla založena firma Nokia?`,
+    o: [`Finsko`, `Japonsko`, `Německo`, `Švédsko`],
+    s: 0
+  },
+  {
+    q: `Ve kterém roce vypustil Sovětský svaz první umělou družici Země?`,
+    o: [`1949`, `1957`, `1961`, `1969`],
+    s: 1
+  },
+  {
+    q: `Kolik kol trvá podle dnešních pravidel profesionální boxerský zápas o titul mistra světa?`,
+    o: [`10`, `12`, `15`, `20`],
+    s: 1
+  },
+  {
+    q: `Co spojují vrstevnice na mapě?`,
+    o: [`místa se stejnou nadmořskou výškou`, `místa se stejnou průměrnou teplotou`, `místa se stejným tlakem vzduchu`, `místa se stejným úhrnem srážek`],
+    s: 0
+  },
+  {
+    q: `Ve kterém městě sídlí muzeum Ermitáž?`,
+    o: [`Moskva`, `Kyjev`, `Jekatěrinburg`, `Petrohrad`],
+    s: 3
+  },
+  {
+    q: `Kolik vodorovných pruhů má vlajka Spojených států amerických?`,
+    o: [`12`, `13`, `15`, `50`],
+    s: 1
+  },
+  {
+    q: `Ve které zemi vznikla opera jako hudební žánr?`,
+    o: [`Francie`, `Německo`, `Itálie`, `Rakousko`],
+    s: 2
+  }
+];
+
+var pismena = [`a)`, `b)`, `c)`, `d)`];
+
+var hodnoceni = [
+  { min: 0, max: 3, text: `Tři body a méně znamenají, že většina oborů vám utekla. Nešlo přitom o nic odborného, jen o věci, které se dají pochytit z novin, z map a z běžného povídání. Osmička, kterou slibuje titulek, je zatím daleko, ale je to jen otázka přehledu, který se dá dohnat.` },
+  { min: 4, max: 6, text: `Polovina bodů, tedy solidní základ. Tušíte správným směrem, jenže tam, kde kvíz chce přesnost místo přibližné představy, začínáte váhat. Do slíbené osmičky vám chybí dvě až čtyři odpovědi a většinou jde právě o ty, kde jste si vybírali mezi dvěma možnostmi.` },
+  { min: 7, max: 9, text: `Přesně to pásmo, o kterém mluví titulek. Sedm až devět bodů znamená, že se ve světě kolem sebe orientujete tak, jak se od člověka s běžným přehledem čeká, a osmička v tom sedí jako typický výsledek. K plnému počtu vám chybělo opravdu málo.` },
+  { min: 10, max: 10, text: `Plný počet. Prošli jste všemi deseti obory bez jediné chyby. U kvízu téhle obtížnosti to není žádná rarita, čistý výsledek tu dává hodně lidí, přesto jste laťku nastavenou na osm bodů překonali s rezervou.` }
+];
+
+var odpovedi = [];
+var vyhodnoceno = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoVyhodnotit = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var tlacitkoZnovu = document.getElementById(`znovu`);
+
+function postav() {
+  kvizEl.innerHTML = ``;
+  for (var i = 0; i < otazky.length; i++) {
+    (function (index) {
+      var box = document.createElement(`div`);
+      box.className = `otazka`;
+
+      var zadani = document.createElement(`p`);
+      zadani.className = `zadani`;
+      zadani.textContent = (index + 1) + `. ` + otazky[index].q;
+      box.appendChild(zadani);
+
+      for (var j = 0; j < otazky[index].o.length; j++) {
+        (function (jIndex) {
+          var btn = document.createElement(`button`);
+          btn.type = `button`;
+          btn.className = `varianta`;
+          btn.textContent = pismena[jIndex] + ` ` + otazky[index].o[jIndex];
+          btn.setAttribute(`data-otazka`, String(index));
+          btn.setAttribute(`data-varianta`, String(jIndex));
+          btn.addEventListener(`click`, function () {
+            if (vyhodnoceno) { return; }
+            odpovedi[index] = jIndex;
+            var vsechny = box.querySelectorAll(`.varianta`);
+            for (var k = 0; k < vsechny.length; k++) {
+              vsechny[k].classList.remove(`vybrana`);
+            }
+            btn.classList.add(`vybrana`);
+            zkontrolujHotovost();
+          });
+          box.appendChild(btn);
+        })(j);
+      }
+
+      kvizEl.appendChild(box);
+    })(i);
+  }
+}
+
+function zkontrolujHotovost() {
+  var hotovo = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] !== `number`) { hotovo = false; break; }
+  }
+  tlacitkoVyhodnotit.disabled = !hotovo;
+  if (hotovo) { hlaskaEl.textContent = ``; }
+}
+
+function vyhodnot() {
+  var hotovo = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] !== `number`) { hotovo = false; break; }
+  }
+  if (!hotovo) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+
+  vyhodnoceno = true;
+  hlaskaEl.textContent = ``;
+  tlacitkoVyhodnotit.disabled = true;
+
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  for (var q = 0; q < otazky.length; q++) {
+    var varianty = boxy[q].querySelectorAll(`.varianta`);
+    for (var v = 0; v < varianty.length; v++) {
+      varianty[v].disabled = true;
+      varianty[v].classList.remove(`vybrana`);
+      if (v === otazky[q].s) {
+        varianty[v].classList.add(`spravna`);
+      } else if (v === odpovedi[q]) {
+        varianty[v].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[q] === otazky[q].s) { body++; }
+  }
+
+  skoreEl.textContent = body + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body >= hodnoceni[h].min && body <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function znovu() {
+  odpovedi = [];
+  vyhodnoceno = false;
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  tlacitkoVyhodnotit.disabled = true;
+  postav();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+tlacitkoVyhodnotit.addEventListener(`click`, vyhodnot);
+tlacitkoZnovu.addEventListener(`click`, znovu);
+postav();
+</script>
+</body>
+</html>
