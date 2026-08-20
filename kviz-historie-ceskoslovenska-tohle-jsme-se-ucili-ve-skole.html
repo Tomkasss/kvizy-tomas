@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz historie Československa: tohle jsme se učili ve škole, ale dnešní mladí nedají ani 6/10</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 16px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+    line-height: 1.4;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  #vyhodnotit, #znovu {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; }
+  #znovu:hover { background: #756658; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+  #vysledek {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 40px;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 14px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+  .skryto { display: none; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz historie Československa: tohle jsme se učili ve škole, ale dnešní mladí nedají ani 6/10</h1>
+  <p class="perex">Deset otázek na dějiny Československa od první republiky až po socialistickou éru. Politika, státní symboly, literatura, hospodářství, sport i armáda. Varianty se drží těsně u sebe a hranici šesti bodů překročí jen část řešitelů.</p>
+
+  <div id="kviz"></div>
+
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska" class="skryto">Odpovězte prosím na všechny otázky</p>
+
+  <div id="vysledek" class="skryto">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var otazky = [
+  {
+    zneni: `1. Který předseda protektorátní vlády byl v roce 1942 popraven za spolupráci s odbojem?`,
+    varianty: [`a) Jaroslav Krejčí`, `b) Rudolf Beran`, `c) Richard Bienert`, `d) Alois Eliáš`],
+    spravna: 3
+  },
+  {
+    zneni: `2. Kam až sahal modrý klín na státní vlajce Československa?`,
+    varianty: [`a) do čtvrtiny délky listu`, `b) do třetiny délky listu`, `c) do poloviny délky listu`, `d) do dvou třetin délky listu`],
+    spravna: 2
+  },
+  {
+    zneni: `3. Kdo je autorem románu Žert?`,
+    varianty: [`a) Milan Kundera`, `b) Josef Škvorecký`, `c) Bohumil Hrabal`, `d) Pavel Kohout`],
+    spravna: 0
+  },
+  {
+    zneni: `4. Kolik měsíců trvala pro běžného brance základní vojenská služba v Československé lidové armádě?`,
+    varianty: [`a) dvanáct`, `b) osmnáct`, `c) dvacet čtyři`, `d) třicet šest`],
+    spravna: 2
+  },
+  {
+    zneni: `5. Který stát získal po druhé světové válce nejvýchodnější část předválečného Československa?`,
+    varianty: [`a) Polsko`, `b) Maďarsko`, `c) Sovětský svaz`, `d) Rumunsko`],
+    spravna: 2
+  },
+  {
+    zneni: `6. Které dva státy tvořily ve dvacátých letech společně s Československem Malou dohodu?`,
+    varianty: [`a) Polsko a Rakousko`, `b) Rumunsko a Království Srbů, Chorvatů a Slovinců`, `c) Bulharsko a Království Srbů, Chorvatů a Slovinců`, `d) Polsko a Rumunsko`],
+    spravna: 1
+  },
+  {
+    zneni: `7. Ve kterém roce získali českoslovenští hokejisté první titul mistrů světa?`,
+    varianty: [`a) 1938`, `b) 1947`, `c) 1949`, `d) 1954`],
+    spravna: 1
+  },
+  {
+    zneni: `8. Kde svedl 1. československý samostatný polní prapor svůj první boj?`,
+    varianty: [`a) u Kyjeva`, `b) u Buzuluku`, `c) u Dukly`, `d) u Sokolova`],
+    spravna: 3
+  },
+  {
+    zneni: `9. Ve kterém roce podepsal prezident dekret o znárodnění dolů a některých průmyslových podniků?`,
+    varianty: [`a) 1945`, `b) 1946`, `c) 1947`, `d) 1948`],
+    spravna: 0
+  },
+  {
+    zneni: `10. Ve kterém roce byly založeny Československé státní aerolinie?`,
+    varianty: [`a) 1919`, `b) 1923`, `c) 1927`, `d) 1930`],
+    spravna: 1
+  }
+];
+
+var hodnoceni = [
+  { min: 0, max: 3, text: `Do školní látky o Československu se vám z paměti vrátily nanejvýš tři střípky. Dvacáté století se z hlavy vytrácí rychleji, než by člověk čekal, a málokdo si ho udrží bez opakování. Projděte si správné odpovědi, hodně z nich příště padne samo.` },
+  { min: 4, max: 6, text: `Poctivý průměr, na kterém končí většina řešitelů. Obrysy státu, jeho symbolů a velkých mezníků máte pořád v hlavě, jakmile ale přijde na konkrétní rok, obec nebo přesný název, jistota kolísá. Nejmladší ročníky, pro které je Československo jen kapitolou v učebnici, se dnes zastavují u spodního okraje tohohle pásma a na šestý bod obvykle nedosáhnou. Vy jste ho měli na dosah, a možná i v ruce.` },
+  { min: 7, max: 9, text: `Výborný výsledek, jaký zvládne jen menšina. Dějiny Československa znáte napříč obory, od protektorátní politiky přes hospodářství až po sport a armádu, a nespoléháte přitom na pár nejomílanějších hesel. K plnému počtu vám scházely jen otázky, kde se dvě varianty držely těsně u sebe.` },
+  { min: 10, max: 10, text: `Plný počet, který se v tomhle kvízu objeví jen výjimečně. Nezaskočil vás ani rok prvního hokejového zlata, ani znárodňovací dekret, ani první boj východní jednotky. Školní znalost jste dávno přerostli a o Československu víte víc než drtivá většina lidí, kteří kvíz otevřou. Klobouk dolů.` }
+];
+
+var odpovedi = new Array(otazky.length).fill(null);
+var vyhodnoceno = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoVyhodnotit = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var tlacitkoZnovu = document.getElementById(`znovu`);
+
+function vykresli() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = o.zneni;
+    box.appendChild(zneni);
+
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `varianta`;
+      btn.textContent = v;
+      btn.setAttribute(`data-otazka`, String(i));
+      btn.setAttribute(`data-varianta`, String(j));
+      btn.addEventListener(`click`, function () {
+        if (vyhodnoceno) { return; }
+        odpovedi[i] = j;
+        var vsechny = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < vsechny.length; k++) {
+          vsechny[k].classList.remove(`vybrana`);
+        }
+        btn.classList.add(`vybrana`);
+        zkontrolujHotovo();
+      });
+      box.appendChild(btn);
+    });
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujHotovo() {
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  tlacitkoVyhodnotit.disabled = !hotovo;
+  if (hotovo) { hlaskaEl.classList.add(`skryto`); }
+}
+
+tlacitkoVyhodnotit.addEventListener(`click`, function () {
+  if (tlacitkoVyhodnotit.disabled) { return; }
+  var neuplne = odpovedi.some(function (o) { return o === null; });
+  if (neuplne) {
+    hlaskaEl.classList.remove(`skryto`);
+    return;
+  }
+
+  vyhodnoceno = true;
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+
+  otazky.forEach(function (o, i) {
+    var varianty = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < varianty.length; j++) {
+      varianty[j].disabled = true;
+      varianty[j].classList.remove(`vybrana`);
+      if (j === o.spravna) {
+        varianty[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        varianty[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === o.spravna) { body++; }
+  });
+
+  skoreEl.textContent = body + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body >= hodnoceni[h].min && body <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+
+  tlacitkoVyhodnotit.classList.add(`skryto`);
+  hlaskaEl.classList.add(`skryto`);
+  vysledekEl.classList.remove(`skryto`);
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+tlacitkoZnovu.addEventListener(`click`, function () {
+  odpovedi = new Array(otazky.length).fill(null);
+  vyhodnoceno = false;
+  vysledekEl.classList.add(`skryto`);
+  tlacitkoVyhodnotit.classList.remove(`skryto`);
+  tlacitkoVyhodnotit.disabled = true;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+vykresli();
+</script>
+</body>
+</html>
