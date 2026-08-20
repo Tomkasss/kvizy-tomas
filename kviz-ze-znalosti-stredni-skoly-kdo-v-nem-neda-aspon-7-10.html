@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz ze znalostí střední školy: kdo v něm nedá aspoň 7/10, měl by se vrátit do lavice</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  max-width: 720px;
+  margin: 0 auto;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  padding: 24px;
+  line-height: 1.5;
+}
+h1 { font-size: 1.7rem; line-height: 1.25; color: #2c2c2c; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin-bottom: 8px; }
+.question {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+.option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.option:last-child { margin-bottom: 0; }
+.option:hover { background: #ede8e1; }
+.option.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.option.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.option.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.option:disabled { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hint { text-align: center; color: #8a6d3b; margin-top: 12px; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+  display: none;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 24px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#retry:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  .question { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<h1>Kvíz ze znalostí střední školy: kdo v něm nedá aspoň 7/10, měl by se vrátit do lavice</h1>
+<p class="perex">Květ, uhlovodík, vlnění i pojem z ekonomie, k tomu dvakrát dějepis, dvakrát literatura, zeměpis a dějiny umění. Deset otázek, čtyři možnosti, jediná správná. Laťka je jasná: sedm bodů. Kdo pod ni spadne, ať si zase sedne do lavice.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="hint" id="hint"></p>
+<div id="result">
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="retry">Zkusit znovu</button>
+</div>
+<script>
+const questions = [
+  { q: `Ve které části pestíku jsou uložena vajíčka?`, options: [`blizna`, `semeník`, `čnělka`, `prašník`], correct: 1 },
+  { q: `Ke kterému literárnímu směru bývá řazena básnická tvorba Otokara Březiny?`, options: [`symbolismus`, `realismus`, `naturalismus`, `romantismus`], correct: 0 },
+  { q: `Jak se nazývají uhlovodíky, které mají v molekule jednu trojnou vazbu?`, options: [`alkany`, `alkeny`, `alkyny`, `areny`], correct: 2 },
+  { q: `Jak se nazývá jev, při němž se vnímaná výška tónu mění podle vzájemného pohybu zdroje a posluchače?`, options: [`rezonance`, `Dopplerův jev`, `interference`, `ozvěna`], correct: 1 },
+  { q: `Jak se nazývá dlouhodobý pokles cenové hladiny v ekonomice?`, options: [`recese`, `devalvace`, `deflace`, `stagnace`], correct: 2 },
+  { q: `Který Leninův kurz od roku 1921 znovu povolil v sovětském Rusku soukromé podnikání a prodej zemědělských přebytků na trhu?`, options: [`socialistická industrializace`, `první pětiletka`, `nová ekonomická politika`, `perestrojka`], correct: 2 },
+  { q: `Který malíř je vedle Pabla Picassa považován za zakladatele kubismu?`, options: [`Henri Matisse`, `André Derain`, `Raoul Dufy`, `Georges Braque`], correct: 3 },
+  { q: `Který dokument z roku 1627 zakotvil dědičné právo Habsburků na český trůn?`, options: [`Zlatá bula sicilská`, `Obnovené zřízení zemské`, `Pragmatická sankce`, `Majestát Rudolfa II.`], correct: 1 },
+  { q: `Ve kterém státě ústí do moře řeka Orinoko?`, options: [`Venezuela`, `Kolumbie`, `Brazílie`, `Guyana`], correct: 0 },
+  { q: `Kdo je autorem básnické sbírky Těžká hodina?`, options: [`Josef Hora`, `Stanislav Kostka Neumann`, `Fráňa Šrámek`, `Jiří Wolker`], correct: 3 }
+];
+
+const verdicts = [
+  { min: 0, max: 3, text: `Tady se titulek naplnil doslova. Sedmibodová laťka zůstala daleko a středoškolská látka se ozvala nanejvýš jako matná vzpomínka, že se něco takového kdysi probíralo. Zpátky do lavice, a to hned do první řady. Dobrá zpráva je, že u každé otázky byly na výběr čtyři možnosti, takže se od nich dá odpíchnout, až si látku projdete znovu.` },
+  { min: 4, max: 6, text: `Kolem poloviny, a přesně tady končí většina dospělých. Na sedmibodovou laťku vám chybí jeden až tři body, takže podle titulku vás lavice zatím neminula. Základ držíte, jenže tam, kde bylo potřeba rozeznat dvě velmi podobné varianty, přesnost už nestačila.` },
+  { min: 7, max: 9, text: `Laťku z titulku jste splnili a do lavice se vracet nemusíte. Sedm až devět bodů znamená, že středoškolská látka ve vás nepřežila jen v obrysech, ale i v detailech, které většina lidí dávno pustila. Jeden až tři chybějící body padly na otázkách, kde už rozhodovala opravdu přesná znalost, ne odhad.` },
+  { min: 10, max: 10, text: `Plný počet, a to v kvízu, kde se otázky střídaly napříč obory od přírodních věd po umění. Sedmibodovou hranici jste nepřekročili o vlásek, ale s tříbodovou rezervou. Deset z deseti tady dá jen menšina, takže do lavice se vracet nebudete, leda ke katedře. Klobouk dolů.` }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+const scoreEl = document.getElementById(`score`);
+const verdictEl = document.getElementById(`verdict`);
+const retryBtn = document.getElementById(`retry`);
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `question`;
+    const qt = document.createElement(`div`);
+    qt.className = `qtext`;
+    qt.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    item.options.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `option`;
+      btn.textContent = opt;
+      if (answers[qi] === oi) btn.classList.add(`selected`);
+      btn.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        render();
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  const allAnswered = answers.every(a => a !== null);
+  submitBtn.disabled = !allAnswered;
+  if (allAnswered) hintEl.textContent = ``;
+}
+
+submitBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.question`);
+  boxes.forEach((box, qi) => {
+    const opts = box.querySelectorAll(`.option`);
+    opts.forEach((btn, oi) => {
+      btn.disabled = true;
+      if (oi === questions[qi].correct) btn.classList.add(`correct`);
+      else if (oi === answers[qi]) btn.classList.add(`wrong`);
+    });
+    if (answers[qi] === questions[qi].correct) score++;
+  });
+  scoreEl.textContent = score + ` z ` + questions.length;
+  const v = verdicts.find(x => score >= x.min && score <= x.max);
+  verdictEl.textContent = v ? v.text : ``;
+  submitBtn.style.display = `none`;
+  hintEl.textContent = ``;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+});
+
+retryBtn.addEventListener(`click`, () => {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  resultEl.style.display = `none`;
+  submitBtn.style.display = `block`;
+  submitBtn.disabled = true;
+  hintEl.textContent = ``;
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+render();
+</script>
+</body>
+</html>
