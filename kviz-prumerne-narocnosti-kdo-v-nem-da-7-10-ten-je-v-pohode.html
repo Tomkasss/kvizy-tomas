@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz průměrné náročnosti: kdo v něm dá 7/10, ten je v pohodě mezi českým průměrem</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    cursor: pointer;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .opt:disabled { cursor: default; }
+  #submit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+  #retry {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #retry:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    .q, #result { padding: 20px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz průměrné náročnosti: kdo v něm dá 7/10, ten je v pohodě mezi českým průměrem</h1>
+  <p class="perex">Deset otázek z deseti různých oborů: mytologie, kosmonautika, sport, zeměpis, evropské peníze, česká technika, sýry, dějiny, klasická hudba a světová literatura. Žádné počítání, jen to, co člověk buď ví, nebo neví.</p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <p id="warn"></p>
+  <div id="result" style="display:none">
+    <p id="score"></p>
+    <p id="verdict"></p>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var QUESTIONS = [
+  { q: `Které řecké bohyni byla zasvěcena posvátná sova?`,
+    o: [`Athéna`, `Héra`, `Afrodíta`, `Artemis`], c: 0 },
+  { q: `Jak se jmenovala kosmická loď, na jejíž palubě Jurij Gagarin v roce 1961 jako první člověk obletěl Zemi?`,
+    o: [`Voschod 1`, `Vostok 1`, `Sojuz 1`, `Sputnik 5`], c: 1 },
+  { q: `V jakém sportu se hraje o Ryder Cup?`,
+    o: [`tenis`, `ragby`, `golf`, `pólo`], c: 2 },
+  { q: `Součástí kterého státu je ostrov Madeira?`,
+    o: [`Španělska`, `Itálie`, `Řecka`, `Portugalska`], c: 3 },
+  { q: `Ve kterém roce se eurové bankovky a mince poprvé dostaly do oběhu?`,
+    o: [`1999`, `2002`, `2004`, `2008`], c: 1 },
+  { q: `Co vynalezli bratranci Veverkové?`,
+    o: [`lodní šroub`, `obloukovou lampu`, `ostnatý drát`, `ruchadlo`], c: 3 },
+  { q: `Který evropský stát je domovem sýra manchego?`,
+    o: [`Španělsko`, `Nizozemsko`, `Švýcarsko`, `Francie`], c: 0 },
+  { q: `Ve kterém roce se u Appomattoxu vzdal generál Robert E. Lee?`,
+    o: [`1848`, `1861`, `1865`, `1877`], c: 2 },
+  { q: `Kdo složil hudební suitu Karneval zvířat?`,
+    o: [`Camille Saint-Saëns`, `Maurice Ravel`, `Claude Debussy`, `Hector Berlioz`], c: 0 },
+  { q: `Kdo napsal román Hlava XXII?`,
+    o: [`Kurt Vonnegut`, `Joseph Heller`, `John Steinbeck`, `Norman Mailer`], c: 1 }
+];
+
+var LETTERS = [`a`, `b`, `c`, `d`];
+
+var VERDICTS = [
+  { min: 0, max: 3, text: `Tady se ztrácel i ten nejsnazší začátek. Athénina sova, Madeira a bratranci Veverkové jsou otázky, na kterých se běžný český řešitel obvykle drží, a právě ony rozhodly. Do českého průměru vám chybí tři až šest bodů podle toho, kde přesně jste skončili, a je to rozdíl, který zvládne dohnat pár pozorných odpolední s mapou a encyklopedií.` },
+  { min: 4, max: 6, text: `Přesně tady se pohybuje průměrný Čech, jeho typický výsledek je šest bodů. Rozjezdové otázky jste nejspíš zvládli, ztráceli jste ale na Gagarinově lodi, na roce zavedení eurové hotovosti nebo na manchegu. Kdo skončil na šesti, dělí ho od titulkového pásma jediná otázka; kdo na čtyřech, potřebuje ještě tři.` },
+  { min: 7, max: 9, text: `Titulkovou hranici máte splněnou. Sedm bodů znamená, že se v pohodě držíte na úrovni českého průměru, spíš mírně nad ním, protože jste kromě rozjezdu utáhli i střední pásmo. Osm nebo devět už značí, že vám střed vyšel celý a že jste si navíc sáhli do nejtěžší trojice, kde většina řešitelů odpadá. Zakopnutí na Ryder Cupu, na roce u Appomattoxu nebo na autorovi Karnevalu zvířat přitom v tomhle pásmu zůstává úplně běžné, všechny tři najednou si nechává až plný počet.` },
+  { min: 10, max: 10, text: `Plný počet, a to zvládne jen menšina. Znamená to, že jste vedle Athéniny sovy a Gagarinovy lodi trefili i sport za Ryder Cupem, rok kapitulace u Appomattoxu, autora Karnevalu zvířat a jméno za románem Hlava XXII. Takový rozhled sahá výrazně nad český průměr a přes všech deset oborů najednou.` }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var locked = false;
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryEl = document.getElementById(`retry`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+
+    var text = document.createElement(`p`);
+    text.className = `q-text`;
+    text.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(text);
+
+    item.o.forEach(function (opt, oi) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `opt`;
+      btn.textContent = LETTERS[oi] + `) ` + opt;
+      btn.addEventListener(`click`, function () {
+        if (locked) { return; }
+        answers[qi] = oi;
+        var siblings = box.querySelectorAll(`.opt`);
+        for (var i = 0; i < siblings.length; i++) {
+          siblings[i].classList.remove(`selected`);
+        }
+        btn.classList.add(`selected`);
+        refresh();
+      });
+      box.appendChild(btn);
+    });
+
+    quizEl.appendChild(box);
+  });
+}
+
+function refresh() {
+  var done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+  if (done) { warnEl.textContent = ``; }
+}
+
+submitEl.addEventListener(`click`, function () {
+  if (locked) { return; }
+  if (answers.some(function (a) { return a === null; })) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  warnEl.textContent = ``;
+
+  var score = 0;
+  var boxes = quizEl.querySelectorAll(`.q`);
+  for (var qi = 0; qi < QUESTIONS.length; qi++) {
+    var opts = boxes[qi].querySelectorAll(`.opt`);
+    var correct = QUESTIONS[qi].c;
+    if (answers[qi] === correct) { score++; }
+    for (var oi = 0; oi < opts.length; oi++) {
+      opts[oi].disabled = true;
+      opts[oi].classList.remove(`selected`);
+      if (oi === correct) {
+        opts[oi].classList.add(`correct`);
+      } else if (oi === answers[qi]) {
+        opts[oi].classList.add(`wrong`);
+      }
+    }
+  }
+
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score >= VERDICTS[v].min && score <= VERDICTS[v].max) {
+      verdictEl.textContent = VERDICTS[v].text;
+      break;
+    }
+  }
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+retryEl.addEventListener(`click`, function () {
+  locked = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.style.display = `none`;
+  warnEl.textContent = ``;
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+refresh();
+</script>
+</body>
+</html>
