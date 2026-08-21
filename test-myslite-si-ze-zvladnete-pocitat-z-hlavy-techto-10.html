@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test: myslíte si, že zvládnete počítat z hlavy? Těchto 10 chytáku vás možná rychle uzemní (obtížnost střední)</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zadani { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.5; }
+  .pole {
+    width: 100%;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: Georgia, "Times New Roman", serif;
+  }
+  .pole:focus { outline: none; background: #ede8e1; border-color: #a89e92; }
+  .pole.vyplneno { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .otazka.spravne .pole { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; font-weight: bold; }
+  .otazka.spatne .pole { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; font-weight: bold; }
+  .reseni { margin-top: 14px; font-size: 1rem; line-height: 1.5; display: none; }
+  .otazka.vyhodnoceno .reseni { display: block; }
+  .reseni.ok { color: #1e5631; }
+  .reseni.ne { color: #721c24; }
+  button {
+    display: block;
+    margin: 40px auto 0;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #fff;
+    font-family: Georgia, "Times New Roman", serif;
+    cursor: pointer;
+  }
+  #vyhodnotit { background: #5b7e5f; }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; }
+  #znovu:hover { background: #756658; }
+  .hlaska { text-align: center; color: #721c24; margin-top: 16px; font-size: 1rem; min-height: 1.2em; }
+  #vysledek {
+    display: none;
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.7; margin: 0; }
+  @media (max-width: 767px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka, #vysledek { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test: myslíte si, že zvládnete počítat z hlavy? Těchto 10 chytáku vás možná rychle uzemní (obtížnost střední)</h1>
+<p class="perex">Tady se nepočítá na papíře ani na displeji, všechno musí proběhnout v hlavě. Čeká vás několik kroků za sebou, čísla, která se sama nezaokrouhlí, a jedna řada, u které je nejtěžší odhalit, co ji vlastně řídí. Tak schválně.</p>
+
+<div id="otazky"></div>
+
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p class="hlaska" id="hlaska"></p>
+
+<div id="vysledek">
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+
+<script>
+var otazky = [
+  { zadani: `1. Kolik je 24 × 19?`, odpovedi: [`456`] },
+  { zadani: `2. Kolik je 65 % z 280?`, odpovedi: [`182`] },
+  { zadani: `3. Kolik je 8 × 43 − 76?`, odpovedi: [`268`] },
+  { zadani: `4. Kolik je 682 ÷ 22?`, odpovedi: [`31`] },
+  { zadani: `5. Kolik je 34²?`, odpovedi: [`1156`] },
+  { zadani: `6. Kolik je sedm devítin z 306?`, odpovedi: [`238`] },
+  { zadani: `7. Které číslo pokračuje v řadě 1, 5, 14, 30, 55?`, odpovedi: [`91`] },
+  { zadani: `8. Kolik sekund mají 2 hodiny a 47 minut?`, odpovedi: [`10020`] },
+  { zadani: `9. Částka 2 340 korun se dělí v poměru 2 : 3 : 5. Kolik korun připadne na prostřední díl?`, odpovedi: [`702`] },
+  { zadani: `10. O kolik je součin čísel 9 a 17 větší než jejich součet?`, odpovedi: [`127`] }
+];
+
+var hodnoceni = [
+  { min: 0, max: 3, text: `Titulek se ptal, jestli vás deset chytáků rychle uzemní, a tenhle výsledek odpovídá bez okolků: uzemnilo jich nejméně sedm. Nebývá za tím to, že by některý příklad nešel spočítat, spíš to, že se vynoří první číslo, které vypadá věrohodně, a nic ho už neprověří. Postup se proto vyplatí obrátit: dřív než něco spočítáte, řekněte si, mezi kterými dvěma kulatými čísly musí výsledek ležet. U 24 × 19 to je někde mezi čtyřmi a pěti sty, u 34² mezi tisícem a dvanácti sty. Kdo si takovou hranici položí, chybné číslo zachytí ještě dřív, než ho vysloví, a body stoupnou bez jediného nově naučeného postupu.` },
+  { min: 4, max: 6, text: `Skóre uprostřed škály, tedy uzemnily vás čtyři, pět nebo šest z těch deseti chytáků. Které konkrétně, se ze součtu bodů vyčíst nedá: klidně vám mohly vyjít ty nejtvrdší příklady a shodila vás dvě zadání, která vypadala nevinně. Pomůže tady jediná věc, ať už jste ztráceli kdekoli: přepsat si čísla na příjemnější sousedy. Místo devatenácti počítat s dvacítkou a jednu porci zase odebrat, procento poskládat z poloviny a desetiny, u zlomku napřed dělit jmenovatelem a teprve pak násobit. Ten přepis stojí pár vteřin a udělat se musí dřív, než se pustíte do počítání, jinak už není z čeho vycházet. Kdo si na něj zvykne, obvykle se posune o bod nebo rovnou o dva.` },
+  { min: 7, max: 9, text: `Sedmička, osmička nebo devítka z deseti, tedy nejméně sedm z těch deseti chytáků na vás nestačilo. Zbytek, ať už vám chyběl jeden bod, nebo tři, utekl nejspíš u úloh, kde jste odpověď spíš odhadli, než dopočítali, a kde přesně to bylo, víte nejlíp vy sami. Vraťte se právě k nim a spočítejte je podruhé jinou cestou, a když obě vedou ke stejnému číslu, výsledek drží. Když se rozejdou, máte zároveň nalezenou chybu i místo, kde vznikla. Na téhle kontrole se pásmo obvykle láme směrem k desítce, protože samotné počítání už vám slouží.` },
+  { min: 10, max: 10, text: `Všech deset bodů a jediné pásmo, kde vás neuzemnil ani jeden z těch chytáků. Rozhodovaly přitom hlavně dvě úlohy: řada 1, 5, 14, 30, 55, jejíž pravidlo se samo nenabídne, a poslední otázka, u které se součin se součtem zamění dřív, než si toho člověk stačí všimnout. Že jste dali obě, nevypovídá ani tak o rychlosti počítání jako o tom, že jste u každého zadání nejdřív rozhodli, co se vlastně počítá, a až pak počítali. Dál se dá jít právě tudy: zkuste si u každého z těch deseti příkladů nahlas popsat, kudy jste k číslu došli. Co dokážete pojmenovat, to vám zůstane po ruce i za rok, kdežto postup, který si jen tak proběhne hlavou, se ztratí první, jakmile pár týdnů nepočítáte.` }
+];
+
+var vyhodnoceno = false;
+var kontejner = document.getElementById(`otazky`);
+var tlacitko = document.getElementById(`vyhodnotit`);
+var hlaska = document.getElementById(`hlaska`);
+var vysledek = document.getElementById(`vysledek`);
+
+function normalizuj(text) {
+  return String(text)
+    .normalize(`NFD`)
+    .replace(/[\u0300-\u036f]/g, ``)
+    .toLowerCase()
+    .replace(/[\s\u00a0\u202f.,'\u2019]/g, ``)
+    .trim();
+}
+
+otazky.forEach(function (o, i) {
+  var box = document.createElement(`div`);
+  box.className = `otazka`;
+  box.id = `otazka-` + i;
+
+  var zadani = document.createElement(`p`);
+  zadani.className = `zadani`;
+  zadani.textContent = o.zadani;
+  box.appendChild(zadani);
+
+  var pole = document.createElement(`input`);
+  pole.type = `text`;
+  pole.className = `pole`;
+  pole.setAttribute(`inputmode`, `numeric`);
+  pole.setAttribute(`autocomplete`, `off`);
+  pole.placeholder = `Napište výsledek`;
+  pole.addEventListener(`input`, function () {
+    if (pole.value.trim() !== ``) {
+      pole.classList.add(`vyplneno`);
+    } else {
+      pole.classList.remove(`vyplneno`);
+    }
+    zkontrolujHotovo();
+  });
+  box.appendChild(pole);
+
+  var reseni = document.createElement(`p`);
+  reseni.className = `reseni`;
+  box.appendChild(reseni);
+
+  kontejner.appendChild(box);
+});
+
+function zkontrolujHotovo() {
+  if (vyhodnoceno) { return; }
+  var pole = kontejner.querySelectorAll(`.pole`);
+  var vsechny = true;
+  for (var i = 0; i < pole.length; i++) {
+    if (pole[i].value.trim() === ``) { vsechny = false; break; }
+  }
+  tlacitko.disabled = !vsechny;
+  if (vsechny) { hlaska.textContent = ``; }
+}
+
+tlacitko.addEventListener(`click`, function () {
+  if (tlacitko.disabled) {
+    hlaska.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  var pole = kontejner.querySelectorAll(`.pole`);
+  var body = 0;
+
+  otazky.forEach(function (o, i) {
+    var box = document.getElementById(`otazka-` + i);
+    var vstup = pole[i];
+    var zadano = normalizuj(vstup.value);
+    var spravne = false;
+    for (var j = 0; j < o.odpovedi.length; j++) {
+      if (normalizuj(o.odpovedi[j]) === zadano) { spravne = true; break; }
+    }
+    var reseni = box.querySelector(`.reseni`);
+    if (spravne) {
+      body++;
+      box.classList.add(`spravne`);
+      reseni.className = `reseni ok`;
+      reseni.textContent = `Správně. Odpověď je ` + o.odpovedi[0] + `.`;
+    } else {
+      box.classList.add(`spatne`);
+      reseni.className = `reseni ne`;
+      reseni.textContent = `Špatně. Správná odpověď je ` + o.odpovedi[0] + `.`;
+    }
+    box.classList.add(`vyhodnoceno`);
+    vstup.disabled = true;
+  });
+
+  vyhodnoceno = true;
+  tlacitko.disabled = true;
+  hlaska.textContent = ``;
+
+  var text = ``;
+  for (var k = 0; k < hodnoceni.length; k++) {
+    if (body >= hodnoceni[k].min && body <= hodnoceni[k].max) { text = hodnoceni[k].text; break; }
+  }
+  document.getElementById(`skore`).textContent = body + ` z ` + otazky.length;
+  document.getElementById(`hodnoceni`).textContent = text;
+  vysledek.style.display = `block`;
+  vysledek.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+document.getElementById(`znovu`).addEventListener(`click`, function () {
+  var pole = kontejner.querySelectorAll(`.pole`);
+  for (var i = 0; i < pole.length; i++) {
+    pole[i].value = ``;
+    pole[i].disabled = false;
+    pole[i].classList.remove(`vyplneno`);
+  }
+  var boxy = kontejner.querySelectorAll(`.otazka`);
+  for (var j = 0; j < boxy.length; j++) {
+    boxy[j].classList.remove(`spravne`, `spatne`, `vyhodnoceno`);
+    boxy[j].querySelector(`.reseni`).textContent = ``;
+  }
+  vyhodnoceno = false;
+  vysledek.style.display = `none`;
+  tlacitko.disabled = true;
+  hlaska.textContent = ``;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+</script>
+</body>
+</html>
