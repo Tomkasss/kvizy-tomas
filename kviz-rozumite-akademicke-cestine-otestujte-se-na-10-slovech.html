@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz: rozumíte akademické češtině? Otestujte se na 10 slovech, které dají běžnému Čechovi zabrat</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+    line-height: 1.45;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta[disabled] { cursor: default; }
+  #vyhodnotit, #znovu {
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #vyhodnotit { background: #5b7e5f; }
+  #vyhodnotit:hover:not(:disabled) { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; }
+  #znovu:hover { background: #756658; }
+  #hlaska { text-align: center; color: #8a6d6d; margin-top: 14px; min-height: 1.2em; }
+  #vysledek {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 40px;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka, #vysledek { padding: 20px; }
+    #vyhodnotit, #znovu { width: 100%; padding: 16px 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz: rozumíte akademické češtině? Otestujte se na 10 slovech, které dají běžnému Čechovi zabrat</h1>
+  <p class="perex">Deset slov, která znáte z odborných textů, přednášek i novinových komentářů. Vypadají povědomě, ale na přesném významu se láme většina. Vyberte vždy jedno ze čtyř vysvětlení a zjistěte, kolik jich trefíte.</p>
+  <div id="kviz"></div>
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+  <div id="vysledek">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var otazky = [
+  {
+    q: `Co znamená slovo „preambule"?`,
+    a: [
+      `závěrečná ustanovení určující, odkdy předpis platí`,
+      `slavnostní úvod vyjadřující východiska a cíle předpisu`,
+      `samostatný text zdůvodňující, proč se předpis přijímá`,
+      `přehled starších předpisů, které nový předpis ruší`
+    ],
+    spravna: 1
+  },
+  {
+    q: `Co znamená slovo „eutrofizace"?`,
+    a: [
+      `postupné okyselení vody působením kyselých dešťů`,
+      `zanášení dna nádrže usazeninami a postupné mělčení`,
+      `znečištění vody splachy chemických postřiků z polí`,
+      `obohacení vody živinami vedoucí k přemnožení sinic`
+    ],
+    spravna: 3
+  },
+  {
+    q: `Co znamená slovo „žehrat"?`,
+    a: [
+      `stěžovat si a reptat na něco`,
+      `vytrvale někoho o něco prosit`,
+      `posmívat se někomu za jeho zády`,
+      `spěšně a nedbale odbýt práci`
+    ],
+    spravna: 0
+  },
+  {
+    q: `Co znamená slovo „hagiografie"?`,
+    a: [
+      `opisování a zdobení rukopisů v klášterních dílnách`,
+      `soupis majetku a desátků pro biskupství`,
+      `písemnictví líčící životy a skutky svatých`,
+      `sepisování dějin klášterů a řeholních řádů`
+    ],
+    spravna: 2
+  },
+  {
+    q: `Co znamená slovo „paronymum"?`,
+    a: [
+      `slovo zvukově podobné jinému slovu, ale odlišné významem`,
+      `slovo znějící zcela stejně jako jiné, ale s jiným významem`,
+      `slovo, jehož význam se vývojem posunul až k opaku původního`,
+      `slovo utvořené spojením počátečních částí dvou jiných slov`
+    ],
+    spravna: 0
+  },
+  {
+    q: `Co znamená slovo „konfabulace"?`,
+    a: [
+      `opakované vtíravé vybavování jediné nepříjemné vzpomínky`,
+      `sklon vidět vlastní minulost v lepším světle`,
+      `neschopnost vybavit si události z posledních hodin`,
+      `nezáměrné vyplňování mezer v paměti smyšlenkami`
+    ],
+    spravna: 3
+  },
+  {
+    q: `Co znamená slovo „profylaxe"?`,
+    a: [
+      `léčba tlumící příznaky, aniž se odstraní příčina nemoci`,
+      `opatření, jimiž se předchází vzniku nemoci nebo nákazy`,
+      `léčba zahájená hned při prvních příznacích nemoci`,
+      `vyšetření, jímž se zjišťuje rozsah už vzniklé nemoci`
+    ],
+    spravna: 1
+  },
+  {
+    q: `Co znamená slovo „endogamie"?`,
+    a: [
+      `pravidlo hledat manžela zásadně mimo vlastní skupinu`,
+      `soužití jednoho muže s několika ženami zároveň`,
+      `pravidlo uzavírat sňatky uvnitř vlastní skupiny`,
+      `sňatek uzavřený mezi blízkými pokrevními příbuznými`
+    ],
+    spravna: 2
+  },
+  {
+    q: `Co znamená slovo „teleologie"?`,
+    a: [
+      `učení o účelnosti všech přírodních i společenských jevů`,
+      `názor, že vše se řídí neměnnými zákony příčin a následků`,
+      `nauka o posledních věcech světa a osudu člověka po smrti`,
+      `nauka o přenosu myšlenek na dálku bez pomoci smyslů`
+    ],
+    spravna: 0
+  },
+  {
+    q: `Co znamená slovo „monopson"?`,
+    a: [
+      `trh, na němž se prodávající dohodli na společné ceně`,
+      `trh, na němž nabízí zboží jen několik málo prodejců`,
+      `trh, na němž je jediný prodávající a mnoho kupujících`,
+      `trh, na němž je jediný kupující a mnoho prodávajících`
+    ],
+    spravna: 3
+  }
+];
+
+var hodnoceni = [
+  { max: 3, text: `Akademická čeština vám zatím zůstává cizí. U většiny slov rozhodoval jejich zvuk a nabízená vysvětlení si byla natolik blízká, že samotný cit nestačil. Deset přesných významů ale právě přibylo a příště už podobné dvojice odliší.` },
+  { max: 6, text: `Přesně tady se schází většina řešitelů. Několik výrazů držíte pevně, u zbytku jste sáhli po tom nejpravděpodobněji znějícím a část z toho vedla vedle. Základní orientaci v akademické slovní zásobě máte, na jemné odstíny významu to zatím nestačí.` },
+  { max: 9, text: `Akademické češtině rozumíte, a to nadprůměrně. Odlišili jste i výrazy, kde se běžně chybuje, a nenachytala vás ani slova, jejichž první slabika slibuje docela jiný obor. Odsud dělí od plného počtu jen pár nejvzácnějších pojmů.` },
+  { max: 10, text: `Plný počet, který se v tomhle kvízu povede jen hrstce lidí. Neuspěl proti vám ani jeden z těsných podobných významů a všech deset slov jste určili bez zaváhání. Akademická čeština je pro vás naprosto srozumitelný jazyk.` }
+];
+
+var pismena = [`a)`, `b)`, `c)`, `d)`];
+var odpovedi = [];
+var hotovo = false;
+var kvizEl = document.getElementById(`kviz`);
+var tlacitko = document.getElementById(`vyhodnotit`);
+var hlaska = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function vykresli() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = (i + 1) + `. ` + o.q;
+    box.appendChild(zneni);
+    o.a.forEach(function (text, j) {
+      var b = document.createElement(`button`);
+      b.className = `varianta`;
+      b.type = `button`;
+      b.textContent = pismena[j] + ` ` + text;
+      b.addEventListener(`click`, function () {
+        if (hotovo) { return; }
+        odpovedi[i] = j;
+        var vsechny = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < vsechny.length; k++) {
+          vsechny[k].classList.remove(`vybrana`);
+        }
+        b.classList.add(`vybrana`);
+        zkontrolujHotovost();
+      });
+      box.appendChild(b);
+    });
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujHotovost() {
+  var plny = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] !== `number`) { plny = false; break; }
+  }
+  tlacitko.disabled = !plny;
+  if (plny) { hlaska.textContent = ``; }
+}
+
+tlacitko.addEventListener(`click`, function () {
+  if (tlacitko.disabled) {
+    hlaska.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  hotovo = true;
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  otazky.forEach(function (o, i) {
+    var varianty = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < varianty.length; j++) {
+      varianty[j].disabled = true;
+      varianty[j].classList.remove(`vybrana`);
+      if (j === o.spravna) {
+        varianty[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        varianty[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === o.spravna) { body++; }
+  });
+  tlacitko.disabled = true;
+  skoreEl.textContent = body + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+znovuEl.addEventListener(`click`, function () {
+  odpovedi = [];
+  hotovo = false;
+  vysledekEl.style.display = `none`;
+  hlaska.textContent = ``;
+  tlacitko.disabled = true;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+vykresli();
+</script>
+</body>
+</html>
