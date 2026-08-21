@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz: troufli byste si dnes na maturitní test? Kdo nedá aspoň 7/10 dostal by kouli</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .hotovo .varianta { cursor: default; }
+  #vyhodnotit, #znovu {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; }
+  #znovu:hover { background: #756658; }
+  #hlaska { text-align: center; color: #a03c3c; margin-top: 14px; min-height: 1.4em; }
+  #vysledek {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 24px;
+    border-top: 4px solid #5b7e5f;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka, #vysledek { padding: 20px; }
+    #vyhodnotit, #znovu { width: 100%; padding: 16px 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz: troufli byste si dnes na maturitní test? Kdo nedá aspoň 7/10 dostal by kouli</h1>
+<p class="perex">Od maturity uteklo pár let, ale zkoušející se ptá dál. Zvládnete ještě otázky z češtiny a literatury, z dějepisu a zeměpisu, z přírodních věd, umění i společenskovědního základu? Sedm bodů je hranice, pod ní čeká koule.</p>
+
+<div id="kviz"></div>
+
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p id="hlaska"></p>
+
+<div id="vysledek">
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+
+<script>
+var otazky = [
+  {
+    zneni: `1. Které z těchto spojení je mluvnicky správně?`,
+    varianty: [`navzdory nepřízně osudu`, `navzdory nepřízni osudu`, `navzdory nepřízeň osudu`, `navzdory nepřízní osudu`],
+    spravna: 1
+  },
+  {
+    zneni: `2. Kdo je autorem knihy Hordubal?`,
+    varianty: [`Vladislav Vančura`, `Jaroslav Havlíček`, `Karel Čapek`, `Egon Hostovský`],
+    spravna: 2
+  },
+  {
+    zneni: `3. Která starověká říše měla hlavní město Ninive?`,
+    varianty: [`Asýrie`, `Babylonie`, `Persie`, `Médie`],
+    spravna: 0
+  },
+  {
+    zneni: `4. Který z těchto mořských proudů je teplý?`,
+    varianty: [`Labradorský proud`, `Kanárský proud`, `Golfský proud`, `Peruánský proud`],
+    spravna: 2
+  },
+  {
+    zneni: `5. Do které čeledi patří rajče?`,
+    varianty: [`brukvovité`, `lilkovité`, `miříkovité`, `tykvovité`],
+    spravna: 1
+  },
+  {
+    zneni: `6. Sulfidem kterého kovu je minerál galenit?`,
+    varianty: [`zinku`, `cínu`, `mědi`, `olova`],
+    spravna: 3
+  },
+  {
+    zneni: `7. Jak se nazývá děj, při kterém průchod stejnosměrného proudu roztokem vylučuje látky na elektrodách?`,
+    varianty: [`ionizace`, `elektrolýza`, `elektromagnetická indukce`, `polarizace`],
+    spravna: 1
+  },
+  {
+    zneni: `8. Jak se nazývá obraz sestavený z barevných skel ve velkých oknech gotických katedrál?`,
+    varianty: [`mozaika`, `freska`, `vitráž`, `sgrafito`],
+    spravna: 2
+  },
+  {
+    zneni: `9. Které z těchto italských tempových označení znamená nejrychlejší tempo?`,
+    varianty: [`largo`, `adagio`, `andante`, `presto`],
+    spravna: 3
+  },
+  {
+    zneni: `10. Kolik stálých členů má Rada bezpečnosti OSN?`,
+    varianty: [`pět`, `sedm`, `deset`, `patnáct`],
+    spravna: 0
+  }
+];
+
+var pismena = [`a)`, `b)`, `c)`, `d)`];
+
+var hodnoceni = [
+  { min: 0, max: 3, text: `Koule, a to bez diskuze. Tři body a méně znamenají, že ze středoškolské látky zbyla jen mlha, ve které se ztratila i jména a pojmy opakované v každém ročníku. Zkoušející by zavřel katalog a poslal vás na opravný termín.` },
+  { min: 4, max: 6, text: `Pořád koule, jen o něco těsnější. Půlku zadání jste dali, jenže laťka z titulku leží na sedmi bodech a k ní vám schází jeden až tři body. Uspěli jste tam, kde stačilo tušení, a ztratili tam, kde se muselo trefit přesné slovo.` },
+  { min: 7, max: 9, text: `Prošli jste. Sedm bodů je přesně ta hranice, kterou titulek klade mezi známku a kouli, a vy jste ji překonali. S devíti body jste se nenechali zmást ani tam, kde vedle sebe stály dvě stejně věrohodné varianty, a k plnému počtu vám scházel jediný krok.` },
+  { min: 10, max: 10, text: `Gratulujeme, plný počet, tedy maturita s vyznamenáním. Sedmibodovou laťku jste nepřekonali o kousek, ale s tříbodovou rezervou, a to napříč všemi obory zadání od mluvnice a literatury přes chemii a fyziku až po hudbu a mezinárodní politiku. Klobouk dolů.` }
+];
+
+var odpovedi = [];
+var vyhodnoceno = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var vyhodnotitEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function postav() {
+  kvizEl.innerHTML = ``;
+  for (var i = 0; i < otazky.length; i++) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var p = document.createElement(`p`);
+    p.className = `zneni`;
+    p.textContent = otazky[i].zneni;
+    box.appendChild(p);
+    for (var j = 0; j < otazky[i].varianty.length; j++) {
+      var b = document.createElement(`button`);
+      b.className = `varianta`;
+      b.textContent = pismena[j] + ` ` + otazky[i].varianty[j];
+      b.setAttribute(`data-o`, i);
+      b.setAttribute(`data-v`, j);
+      b.addEventListener(`click`, klik);
+      box.appendChild(b);
+    }
+    kvizEl.appendChild(box);
+  }
+}
+
+function klik(e) {
+  if (vyhodnoceno) { return; }
+  var o = parseInt(e.currentTarget.getAttribute(`data-o`), 10);
+  var v = parseInt(e.currentTarget.getAttribute(`data-v`), 10);
+  odpovedi[o] = v;
+  var sourozenci = e.currentTarget.parentNode.querySelectorAll(`.varianta`);
+  for (var k = 0; k < sourozenci.length; k++) {
+    sourozenci[k].classList.remove(`vybrana`);
+  }
+  e.currentTarget.classList.add(`vybrana`);
+  hlaskaEl.textContent = ``;
+  zkontrolujStav();
+}
+
+function zkontrolujStav() {
+  var hotovo = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] === `undefined`) { hotovo = false; }
+  }
+  vyhodnotitEl.disabled = !hotovo;
+}
+
+vyhodnotitEl.addEventListener(`click`, function () {
+  var vsechny = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] === `undefined`) { vsechny = false; }
+  }
+  if (!vsechny) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  vyhodnoceno = true;
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  for (var o = 0; o < otazky.length; o++) {
+    boxy[o].classList.add(`hotovo`);
+    var tlacitka = boxy[o].querySelectorAll(`.varianta`);
+    for (var v = 0; v < tlacitka.length; v++) {
+      tlacitka[v].classList.remove(`vybrana`);
+      if (v === otazky[o].spravna) {
+        tlacitka[v].classList.add(`spravna`);
+      } else if (v === odpovedi[o]) {
+        tlacitka[v].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[o] === otazky[o].spravna) { body++; }
+  }
+  skoreEl.textContent = body + ` z ` + otazky.length;
+  var text = ``;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body >= hodnoceni[h].min && body <= hodnoceni[h].max) { text = hodnoceni[h].text; }
+  }
+  hodnoceniEl.textContent = text;
+  vysledekEl.style.display = `block`;
+  vyhodnotitEl.disabled = true;
+  hlaskaEl.textContent = ``;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+znovuEl.addEventListener(`click`, function () {
+  odpovedi = [];
+  vyhodnoceno = false;
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  vyhodnotitEl.disabled = true;
+  postav();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+postav();
+</script>
+</body>
+</html>
