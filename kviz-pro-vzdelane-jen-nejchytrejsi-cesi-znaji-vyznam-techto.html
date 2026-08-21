@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro vzdělané: jen nejchytřejší Češi znají význam těchto 10 odborných slov</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.question {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+#evaluate {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#evaluate:hover { background: #4a6b4e; }
+#evaluate:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warning { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#retry:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .question { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz pro vzdělané: jen nejchytřejší Češi znají význam těchto 10 odborných slov</h1>
+  <p class="perex">Deset slov, která česká odborná a knižní čeština používá naprosto samozřejmě. U každého najdete čtyři výklady a nejméně dva z nich pokaždé znějí přijatelně. Rozhodne přesnost, ne odhad. Kolik z deseti trefíte?</p>
+  <div id="quiz"></div>
+  <button id="evaluate" disabled>Vyhodnotit</button>
+  <div id="warning"></div>
+  <div id="result" style="display:none">
+    <div id="score"></div>
+    <p id="verdict"></p>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var QUESTIONS = [
+  {
+    q: `Co znamená slovo „moratorium"?`,
+    options: [
+      `úplné zrušení dříve uzavřeného závazku bez náhrady`,
+      `dočasné pozastavení činnosti nebo platební povinnosti`,
+      `prohlášení dřívějšího rozhodnutí za neplatné od počátku`,
+      `rozložení dlužné částky do pravidelných měsíčních splátek`
+    ],
+    correct: 1
+  },
+  {
+    q: `Co znamená slovo „peripetie"?`,
+    options: [
+      `úvod, v němž se čtenář seznamuje s postavami děje`,
+      `náhlý zvrat, který obrátí dosavadní vývoj událostí`,
+      `vystupňované napětí, k němuž vše dosud směřovalo`,
+      `rozuzlení, v němž se konečně uzavřou všechny zápletky`
+    ],
+    correct: 1
+  },
+  {
+    q: `Co znamená slovo „adheze"?`,
+    options: [
+      `síla, která drží pohromadě částice uvnitř jedné a téže látky`,
+      `samovolné pronikání částic jedné látky mezi částice druhé`,
+      `napětí, které stahuje povrch kapaliny do co nejmenší plochy`,
+      `přilnavost mezi povrchy dvou různých látek, jež se dotýkají`
+    ],
+    correct: 3
+  },
+  {
+    q: `Co znamená slovo „notorieta"?`,
+    options: [
+      `skutečnost natolik známá, že se před soudem nedokazuje`,
+      `opakované páchání téhož provinění stále týmž člověkem`,
+      `listina, kterou sepsal a svým podpisem ověřil notář`,
+      `sdělení, jímž úřad veřejně oznamuje své rozhodnutí`
+    ],
+    correct: 0
+  },
+  {
+    q: `Co znamená slovo „imanentní"?`,
+    options: [
+      `bezprostředně hrozící a takřka neodvratně se blížící`,
+      `přesahující hranice veškeré lidské smyslové zkušenosti`,
+      `obsažený v samé podstatě věci, bytostně jí vlastní`,
+      `nepřipouštějící žádnou námitku ani sebemenší pochybnost`
+    ],
+    correct: 2
+  },
+  {
+    q: `Co znamená slovo „veduta"?`,
+    options: [
+      `obraz krajiny oživené postavami z antických bájí a pověstí`,
+      `obraz městské ulice s výjevem ze života jejích obyvatel`,
+      `obraz chrámového interiéru se světlem dopadajícím na klenbu`,
+      `obraz věrně zachycující skutečnou podobu konkrétního města`
+    ],
+    correct: 3
+  },
+  {
+    q: `Co znamená slovo „pilastr"?`,
+    options: [
+      `sloup zapuštěný do zdi, z níž vystupuje jen svou polovinou`,
+      `plochý sloup mírně vystupující ze zdi, s patkou a hlavicí`,
+      `úzký svislý pás omítky, který jen opticky člení průčelí`,
+      `předsunutá část průčelí vybíhající po celé výšce stavby`
+    ],
+    correct: 1
+  },
+  {
+    q: `Co znamená slovo „kooptace"?`,
+    options: [
+      `doplňovací volba vypsaná na uvolněné místo ve sboru`,
+      `doplnění sboru o člena jmenovaného nadřízeným orgánem`,
+      `doplnění sboru o nového člena rozhodnutím sboru samého`,
+      `přenesení hlasovacího práva člena sboru na jiného člena`
+    ],
+    correct: 2
+  },
+  {
+    q: `Co znamená slovo „iatrogenní"?`,
+    options: [
+      `způsobený zásahem lékaře, jeho vyšetřením nebo léčbou`,
+      `získaný v souvislosti s pobytem ve zdravotnickém zařízení`,
+      `vzniklý bez příčiny, kterou by se dařilo zjistit`,
+      `přítomný už v době narození a nezískaný během života`
+    ],
+    correct: 0
+  },
+  {
+    q: `Co znamená slovo „hyperkorektnost"?`,
+    options: [
+      `užívání domněle správných tvarů ve snaze mluvit spisovněji`,
+      `úzkostlivé opravování jazykových chyb v projevu druhých lidí`,
+      `hromadění zbytečně učených výrazů ve zcela obyčejném projevu`,
+      `doslovné lpění na znění pravidla bez ohledu na jeho smysl`
+    ],
+    correct: 0
+  }
+];
+
+var VERDICTS = [
+  { min: 0, max: 3, text: `Vaše slovní zásoba pokrývá běžnou mluvu a hlavní zpravodajství, odborná a knižní vrstva češtiny do ní zatím nepatří. U většiny slov rozhodoval jejich zvuk a nabízené výklady si byly příliš blízké na to, aby cit stačil. Deset přesných významů ale právě přibylo.` },
+  { min: 4, max: 6, text: `Slovní zásoba na úrovni, s jakou se čte odborněji psaný článek s občasným zaváháním. Slova ze dvou tří oborů držíte pevně, u zbytku jste sáhli po nejpravděpodobněji znějícím výkladu a část z toho vedla vedle. Přesné odstíny významu si zatím domýšlíte z okolní věty.` },
+  { min: 7, max: 9, text: `Široká slovní zásoba, jaká sahá napříč obory a nezastaví se u toho, co je slyšet v médiích. Odlišili jste i dvojice, kde se běžně chybuje, a nenachytala vás slova, která podle zvuku slibují docela jiný význam. Odborný text, smlouvu i výstavní katalog přečtete bez slovníku.` },
+  { min: 10, max: 10, text: `Plný počet, který se v tomhle kvízu povede opravdu jen hrstce lidí. Vaše slovní zásoba pokrývá právo, filozofii, medicínu, umění i jazykovědu naráz a neuspěl proti vám ani jeden z těsných podobných významů. Přesně tuhle šíři slibuje titulek, a vy jste ji doložili všemi deseti body.` }
+];
+
+var LETTERS = [`a)`, `b)`, `c)`, `d)`];
+var answers = new Array(QUESTIONS.length).fill(null);
+var locked = false;
+
+var quizEl = document.getElementById(`quiz`);
+var evaluateBtn = document.getElementById(`evaluate`);
+var warningEl = document.getElementById(`warning`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryBtn = document.getElementById(`retry`);
+
+function build() {
+  quizEl.textContent = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `question`;
+
+    var title = document.createElement(`p`);
+    title.className = `qtext`;
+    title.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(title);
+
+    item.options.forEach(function (opt, oi) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `opt`;
+      btn.textContent = LETTERS[oi] + ` ` + opt;
+      btn.addEventListener(`click`, function () {
+        if (locked) { return; }
+        answers[qi] = oi;
+        var siblings = box.querySelectorAll(`.opt`);
+        for (var i = 0; i < siblings.length; i++) {
+          siblings[i].classList.remove(`selected`);
+        }
+        btn.classList.add(`selected`);
+        refresh();
+      });
+      box.appendChild(btn);
+    });
+
+    quizEl.appendChild(box);
+  });
+}
+
+function refresh() {
+  var done = answers.every(function (a) { return a !== null; });
+  evaluateBtn.disabled = !done;
+  if (done) { warningEl.textContent = ``; }
+}
+
+evaluateBtn.addEventListener(`click`, function () {
+  if (evaluateBtn.disabled) { return; }
+  var done = answers.every(function (a) { return a !== null; });
+  if (!done) {
+    warningEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  evaluateBtn.disabled = true;
+
+  var score = 0;
+  var boxes = quizEl.querySelectorAll(`.question`);
+  for (var qi = 0; qi < QUESTIONS.length; qi++) {
+    var opts = boxes[qi].querySelectorAll(`.opt`);
+    var correct = QUESTIONS[qi].correct;
+    if (answers[qi] === correct) { score++; }
+    for (var oi = 0; oi < opts.length; oi++) {
+      opts[oi].disabled = true;
+      opts[oi].classList.remove(`selected`);
+      if (oi === correct) {
+        opts[oi].classList.add(`correct`);
+      } else if (oi === answers[qi]) {
+        opts[oi].classList.add(`wrong`);
+      }
+    }
+  }
+
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score >= VERDICTS[v].min && score <= VERDICTS[v].max) {
+      verdictEl.textContent = VERDICTS[v].text;
+      break;
+    }
+  }
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+retryBtn.addEventListener(`click`, function () {
+  locked = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.style.display = `none`;
+  warningEl.textContent = ``;
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+refresh();
+</script>
+</body>
+</html>
