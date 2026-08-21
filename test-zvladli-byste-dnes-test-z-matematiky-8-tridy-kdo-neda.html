@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test: zvládli byste dnes test z matematiky 8. třídy? Kdo nedá 7/10, dostal by za 5</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 36px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover:not(:disabled) { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.ok { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.bad { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+.txt {
+  display: block;
+  width: 100%;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+}
+.txt:focus { outline: none; border: 1px solid #a89e92; background: #fff; }
+.txt.ok { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.txt.bad { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.sol { margin: 12px 0 0; font-size: 1rem; color: #1e5631; }
+.sol.miss { color: #721c24; }
+#go, #again {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  background: #5b7e5f;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+#go:hover:not(:disabled) { background: #4a6b4e; }
+#go:disabled { background: #b5b5b5; cursor: not-allowed; }
+#hint { text-align: center; color: #8c7b6b; font-size: .95rem; margin: 14px 0 0; }
+#again { background: #8c7b6b; }
+#again:hover { background: #756658; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+.hidden { display: none; }
+@media (max-width: 767px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1 id="title"></h1>
+<p class="perex" id="perex"></p>
+<div id="quiz"></div>
+<button id="go" type="button" disabled></button>
+<p id="hint"></p>
+<div id="result" class="hidden">
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="again" type="button"></button>
+</div>
+</div>
+<script>
+var TITLE = `Test: zvládli byste dnes test z matematiky 8. třídy? Kdo nedá 7/10, dostal by za 5`;
+var PEREX = `Těžiště tady leží v osmé třídě, pár úloh sahá o ročník zpátky. Tužka a papír stačí, mobil s kalkulačkou nechte ležet. Hranice je sedm bodů z deseti: kdo jich nasbírá míň, dostal by dnes ze školního testu pětku.`;
+var GO_LABEL = `Vyhodnotit`;
+var AGAIN_LABEL = `Zkusit znovu`;
+var HINT_TEXT = `Odpovězte prosím na všechny otázky`;
+var SOL_PREFIX = `Správná odpověď: `;
+
+var QUIZ = [
+  {
+    type: `choice`,
+    q: `1. Kolik je (−6) · (−4) + (−9)?`,
+    options: [`a) 33`, `b) 15`, `c) −15`, `d) −33`],
+    correct: 1
+  },
+  {
+    type: `open`,
+    q: `2. Z 80 uchazečů uspělo u přijímací zkoušky 68 z nich. Kolik procent uchazečů uspělo?`,
+    accept: [`85`, `85%`, `85procent`],
+    show: `85`
+  },
+  {
+    type: `open`,
+    q: `3. Součet tří po sobě jdoucích přirozených čísel je 87. Kolik je největší z těchto tří čísel?`,
+    accept: [`30`],
+    show: `30`
+  },
+  {
+    type: `choice`,
+    q: `4. Ve směsi je 24 kilogramů písku a 18 kilogramů cementu. Jaký je poměr písku k cementu v základním tvaru?`,
+    options: [`a) 3 : 4`, `b) 12 : 9`, `c) 4 : 3`, `d) 8 : 6`],
+    correct: 2
+  },
+  {
+    type: `open`,
+    q: `5. Obdélníkové hřiště má rozměry 15 metrů a 20 metrů. Kolik metrů měří jeho úhlopříčka?`,
+    accept: [`25`, `25m`, `25metru`],
+    show: `25`
+  },
+  {
+    type: `choice`,
+    q: `6. Jak vypadá výraz (3a − 4b)² po roznásobení?`,
+    options: [`a) 9a² − 24ab + 16b²`, `b) 9a² − 12ab + 16b²`, `c) 9a² + 16b²`, `d) 9a² − 24ab − 16b²`],
+    correct: 0
+  },
+  {
+    type: `choice`,
+    q: `7. Kruh má průměr 14 centimetrů. Kolik centimetrů čtverečních měří jeho obsah, vyjádřeno pomocí čísla π?`,
+    options: [`a) 14π`, `b) 49π`, `c) 28π`, `d) 196π`],
+    correct: 1
+  },
+  {
+    type: `open`,
+    q: `8. Bod C leží na kružnici, jejímž průměrem je úsečka AB, a úhel při vrcholu A v trojúhelníku ABC měří 34 stupňů. Kolik stupňů měří úhel při vrcholu B?`,
+    accept: [`56`, `56stupnu`],
+    show: `56`
+  },
+  {
+    type: `choice`,
+    q: `9. Jaký je medián souboru čísel 21, 8, 14, 5, 30, 11, 9?`,
+    options: [`a) 14`, `b) 9`, `c) 11`, `d) 5`],
+    correct: 2
+  },
+  {
+    type: `choice`,
+    q: `10. Válec má poloměr podstavy 4 centimetry a je 6 centimetrů vysoký. Jaký je jeho povrch v centimetrech čtverečních, vyjádřeno pomocí čísla π?`,
+    options: [`a) 48π`, `b) 96π`, `c) 64π`, `d) 80π`],
+    correct: 3
+  }
+];
+
+var BANDS = [
+  { min: 0, max: 3, text: `Pětka a test nezvládnutý. Osmá třída je u vás pod silnou vrstvou prachu a nejvíc bodů padlo tam, kde se nedalo nic odvodit a muselo se prostě vědět, jak zní vzorec. Na sedm bodů, tedy tam, kde pětka končí, potřebujete přidat nejméně čtyři body. Cesta zpátky nevede přes celý ročník naráz: vyberte si jediné téma, třeba procenta, nastudujte si postup a spočítejte si k němu deset příkladů za sebou. Na další téma jděte až potom.` },
+  { min: 4, max: 6, text: `Pořád pětka, jenže těsná. Zhruba půlka úloh vyšla, u druhé se to zaseklo, a vyplatí se zjistit kde: jestli u vybavení vzorce a věty, nebo až u samotného počítání. To první se dohání rychleji, přehled vzorců na jedno odpoledne posune výsledek spolehlivěji než opakování celého ročníku. Do bezpečí, tedy k sedmi bodům, zbývaly nanejvýš tři body a při šesti dokonce jediný.` },
+  { min: 7, max: 9, text: `Pětka se nekoná, test je zvládnutý. Za sedm bodů by dnes byla trojka, za osm dvojka a za devět těsná jednička. Nejenže počítáte, ale vybavili jste si i vzorce a věty, na kterých většina zdejších úloh stojí. Mezi nabízenými odpověďmi přitom schválně seděly typické omyly, tedy obvod vydávaný za obsah, vzorec bez prostředního členu nebo průměr místo prostřední hodnoty. Na desítku zbývalo dopočítat ještě jednu až tři úlohy.` },
+  { min: 10, max: 10, text: `Plný počet a čistá jednička. Deset okruhů, deset zásahů: operace se zápornými čísly, procenta, lineární rovnice, poměr v základním tvaru, Pythagorova věta, algebraický vzorec, obsah kruhu, Thaletova věta, medián a povrch válce. Ani jeden z nastražených omylů si vás nevzal. Školní test z matematiky osmé třídy byste dnes napsali líp než většina dnešních osmáků.` }
+];
+
+var picked = [];
+var locked = false;
+
+function norm(s) {
+  return s.normalize(`NFD`).replace(/[\u0300-\u036f]/g, ``).toLowerCase().replace(/[^a-z0-9]/g, ``);
+}
+
+function build() {
+  document.getElementById(`title`).textContent = TITLE;
+  document.getElementById(`perex`).textContent = PEREX;
+  document.getElementById(`go`).textContent = GO_LABEL;
+  document.getElementById(`again`).textContent = AGAIN_LABEL;
+
+  var box = document.getElementById(`quiz`);
+  box.textContent = ``;
+
+  QUIZ.forEach(function (item, qi) {
+    var card = document.createElement(`div`);
+    card.className = `q`;
+
+    var head = document.createElement(`p`);
+    head.className = `q-text`;
+    head.textContent = item.q;
+    card.appendChild(head);
+
+    if (item.type === `choice`) {
+      item.options.forEach(function (label, oi) {
+        var b = document.createElement(`button`);
+        b.type = `button`;
+        b.className = `opt`;
+        b.textContent = label;
+        b.addEventListener(`click`, function () {
+          if (locked) { return; }
+          picked[qi] = oi;
+          var all = card.querySelectorAll(`.opt`);
+          for (var i = 0; i < all.length; i++) { all[i].classList.remove(`sel`); }
+          b.classList.add(`sel`);
+          refresh();
+        });
+        card.appendChild(b);
+      });
+    } else {
+      var inp = document.createElement(`input`);
+      inp.type = `text`;
+      inp.className = `txt`;
+      inp.setAttribute(`autocomplete`, `off`);
+      inp.addEventListener(`input`, function () {
+        if (locked) { return; }
+        picked[qi] = inp.value;
+        refresh();
+      });
+      card.appendChild(inp);
+    }
+
+    var sol = document.createElement(`p`);
+    sol.className = `sol hidden`;
+    card.appendChild(sol);
+
+    box.appendChild(card);
+  });
+}
+
+function answered() {
+  for (var i = 0; i < QUIZ.length; i++) {
+    var v = picked[i];
+    if (QUIZ[i].type === `choice`) {
+      if (typeof v !== `number`) { return false; }
+    } else {
+      if (typeof v !== `string` || norm(v) === ``) { return false; }
+    }
+  }
+  return true;
+}
+
+function refresh() {
+  var ready = answered();
+  document.getElementById(`go`).disabled = !ready;
+  document.getElementById(`hint`).textContent = ready ? `` : HINT_TEXT;
+}
+
+function isRight(qi) {
+  var item = QUIZ[qi];
+  if (item.type === `choice`) { return picked[qi] === item.correct; }
+  var v = norm(picked[qi] || ``);
+  for (var i = 0; i < item.accept.length; i++) {
+    if (norm(item.accept[i]) === v) { return true; }
+  }
+  return false;
+}
+
+function evaluate() {
+  if (locked || !answered()) { return; }
+  locked = true;
+
+  var cards = document.getElementById(`quiz`).children;
+  var score = 0;
+
+  QUIZ.forEach(function (item, qi) {
+    var card = cards[qi];
+    var good = isRight(qi);
+    if (good) { score++; }
+    var sol = card.querySelector(`.sol`);
+
+    if (item.type === `choice`) {
+      var opts = card.querySelectorAll(`.opt`);
+      for (var i = 0; i < opts.length; i++) {
+        opts[i].disabled = true;
+        opts[i].classList.remove(`sel`);
+        if (i === item.correct) {
+          opts[i].classList.add(`ok`);
+        } else if (i === picked[qi]) {
+          opts[i].classList.add(`bad`);
+        }
+      }
+      if (!good) {
+        sol.textContent = SOL_PREFIX + item.options[item.correct];
+        sol.classList.add(`miss`);
+        sol.classList.remove(`hidden`);
+      }
+    } else {
+      var inp = card.querySelector(`.txt`);
+      inp.readOnly = true;
+      inp.classList.add(good ? `ok` : `bad`);
+      if (!good) {
+        sol.textContent = SOL_PREFIX + item.show;
+        sol.classList.add(`miss`);
+        sol.classList.remove(`hidden`);
+      }
+    }
+  });
+
+  var verdict = ``;
+  for (var b = 0; b < BANDS.length; b++) {
+    if (score >= BANDS[b].min && score <= BANDS[b].max) { verdict = BANDS[b].text; }
+  }
+
+  document.getElementById(`score`).textContent = score + ` z ` + QUIZ.length;
+  document.getElementById(`verdict`).textContent = verdict;
+  document.getElementById(`go`).disabled = true;
+  document.getElementById(`hint`).textContent = ``;
+
+  var res = document.getElementById(`result`);
+  res.classList.remove(`hidden`);
+  res.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  picked = [];
+  locked = false;
+  document.getElementById(`result`).classList.add(`hidden`);
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+document.getElementById(`go`).addEventListener(`click`, evaluate);
+document.getElementById(`again`).addEventListener(`click`, reset);
+
+build();
+refresh();
+</script>
+</body>
+</html>
