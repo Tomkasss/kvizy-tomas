@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz: zvládli byste ještě dnes maturitu?</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 36px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.locked .opt { cursor: default; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #721c24; margin: 14px 0 0; font-size: .95rem; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+#again {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#again:hover { background: #756658; }
+.hidden { display: none; }
+@media (max-width: 767px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q, #result { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz: zvládli byste ještě dnes maturitu? Kdo dá víc než 8/10, prošel by s vyznamenáním (obtížnost střední)</h1>
+<p class="perex">Maturitní vysvědčení máte dávno v šuplíku, ale něco v hlavě zůstalo. Deset otázek z literatury, dějepisu, zeměpisu, biologie, fyziky, chemie, dějin umění, hudby a společenských věd prověří, kolik ze středoškolské látky přežilo roky bez učebnic.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warn" class="hidden">Odpovězte prosím na všechny otázky</p>
+<div id="result" class="hidden">
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="again">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  {
+    q: `1. Jak se nazývá skupina prvků, do níž patří fluor, chlor, brom a jod?`,
+    opts: [`a) alkalické kovy`, `b) chalkogeny`, `c) halogeny`, `d) vzácné plyny`],
+    correct: 2
+  },
+  {
+    q: `2. Který umělecký sloh se v 18. století vyvinul z baroka a proslul drobným zprohýbaným ornamentem?`,
+    opts: [`a) manýrismus`, `b) rokoko`, `c) klasicismus`, `d) empír`],
+    correct: 1
+  },
+  {
+    q: `3. Jak se nazývá úzký a hluboký mořský záliv, který vznikl zaplavením údolí vyhloubeného ledovcem?`,
+    opts: [`a) laguna`, `b) estuár`, `c) fjord`, `d) atol`],
+    correct: 2
+  },
+  {
+    q: `4. Jakou brýlovou čočkou se koriguje krátkozrakost?`,
+    opts: [`a) rozptylnou čočkou`, `b) spojnou čočkou`, `c) cylindrickou čočkou`, `d) prizmatickou čočkou`],
+    correct: 0
+  },
+  {
+    q: `5. Kdo je autorem novely Romeo, Julie a tma?`,
+    opts: [`a) Arnošt Lustig`, `b) Ladislav Fuks`, `c) Josef Škvorecký`, `d) Jan Otčenášek`],
+    correct: 3
+  },
+  {
+    q: `6. Které rostlinné pletivo vede vodu s minerálními látkami od kořenů vzhůru?`,
+    opts: [`a) lýko`, `b) dřevo`, `c) kambium`, `d) pokožka`],
+    correct: 1
+  },
+  {
+    q: `7. Jak se nazývá skladba pro sólový nástroj s doprovodem orchestru?`,
+    opts: [`a) koncert`, `b) symfonie`, `c) sonáta`, `d) suita`],
+    correct: 0
+  },
+  {
+    q: `8. Který orgán Evropské unie předkládá návrhy nových unijních právních předpisů?`,
+    opts: [`a) Evropský parlament`, `b) Evropská komise`, `c) Rada Evropské unie`, `d) Evropská rada`],
+    correct: 1
+  },
+  {
+    q: `9. Jak se označuje smlouva o neútočení z 23. srpna 1939, jejíž tajný dodatkový protokol rozdělil východní Evropu na sféry vlivu?`,
+    opts: [`a) Locarnské dohody`, `b) Pakt tří`, `c) Briandův–Kelloggův pakt`, `d) pakt Ribbentrop–Molotov`],
+    correct: 3
+  },
+  {
+    q: `10. Kdo stál v čele první československé vlády ustavené v Praze v listopadu 1918?`,
+    opts: [`a) Karel Kramář`, `b) Vlastimil Tusar`, `c) Antonín Švehla`, `d) Alois Rašín`],
+    correct: 0
+  }
+];
+
+var BANDS = [
+  { min: 0, max: 3, text: `Maturitu byste dnes nesložili. Tři a méně bodů znamená, že středoškolská látka ve vás zůstala jen v nejhrubších obrysech a rozhodnout mezi dvěma podobnými variantami už na ni nestačilo. Ke komisi byste se sice dostali, ale s posudkem na opravný termín.` },
+  { min: 4, max: 6, text: `Zhruba polovina, a přesně tady končí většina dospělých, kteří maturitu dávno odložili. Na složení maturity to ještě není, chybí vám k němu jeden až tři body. Základ držíte, jen se ozval spíš v předmětech, které vás kdysi zajímaly, než napříč celým zadáním.` },
+  { min: 7, max: 9, text: `Maturitu jste složili. Sedm nebo osm bodů znamená slušný výsledek a jistý průchod komisí, na vyznamenání to ale ještě není. Devět bodů už laťku z titulku splňuje: to je maturita s vyznamenáním, a takové skóre dá jen menšina řešitelů.` },
+  { min: 10, max: 10, text: `Plný počet, tedy maturita s vyznamenáním bez jediného zaváhání. Neprošly vám ani otázky, kde rozhodovala přesná znalost místo odhadu, a to napříč všemi obory zadání od chemie po dějepis. Deset z deseti tady dá jen zlomek řešitelů. Klobouk dolů.` }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var locked = false;
+
+var quizEl = document.getElementById('quiz');
+var submitEl = document.getElementById('submit');
+var warnEl = document.getElementById('warn');
+var resultEl = document.getElementById('result');
+var scoreEl = document.getElementById('score');
+var verdictEl = document.getElementById('verdict');
+var againEl = document.getElementById('again');
+
+function build() {
+  quizEl.innerHTML = '';
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    var box = document.createElement('div');
+    box.className = 'q';
+    var p = document.createElement('p');
+    p.className = 'qtext';
+    p.textContent = QUESTIONS[i].q;
+    box.appendChild(p);
+    for (var j = 0; j < QUESTIONS[i].opts.length; j++) {
+      var b = document.createElement('button');
+      b.className = 'opt';
+      b.type = 'button';
+      b.textContent = QUESTIONS[i].opts[j];
+      b.setAttribute('data-q', String(i));
+      b.setAttribute('data-o', String(j));
+      b.addEventListener('click', onPick);
+      box.appendChild(b);
+    }
+    quizEl.appendChild(box);
+  }
+}
+
+function onPick(e) {
+  if (locked) return;
+  var qi = parseInt(e.currentTarget.getAttribute('data-q'), 10);
+  var oi = parseInt(e.currentTarget.getAttribute('data-o'), 10);
+  answers[qi] = oi;
+  var box = e.currentTarget.parentNode;
+  var btns = box.querySelectorAll('.opt');
+  for (var k = 0; k < btns.length; k++) {
+    btns[k].classList.remove('sel');
+  }
+  e.currentTarget.classList.add('sel');
+  refresh();
+}
+
+function allAnswered() {
+  for (var i = 0; i < answers.length; i++) {
+    if (answers[i] === null) return false;
+  }
+  return true;
+}
+
+function refresh() {
+  var ready = allAnswered();
+  submitEl.disabled = !ready;
+  if (ready) warnEl.classList.add('hidden');
+}
+
+function evaluate() {
+  if (!allAnswered()) {
+    warnEl.classList.remove('hidden');
+    return;
+  }
+  locked = true;
+  var score = 0;
+  var boxes = quizEl.querySelectorAll('.q');
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    boxes[i].classList.add('locked');
+    var btns = boxes[i].querySelectorAll('.opt');
+    var c = QUESTIONS[i].correct;
+    if (answers[i] === c) score++;
+    for (var j = 0; j < btns.length; j++) {
+      btns[j].classList.remove('sel');
+      if (j === c) {
+        btns[j].classList.add('correct');
+      } else if (j === answers[i]) {
+        btns[j].classList.add('wrong');
+      }
+    }
+  }
+  scoreEl.textContent = score + ' z ' + QUESTIONS.length;
+  var txt = '';
+  for (var b = 0; b < BANDS.length; b++) {
+    if (score >= BANDS[b].min && score <= BANDS[b].max) txt = BANDS[b].text;
+  }
+  verdictEl.textContent = txt;
+  submitEl.disabled = true;
+  resultEl.classList.remove('hidden');
+  resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function reset() {
+  answers = new Array(QUESTIONS.length).fill(null);
+  locked = false;
+  resultEl.classList.add('hidden');
+  warnEl.classList.add('hidden');
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+submitEl.addEventListener('click', evaluate);
+againEl.addEventListener('click', reset);
+
+build();
+refresh();
+</script>
+</body>
+</html>
