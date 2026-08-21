@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz moderních znalostí pro seniory: kdo nedá aspoň 6/10, tomu už možná ujiždí vlak</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+  }
+  .obal { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; margin: 0 0 20px; color: #2c2c2c; }
+  .perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+    line-height: 1.45;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .hotovo .varianta { cursor: default; }
+  #vyhodnotit, #znovu {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; }
+  #znovu:hover { background: #756658; }
+  #hlaska { text-align: center; color: #8a3b3b; margin-top: 14px; font-size: .95rem; min-height: 1.2em; }
+  #vysledek {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+    border-top: 4px solid #5b7e5f;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 14px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="obal">
+  <h1>Kvíz moderních znalostí pro seniory: kdo nedá aspoň 6/10, tomu už možná ujiždí vlak</h1>
+  <p class="perex">Dnešní svět se mění rychle a spousta novinek se do života přikradla úplně bez vysvětlení. Deset otázek z techniky, dopravy, placení i zábavy ukáže, jak si v něm stojíte. Nic se nepočítá, rozhoduje jen přehled.</p>
+
+  <div id="kviz"></div>
+
+  <button id="vyhodnotit" type="button" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+
+  <div id="vysledek">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu" type="button">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var otazky = [
+  {
+    zneni: `1. Jak se od června 2017 účtují českému zákazníkovi hovory a data spotřebované při pobytu v jiné zemi Evropské unie?`,
+    varianty: [
+      `jednotnou evropskou sazbou, kterou pro všechny operátory stanoví Evropská komise`,
+      `zdarma, náklady si mezi sebou vyrovnávají operátoři obou zemí`,
+      `podle jeho domácího tarifu, bez roamingových příplatků`,
+      `podle roamingového ceníku operátora, jen se stropem, který určuje Evropská unie`
+    ],
+    spravna: 2
+  },
+  {
+    zneni: `2. Jak se jmenuje státní služba, ve které si člověk sám zobrazí přehled léků, které mu lékaři předepsali a lékárny vydaly?`,
+    varianty: [
+      `Elektronická léková knížka`,
+      `Léková karta pojištěnce`,
+      `Centrální registr léčivých přípravků`,
+      `Lékový záznam pacienta`
+    ],
+    spravna: 3
+  },
+  {
+    zneni: `3. Proč se u odpovědí ChatGPT a podobných programů doporučuje ověřit si fakta ještě jinde?`,
+    varianty: [
+      `protože program umí odpovídat jen anglicky a překlad do češtiny bývá nepřesný`,
+      `protože program dokáže vymyslet i údaj, který zní přesvědčivě, ale ve skutečnosti neplatí`,
+      `protože program čerpá výhradně z Wikipedie, kterou může upravit kdokoli`,
+      `protože program odpovídá jen na dotazy, které mu už dřív položil někdo jiný`
+    ],
+    spravna: 1
+  },
+  {
+    zneni: `4. Na co je dnes v Česku navázaná dálniční známka pro osobní auto?`,
+    varianty: [
+      `na řidičský průkaz majitele vozidla`,
+      `na číslo velkého technického průkazu`,
+      `na výrobní číslo karoserie`,
+      `na registrační značku vozidla`
+    ],
+    spravna: 3
+  },
+  {
+    zneni: `5. K čemu slouží bankovní identita?`,
+    varianty: [
+      `k okamžitému převodu peněz mezi účty různých bank, který dorazí do několika vteřin`,
+      `k potvrzení totožnosti při výběru hotovosti z bankomatu bez platební karty`,
+      `k přihlášení k online službám úřadů i firem pomocí údajů z internetového bankovnictví`,
+      `k jednotnému přehledu všech účtů a úvěrů, které člověk u českých bank má`
+    ],
+    spravna: 2
+  },
+  {
+    zneni: `6. Co je dvoufázové ověření při přihlašování?`,
+    varianty: [
+      `přihlášení, u kterého se heslo zadává dvakrát po sobě pro kontrolu`,
+      `přihlášení, které se po dvou nezdařených pokusech samo zablokuje`,
+      `přihlášení, které vedle hesla vyžaduje ještě druhé ověření, například jednorázový kód nebo otisk prstu`,
+      `přihlášení dvěma hesly, jedním k účtu a druhým k platbám`
+    ],
+    spravna: 2
+  },
+  {
+    zneni: `7. Čím se proslavila internetová platforma Vinted?`,
+    varianty: [
+      `prodejem použitého oblečení, které si lidé nabízejí navzájem`,
+      `prodejem vstupenek na koncerty a sportovní zápasy`,
+      `rozvozem potravin od malých farmářů a pěstitelů`,
+      `inzercí ojetých aut a náhradních dílů`
+    ],
+    spravna: 0
+  },
+  {
+    zneni: `8. K čemu slouží aplikace Shazam?`,
+    varianty: [
+      `k překladu cizojazyčného textu písně do češtiny`,
+      `k nahrávání vlastního zpěvu na hudební podklad`,
+      `ke stažení celého alba do telefonu na poslech bez internetu`,
+      `k rozpoznání skladby, která právě hraje v okolí`
+    ],
+    spravna: 3
+  },
+  {
+    zneni: `9. Proč tepelné čerpadlo dodá do domu víc tepla, než kolik samo spotřebuje elektřiny?`,
+    varianty: [
+      `protože si část elektřiny vyrobí samo ze slunečních panelů umístěných na střeše domu`,
+      `protože většinu tepla odebere venkovnímu vzduchu, zemi nebo vodě a elektřinu spotřebuje na jeho přečerpání do domu`,
+      `protože zbylé teplo dodá plynový hořák, který má zabudovaný uvnitř své skříně`,
+      `protože odebírá teplo vzduchu uvnitř domu a vrací ho zpět ohřátý`
+    ],
+    spravna: 1
+  },
+  {
+    zneni: `10. K čemu slouží státní aplikace eDoklady?`,
+    varianty: [
+      `k prokázání totožnosti občanským průkazem uloženým v mobilním telefonu`,
+      `k objednání na úřad na konkrétní hodinu bez čekání ve frontě`,
+      `k odesílání úředních podání do datové schránky`,
+      `k placení pokut a správních poplatků z mobilního telefonu`
+    ],
+    spravna: 0
+  }
+];
+
+var hodnoceni = [
+  { min: 0, max: 3, text: `K laťce šesti bodů to bylo daleko a pár věcí z dnešní každodennosti vás zatím míjí. Není to žádná ostuda, většina těchhle novinek se do života dostala potichu a nikdo je nevysvětloval. Projděte si správné odpovědi a budete vědět, co se skrývá za telefonováním v zahraničí, za placením na dálnici i za pojmy, které slýcháte ve zprávách.` },
+  { min: 4, max: 5, text: `Na laťku z titulku to o kousek nestačilo, ale opravdu jen o kousek. Známější věci trefíte spolehlivě, zaváháte tam, kde jde o služby a pravidla, na která člověk musí sám narazit: přihlašování přes banku, ověřování při vstupu do účtu, státní aplikace. K laťce vám chyběla jedna dvě odpovědi, ne přehled.` },
+  { min: 6, max: 8, text: `Laťku šesti bodů jste splnili a přesně tady se drží většina lidí, kteří dnešní svět sledují okrajově. Vlak vám neujíždí: rozumíte technice v telefonu, novým pravidlům na úřadech i tomu, jak se dnes topí, platí a nakupuje. Pár otázek vám uteklo tam, kde jde o pojem, který se nikde nevysvětluje a člověk ho musí sám vyhledat.` },
+  { min: 9, max: 10, text: `Laťku z titulku jste překonali s velkou rezervou a to se povede jen menšině. Prošli jste prakticky bez zaváhání vším, co kvíz nabídl: telefonováním po Evropě, umělou inteligencí, novinkami v dopravě i bankovnictví a státními aplikacemi. Takový přehled o dnešní každodennosti nemá zdaleka každý a pouhým odhadem se na něj nedosáhne. Vlak vám neujíždí, spíš sedíte v jeho čele.` }
+];
+
+var odpovedi = [];
+var hotovo = false;
+var pismena = [`a) `, `b) `, `c) `, `d) `];
+
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function postav() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    box.setAttribute(`data-otazka`, String(i));
+
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = o.zneni;
+    box.appendChild(zneni);
+
+    o.varianty.forEach(function (v, j) {
+      var b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `varianta`;
+      b.textContent = pismena[j] + v;
+      b.addEventListener(`click`, function () {
+        if (hotovo) { return; }
+        odpovedi[i] = j;
+        var sourozenci = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < sourozenci.length; k++) {
+          sourozenci[k].classList.remove(`vybrana`);
+        }
+        b.classList.add(`vybrana`);
+        hlaskaEl.textContent = ``;
+        zkontrolujStav();
+      });
+      box.appendChild(b);
+    });
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujStav() {
+  var vsechny = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] !== `number`) { vsechny = false; break; }
+  }
+  tlacitkoEl.disabled = !vsechny;
+}
+
+tlacitkoEl.addEventListener(`click`, function () {
+  if (tlacitkoEl.disabled) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  vyhodnot();
+});
+
+function vyhodnot() {
+  hotovo = true;
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  for (var i = 0; i < boxy.length; i++) {
+    var box = boxy[i];
+    box.classList.add(`hotovo`);
+    var tlacitka = box.querySelectorAll(`.varianta`);
+    var spravna = otazky[i].spravna;
+    var moje = odpovedi[i];
+    if (moje === spravna) { body++; }
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].classList.remove(`vybrana`);
+      if (j === spravna) {
+        tlacitka[j].classList.add(`spravna`);
+      } else if (j === moje) {
+        tlacitka[j].classList.add(`spatna`);
+      }
+    }
+  }
+
+  skoreEl.textContent = body + ` z ` + otazky.length;
+  var text = ``;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body >= hodnoceni[h].min && body <= hodnoceni[h].max) {
+      text = hodnoceni[h].text;
+      break;
+    }
+  }
+  hodnoceniEl.textContent = text;
+  vysledekEl.style.display = `block`;
+  tlacitkoEl.disabled = true;
+  hlaskaEl.textContent = ``;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+znovuEl.addEventListener(`click`, function () {
+  hotovo = false;
+  odpovedi = [];
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  postav();
+  zkontrolujStav();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+postav();
+zkontrolujStav();
+</script>
+</body>
+</html>
