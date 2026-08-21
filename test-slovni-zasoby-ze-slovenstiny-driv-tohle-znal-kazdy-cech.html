@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test slovní zásoby ze slovenštiny: dřív tohle znal každý Čech, dnes většina nedá ani 7/10</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 36px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qt { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.5; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+  line-height: 1.45;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt[disabled] { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 24px;
+  display: none;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+#again {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#again:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q, #result { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test slovní zásoby ze slovenštiny: dřív tohle znal každý Čech, dnes většina nedá ani 7/10</h1>
+<p class="perex">Slovenština zněla z televize každý večer a rozumět jí bylo samozřejmé. Dnes stačí deset běžných slov z kuchyně, dílny i přírody a jistota se rozpadne. Zkuste, kolik jich trefíte bez slovníku.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<div id="warn"></div>
+<div id="result">
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="again">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var DATA = [
+  { q: `Co znamená slovenské slovo „pokrievka“?`,
+    o: [`prošívaná přikrývka, pod kterou se spí v posteli`, `šátek, kterým si žena pokrývá hlavu`, `poklice, která na hrnci drží páru`, `plachta natažená přes vůz naložený senem`], a: 2 },
+  { q: `Co znamená slovenské slovo „gombík“?`,
+    o: [`knoflík, který se prostrkuje dírkou v látce`, `přezka, kterou se stahuje opasek`, `patentka, jež drží dva díly zacvaknutím`, `zip, jenž se zapíná posuvným jezdcem`], a: 0 },
+  { q: `Co znamená slovenské slovo „dážďovka“?`,
+    o: [`housenka lezoucí po listu`, `stonožka schovaná pod kamenem`, `pijavice žijící ve stojaté vodě`, `žížala žijící v půdě`], a: 3 },
+  { q: `Co znamená slovenské slovo „stolár“?`,
+    o: [`tesař stavějící krovy a dřevěné konstrukce`, `soustružník obrábějící dřevo na soustruhu`, `řezbář zdobící dřevo vyřezáváním`, `truhlář vyrábějící nábytek ze dřeva`], a: 3 },
+  { q: `Co znamená slovenské slovo „smädný“?`,
+    o: [`hladový, toužící po jídle`, `unavený, toužící po spánku`, `žíznivý, toužící po napití`, `smutný, toužící po útěše`], a: 2 },
+  { q: `Co znamená slovenské sloveso „ponáhľať sa“?`,
+    o: [`vléct se a jít pomalu`, `spěchat, pospíchat za nějakým cílem`, `opozdit se a přijít pozdě`, `zastavit se a chvíli odpočívat`], a: 1 },
+  { q: `Co znamená slovenské slovo „hrdza“?`,
+    o: [`plíseň rozlézající se po vlhké zdi`, `saze usazené v komíně`, `rez, hnědočervený povlak na železe`, `měděnka, zelenkavý povlak na mědi`], a: 2 },
+  { q: `Co znamená slovenské slovo „garbiar“?`,
+    o: [`koželuh, který vydělává surové kůže`, `kotlář, který kove měděné kotle a nádoby`, `provazník, který splétá konopné provazy`, `kamnář, který staví kachlová kamna`], a: 0 },
+  { q: `Co znamená slovenské slovo „ošípaná“?`,
+    o: [`koza chovaná pro mléko a sýry`, `husa chovaná pro peří a maso`, `ovce chovaná pro vlnu a mléko`, `prase domácí chované na maso`], a: 3 },
+  { q: `Co znamená slovenské slovo „borievka“?`,
+    o: [`borovice lesní s dlouhými jehlicemi`, `jalovec s modročernými bobulemi`, `brusinka rostoucí v jehličnatých lesích`, `jeřáb s hroznem oranžových plodů`], a: 1 }
+];
+
+var VERDICTS = [
+  { max: 3, t: `U slov, která zněla povědomě, jste sáhli po nejbližším českém významu a ten vedl jinam. Na laťku 7 z 10, o které mluví titulek, je odsud ještě kus cesty. Většina těch slov se přitom dá odchytat za jediný slovenský film.` },
+  { max: 6, t: `Přesně tady se schází většina řešitelů. Část slov jste měli jistou, u zbytku rozhodl odhad. Na sedm bodů to nestačilo, ale k laťce z titulku vám chyběly jednotky otázek.` },
+  { max: 9, t: `Na laťku 7 z 10 jste dosáhli, a to se dnes povede menšině. Zrádná slova, kde česká podoba slibuje jiný význam, vás nedostala všechna. Zaskočilo vás nanejvýš pár výrazů bez průhledného českého protějšku.` },
+  { max: 10, t: `Plný počet, který se v tomhle testu objevuje jen vzácně. Nenachytalo vás ani slovo, u kterého česká podoba slibuje docela jiný význam, ani to nejméně nápadné z celé desítky.` }
+];
+
+var LETTERS = [`a`, `b`, `c`, `d`];
+var picks = [];
+var done = false;
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var againEl = document.getElementById(`again`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  picks = [];
+  done = false;
+  for (var i = 0; i < DATA.length; i++) {
+    picks.push(null);
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var title = document.createElement(`p`);
+    title.className = `qt`;
+    title.textContent = (i + 1) + `. ` + DATA[i].q;
+    box.appendChild(title);
+    for (var j = 0; j < DATA[i].o.length; j++) {
+      var btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.type = `button`;
+      btn.textContent = LETTERS[j] + `) ` + DATA[i].o[j];
+      btn.setAttribute(`data-q`, String(i));
+      btn.setAttribute(`data-o`, String(j));
+      btn.addEventListener(`click`, onPick);
+      box.appendChild(btn);
+    }
+    quizEl.appendChild(box);
+  }
+  submitEl.disabled = true;
+  warnEl.textContent = ``;
+  resultEl.style.display = `none`;
+}
+
+function onPick(e) {
+  if (done) { return; }
+  var qi = parseInt(e.currentTarget.getAttribute(`data-q`), 10);
+  var oi = parseInt(e.currentTarget.getAttribute(`data-o`), 10);
+  picks[qi] = oi;
+  var box = quizEl.children[qi];
+  var opts = box.querySelectorAll(`.opt`);
+  for (var k = 0; k < opts.length; k++) {
+    opts[k].classList.remove(`sel`);
+  }
+  e.currentTarget.classList.add(`sel`);
+  var all = true;
+  for (var m = 0; m < picks.length; m++) {
+    if (picks[m] === null) { all = false; }
+  }
+  submitEl.disabled = !all;
+  if (all) { warnEl.textContent = ``; }
+}
+
+submitEl.addEventListener(`click`, function () {
+  if (done) { return; }
+  for (var m = 0; m < picks.length; m++) {
+    if (picks[m] === null) {
+      warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+      return;
+    }
+  }
+  done = true;
+  var score = 0;
+  for (var i = 0; i < DATA.length; i++) {
+    var box = quizEl.children[i];
+    var opts = box.querySelectorAll(`.opt`);
+    for (var j = 0; j < opts.length; j++) {
+      opts[j].disabled = true;
+      opts[j].classList.remove(`sel`);
+      if (j === DATA[i].a) {
+        opts[j].classList.add(`correct`);
+      } else if (j === picks[i]) {
+        opts[j].classList.add(`wrong`);
+      }
+    }
+    if (picks[i] === DATA[i].a) { score++; }
+  }
+  submitEl.disabled = true;
+  warnEl.textContent = ``;
+  scoreEl.textContent = score + ` z ` + DATA.length;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score <= VERDICTS[v].max) { verdictEl.textContent = VERDICTS[v].t; break; }
+  }
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+againEl.addEventListener(`click`, function () {
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+</script>
+</body>
+</html>
