@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test římských číslic ze základní školy: kdo pozná MMMCMXCIX, ten si je pamatuje i po letech</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt.locked { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hint { text-align: center; color: #8a7f72; margin-top: 14px; font-size: .95rem; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 40px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#again {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#again:hover { background: #756658; }
+.hidden { display: none; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test římských číslic ze základní školy: kdo pozná MMMCMXCIX, ten si je pamatuje i po letech</h1>
+<p class="perex">Ze školních lavic si je odnesl každý, pak už je člověk potkává jen na ciferníku, na letopočtu nad vraty a ve jménech panovníků. Deset otázek ukáže, jestli vám zůstaly nejen hodnoty znaků, ale i pravidla, podle kterých se skládají.</p>
+
+<div id="quiz"></div>
+
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="hint hidden" id="hint">Odpovězte prosím na všechny otázky</p>
+
+<div id="result" class="hidden">
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="again">Zkusit znovu</button>
+</div>
+</div>
+
+<script>
+var QUESTIONS = [
+  { q: `1. Jakou hodnotu má římská číslice D?`, opts: [`50`, `100`, `500`, `1000`], correct: 2 },
+  { q: `2. Jak se římskými číslicemi zapisuje číslo 400?`, opts: [`CL`, `CD`, `DC`, `CM`], correct: 1 },
+  { q: `3. Který z těchto zápisů představuje největší číslo?`, opts: [`LXXX`, `XCIX`, `CVIII`, `CX`], correct: 3 },
+  { q: `4. Jaké číslo označuje římská číslice v papežském jméně Benedikt XVI.?`, opts: [`14`, `15`, `16`, `17`], correct: 2 },
+  { q: `5. Které tři římské číslice se podle dnešních pravidel v zápisu čísla neopakují?`, opts: [`I, V, X`, `L, C, D`, `V, X, M`, `V, L, D`], correct: 3 },
+  { q: `6. Který z těchto tvarů je podle dnešního standardního zápisu římských číslic neplatný?`, opts: [`IL`, `XCIX`, `CDXLIV`, `MCMXC`], correct: 0 },
+  { q: `7. Jaký letopočet představuje zápis MDCCLXXXIV?`, opts: [`1684`, `1774`, `1784`, `1786`], correct: 2 },
+  { q: `8. Která z těchto římských číslic se na tradičním hodinovém ciferníku obvykle píše jinak, než jak předepisuje dnešní standardní zápis?`, opts: [`III`, `IV`, `VIII`, `IX`], correct: 1 },
+  { q: `9. Jaké číslo se skrývá pod římským zápisem XLII?`, opts: [`42`, `48`, `52`, `62`], correct: 0 },
+  { q: `10. Jak se římskými číslicemi zapisuje rok 2026?`, opts: [`MMXXVI`, `MMXVI`, `MMXXIV`, `MMCXXVI`], correct: 0 }
+];
+
+var VERDICTS = [
+  { min: 0, max: 3, text: `Ze základní školy vám zůstalo pár nejběžnějších znaků a tam to skončilo. Poznáte I, V a X na hodinách, ale jakmile se sejde víc písmen za sebou nebo se objeví odčítací tvar, přestává být zápis čitelný. Letopočet nad vraty kostela byste rozluštili jen s tužkou v ruce, znak po znaku.` },
+  { min: 4, max: 6, text: `Klasický zůstatek po letech. Hodnoty znaků máte pevně a běžný převod do stovek zvládnete, ale pravidla soustavy se vytratila. Neplatný zápis nepoznáte spolehlivě a u čtyřmístných letopočtů začnete počítat na prstech. Pro každodenní potřebu to stačí, na plný počet ne.` },
+  { min: 7, max: 9, text: `Římské číslice jste se kdysi učili a drží vám dodnes. Převádíte oběma směry, znáte hodnotu každého znaku včetně těch, které se na ciferník nevejdou, a víte, které se nikdy neopakují. Zaváhali jste nejspíš jen tam, kde už nejde o čtení, ale o pravidlo, podle kterého se odčítá.` },
+  { min: 10, max: 10, text: `Přesně o tomhle výsledku mluví titulek. Neujde vám neplatný odčítací tvar, čtyřmístný letopočet složíte i rozeberete zpaměti a poznáte i tvar, který se drží jen na hodinových cifernících. Kdo si takhle jistě poradí s MDCCLXXXIV, rozebere stejným postupem i MMMCMXCIX.` }
+];
+
+var LETTERS = [`a`, `b`, `c`, `d`];
+var answers = new Array(QUESTIONS.length).fill(null);
+var locked = false;
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var hintEl = document.getElementById(`hint`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var againEl = document.getElementById(`again`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var t = document.createElement(`p`);
+    t.className = `q-text`;
+    t.textContent = item.q;
+    box.appendChild(t);
+    item.opts.forEach(function (opt, oi) {
+      var b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = LETTERS[oi] + `) ` + opt;
+      b.addEventListener(`click`, function () { choose(qi, oi); });
+      box.appendChild(b);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function choose(qi, oi) {
+  if (locked) { return; }
+  answers[qi] = oi;
+  var box = quizEl.children[qi];
+  var btns = box.querySelectorAll(`.opt`);
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].classList.toggle(`sel`, i === oi);
+  }
+  refresh();
+}
+
+function refresh() {
+  var done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+  hintEl.classList.toggle(`hidden`, done);
+}
+
+function evaluate() {
+  if (locked) { return; }
+  if (answers.some(function (a) { return a === null; })) { return; }
+  locked = true;
+  var score = 0;
+  QUESTIONS.forEach(function (item, qi) {
+    var btns = quizEl.children[qi].querySelectorAll(`.opt`);
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.add(`locked`);
+      btns[i].classList.remove(`sel`);
+      if (i === item.correct) { btns[i].classList.add(`correct`); }
+      else if (i === answers[qi]) { btns[i].classList.add(`wrong`); }
+    }
+    if (answers[qi] === item.correct) { score++; }
+  });
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  var v = VERDICTS.filter(function (x) { return score >= x.min && score <= x.max; })[0];
+  verdictEl.textContent = v ? v.text : ``;
+  submitEl.disabled = true;
+  hintEl.classList.add(`hidden`);
+  resultEl.classList.remove(`hidden`);
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  locked = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.classList.add(`hidden`);
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+againEl.addEventListener(`click`, reset);
+
+build();
+refresh();
+</script>
+</body>
+</html>
