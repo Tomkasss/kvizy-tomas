@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test pro seniory: 10 otázek za 5 minut zjistí, jestli nemáte nedostatky ve všeobecném přehledu</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zadani { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+    line-height: 1.4;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  #vyhodnotit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; min-height: 1.2em; }
+  #vysledek {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 32px;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+  #znovu {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #znovu:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka, #vysledek { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test pro seniory: 10 otázek za 5 minut zjistí, jestli nemáte nedostatky ve všeobecném přehledu</h1>
+  <p class="perex">Deset otázek pro seniory z deseti různých oborů: od astronomie přes sport, ekonomiku a české svátky až po kuchyni, les, počasí, hudbu, historii a textil. Pět minut, žádná nápověda a jeden jasný výsledek. Uvidíte, jestli má váš všeobecný přehled mezery.</p>
+
+  <div id="kviz"></div>
+
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <div id="hlaska"></div>
+
+  <div id="vysledek">
+    <div id="skore"></div>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var otazky = [
+  {
+    zadani: `1. Čím je způsobené střídání ročních období na Zemi?`,
+    varianty: [`měnící se vzdáleností Země od Slunce během roku`, `sklonem zemské osy k rovině oběhu kolem Slunce`, `proměnlivou intenzitou záření vycházejícího ze Slunce`, `přitažlivým působením Měsíce na zemský povrch`],
+    spravna: 1
+  },
+  {
+    zadani: `2. Co na Tour de France znamená žlutý dres?`,
+    varianty: [`že jezdec vede bodovací sprinterskou soutěž`, `že jezdec vede soutěž vrchařů o horské prémie`, `že jezdec vede celkovou klasifikaci závodu`, `že jezdec je nejlepší z mladíků do 25 let`],
+    spravna: 2
+  },
+  {
+    zadani: `3. Co vyjadřuje ukazatel HDP?`,
+    varianty: [`celkovou hodnotu statků a služeb vytvořených v zemi za rok`, `celkovou výši dluhu státu vůči zahraničním věřitelům`, `průměrnou hrubou mzdu zaměstnanců v národním hospodářství`, `rozdíl mezi hodnotou vývozu a hodnotou dovozu země`],
+    spravna: 0
+  },
+  {
+    zadani: `4. Který z těchto dnů je v Česku pouze významným dnem, nikoli státním svátkem?`,
+    varianty: [`1. leden`, `8. květen`, `27. červen`, `17. listopad`],
+    spravna: 2
+  },
+  {
+    zadani: `5. Z jaké obiloviny se vyrábí kuskus, který se běžně prodává v českých obchodech?`,
+    varianty: [`z rýže`, `z kukuřice`, `z ovsa`, `z pšenice`],
+    spravna: 3
+  },
+  {
+    zadani: `6. Která dřevina je nejrozšířenější v českých lesích?`,
+    varianty: [`borovice lesní`, `buk lesní`, `dub letní`, `smrk ztepilý`],
+    spravna: 3
+  },
+  {
+    zadani: `7. Kterou veličinu měří přístroj zvaný anemometr?`,
+    varianty: [`rychlost větru`, `vlhkost vzduchu`, `atmosférický tlak`, `množství srážek`],
+    spravna: 0
+  },
+  {
+    zadani: `8. Ze které země pochází hudební žánr fado?`,
+    varianty: [`Itálie`, `Řecko`, `Španělsko`, `Portugalsko`],
+    spravna: 3
+  },
+  {
+    zadani: `9. Kdo navrhl první poštovní známku, kterou v roce 1918 vydala československá státní pošta?`,
+    varianty: [`Max Švabinský`, `Alfons Mucha`, `Vojtěch Preissig`, `Josef Lada`],
+    spravna: 1
+  },
+  {
+    zadani: `10. Co znamená přeškrtnutý trojúhelník na visačce s pokyny k údržbě oblečení?`,
+    varianty: [`že se textilie nesmí bělit`, `že se nesmí prát v pračce`, `že se nesmí sušit v sušičce`, `že se nesmí žehlit`],
+    spravna: 0
+  }
+];
+
+var pismena = [`a) `, `b) `, `c) `, `d) `];
+var odpovedi = new Array(otazky.length).fill(null);
+var hotovo = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var vyhodnotitEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function postavKviz() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    var zad = document.createElement(`p`);
+    zad.className = `zadani`;
+    zad.textContent = o.zadani;
+    box.appendChild(zad);
+
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement(`button`);
+      btn.className = `varianta`;
+      btn.type = `button`;
+      btn.textContent = pismena[j] + v;
+      btn.addEventListener(`click`, function () {
+        if (hotovo) { return; }
+        odpovedi[i] = j;
+        var vsechny = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < vsechny.length; k++) {
+          vsechny[k].classList.remove(`vybrana`);
+        }
+        btn.classList.add(`vybrana`);
+        zkontrolujHotovost();
+      });
+      box.appendChild(btn);
+    });
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujHotovost() {
+  var vse = odpovedi.every(function (o) { return o !== null; });
+  vyhodnotitEl.disabled = !vse;
+  if (vse) { hlaskaEl.textContent = ``; }
+}
+
+vyhodnotitEl.addEventListener(`click`, function () {
+  if (!odpovedi.every(function (o) { return o !== null; })) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  hotovo = true;
+  hlaskaEl.textContent = ``;
+  vyhodnotitEl.disabled = true;
+
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  otazky.forEach(function (o, i) {
+    var tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove(`vybrana`);
+    }
+    tlacitka[o.spravna].classList.add(`spravna`);
+    if (odpovedi[i] === o.spravna) {
+      body++;
+    } else {
+      tlacitka[odpovedi[i]].classList.add(`spatna`);
+    }
+  });
+
+  skoreEl.textContent = body + ` z 10`;
+  hodnoceniEl.textContent = hodnotText(body);
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+function hodnotText(b) {
+  if (b <= 3) {
+    return `Ve všeobecném přehledu se ukázaly citelné mezery, a to napříč několika obory naráz. Sedm a více otázek zůstalo bez správné odpovědi, nejde tedy o jednu slabinu, ale o širší odstup. Nic z toho není nevratné, protože jsou to fakta, která se dají doplnit čtením, pořady o přírodě a dějinách a druhým průchodem tímhle kvízem za pár týdnů.`;
+  }
+  if (b <= 6) {
+    return `Základ máte pevný, ale úplný přehled to ještě není. Zhruba polovina otázek vám vyšla, druhá polovina ne, takže nedostatky máte, zato úzké a snadno zaplnitelné. Nejvíc bodů v téhle desítce leží v otázkách, které nestačí odhadnout a je u nich potřeba znát konkrétní obilovinu, dřevinu, přístroj nebo zemi původu.`;
+  }
+  if (b <= 9) {
+    return `Váš všeobecný přehled je v pořádku a vážnou mezeru v něm nenajdete. Ztráta jednoho až tří bodů znamená jediné: pár okrajových faktů z oborů, které nesledujete denně. Na celkovém obrázku to nic nemění.`;
+  }
+  return `Nedostatky ve všeobecném přehledu nemáte žádné. Astronomie, sport, ekonomika, české svátky, kuchyně, les, počasí, hudba i textil vám sedí stejně dobře a nezastavila vás ani otázka na autora první známky československé státní pošty, tedy nejnáročnější kus celé desítky. Deset správných odpovědí z deseti různých oborů je výsledek, ke kterému se odhadem dojít nedá.`;
+}
+
+znovuEl.addEventListener(`click`, function () {
+  odpovedi = new Array(otazky.length).fill(null);
+  hotovo = false;
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  vyhodnotitEl.disabled = true;
+  postavKviz();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+postavKviz();
+</script>
+</body>
+</html>
