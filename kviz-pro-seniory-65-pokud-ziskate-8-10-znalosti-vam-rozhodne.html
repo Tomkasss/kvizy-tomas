@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz pro seniory 65+: pokud získáte 8/10, znalosti vám rozhodně nechybějí</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:Georgia,"Times New Roman",serif;background:#f5f0eb;margin:0;padding:32px 16px;color:#2c2c2c;line-height:1.6}
+.wrap{max-width:720px;margin:0 auto}
+h1{font-size:1.9rem;line-height:1.3;color:#2c2c2c;margin:0 0 20px}
+.perex{font-size:1.05rem;color:#4a4a4a;margin:0 0 32px}
+.q{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.q-text{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer;line-height:1.5}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border:1px solid #7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border:1px solid #d4848a;color:#721c24}
+.locked .opt{cursor:default}
+#submit{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;font-family:inherit;cursor:pointer}
+#submit:hover{background:#4a6b4e}
+#submit:disabled{background:#b5b5b5;cursor:not-allowed}
+#warn{text-align:center;color:#721c24;margin-top:14px;min-height:1.4em}
+#result{background:#fefcf9;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-top:24px;border-top:4px solid #5b7e5f;display:none}
+#score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+#verdict{font-size:1rem;color:#4a4a4a;text-align:center;margin:0}
+#again{background:#8c7b6b;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;font-family:inherit;cursor:pointer}
+#again:hover{background:#756658}
+@media(max-width:600px){body{padding:16px}h1{font-size:1.5rem}.q{padding:20px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro seniory 65+: pokud získáte 8/10, znalosti vám rozhodně nechybějí</h1>
+<p class="perex">Deset otázek napříč obory, kde se sejde dějepis, čeština, příroda i sport. Pro každého po pětašedesátce, kdo si chce ověřit, kolik z nastřádaného rozhledu má pořád po ruce. Osm správných odpovědí je meta, na kterou dosáhne jen část lidí.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warn"></p>
+<div id="result">
+<p id="score"></p>
+<p id="verdict"></p>
+<button id="again">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+ {q:`Kdo z vůdců Velké francouzské revoluce byl popraven v červenci 1794?`,
+  o:[`Georges Danton`,`Jean-Paul Marat`,`Maximilien Robespierre`,`Camille Desmoulins`],c:2},
+ {q:`Co znamená přídavné jméno „otrlý"?`,
+  o:[`necitelný a otupělý vůči cizí bolesti`,`neupravený a zanedbaný`,`prudce vznětlivý`,`mlčenlivý a uzavřený`],c:0},
+ {q:`Která houba způsobuje v Evropě nejvíce smrtelných otrav?`,
+  o:[`hřib satan`,`muchomůrka zelená`,`muchomůrka červená`,`čechratka podvinutá`],c:1},
+ {q:`Ve kterém kraji leží Lednicko-valtický areál?`,
+  o:[`ve Zlínském`,`v Olomouckém`,`v Jihočeském`,`v Jihomoravském`],c:3},
+ {q:`Kdo napsal humoristický román Zvonokosy?`,
+  o:[`Gabriel Chevallier`,`Marcel Pagnol`,`Alphonse Daudet`,`Jules Romains`],c:0},
+ {q:`Která součástka propouští elektrický proud jen v jednom směru?`,
+  o:[`cívka`,`rezistor`,`dioda`,`kondenzátor`],c:2},
+ {q:`V jakém slohu byl v 19. století přestavěn zámek Hluboká nad Vltavou?`,
+  o:[`v novobarokním`,`v novogotickém`,`v novorenesančním`,`v empírovém`],c:1},
+ {q:`Ve kterém městě se vyrábějí olomoucké tvarůžky?`,
+  o:[`v Litovli`,`v Mohelnici`,`v Zábřehu`,`v Lošticích`],c:3},
+ {q:`Ve které zemi se konalo mistrovství světa ve fotbale v roce 1990?`,
+  o:[`ve Španělsku`,`v Argentině`,`v Itálii`,`v Mexiku`],c:2},
+ {q:`Které tvrzení znamená totéž jako věta, že každý účastník exkurze měl reflexní vestu?`,
+  o:[`Každý, kdo měl reflexní vestu, byl účastníkem exkurze.`,`Kdo neměl reflexní vestu, nebyl účastníkem exkurze.`,`Kdo nebyl účastníkem exkurze, neměl reflexní vestu.`,`Někteří účastníci exkurze reflexní vestu neměli.`],c:1}
+];
+
+var BANDS = [
+ {min:0,max:3,t:`Tentokrát to bylo spíš o tipování než o jistotě. Otázky mířily do deseti různých oborů a zrovna ty vaše silné stránky se mezi nimi nejspíš neobjevily. Slibovaná osmička zůstala daleko, ale deset ověřených faktů vám tu zůstává k dispozici na příště.`},
+ {min:4,max:6,t:`Solidní polovina, byť o kus pod tím, co takhle rozkročený kvíz obvykle vynese. Základ je pevný, zaváhání přišla u detailů, které se v běžném dni neopakují. K hranici z titulku chybí dva až čtyři body, což je dohnatelná vzdálenost.`},
+ {min:7,max:9,t:`Tady už se výsledek dotýká toho, co slibuje titulek. Kdo dosáhl osmi a víc, může si být jistý, že mu znalosti rozhodně nechybějí: udržel krok v dějinách, češtině, přírodě, zeměpisu i technice a chybu udělal jen tam, kde se odpověď schovává hodně hluboko. Sedm bodů je předsíň téhle skupiny, jediná otázka od potvrzení.`},
+ {min:10,max:10,t:`Plný počet, tedy ani jedno klopýtnutí napříč deseti obory. Poznat sloh přestavěného zámku, autora francouzské satiry i součástku z domácí elektroniky a k tomu projít logickou úlohou bez zaváhání dá pořádnou práci. Osmička z titulku je v tomhle případě překonaná o dva body a takový výsledek se podaří opravdu málokomu.`}
+];
+
+var LETTERS = [`a)`,`b)`,`c)`,`d)`];
+var answers = [];
+var done = false;
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var againEl = document.getElementById(`again`);
+
+function build(){
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function(item,qi){
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var head = document.createElement(`p`);
+    head.className = `q-text`;
+    head.textContent = (qi+1) + `. ` + item.q;
+    box.appendChild(head);
+    item.o.forEach(function(opt,oi){
+      var b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = LETTERS[oi] + ` ` + opt;
+      b.addEventListener(`click`,function(){ pick(qi,oi,box); });
+      box.appendChild(b);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function pick(qi,oi,box){
+  if(done) return;
+  answers[qi] = oi;
+  var opts = box.querySelectorAll(`.opt`);
+  for(var i=0;i<opts.length;i++){ opts[i].classList.remove(`sel`); }
+  opts[oi].classList.add(`sel`);
+  warnEl.textContent = ``;
+  refresh();
+}
+
+function answered(){
+  var n = 0;
+  for(var i=0;i<QUESTIONS.length;i++){ if(answers[i] !== undefined) n++; }
+  return n;
+}
+
+function refresh(){
+  submitEl.disabled = answered() !== QUESTIONS.length;
+}
+
+function evaluate(){
+  if(done) return;
+  if(answered() !== QUESTIONS.length){
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  done = true;
+  var score = 0;
+  var boxes = quizEl.querySelectorAll(`.q`);
+  for(var i=0;i<QUESTIONS.length;i++){
+    var opts = boxes[i].querySelectorAll(`.opt`);
+    var chosen = answers[i];
+    var correct = QUESTIONS[i].c;
+    if(chosen === correct) score++;
+    for(var j=0;j<opts.length;j++){ opts[j].classList.remove(`sel`); }
+    opts[correct].classList.add(`ok`);
+    if(chosen !== correct){ opts[chosen].classList.add(`bad`); }
+    boxes[i].classList.add(`locked`);
+  }
+  submitEl.disabled = true;
+  warnEl.textContent = ``;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  for(var k=0;k<BANDS.length;k++){
+    if(score >= BANDS[k].min && score <= BANDS[k].max){ verdictEl.textContent = BANDS[k].t; break; }
+  }
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({behavior:`smooth`,block:`start`});
+}
+
+function reset(){
+  done = false;
+  answers = [];
+  resultEl.style.display = `none`;
+  warnEl.textContent = ``;
+  build();
+  refresh();
+  window.scrollTo({top:0,behavior:`smooth`});
+}
+
+submitEl.addEventListener(`click`,evaluate);
+againEl.addEventListener(`click`,reset);
+build();
+refresh();
+</script>
+</body>
+</html>
