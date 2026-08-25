@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz všeobecných znalostí pro bystré hlavy: kdo dá alespoň 8/10, má přehled jako málokdo</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 20px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 18px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .otazka p.q { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 16px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  #vyhodnotit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .15s;
+  }
+  #vyhodnotit:hover:not(:disabled) { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #hlaska { text-align: center; color: #721c24; margin: 14px 0 0; min-height: 1.2em; }
+  #vysledek {
+    display: none;
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+    text-align: center;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; margin: 0 0 12px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; margin: 0; }
+  #znovu {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 28px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .15s;
+  }
+  #znovu:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    .otazka { padding: 20px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz všeobecných znalostí pro bystré hlavy: kdo dá alespoň 8/10, má přehled jako málokdo</h1>
+  <p class="perex">Deset otázek z deseti různých oborů: dějiny, zeměpis, jídlo, sport, přírodní vědy, literatura, hudba, film, technika a výtvarné umění. U každé čtyři možnosti a jediná správná. Průměrný řešitel se drží kolem sedmi bodů.</p>
+  <div id="kviz"></div>
+  <p id="hlaska"></p>
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <div id="vysledek">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+  const otazky = [
+    { q: `1. Ve kterém městě byl upálen mistr Jan Hus?`,
+      moznosti: [`Basilej`, `Norimberk`, `Řezno`, `Kostnice`], spravna: 3 },
+    { q: `2. Ke kterému státu patří ostrov Tasmánie?`,
+      moznosti: [`Nový Zéland`, `Indonésie`, `Austrálie`, `Papua-Nová Guinea`], spravna: 2 },
+    { q: `3. Z jaké suroviny se vaří italská polenta?`,
+      moznosti: [`z kukuřičné mouky`, `z pšeničné krupice`, `z bramborového škrobu`, `z rýžové mouky`], spravna: 0 },
+    { q: `4. Kolik hráčů má na hřišti družstvo v házené?`,
+      moznosti: [`pět`, `šest`, `sedm`, `osm`], spravna: 2 },
+    { q: `5. Ve které vrstvě atmosféry vzniká téměř všechno počasí?`,
+      moznosti: [`stratosféra`, `troposféra`, `mezosféra`, `termosféra`], spravna: 1 },
+    { q: `6. Kdo je autorem románu Egypťan Sinuhet?`,
+      moznosti: [`Christian Jacq`, `Henryk Sienkiewicz`, `Robert Graves`, `Mika Waltari`], spravna: 3 },
+    { q: `7. Který skladatel je autorem symfonie h moll, které se přezdívá Nedokončená?`,
+      moznosti: [`Anton Bruckner`, `Franz Schubert`, `Robert Schumann`, `Felix Mendelssohn`], spravna: 1 },
+    { q: `8. Kdo režíroval film Obecná škola?`,
+      moznosti: [`Jan Svěrák`, `Vít Olmer`, `Jiří Menzel`, `Zdeněk Svěrák`], spravna: 0 },
+    { q: `9. Který kov musí ocel obsahovat, aby byla nerezová?`,
+      moznosti: [`nikl`, `mangan`, `chrom`, `molybden`], spravna: 2 },
+    { q: `10. Kdo je autorem sochy Svobody v New Yorku?`,
+      moznosti: [`Frédéric Auguste Bartholdi`, `Gustave Eiffel`, `Auguste Rodin`, `Jean-Baptiste Carpeaux`], spravna: 0 }
+  ];
+
+  const odpovedi = new Array(otazky.length).fill(null);
+  let zamek = false;
+  const kvizEl = document.getElementById(`kviz`);
+  const vyhodnotitBtn = document.getElementById(`vyhodnotit`);
+  const hlaskaEl = document.getElementById(`hlaska`);
+  const vysledekEl = document.getElementById(`vysledek`);
+  const skoreEl = document.getElementById(`skore`);
+  const hodnoceniEl = document.getElementById(`hodnoceni`);
+  const znovuBtn = document.getElementById(`znovu`);
+  const pismena = [`a`, `b`, `c`, `d`];
+
+  function vykresli() {
+    kvizEl.innerHTML = ``;
+    otazky.forEach((ot, i) => {
+      const box = document.createElement(`div`);
+      box.className = `otazka`;
+      const qp = document.createElement(`p`);
+      qp.className = `q`;
+      qp.textContent = ot.q;
+      box.appendChild(qp);
+      ot.moznosti.forEach((m, j) => {
+        const btn = document.createElement(`button`);
+        btn.className = `varianta`;
+        btn.textContent = pismena[j] + `) ` + m;
+        btn.addEventListener(`click`, () => {
+          if (zamek) return;
+          odpovedi[i] = j;
+          Array.from(box.querySelectorAll(`.varianta`)).forEach(b => b.classList.remove(`vybrana`));
+          btn.classList.add(`vybrana`);
+          aktualizujTlacitko();
+        });
+        box.appendChild(btn);
+      });
+      kvizEl.appendChild(box);
+    });
+  }
+
+  function aktualizujTlacitko() {
+    const vse = odpovedi.every(o => o !== null);
+    vyhodnotitBtn.disabled = !vse;
+    if (vse) hlaskaEl.textContent = ``;
+  }
+
+  vyhodnotitBtn.addEventListener(`click`, () => {
+    if (odpovedi.some(o => o === null)) {
+      hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+      return;
+    }
+    zamek = true;
+    let skore = 0;
+    const boxy = kvizEl.querySelectorAll(`.otazka`);
+    boxy.forEach((box, i) => {
+      const btns = box.querySelectorAll(`.varianta`);
+      btns.forEach((btn, j) => {
+        btn.disabled = true;
+        if (j === otazky[i].spravna) btn.classList.add(`spravna`);
+        if (j === odpovedi[i] && odpovedi[i] !== otazky[i].spravna) btn.classList.add(`spatna`);
+      });
+      if (odpovedi[i] === otazky[i].spravna) skore++;
+    });
+    vyhodnotitBtn.style.display = `none`;
+    hlaskaEl.textContent = ``;
+    skoreEl.textContent = skore + ` z ` + otazky.length;
+    hodnoceniEl.textContent = hodnoceni(skore);
+    vysledekEl.style.display = `block`;
+    vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  });
+
+  function hodnoceni(s) {
+    if (s <= 3) return `Deset oborů za sebou je nápor, u kterého stačí, aby vás minuly dva tři z nich, a skóre spadne rychle. Tentokrát vás zastavily i otázky ze střední části kvízu, kde se dvě nabídky držely blízko u sebe. K hranici, kterou slibuje titulek, je odsud daleko, zato každá dohledaná odpověď se vám příště vrátí.`;
+    if (s <= 6) return `Solidní základ, na kterém se dá stavět. Rozjezdovou část jste zvládli, jenže v pásmu, kde už nestačí tušit a je potřeba vědět, vás kvíz několikrát poslal vedle. Do skupiny, o které mluví titulek, chybí dva až čtyři body, a to je rozdíl jedné dvou znalostí, ne propast.`;
+    if (s <= 9) return `Tady se láme titulek. Sedm bodů je přesně průměr, kterým tenhle kvíz končí u většiny lidí, ale osm a devět už znamená, že jste přelezli laťku, na kterou dosáhne jen menšina. Orientujete se napříč obory prokazatelně líp než okolí a k plnému počtu vám chyběla jedna až tři odpovědi, nejspíš u těch nejtěsnějších nabídek.`;
+    return `Naprostá špička. Trefit všech deset oborů včetně té nejtvrdší otázky kvízu nedá ani ten, kdo se na osmi bodech běžně drží. Tohle není náhoda ani štěstí při tipování, ale přehled, jaký má opravdu málokdo. Smekáme.`;
+  }
+
+  znovuBtn.addEventListener(`click`, () => {
+    for (let i = 0; i < odpovedi.length; i++) odpovedi[i] = null;
+    zamek = false;
+    vysledekEl.style.display = `none`;
+    vyhodnotitBtn.style.display = `block`;
+    vyhodnotitBtn.disabled = true;
+    hlaskaEl.textContent = ``;
+    vykresli();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  });
+
+  vykresli();
+</script>
+</body>
+</html>
