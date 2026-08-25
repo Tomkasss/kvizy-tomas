@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test českých slov: kdo správně vysvětlí všech 10, má mimořádně bohatou slovní zásobu</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+    line-height: 1.45;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta[disabled] { cursor: default; }
+  #vyhodnotit, #znovu {
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #vyhodnotit { background: #5b7e5f; }
+  #vyhodnotit:hover:not(:disabled) { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; }
+  #znovu:hover { background: #756658; }
+  #hlaska { text-align: center; color: #8a6d6d; margin-top: 14px; min-height: 1.2em; }
+  #vysledek {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 40px;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka, #vysledek { padding: 20px; }
+    #vyhodnotit, #znovu { width: 100%; padding: 16px 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test českých slov: kdo správně vysvětlí všech 10, má mimořádně bohatou slovní zásobu</h1>
+  <p class="perex">Deset slov, která se z běžné řeči vytratila nebo se v ní objeví jen zřídka. U každého čekají čtyři výklady a tři z nich jsou nastražené. Kdo správně vysvětlí všech deset, má mimořádně bohatou slovní zásobu.</p>
+  <div id="kviz"></div>
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+  <div id="vysledek">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var otazky = [
+  {
+    q: `Co znamená sloveso „lkát"?`,
+    a: [
+      `toužebně vzhlížet k někomu s němým obdivem`,
+      `zhluboka vzdychat úlevou po vykonané práci`,
+      `žalostně naříkat a hlasitě bědovat`,
+      `tlumeně sténat bolestí se zaťatými zuby`
+    ],
+    spravna: 2
+  },
+  {
+    q: `Co znamená přídavné jméno „klopotný"?`,
+    a: [
+      `namáhavý a spojený s velkou dřinou`,
+      `nemotorný a působící trapné rozpaky`,
+      `zdlouhavý a stále znovu přerušovaný`,
+      `opatrný a postupující s velkou obezřetností`
+    ],
+    spravna: 0
+  },
+  {
+    q: `Co označuje slovo „fěrtoch"?`,
+    a: [
+      `vysoká pletená punčocha sahající ke kolenům`,
+      `široký kožený opasek s velkou přezkou`,
+      `plátěný pytlík na drobné nošený u pasu`,
+      `široká zástěra nošená přes oděv při práci`
+    ],
+    spravna: 3
+  },
+  {
+    q: `Co označuje slovo „šufánek"?`,
+    a: [
+      `plochá dřevěná lopatka na obracení placek`,
+      `hluboká naběračka na nalévání polévky`,
+      `drátěné síto na scezování uvařených nudlí`,
+      `kovová struhadlová deska na krouhání zelí`
+    ],
+    spravna: 1
+  },
+  {
+    q: `Co označuje slovo „berně"?`,
+    a: [
+      `daň odváděná vrchnosti nebo panovníkovi`,
+      `úroda ponechaná hospodáři po odvodu desátku`,
+      `soupis poddaných pořízený pro potřeby panství`,
+      `povinná práce vykonávaná na panském poli`
+    ],
+    spravna: 0
+  },
+  {
+    q: `Co znamená slovo „pamflet"?`,
+    a: [
+      `slavnostní báseň složená k významnému výročí`,
+      `tištěné oznámení o úmrtí rozesílané příbuzným`,
+      `ostrý útočný spis napadající osobu nebo poměry`,
+      `krátký souhrn obsahu knihy otištěný na přebalu`
+    ],
+    spravna: 2
+  },
+  {
+    q: `Co označuje slovo „kolportér"?`,
+    a: [
+      `sazeč, který připravuje stránky novin k tisku`,
+      `pouliční nebo podomní prodavač novin a tiskovin`,
+      `redaktor odpovídající za večerní vydání listu`,
+      `dopisovatel posílající do redakce zprávy z ciziny`
+    ],
+    spravna: 1
+  },
+  {
+    q: `Co označuje slovo „panoptikum"?`,
+    a: [
+      `kočovné divadlo hrající výpravné kusy pod plátěnou střechou`,
+      `prosklená chodba s vyhlídkou do několika pater budovy najednou`,
+      `obrazárna vystavující podobizny členů významných šlechtických rodů`,
+      `sbírka kuriozit a voskových figur přístupná návštěvníkům`
+    ],
+    spravna: 3
+  },
+  {
+    q: `Co znamená slovo „memento"?`,
+    a: [
+      `varovná připomínka, která má odradit od opakování chyby`,
+      `slavnostní proslov pronesený na počest zesnulého`,
+      `pamětní zápis vkládaný do základního kamene stavby`,
+      `stručná poznámka připojená na okraj úřední listiny`
+    ],
+    spravna: 0
+  },
+  {
+    q: `Co znamená slovo „kverulant"?`,
+    a: [
+      `člověk, který se vyhýbá jakémukoli sporu a raději ustoupí`,
+      `člověk, který ostatním vnucuje své názory hlasitým mluvením`,
+      `člověk, který si na všechno stěžuje a soudí se pro maličkosti`,
+      `člověk, který za každou cenu prosazuje své zásluhy před ostatními`
+    ],
+    spravna: 2
+  }
+];
+
+var hodnoceni = [
+  { max: 3, text: `Slovní zásoba na úrovni každodenního provozu. Vystačí na běžnou domluvu, zprávy i nákup, ale jakmile se v textu objeví výraz z knihy nebo ze starší mluvy, chybí opora a rozhoduje odhad. Právě přibylo deset slov, u kterých už příště tápat nemusíte.` },
+  { max: 6, text: `Základ sedí, jistota kolísá. Slova, která se občas mihnou ve zprávách nebo v knize, poznáte, ale u starší a nářeční vrstvy zabraly nastražené výklady, protože se od správného lišily jen odstínem významu. K běžnému průměru řešitele tohoto testu chybí jeden dva body.` },
+  { max: 9, text: `Přesně na úrovni, na kterou tenhle test míří. Rozumíte i slovům, která z běžné řeči zmizela nebo se do ní dostala z odborné a knižní vrstvy, a příbuzné významy od sebe rozeznáte. K plnému počtu chybělo jen pár nejvzdálenějších výrazů.` },
+  { max: 10, text: `Mimořádně bohatá slovní zásoba, přesně jak slibuje titulek. Slova z básnické mluvy, z nářečí, ze staré úřední češtiny i z přejaté odborné vrstvy, a ani jeden těsný distraktor nezabral. Tenhle výsledek dá jen menšina.` }
+];
+
+var pismena = [`a)`, `b)`, `c)`, `d)`];
+var odpovedi = [];
+var hotovo = false;
+var kvizEl = document.getElementById(`kviz`);
+var tlacitko = document.getElementById(`vyhodnotit`);
+var hlaska = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function vykresli() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = (i + 1) + `. ` + o.q;
+    box.appendChild(zneni);
+    o.a.forEach(function (text, j) {
+      var b = document.createElement(`button`);
+      b.className = `varianta`;
+      b.type = `button`;
+      b.textContent = pismena[j] + ` ` + text;
+      b.addEventListener(`click`, function () {
+        if (hotovo) { return; }
+        odpovedi[i] = j;
+        var vsechny = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < vsechny.length; k++) {
+          vsechny[k].classList.remove(`vybrana`);
+        }
+        b.classList.add(`vybrana`);
+        zkontrolujHotovost();
+      });
+      box.appendChild(b);
+    });
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujHotovost() {
+  var plny = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] !== `number`) { plny = false; break; }
+  }
+  tlacitko.disabled = !plny;
+  if (plny) { hlaska.textContent = ``; }
+}
+
+tlacitko.addEventListener(`click`, function () {
+  if (tlacitko.disabled) {
+    hlaska.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  hotovo = true;
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  otazky.forEach(function (o, i) {
+    var varianty = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < varianty.length; j++) {
+      varianty[j].disabled = true;
+      varianty[j].classList.remove(`vybrana`);
+      if (j === o.spravna) {
+        varianty[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        varianty[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === o.spravna) { body++; }
+  });
+  tlacitko.disabled = true;
+  skoreEl.textContent = body + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+znovuEl.addEventListener(`click`, function () {
+  odpovedi = [];
+  hotovo = false;
+  vysledekEl.style.display = `none`;
+  hlaska.textContent = ``;
+  tlacitko.disabled = true;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+vykresli();
+</script>
+</body>
+</html>
