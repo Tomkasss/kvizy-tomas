@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Těžký kvíz ze základní školy: dnešní dospělí v něm často nezvládnou ani 7/10</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 32px 16px 64px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.question {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.5; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt[disabled] { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+.warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+  display: none;
+}
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+.verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#retry:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 20px 16px 48px; }
+  h1 { font-size: 1.5rem; }
+  .question { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Těžký kvíz ze základní školy: dnešní dospělí v něm často nezvládnou ani 7/10</h1>
+<p class="perex">Deset otázek z učiva základní školy, jak si ho po letech pamatují dospělí: dějepis, zeměpis, přírodopis, fyzika, chemie, čeština, literatura, hudební i výtvarná výchova. Nic navíc, jen to, co se kdysi probíralo.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="warn" id="warn" style="display:none;">Odpovězte prosím na všechny otázky</p>
+<div id="result">
+  <p class="score" id="score"></p>
+  <p class="verdict" id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var questions = [
+  { q: `Jak se jmenuje nejvyšší hora Pyrenejí?`,
+    o: [`Mulhacén`, `Pico de Aneto`, `Monte Perdido`, `Pico Veleta`], a: 1 },
+  { q: `Kolik symfonických básní tvoří Smetanův cyklus Má vlast?`,
+    o: [`pět`, `šest`, `sedm`, `devět`], a: 1 },
+  { q: `Jak se jmenoval společný program, v němž husité roku 1420 shrnuli své hlavní požadavky?`,
+    o: [`Kutnohorský dekret`, `Basilejská kompaktáta`, `Majestát Rudolfa II.`, `Čtyři artikuly pražské`], a: 3 },
+  { q: `Který smyslový orgán umožňuje rybám vnímat proudění a chvění vody?`,
+    o: [`postranní čára`, `plynový měchýř`, `žaberní oblouk`, `tuková ploutev`], a: 0 },
+  { q: `Kolik obojetných souhlásek má čeština?`,
+    o: [`šest`, `sedm`, `osm`, `deset`], a: 2 },
+  { q: `Ve kterém Verneově románu ztroskotá na neobydleném ostrově patnáct chlapců ze školního internátu?`,
+    o: [`Tajuplný ostrov`, `Dva roky prázdnin`, `Patnáctiletý kapitán`, `Děti kapitána Granta`], a: 1 },
+  { q: `Který plyn vzniká jako hlavní produkt spalování síry na vzduchu?`,
+    o: [`oxid siřičitý`, `sirovodík`, `oxid sírový`, `sirouhlík`], a: 0 },
+  { q: `Při jaké teplotě má voda největší hustotu?`,
+    o: [`0 °C`, `2 °C`, `4 °C`, `10 °C`], a: 2 },
+  { q: `Kdo je autorem deskových obrazů v kapli svatého Kříže na Karlštejně?`,
+    o: [`Mikuláš Wurmser ze Štrasburku`, `Mistr vyšebrodského oltáře`, `Mistr třeboňského oltáře`, `Mistr Theodorik`], a: 3 },
+  { q: `Který mezopotamský panovník dal sepsat zákoník vytesaný do kamenné stély, uložené dnes v pařížském Louvru?`,
+    o: [`Chammurapi`, `Sargon Akkadský`, `Aššurbanipal`, `Nebukadnesar II.`], a: 0 }
+];
+
+var verdicts = [
+  { max: 3, t: `Na laťku sedmi bodů jste tentokrát nedosáhli se značnou rezervou. Ze základní školy vám zůstal spíš obrys než detail: víte, že se něco takového bralo, ale konkrétní jméno, číslo nebo pojem se už nevybaví. Není to nic proti vám, tenhle kvíz schválně sahá tam, kde se školní látka po letech nepřipomíná. Kdyby vám kdokoli tvrdil, že tohle musí umět každý deváťák, mýlí se.` },
+  { max: 6, t: `Přesně sem spadá většina dospělých, kteří základní školu dokončili před lety. Body jste posbírali tam, kde se látka připomíná i mimo školu, a ztráceli tam, kde odpověď stojí na jediném jméně nebo jediném čísle z konkrétní hodiny. K sedmi bodům, které titulek staví jako laťku, vám chybělo jedno až tři zaváhání.` },
+  { max: 9, t: `Laťku jste překonali, a to je v tomhle kvízu menšina. Ze základní školy vám nezůstala jen kostra, ale i patra, která se po letech nepřipomínají: chemie oxidů, anomálie vody, pravopis s vyjmenovanými slovy. Na plný počet chybělo jedno až tři místa, kde se odpověď nedala odhadnout, jen vybavit.` },
+  { max: 10, t: `Plný počet, a ten je tady opravdu vzácný. Trefili jste i tři nejtěžší otázky, kde se rozhoduje jediným vrcholem v pohoří, jediným názvem husitského programu a jediným jménem dvorního malíře Karla IV. Titulek jste vyvrátili se vším všudy.` }
+];
+
+var answers = [];
+var locked = false;
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryEl = document.getElementById(`retry`);
+var letters = [`a`, `b`, `c`, `d`];
+
+function build() {
+  quizEl.innerHTML = ``;
+  questions.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `question`;
+    var title = document.createElement(`p`);
+    title.className = `qtext`;
+    title.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(title);
+    item.o.forEach(function (opt, oi) {
+      var btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.type = `button`;
+      btn.textContent = letters[oi] + `) ` + opt;
+      btn.addEventListener(`click`, function () {
+        if (locked) { return; }
+        answers[qi] = oi;
+        var sibs = box.querySelectorAll(`.opt`);
+        for (var i = 0; i < sibs.length; i++) { sibs[i].classList.remove(`selected`); }
+        btn.classList.add(`selected`);
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function answered() {
+  var n = 0;
+  for (var i = 0; i < questions.length; i++) {
+    if (typeof answers[i] === `number`) { n++; }
+  }
+  return n;
+}
+
+function updateSubmit() {
+  var done = answered() === questions.length;
+  submitEl.disabled = !done;
+  if (done) { warnEl.style.display = `none`; }
+}
+
+submitEl.addEventListener(`click`, function () {
+  if (answered() !== questions.length) {
+    warnEl.style.display = `block`;
+    return;
+  }
+  locked = true;
+  var score = 0;
+  var boxes = quizEl.querySelectorAll(`.question`);
+  for (var qi = 0; qi < questions.length; qi++) {
+    var opts = boxes[qi].querySelectorAll(`.opt`);
+    for (var oi = 0; oi < opts.length; oi++) {
+      opts[oi].disabled = true;
+      opts[oi].classList.remove(`selected`);
+      if (oi === questions[qi].a) { opts[oi].classList.add(`correct`); }
+      else if (oi === answers[qi]) { opts[oi].classList.add(`wrong`); }
+    }
+    if (answers[qi] === questions[qi].a) { score++; }
+  }
+  scoreEl.textContent = score + ` z ` + questions.length;
+  for (var v = 0; v < verdicts.length; v++) {
+    if (score <= verdicts[v].max) { verdictEl.textContent = verdicts[v].t; break; }
+  }
+  submitEl.disabled = true;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+retryEl.addEventListener(`click`, function () {
+  answers = [];
+  locked = false;
+  resultEl.style.display = `none`;
+  warnEl.style.display = `none`;
+  build();
+  updateSubmit();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+updateSubmit();
+</script>
+</body>
+</html>
