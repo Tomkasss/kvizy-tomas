@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro vzdělané seniory: 8/10 získají jen lidé 60+ s opravdu širokým rozhledem</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.question {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+#evaluate {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#evaluate:hover { background: #4a6b4e; }
+#evaluate:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warning { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#retry:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .question { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz pro vzdělané seniory: 8/10 získají jen lidé 60+ s opravdu širokým rozhledem</h1>
+  <p class="perex">Deset otázek pro ročníky šedesát plus, které si drží rozhled napříč obory. Od zeměpisu přes češtinu, přírodu, jídlo a pití až po hudbu, sport, umění, techniku a dějiny vědy. Osm správných odpovědí zvládne jen menšina, plný počet ještě míň.</p>
+  <div id="quiz"></div>
+  <button id="evaluate" disabled>Vyhodnotit</button>
+  <div id="warning"></div>
+  <div id="result" style="display:none">
+    <div id="score"></div>
+    <p id="verdict"></p>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var QUESTIONS = [
+  {
+    q: `Se kterou zemí sdílí Dominikánská republika jeden ostrov?`,
+    options: [`s Kubou`, `s Jamajkou`, `s Haiti`, `s Bahamami`],
+    correct: 2
+  },
+  {
+    q: `Z jakého ovoce se pálí normandský destilát calvados?`,
+    options: [`z hroznů`, `z jablek`, `ze švestek`, `z hrušek`],
+    correct: 1
+  },
+  {
+    q: `Ve kterém sportu se hraje o Thomasův pohár?`,
+    options: [`ve squashi`, `v badmintonu`, `ve stolním tenisu`, `v pozemním hokeji`],
+    correct: 1
+  },
+  {
+    q: `Ve kterém městě sídlí obrazárna Uffizi?`,
+    options: [`ve Florencii`, `v Benátkách`, `v Miláně`, `v Neapoli`],
+    correct: 0
+  },
+  {
+    q: `Patronkou které profese je svatá Barbora?`,
+    options: [`vinařů`, `mlynářů`, `horníků`, `rybářů`],
+    correct: 2
+  },
+  {
+    q: `Ve které zemi vznikl ve třicátých letech 19. století tanec polka?`,
+    options: [`v Polsku`, `v Uhrách`, `v Bavorsku`, `v Čechách`],
+    correct: 3
+  },
+  {
+    q: `Co znamená přídavné jméno pregnantní?`,
+    options: [`výstižný, přesný`, `předběžný, nezávazný`, `okázalý, honosný`, `rozvláčný, zdlouhavý`],
+    correct: 0
+  },
+  {
+    q: `Z čeho se získává přírodní kaučuk?`,
+    options: [`z mléčné šťávy tropického stromu`, `z vonné pryskyřice tropického keře`, `z dužnatých plodů tropické liány`, `z usušených listů tropické byliny`],
+    correct: 0
+  },
+  {
+    q: `K čemu sloužil námořníkům sextant?`,
+    options: [`k měření hloubky vody pod kýlem plavidla`, `k určení směru pomocí magnetického pole Země`, `k měření rychlosti lodi vůči vodní hladině`, `k určení polohy podle výšky nebeských těles`],
+    correct: 3
+  },
+  {
+    q: `Který lékař zavedl mytí rukou na porodnickém oddělení?`,
+    options: [`Louis Pasteur`, `Robert Koch`, `Ignác Semmelweis`, `Joseph Lister`],
+    correct: 2
+  }
+];
+
+var VERDICTS = [
+  { min: 0, max: 3, text: `Tenhle výsledek znamená, že většina otázek zamířila mimo to, co člověk potká v běžném provozu dne. Kvíz schválně skáče mezi zeměpisem, jazykem, přírodou i uměním a několik položek stojí na detailu, který se v hovoru nepoužívá. Skóre v tomhle pásmu je hlavně pozvánka vzít si seznam správných odpovědí jako mapu, kudy pokračovat příště.` },
+  { min: 4, max: 6, text: `Polovina bodů je slušný střed. V tomhle pásmu se obvykle střídá pevná znalost s odhadem mezi dvěma podobně znějícími variantami a právě ten odhad rozhoduje. Do nadprůměrného pásma zbývá jedna až tři odpovědi podle toho, kde přesně jste skončili, takže rozdíl není propastný.` },
+  { min: 7, max: 9, text: `Nadprůměrný výsledek. Sedm bodů znamená, že hranice slibovaná v titulku je na dosah a dělí vás od ní jediná odpověď, osmi body je naplněná a devět ji překonává. Takové skóre nesesbírá nikdo, kdo se opírá o jediný obor, stojí za ním široký záběr napříč několika.` },
+  { min: 10, max: 10, text: `Plný počet, a ten dá opravdu jen menšina. Deset z deseti znamená, že prošlo bez zaváhání všechno, zeměpis, čeština, příroda, jídlo a pití, hudba, sport, umění, technika i dějiny vědy. Tohle už není běžný přehled, ale doložená sečtělost.` }
+];
+
+var LETTERS = [`a)`, `b)`, `c)`, `d)`];
+var answers = new Array(QUESTIONS.length).fill(null);
+var locked = false;
+
+var quizEl = document.getElementById(`quiz`);
+var evaluateBtn = document.getElementById(`evaluate`);
+var warningEl = document.getElementById(`warning`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryBtn = document.getElementById(`retry`);
+
+function build() {
+  quizEl.textContent = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `question`;
+
+    var title = document.createElement(`p`);
+    title.className = `qtext`;
+    title.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(title);
+
+    item.options.forEach(function (opt, oi) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `opt`;
+      btn.textContent = LETTERS[oi] + ` ` + opt;
+      btn.addEventListener(`click`, function () {
+        if (locked) { return; }
+        answers[qi] = oi;
+        var siblings = box.querySelectorAll(`.opt`);
+        for (var i = 0; i < siblings.length; i++) {
+          siblings[i].classList.remove(`selected`);
+        }
+        btn.classList.add(`selected`);
+        refresh();
+      });
+      box.appendChild(btn);
+    });
+
+    quizEl.appendChild(box);
+  });
+}
+
+function refresh() {
+  var done = answers.every(function (a) { return a !== null; });
+  evaluateBtn.disabled = !done;
+  if (done) { warningEl.textContent = ``; }
+}
+
+evaluateBtn.addEventListener(`click`, function () {
+  if (evaluateBtn.disabled) { return; }
+  var done = answers.every(function (a) { return a !== null; });
+  if (!done) {
+    warningEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  evaluateBtn.disabled = true;
+
+  var score = 0;
+  var boxes = quizEl.querySelectorAll(`.question`);
+  for (var qi = 0; qi < QUESTIONS.length; qi++) {
+    var opts = boxes[qi].querySelectorAll(`.opt`);
+    var correct = QUESTIONS[qi].correct;
+    if (answers[qi] === correct) { score++; }
+    for (var oi = 0; oi < opts.length; oi++) {
+      opts[oi].disabled = true;
+      opts[oi].classList.remove(`selected`);
+      if (oi === correct) {
+        opts[oi].classList.add(`correct`);
+      } else if (oi === answers[qi]) {
+        opts[oi].classList.add(`wrong`);
+      }
+    }
+  }
+
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score >= VERDICTS[v].min && score <= VERDICTS[v].max) {
+      verdictEl.textContent = VERDICTS[v].text;
+      break;
+    }
+  }
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+retryBtn.addEventListener(`click`, function () {
+  locked = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.style.display = `none`;
+  warningEl.textContent = ``;
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+refresh();
+</script>
+</body>
+</html>
