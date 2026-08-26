@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vědomostní mix pro seniory: 10 otázek ukáže, zda si v důchodu stále udržujete skvělý přehled</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  #vyhodnotit, #znovu {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; }
+  #znovu:hover { background: #756658; }
+  #vysledek {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.2em; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Vědomostní mix pro seniory: 10 otázek ukáže, zda si v důchodu stále udržujete skvělý přehled</h1>
+  <p class="perex">Deset otázek napříč obory, od dějin a zeměpisu přes přírodu, sport a techniku až po hudbu, mytologii a architekturu. U každé čtyři možnosti a jediná správná. Zjistěte, milí senioři, jak pevně vám přehled drží i po letech.</p>
+
+  <div id="kviz"></div>
+
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+
+  <div id="vysledek">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+const otazky = [
+  {
+    z: `Který průsmyk je nejnižším a nejvytíženějším alpským přechodem mezi Rakouskem a Itálií?`,
+    v: [`Semmering`, `Svatogotthardský průsmyk`, `Brennerský průsmyk`, `Mont Cenis`],
+    s: 2
+  },
+  {
+    z: `Kdo byl na sklonku roku 1938 zvolen prezidentem republiky poté, co Edvard Beneš abdikoval?`,
+    v: [`Emil Hácha`, `Jan Syrový`, `Rudolf Beran`, `Alois Eliáš`],
+    s: 0
+  },
+  {
+    z: `Který sport vymyslel roku 1891 kanadský tělocvikář James Naismith, když sháněl hru na zimní cvičení v hale?`,
+    v: [`volejbal`, `basketbal`, `házená`, `stolní tenis`],
+    s: 1
+  },
+  {
+    z: `Proč je za jasného dne obloha modrá?`,
+    v: [`obloha odráží barvu mořské hladiny`, `ozonová vrstva pohlcuje červené světlo`, `vodní pára ve vzduchu má namodralý odstín`, `vzduch rozptyluje modré světlo víc než ostatní`],
+    s: 3
+  },
+  {
+    z: `Do které skupiny živočichů patří pijavice?`,
+    v: [`ploštěnci`, `kroužkovci`, `hlísti`, `měkkýši`],
+    s: 1
+  },
+  {
+    z: `Která dnešní země byla až do roku 1949 nizozemskou kolonií?`,
+    v: [`Malajsie`, `Filipíny`, `Srí Lanka`, `Indonésie`],
+    s: 3
+  },
+  {
+    z: `Kdo si roku 1886 nechal patentovat první automobil se spalovacím motorem?`,
+    v: [`Karl Benz`, `Gottlieb Daimler`, `Rudolf Diesel`, `Henry Ford`],
+    s: 0
+  },
+  {
+    z: `Který mytický král byl potrestán věčným hladem a žízní na dosah vody a ovoce?`,
+    v: [`Sisyfos`, `Prométheus`, `Tantalos`, `Midas`],
+    s: 2
+  },
+  {
+    z: `Kdo složil Svatební pochod ze Snu noci svatojánské?`,
+    v: [`Richard Wagner`, `Felix Mendelssohn`, `Johannes Brahms`, `Franz Schubert`],
+    s: 1
+  },
+  {
+    z: `Kdo navrhl kostel Nejsvětějšího Srdce Páně na pražských Vinohradech?`,
+    v: [`Jože Plečnik`, `Jan Kotěra`, `Adolf Loos`, `Josef Gočár`],
+    s: 0
+  }
+];
+
+const hodnoceni = [
+  { min: 0, max: 3, text: `Tolik různých oborů naráz je zrada a takhle nízké skóre nejčastěji znamená, že se kvíz strefil do témat, která vám leží nejdál. Přehled tím rozhodně nemizí, jen zrovna nepadl do vašich vod. Zkuste to znovu za pár dní a uvidíte, že se výsledek posune.` },
+  { min: 4, max: 6, text: `Zhruba polovina bodů. Otázky ze školních lavic jste vzali s jistotou, u těch náročnějších už ale rozhodovalo váhání mezi dvěma variantami. Solidní všeobecný základ, na kterém ještě zůstalo pár bílých míst.` },
+  { min: 7, max: 9, text: `Výborně, přesně sem míří většina řešitelů a přesně na tohle pásmo kvíz cílil. Orientujete se napříč dějinami, přírodou i uměním a zastavily vás nanejvýš tři nejzáludnější otázky. K plnému počtu chyběl kousek.` },
+  { min: 10, max: 10, text: `Naprostá špička. Plný počet napříč všemi obory dá jen menšina řešitelů a vy jste mezi nimi. Přehled, který sahá od zeměpisu Evropy přes zoologii až po pražskou architekturu, si po letech udržel opravdu málokdo. Máte být na co hrdí.` }
+];
+
+const pismena = [`a`, `b`, `c`, `d`];
+let odpovedi = new Array(otazky.length).fill(null);
+let hotovo = false;
+
+const kvizEl = document.getElementById(`kviz`);
+const vyhodnotitEl = document.getElementById(`vyhodnotit`);
+const hlaskaEl = document.getElementById(`hlaska`);
+const vysledekEl = document.getElementById(`vysledek`);
+const skoreEl = document.getElementById(`skore`);
+const hodnoceniEl = document.getElementById(`hodnoceni`);
+const znovuEl = document.getElementById(`znovu`);
+
+function vykresli() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    const box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    const zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = (i + 1) + `. ` + o.z;
+    box.appendChild(zneni);
+
+    o.v.forEach(function (text, j) {
+      const btn = document.createElement(`button`);
+      btn.className = `varianta`;
+      btn.textContent = pismena[j] + `) ` + text;
+      btn.setAttribute(`data-o`, i);
+      btn.setAttribute(`data-v`, j);
+      btn.addEventListener(`click`, function () {
+        if (hotovo) return;
+        odpovedi[i] = j;
+        const sourozenci = box.querySelectorAll(`.varianta`);
+        for (let k = 0; k < sourozenci.length; k++) {
+          sourozenci[k].classList.remove(`vybrana`);
+        }
+        btn.classList.add(`vybrana`);
+        zkontrolujPripravenost();
+      });
+      box.appendChild(btn);
+    });
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujPripravenost() {
+  const vse = odpovedi.every(function (x) { return x !== null; });
+  vyhodnotitEl.disabled = !vse;
+  if (vse) hlaskaEl.textContent = ``;
+}
+
+vyhodnotitEl.addEventListener(`click`, function () {
+  if (!odpovedi.every(function (x) { return x !== null; })) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  hotovo = true;
+  hlaskaEl.textContent = ``;
+  let skore = 0;
+
+  const boxy = kvizEl.querySelectorAll(`.otazka`);
+  otazky.forEach(function (o, i) {
+    const tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    for (let j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove(`vybrana`);
+      if (j === o.s) {
+        tlacitka[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === o.s) skore++;
+  });
+
+  vyhodnotitEl.disabled = true;
+  skoreEl.textContent = skore + ` z ` + otazky.length;
+  for (let h = 0; h < hodnoceni.length; h++) {
+    if (skore >= hodnoceni[h].min && skore <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+znovuEl.addEventListener(`click`, function () {
+  odpovedi = new Array(otazky.length).fill(null);
+  hotovo = false;
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  vyhodnotitEl.disabled = true;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+vykresli();
+</script>
+</body>
+</html>
