@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Velký vědomostní test pro seniory nad 60 let: výsledek 8/10 potvrdí výborný přehled</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 18px; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zadani { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  #vyhodnotit, #znovu {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; }
+  #znovu:hover { background: #756658; }
+  #vysledek {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 24px;
+  }
+  .skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 14px; }
+  .hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  .hlaska { text-align: center; color: #721c24; margin: 14px 0 0; }
+  .skryto { display: none; }
+  @media (max-width: 767px) {
+    body { padding: 16px; }
+    .otazka, #vysledek { padding: 20px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Velký vědomostní test pro seniory nad 60 let: výsledek 8/10 potvrdí výborný přehled</h1>
+<p class="perex">Deset otázek napříč obory pro každého, komu je přes šedesát: dějiny, zeměpis, příroda, literatura, film, hudba, sport, technika, jazyk i vaření. U každé čtyři možnosti a jediná správná. Osm bodů znamená výborný přehled.</p>
+
+<div id="kviz"></div>
+
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p id="hlaska" class="hlaska skryto">Odpovězte prosím na všechny otázky</p>
+
+<div id="vysledek" class="skryto">
+  <p class="skore" id="skore"></p>
+  <p class="hodnoceni" id="hodnoceni"></p>
+</div>
+<button id="znovu" class="skryto">Zkusit znovu</button>
+</div>
+
+<script>
+var otazky = [
+  {
+    zadani: `1. Ve kterém století byla upálena Jana z Arku?`,
+    varianty: [`a) ve 13. století`, `b) ve 14. století`, `c) v 15. století`, `d) v 16. století`],
+    spravna: 2
+  },
+  {
+    zadani: `2. Které rozsáhlé travnaté pláně se rozkládají v Argentině a Uruguayi?`,
+    varianty: [`a) prérie`, `b) stepi`, `c) pampy`, `d) savany`],
+    spravna: 2
+  },
+  {
+    zadani: `3. Který plavecký způsob je nejrychlejší?`,
+    varianty: [`a) prsa`, `b) znak`, `c) motýlek`, `d) kraul`],
+    spravna: 3
+  },
+  {
+    zadani: `4. Kolik slovních druhů rozlišuje tradiční školní mluvnice češtiny?`,
+    varianty: [`a) devět`, `b) deset`, `c) jedenáct`, `d) dvanáct`],
+    spravna: 1
+  },
+  {
+    zadani: `5. Co tvoří hlavní část potravy krtka obecného?`,
+    varianty: [`a) kořínky a oddenky rostlin`, `b) semena a podzemní hlízy`, `c) drobní hlodavci`, `d) žížaly a larvy hmyzu`],
+    spravna: 3
+  },
+  {
+    zadani: `6. Která tekutina se zašlehává do jíšky při přípravě bešamelové omáčky?`,
+    varianty: [`a) mléko`, `b) sladká smetana`, `c) masový vývar`, `d) bílé víno`],
+    spravna: 0
+  },
+  {
+    zadani: `7. Která surovina tvoří největší část směsi pro tavení skla?`,
+    varianty: [`a) jíl`, `b) kaolin`, `c) sádrovec`, `d) křemičitý písek`],
+    spravna: 3
+  },
+  {
+    zadani: `8. Který francouzský spisovatel shrnul své romány do rozsáhlého cyklu Lidská komedie?`,
+    varianty: [`a) Émile Zola`, `b) Honoré de Balzac`, `c) Gustave Flaubert`, `d) Victor Hugo`],
+    spravna: 1
+  },
+  {
+    zadani: `9. Kdo režíroval filmovou komedii Kristian?`,
+    varianty: [`a) Karel Lamač`, `b) Martin Frič`, `c) Vladimír Slavínský`, `d) Miroslav Cikán`],
+    spravna: 1
+  },
+  {
+    zadani: `10. Kdo složil operu Fidelio?`,
+    varianty: [`a) Ludwig van Beethoven`, `b) Wolfgang Amadeus Mozart`, `c) Richard Wagner`, `d) Franz Schubert`],
+    spravna: 0
+  }
+];
+
+var hodnoceni = [
+  {
+    max: 3,
+    text: `Deset oborů za sebou je nápor, který srazí spoustu lidí, a dnes to odneslo i vás. Nejspíš vás dostaly těsné nabídky, kde stály dvě odpovědi hned vedle sebe a rozhodoval detail, ať už šlo o surovinu, ze které se taví sklo, nebo o francouzské romanopisce 19. století. Nic z toho nemluví proti vašemu přehledu, jen jste tentokrát sáhli vedle tam, kde stačilo chvilku zapřemýšlet.`
+  },
+  {
+    max: 6,
+    text: `Slušný průměr a přesně tady se pohybuje velká část řešitelů. Část otázek vám nedělala potíže, jinde vás ale připravily o body přírodopis, technika nebo francouzská klasika. K hranici osmi bodů, kterou slibuje titulek, vám scházejí dva až čtyři body podle toho, kde přesně jste skončili, a je to vzdálenost, kterou zkrátí jedno pozorné odpoledne s encyklopedií.`
+  },
+  {
+    max: 9,
+    text: `Tady už je vidět opravdový rozhled. Se sedmi body stojíte těsně pod slibovanou hranicí: chybí jediný bod a osmý jste mohli mít u tvůrce Lidské komedie nebo u suroviny, ze které se taví sklo. Kdo má osm a víc, ten má výborný přehled potvrzený. Prošel dějinami, zeměpisem, přírodou i uměním a nenechal se svést ani tam, kde si nabídnuté možnosti byly nebezpečně podobné.`
+  },
+  {
+    max: 10,
+    text: `Naprostá špička, a takový výsledek dá jen menšina. Od upálení Jany z Arku přes krtčí jídelníček, tavení skla a Balzaka až po Friče a Beethovenovu jedinou operu jste neminuli ani jednou. Deset různých oborů v řadě za sebou nezvládne jen tak někdo, a vy jste jimi prošli bez jediného zaváhání.`
+  }
+];
+
+var odpovedi = new Array(otazky.length).fill(null);
+var hotovo = false;
+
+var kvizEl = document.getElementById('kviz');
+var vyhodnotitEl = document.getElementById('vyhodnotit');
+var hlaskaEl = document.getElementById('hlaska');
+var vysledekEl = document.getElementById('vysledek');
+var skoreEl = document.getElementById('skore');
+var hodnoceniEl = document.getElementById('hodnoceni');
+var znovuEl = document.getElementById('znovu');
+
+function postavKviz() {
+  kvizEl.innerHTML = '';
+  otazky.forEach(function (o, i) {
+    var box = document.createElement('div');
+    box.className = 'otazka';
+
+    var zadani = document.createElement('p');
+    zadani.className = 'zadani';
+    zadani.textContent = o.zadani;
+    box.appendChild(zadani);
+
+    o.varianty.forEach(function (v, j) {
+      var tl = document.createElement('button');
+      tl.type = 'button';
+      tl.className = 'varianta';
+      tl.textContent = v;
+      tl.addEventListener('click', function () {
+        if (hotovo) { return; }
+        odpovedi[i] = j;
+        var sourozenci = box.querySelectorAll('.varianta');
+        for (var k = 0; k < sourozenci.length; k++) {
+          sourozenci[k].classList.remove('vybrana');
+        }
+        tl.classList.add('vybrana');
+        zkontrolujStav();
+      });
+      box.appendChild(tl);
+    });
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujStav() {
+  var vsechny = odpovedi.every(function (o) { return o !== null; });
+  vyhodnotitEl.disabled = !vsechny;
+  if (vsechny) { hlaskaEl.classList.add('skryto'); }
+}
+
+vyhodnotitEl.addEventListener('click', function () {
+  if (vyhodnotitEl.disabled) {
+    hlaskaEl.classList.remove('skryto');
+    return;
+  }
+  hotovo = true;
+  var skore = 0;
+  var boxy = kvizEl.querySelectorAll('.otazka');
+
+  otazky.forEach(function (o, i) {
+    var tlacitka = boxy[i].querySelectorAll('.varianta');
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove('vybrana');
+      if (j === o.spravna) {
+        tlacitka[j].classList.add('spravna');
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add('spatna');
+      }
+    }
+    if (odpovedi[i] === o.spravna) { skore++; }
+  });
+
+  skoreEl.textContent = skore + ' z ' + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+
+  vyhodnotitEl.classList.add('skryto');
+  hlaskaEl.classList.add('skryto');
+  vysledekEl.classList.remove('skryto');
+  znovuEl.classList.remove('skryto');
+  vysledekEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+znovuEl.addEventListener('click', function () {
+  hotovo = false;
+  odpovedi = new Array(otazky.length).fill(null);
+  postavKviz();
+  vyhodnotitEl.disabled = true;
+  vyhodnotitEl.classList.remove('skryto');
+  vysledekEl.classList.add('skryto');
+  znovuEl.classList.add('skryto');
+  hlaskaEl.classList.add('skryto');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+postavKviz();
+</script>
+</body>
+</html>
