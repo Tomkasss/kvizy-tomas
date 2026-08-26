@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test logického myšlení pro seniory: 10 zapeklitých úloh prověří, jak rychle vám to v důchodu stále myslí</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 36px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+    line-height: 1.45;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .locked .opt { cursor: default; }
+  .locked .opt:hover { background: #f7f4f0; }
+  .locked .opt.sel:hover { background: #dcd3c7; }
+  .locked .opt.correct:hover { background: #d4edda; }
+  .locked .opt.wrong:hover { background: #f8d7da; }
+  #submit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #warn { text-align: center; color: #721c24; margin: 14px 0 0; min-height: 1.4em; }
+  #result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+    border-top: 4px solid #5b7e5f;
+    display: none;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 14px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #retry {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #retry:hover { background: #756658; }
+  @media (max-width: 767px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .q { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test logického myšlení pro seniory: 10 zapeklitých úloh prověří, jak rychle vám to v důchodu stále myslí</h1>
+  <p class="perex">Deset úloh na čistý úsudek. Co z čeho plyne, co která věta doopravdy říká, kdo sedí po čí levici. Žádné počítání ani školní fakta, jen rychlost a přesnost myšlení. Průměrný řešitel dá sedm. Kolik dáte vy?</p>
+
+  <div id="quiz"></div>
+
+  <button id="submit" disabled>Vyhodnotit</button>
+  <p id="warn"></p>
+
+  <div id="result">
+    <p id="score"></p>
+    <p id="verdict"></p>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var QUESTIONS = [
+  {
+    q: `1. Jestliže pozítří bude čtvrtek, jaký den v týdnu byl před dvěma dny?`,
+    opts: [`a) sobota`, `b) neděle`, `c) pondělí`, `d) pátek`],
+    correct: 1
+  },
+  {
+    q: `2. Které z těchto vysvětlení ve skutečnosti nic nevysvětluje?`,
+    opts: [
+      `a) Rostlina uschla, protože ji nikdo dlouho nezalil.`,
+      `b) Ten prášek uspává proto, že má uspávací účinek.`,
+      `c) Vlak nabral zpoždění, protože na trati opravovali koleje.`,
+      `d) V bytě je chladno, protože je vypnuté topení.`
+    ],
+    correct: 1
+  },
+  {
+    q: `3. Domovní řád zakazuje hlučit po desáté hodině večer, o víkendu už po deváté, který z těchto případů domovní řád neporušuje?`,
+    opts: [
+      `a) hluk v sobotu o půl desáté večer`,
+      `b) hluk ve středu ve tři čtvrtě na jedenáct večer`,
+      `c) hluk v neděli v deset večer`,
+      `d) hluk v úterý o půl desáté večer`
+    ],
+    correct: 3
+  },
+  {
+    q: `4. Tři ozubená kola do sebe zapadají v jedné řadě za sebou, a otáčí-li se první z nich doprava, kterým směrem se otáčí třetí?`,
+    opts: [
+      `a) doprava`,
+      `b) doleva`,
+      `c) záleží na tom, jak jsou kola velká`,
+      `d) směr určit nelze`
+    ],
+    correct: 0
+  },
+  {
+    q: `5. Anna, Bohumil i Cyril byli v čekárně, každý bez přestávky od svého příchodu až do svého odchodu, Anna odešla dřív, než Bohumil přišel, a Cyril přišel dřív než Anna a odešel až po Bohumilovi, které tvrzení z toho jistě plyne?`,
+    opts: [
+      `a) Cyril byl v čekárně zároveň s Annou i zároveň s Bohumilem.`,
+      `b) Anna byla v čekárně zároveň s Bohumilem.`,
+      `c) Cyril odešel dřív, než Bohumil přišel.`,
+      `d) Bohumil přišel do čekárny dřív než Cyril.`
+    ],
+    correct: 0
+  },
+  {
+    q: `6. Které slovo dokončí dvojici: POVODEŇ je k SUCHU jako HOREČKA je k ?`,
+    opts: [`a) nachlazení`, `b) zimnici`, `c) podchlazení`, `d) mdlobě`],
+    correct: 2
+  },
+  {
+    q: `7. Na gumě razítka je text vyrytý tak, aby se jeho otisk na papíře dal číst normálně, jak vypadá samotný text na gumě, když se na něj podíváte a čtete ho zleva doprava?`,
+    opts: [
+      `a) písmena jsou stranově převrácená, ale jdou ve správném pořadí`,
+      `b) písmena jsou stranově správná a jdou ve správném pořadí`,
+      `c) písmena jsou stranově správná, ale jdou v obráceném pořadí`,
+      `d) písmena jsou stranově převrácená a jdou v obráceném pořadí`
+    ],
+    correct: 3
+  },
+  {
+    q: `8. U kulatého stolu sedí Alena, Bohumil, Cyril a Dana, Alena sedí naproti Cyrilovi a Bohumil po Alenině levici, kdo sedí po Cyrilově levici?`,
+    opts: [`a) Alena`, `b) Bohumil`, `c) Dana`, `d) nelze určit`],
+    correct: 2
+  },
+  {
+    q: `9. Zdeněk slíbil: „Když přijdu včas, přinesu i podklady." Ukázalo se, že svůj slib nedodržel, co z toho jistě plyne?`,
+    opts: [
+      `a) Zdeněk nepřišel včas.`,
+      `b) Zdeněk přišel včas, ale podklady nepřinesl.`,
+      `c) Zdeněk nepřišel včas ani nepřinesl podklady.`,
+      `d) Zdeněk přinesl podklady, ale nepřišel včas.`
+    ],
+    correct: 1
+  },
+  {
+    q: `10. Ve spíži stojí tři zavřené nádoby s nápisy hrách, fazole a směs, v jedné je hrách, ve druhé fazole a ve třetí obojí smíchané, přičemž žádný z nápisů nesedí, z které nádoby stačí naslepo vytáhnout jediné semeno, aby se dal určit obsah všech tří?`,
+    opts: [
+      `a) z nádoby s nápisem směs`,
+      `b) z nádoby s nápisem hrách`,
+      `c) z nádoby s nápisem fazole`,
+      `d) na tom nezáleží, stačí kterákoli`
+    ],
+    correct: 0
+  }
+];
+
+var VERDICTS = [
+  {
+    min: 0, max: 3,
+    text: `Myšlení dnes běželo spíš po povrchu než do hloubky. U většiny úloh jste sáhli po variantě, která zněla samozřejmě, jenže zadání tvrdilo něco jiného, a přesně na tomhle rozdílu tyhle úlohy stojí. Není to otázka věku ani vědomostí, ale zvyku číst větu doslova a teprve pak rozhodnout. Zkuste u každé úlohy nejdřív nahlas říct, co se v ní vlastně tvrdí, a skóre poskočí rychleji, než čekáte.`
+  },
+  {
+    min: 4, max: 6,
+    text: `Přímočaré úlohy vám sedly, složitější vás zbrzdily. Tam, kde stačil jeden krok úvahy, jste rozhodli správně, ale jakmile bylo potřeba spojit dva kroky nebo pohlídat, co přesně z pravidla plyne, předběhla vás intuice. Logika vám funguje spolehlivě, jen zatím neustojí těsné varianty. K průměrným sedmi bodům chybí kousek.`
+  },
+  {
+    min: 7, max: 9,
+    text: `Sedm bodů je průměr tohoto testu a vy jste na něm, nebo nad ním. Rozeznáte, co z tvrzení skutečně vyplývá a co se jen nabízí, poradíte si s pravidlem, které má dva různé prahy podle dne v týdnu, i s rozpletením několika podmínek najednou, a lákavé varianty vás nestrhnou. Jestli vám navíc odpovědi naskakovaly rychle a nemuseli jste se k úlohám vracet, je to přesně ta kombinace, kterou titulek slibuje prověřit.`
+  },
+  {
+    min: 10, max: 10,
+    text: `Nejvyšší patro, kam se dostane jen zlomek řešitelů. Nezastavila vás jediná úloha, od slibu, který Zdeněk porušil, přes text vyrytý na gumě razítka a rozsazení u kulatého stolu až po nádoby se špatnými nápisy, kde se většina zamotá. Deset z deseti znamená, že jste u žádné úlohy nepodlehli variantě, která zněla samozřejmě. Klobouk dolů.`
+  }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var evaluated = false;
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryEl = document.getElementById(`retry`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+
+    var qt = document.createElement(`p`);
+    qt.className = `q-text`;
+    qt.textContent = item.q;
+    box.appendChild(qt);
+
+    item.opts.forEach(function (optText, oi) {
+      var btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.type = `button`;
+      btn.textContent = optText;
+      btn.addEventListener(`click`, function () {
+        if (evaluated) return;
+        answers[qi] = oi;
+        var siblings = box.querySelectorAll(`.opt`);
+        for (var i = 0; i < siblings.length; i++) {
+          siblings[i].classList.remove(`sel`);
+        }
+        btn.classList.add(`sel`);
+        warnEl.textContent = ``;
+        refreshSubmit();
+      });
+      box.appendChild(btn);
+    });
+
+    quizEl.appendChild(box);
+  });
+}
+
+function refreshSubmit() {
+  var done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+}
+
+submitEl.addEventListener(`click`, function () {
+  if (evaluated) return;
+  if (!answers.every(function (a) { return a !== null; })) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  evaluated = true;
+  warnEl.textContent = ``;
+
+  var score = 0;
+  var boxes = quizEl.querySelectorAll(`.q`);
+  for (var qi = 0; qi < QUESTIONS.length; qi++) {
+    var box = boxes[qi];
+    box.classList.add(`locked`);
+    var opts = box.querySelectorAll(`.opt`);
+    var correct = QUESTIONS[qi].correct;
+    var chosen = answers[qi];
+    if (chosen === correct) score++;
+    for (var oi = 0; oi < opts.length; oi++) {
+      opts[oi].classList.remove(`sel`);
+      if (oi === correct) {
+        opts[oi].classList.add(`correct`);
+      } else if (oi === chosen) {
+        opts[oi].classList.add(`wrong`);
+      }
+    }
+  }
+
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  var v = VERDICTS.filter(function (r) { return score >= r.min && score <= r.max; })[0];
+  verdictEl.textContent = v ? v.text : ``;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+retryEl.addEventListener(`click`, function () {
+  evaluated = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.style.display = `none`;
+  warnEl.textContent = ``;
+  build();
+  refreshSubmit();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+refreshSubmit();
+</script>
+</body>
+</html>
