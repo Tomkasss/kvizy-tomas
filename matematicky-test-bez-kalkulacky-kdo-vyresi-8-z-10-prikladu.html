@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matematický test bez kalkulačky: kdo vyřeší 8 z 10 příkladů, má stále rychlou hlavu</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 20px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zadani { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+  .odpoved {
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: Georgia, "Times New Roman", serif;
+  }
+  .odpoved:focus { outline: none; background: #ede8e1; border-color: #a89e92; }
+  .odpoved:disabled { opacity: 1; }
+  .odpoved.spravne { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; font-weight: bold; }
+  .odpoved.spatne { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .reseni { margin-top: 14px; font-size: 1rem; color: #1e5631; }
+  #vyhodnotit, #znovu {
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: Georgia, "Times New Roman", serif;
+  }
+  #vyhodnotit { background: #5b7e5f; }
+  #vyhodnotit:hover:enabled { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; }
+  #znovu:hover { background: #756658; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.4em; }
+  #vysledek {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; }
+  @media (max-width: 767px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka, #vysledek { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Matematický test bez kalkulačky: kdo vyřeší 8 z 10 příkladů, má stále rychlou hlavu</h1>
+  <p class="perex">Deset příkladů čistě z hlavy, bez kalkulačky, tužky i papíru. Dvojciferné násobení, procenta, dělení se zbytkem, zlomek i řada, u které je nejtěžší odhalit pravidlo. Kolik jich zvládnete vy?</p>
+
+  <div id="kviz"></div>
+
+  <button id="vyhodnotit" type="button" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+
+  <div id="vysledek">
+    <div id="skore"></div>
+    <div id="hodnoceni"></div>
+    <button id="znovu" type="button">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  var otazky = [
+    { zadani: `1. Kolik je 26 × 17?`, odpovedi: [`442`] },
+    { zadani: `2. Kolik je 14 × 16 + 35?`, odpovedi: [`259`] },
+    { zadani: `3. Kolik je 19² + 7²?`, odpovedi: [`410`] },
+    { zadani: `4. Kolik je 559 ÷ 13?`, odpovedi: [`43`] },
+    { zadani: `5. Kolik je 30 % z 470?`, odpovedi: [`141`] },
+    { zadani: `6. Kolik jsou čtyři sedminy z 287?`, odpovedi: [`164`] },
+    { zadani: `7. Jaký zbytek dává číslo 437 po dělení dvanácti?`, odpovedi: [`5`] },
+    { zadani: `8. Kolik stran zbývá z knihy o 372 stranách, jestliže první den z ní bylo přečteno 84 stran a druhý den třetina zbytku?`, odpovedi: [`192`] },
+    { zadani: `9. Které číslo pokračuje v řadě 4, 7, 13, 25, 49?`, odpovedi: [`97`] },
+    { zadani: `10. Kolik je 24 × 6 − 138 ÷ 3?`, odpovedi: [`98`] }
+  ];
+
+  var hodnoceni = [
+    { max: 3, text: `Na osmičku z titulku to dnes nestačilo a scházela do ní přinejmenším polovina možných bodů. Nebývá za tím neznalost postupu, spíš to, že vám mezivýsledek zmizel dřív, než jste ho stihli použít v dalším kroku. Nejrychleji se to napravuje u nejkratších příkladů: začněte dvojciferným násobením a rozkládejte si ho na desítky a jednotky, tedy druhý činitel rozdělte na desítku a zbytek a obě části sečtěte teprve nakonec. Až vám tenhle rozklad půjde bez přemýšlení, přiberte procenta počítaná přes desetinu a její násobky. Rychlá hlava se z tohohle pásma vrací poctivým opakováním jediného typu příkladu, ne skákáním mezi všemi deseti.` },
+    { max: 6, text: `Necelá polovina až šest bodů, tedy k hranici osmi z titulku vám scházely dva až čtyři body. Kratší příklady vám vyšly, ztráty přišly tam, kde se před počítáním musí nejdřív rozhodnout, kterou cestou vůbec jít: u zlomku z většího čísla, u zbytku po dělení nebo u slovní úlohy o dvou krocích. Zkuste u takového zadání napřed nahlas říct postup a teprve pak počítat. Rozdíl mezi tímhle pásmem a osmičkou z titulku většinou nedělá rychlost počtů, ale právě to rozmyšlení předem, a osvojíte si ho dřív než jakýkoli trik na zrychlení.` },
+    { max: 9, text: `Sedm bodů znamená, že na osmičku z titulku scházel jediný příklad, osm bodů laťku trefuje přesně a devět je o příklad nad ní, takže rychlou hlavu vám nikdo neupře. Násobení dvou dvojciferných čísel, druhé mocniny, procenta i dělení trojciferného čísla zvládáte v hlavě ve chvíli, kdy ostatní teprve odemykají mobil. Chybějící body nejspíš zůstaly tam, kde se nedá počítat rovnou zleva doprava: u číselné řady a u zadání, ve kterém se sejde několik operací najednou. U řady pomůže projít si ji ještě jednou od konce, u spojených operací zase rozmyslet si pořadí ještě předtím, než sáhnete po prvním čísle. Kdo si tenhle zvyk osvojí, přestane u obou zadání odevzdávat odpověď, která ho napadla jako první.` },
+    { max: 10, text: `Plný počet, a takhle čistý výsledek odevzdá z deseti lidí sotva jeden. Proti osmičce z titulku jste navíc o dva příklady a rychlá hlava je tady slabé slovo: zvládli jste bez zaváhání všechno od násobení dvojciferných čísel přes součet druhých mocnin, dělení trojciferného čísla, procenta, zlomek a zbytek po dělení až po slovní úlohu, číselnou řadu a zadání, kde se za sebou řetězí tři operace. To neukazuje jen zaběhnutou početní techniku, ale hlavně to, že vám rozpracované číslo v hlavě vydrží, dokud si pro něj nepřijde další krok. Aby vám tahle úroveň zůstala, potřebujete příklady, které vás donutí zastavit se: zkuste příště násobit trojciferná čísla mezi sebou nebo dělit čtyřciferné číslo tak, aby nevycházelo beze zbytku.` }
+  ];
+
+  var kviz = document.getElementById(`kviz`);
+  var tlacitko = document.getElementById(`vyhodnotit`);
+  var hlaska = document.getElementById(`hlaska`);
+  var vysledek = document.getElementById(`vysledek`);
+  var skore = document.getElementById(`skore`);
+  var textHodnoceni = document.getElementById(`hodnoceni`);
+  var znovu = document.getElementById(`znovu`);
+  var pole = [];
+  var hotovo = false;
+
+  function normalizuj(text) {
+    return text
+      .toLowerCase()
+      .normalize(`NFD`)
+      .replace(/[̀-ͯ]/g, ``)
+      .replace(/\s+/g, ``)
+      .replace(/[.,]$/, ``);
+  }
+
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    var zadani = document.createElement(`div`);
+    zadani.className = `zadani`;
+    zadani.textContent = o.zadani;
+    box.appendChild(zadani);
+
+    var vstup = document.createElement(`input`);
+    vstup.type = `text`;
+    vstup.className = `odpoved`;
+    vstup.setAttribute(`inputmode`, `numeric`);
+    vstup.setAttribute(`autocomplete`, `off`);
+    vstup.setAttribute(`aria-label`, `Odpověď na otázku ` + (i + 1));
+    vstup.placeholder = `Napište odpověď`;
+    box.appendChild(vstup);
+
+    var reseni = document.createElement(`div`);
+    reseni.className = `reseni`;
+    reseni.style.display = `none`;
+    box.appendChild(reseni);
+
+    kviz.appendChild(box);
+    pole.push({ vstup: vstup, reseni: reseni });
+  });
+
+  function zkontrolujVyplneni() {
+    if (hotovo) { return; }
+    var vseVyplneno = pole.every(function (p) {
+      return p.vstup.value.trim() !== ``;
+    });
+    tlacitko.disabled = !vseVyplneno;
+    if (vseVyplneno) { hlaska.textContent = ``; }
+  }
+
+  pole.forEach(function (p) {
+    p.vstup.addEventListener(`input`, zkontrolujVyplneni);
+  });
+
+  tlacitko.addEventListener(`click`, function () {
+    if (tlacitko.disabled) {
+      hlaska.textContent = `Odpovězte prosím na všechny otázky`;
+      return;
+    }
+    var body = 0;
+    pole.forEach(function (p, i) {
+      var zadano = normalizuj(p.vstup.value);
+      var spravne = otazky[i].odpovedi.some(function (o) {
+        return normalizuj(o) === zadano;
+      });
+      p.vstup.disabled = true;
+      if (spravne) {
+        p.vstup.classList.add(`spravne`);
+        body = body + 1;
+      } else {
+        p.vstup.classList.add(`spatne`);
+        p.reseni.textContent = `Správná odpověď: ` + otazky[i].odpovedi[0];
+        p.reseni.style.display = `block`;
+      }
+    });
+
+    hotovo = true;
+    tlacitko.disabled = true;
+    hlaska.textContent = ``;
+
+    skore.textContent = body + ` z 10`;
+    for (var j = 0; j < hodnoceni.length; j++) {
+      if (body <= hodnoceni[j].max) {
+        textHodnoceni.textContent = hodnoceni[j].text;
+        break;
+      }
+    }
+    vysledek.style.display = `block`;
+    vysledek.scrollIntoView({ behavior: `smooth`, block: `start` });
+  });
+
+  znovu.addEventListener(`click`, function () {
+    pole.forEach(function (p) {
+      p.vstup.value = ``;
+      p.vstup.disabled = false;
+      p.vstup.classList.remove(`spravne`);
+      p.vstup.classList.remove(`spatne`);
+      p.reseni.style.display = `none`;
+      p.reseni.textContent = ``;
+    });
+    hotovo = false;
+    vysledek.style.display = `none`;
+    tlacitko.disabled = true;
+    hlaska.textContent = ``;
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  });
+})();
+</script>
+</body>
+</html>
