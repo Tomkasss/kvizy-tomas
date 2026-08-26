@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test znalostí z 8. třídy: kdo nezíská alespoň 7/10, ve škole by dnes propadl</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .zamek .varianta { cursor: default; }
+  .zamek .varianta:hover { background: #f7f4f0; }
+  .zamek .varianta.vybrana:hover { background: #dcd3c7; }
+  .zamek .varianta.spravna:hover { background: #d4edda; }
+  .zamek .varianta.spatna:hover { background: #f8d7da; }
+  .textpole {
+    width: 100%;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+  }
+  .reseni { margin-top: 14px; font-size: .98rem; color: #1e5631; }
+  #vyhodnotit, #znovu {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; }
+  #znovu:hover { background: #756658; }
+  #hlaska { text-align: center; color: #a33; margin-top: 14px; font-size: .95rem; min-height: 1.2em; }
+  #vysledek {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+    border-top: 4px solid #5b7e5f;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+  @media (max-width: 768px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka, #vysledek { padding: 20px; }
+    #vyhodnotit, #znovu { width: 100%; padding: 16px 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test znalostí z 8. třídy: kdo nezíská alespoň 7/10, ve škole by dnes propadl</h1>
+  <p class="perex">Deset otázek z učiva osmé třídy napříč předměty: dějepis, zeměpis, přírodopis, fyzika, chemie, čeština, literatura i hudební a výtvarná výchova. Sedm bodů je hranice, pod kterou by dnešní vysvědčení nedopadlo dobře.</p>
+
+  <div id="kviz"></div>
+
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+
+  <div id="vysledek">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var otazky = [
+  {
+    zneni: `1. Na kterém fyzikálním jevu je založena činnost transformátoru?`,
+    varianty: [`elektromagnetická indukce`, `elektrostatická indukce`, `termoelektrický jev`, `piezoelektrický jev`],
+    spravna: 0
+  },
+  {
+    zneni: `2. Který plyn vzniká při nedokonalém spalování uhlíku, ale při dokonalém spalování nikoli?`,
+    varianty: [`oxid uhličitý`, `oxid siřičitý`, `metan`, `oxid uhelnatý`],
+    spravna: 3
+  },
+  {
+    zneni: `3. Ve kterém roce vstoupila Česká republika do Severoatlantické aliance?`,
+    varianty: [`1993`, `1999`, `2002`, `2004`],
+    spravna: 1
+  },
+  {
+    zneni: `4. Jak se nazývá sochařské dílo, u něhož tvary jen zčásti vystupují nad rovinu podkladu?`,
+    varianty: [`reliéf`, `busta`, `torzo`, `sousoší`],
+    spravna: 0
+  },
+  {
+    zneni: `5. Které francouzské shromáždění se roku 1789 sešlo ve Versailles poprvé po sto sedmdesáti pěti letech?`,
+    varianty: [`Direktorium`, `Národní konvent`, `Generální stavy`, `Provinční stavy`],
+    spravna: 2
+  },
+  {
+    zneni: `6. Jak se nazývá tekutá složka krve, v níž jsou rozptýleny krvinky?`,
+    varianty: [`krevní sérum`, `krevní plazma`, `míza`, `tkáňový mok`],
+    spravna: 1
+  },
+  {
+    zneni: `7. Která z těchto vět je věta jednočlenná?`,
+    varianty: [`Bratr už spí.`, `Od rána nepřetržitě prší.`, `Vlak přijel s desetiminutovým zpožděním.`, `Slunce zapadá.`],
+    spravna: 1
+  },
+  {
+    zneni: `8. Kdo je autorem básnické skladby Slávy dcera?`,
+    varianty: [`Josef Jungmann`, `Václav Hanka`, `František Ladislav Čelakovský`, `Ján Kollár`],
+    spravna: 3
+  },
+  {
+    zneni: `9. Která hudební forma je postavená na tom, že jednotlivé hlasy postupně nastupují s týmž tématem a dál je rozvíjejí?`,
+    varianty: [`etuda`, `kantáta`, `fuga`, `rapsodie`],
+    spravna: 2
+  },
+  {
+    zneni: `10. Které z Velkých jezer v Severní Americe leží celé na území Spojených států?`,
+    varianty: [`Hořejší jezero`, `Huronské jezero`, `Erijské jezero`, `Michiganské jezero`],
+    spravna: 3
+  }
+];
+
+var hodnoceniTexty = [
+  { min: 0, max: 3, text: `Známka na vysvědčení by byla nedostatečná a propadnutí by přišlo se vším všudy. Z osmé třídy vám zůstal obrys, ne detail: tušíte, že se to kdysi bralo, ale konkrétní jméno, číslo nebo pojem už nenaskočí. Přeskočit hranici sedmi bodů se tentokrát nepovedlo ani zdaleka, což ovšem po letech od poslední hodiny není nic nečekaného.` },
+  { min: 4, max: 6, text: `Pod čarou, ale ne o propastný kus. Známka by se pohybovala mezi dostatečnou a nedostatečnou a k postupu do dalšího ročníku by chyběl jeden až tři body. Uspěl jste tam, kde se látka připomíná i mimo školu, a ztratil u otázek, které stojí na jediném názvu z jediné hodiny. Právě tyhle body se přitom dobírají nejsnáz, stačí si vybavit, ne odhadnout.` },
+  { min: 7, max: 9, text: `Laťku sedmi bodů jste překonal a propadnutí se vás netýká. Vysvědčení by neslo dobrou až chvalitebnou, u devíti bodů i lepší. Osmá třída po vás zanechala víc než kostru: obstál jste i v předmětech, které se v běžném životě nepřipomínají vůbec. K plnému počtu chyběla jedna až tři místa, kde se odpověď nedala odhadnout, jen vybavit.` },
+  { min: 10, max: 10, text: `Výborná napříč všemi předměty a plný počet, na který dosáhne jen menšina. Trefil jste i francouzské stavovské shromáždění, fugu s postupně nastupujícími hlasy a jediné z Velkých jezer bez kanadské hranice. Osmou třídu byste dnes zvládl bez jediné chyby a titulek jste vyvrátil se vším všudy.` }
+];
+
+var pismena = [`a)`, `b)`, `c)`, `d)`];
+var odpovedi = new Array(otazky.length).fill(null);
+var vyhodnoceno = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoVyhodnotit = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var tlacitkoZnovu = document.getElementById(`znovu`);
+
+function postavKviz() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = o.zneni;
+    box.appendChild(zneni);
+
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `varianta`;
+      btn.textContent = pismena[j] + ` ` + v;
+      btn.addEventListener(`click`, function () {
+        if (vyhodnoceno) { return; }
+        odpovedi[i] = j;
+        var vsechny = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < vsechny.length; k++) {
+          vsechny[k].classList.remove(`vybrana`);
+        }
+        btn.classList.add(`vybrana`);
+        obnovTlacitko();
+      });
+      box.appendChild(btn);
+    });
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function obnovTlacitko() {
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  tlacitkoVyhodnotit.disabled = !hotovo;
+  if (hotovo) { hlaskaEl.textContent = ``; }
+}
+
+function vyhodnot() {
+  if (odpovedi.some(function (o) { return o === null; })) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  vyhodnoceno = true;
+  var skore = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  for (var i = 0; i < boxy.length; i++) {
+    boxy[i].classList.add(`zamek`);
+    var varianty = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < varianty.length; j++) {
+      varianty[j].classList.remove(`vybrana`);
+      if (j === otazky[i].spravna) {
+        varianty[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        varianty[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === otazky[i].spravna) { skore++; }
+  }
+
+  skoreEl.textContent = skore + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceniTexty.length; h++) {
+    if (skore >= hodnoceniTexty[h].min && skore <= hodnoceniTexty[h].max) {
+      hodnoceniEl.textContent = hodnoceniTexty[h].text;
+      break;
+    }
+  }
+  tlacitkoVyhodnotit.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function znovu() {
+  odpovedi = new Array(otazky.length).fill(null);
+  vyhodnoceno = false;
+  vysledekEl.style.display = `none`;
+  tlacitkoVyhodnotit.style.display = `block`;
+  tlacitkoVyhodnotit.disabled = true;
+  hlaskaEl.textContent = ``;
+  postavKviz();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+tlacitkoVyhodnotit.addEventListener(`click`, vyhodnot);
+tlacitkoZnovu.addEventListener(`click`, znovu);
+postavKviz();
+</script>
+</body>
+</html>
