@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rychlý test počítání zpaměti: zvládnete všech 10 příkladů bez jediné chyby?</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 40px 20px;
+  line-height: 1.65;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 36px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.answer {
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: Georgia, "Times New Roman", serif;
+}
+.answer:focus { outline: none; background: #ede8e1; border-color: #a89e92; }
+.answer.locked { pointer-events: none; }
+.answer.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; font-weight: bold; }
+.answer.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.solution { margin: 14px 0 0; font-size: 1rem; color: #1e5631; }
+.solution.miss { color: #721c24; }
+.solution b { color: #1e5631; }
+#submit, #retry {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #fff;
+  font-family: Georgia, "Times New Roman", serif;
+  cursor: pointer;
+}
+#submit { background: #5b7e5f; }
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry { background: #8c7b6b; }
+#retry:hover { background: #756658; }
+#warn { text-align: center; color: #721c24; margin: 14px 0 0; font-size: 1rem; min-height: 1.65em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+  display: none;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+@media (max-width: 767px) {
+  body { padding: 16px; }
+  .q, #result { padding: 20px; }
+  h1 { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Rychlý test počítání zpaměti: zvládnete všech 10 příkladů bez jediné chyby?</h1>
+<p class="perex">Hodnotí se přesnost, ne rychlost. Deset zadání, u kterých si mezivýsledek nemáte kam odložit: násobení, zlomek, procenta, mocnina, dělení, čas, poměr i jedna číselná řada. Projdete jimi čistě?</p>
+<div id="quiz"></div>
+<button id="submit" type="button" disabled>Vyhodnotit</button>
+<p id="warn"></p>
+<div id="result">
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="retry" type="button">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  { q: `1. Kolik je 29 × 23?`, a: [`667`] },
+  { q: `2. Kolik je pět šestin z 414?`, a: [`345`] },
+  { q: `3. Kolik je 20 % z 385?`, a: [`77`] },
+  { q: `4. Kolik je 9 × 24 − 17 × 6?`, a: [`114`] },
+  { q: `5. Kolik je 588 ÷ 12?`, a: [`49`] },
+  { q: `6. Kolik minut uplyne od 9:40 do 15:10?`, a: [`330`] },
+  { q: `7. Kolik je 47²?`, a: [`2209`] },
+  { q: `8. Kolik je 1,6 × 245?`, a: [`392`] },
+  { q: `9. Které číslo pokračuje v řadě 3, 5, 15, 17, 51?`, a: [`53`] },
+  { q: `10. Kolik korun připadne na největší díl, jestliže se částka 4 620 korun rozdělí v poměru 2 : 4 : 5?`, a: [`2100`] }
+];
+
+var BANDS = [
+  { min: 0, max: 3, text: `Ležet tu zůstalo nejméně sedm bodů, takže k bezchybné desítce ze slibu titulku je odsud ještě daleko. Začít se dá u dvou zadání, která jsou v téhle sadě vstupní branou. Dělení 588 ÷ 12 vyjde každému, kdo si dělence rozdělí na 480 a 108, protože obě čísla se dvanácti podělí bez váhání a dají dohromady 49. U 20 % z 385 se nemusí sahat po zlomku, stačí desetina: 38,5 a ještě jednou tolik je 77. V obou případech jste velké číslo rozebrali na dva kusy, se kterými si už poradíte, a totéž po vás chce i 1,6 × 245 nebo rozdělení 4 620 korun na jedenáct dílů. Kdo tenhle rozklad zvládne u dvou nejlevnějších položek testu, má čím začít u zbylých osmi.` },
+  { min: 4, max: 6, text: `Polovina desítky je doma, na plný počet bez jediné chyby jste ale ztratili čtyři až šest bodů. Podívejte se, co mají společného tři konkrétní zadání téhle sady. Pět šestin z 414 nežádá násobit pěti a pak dělit šesti, protože 414 je šestkou dělitelné rovnou a zbývá jen vzít 69 pětkrát. U 1,6 × 245 se vyplatí odsunout desetinnou čárku na konec a počítat 245 krát 16, nebo rovnou 245 plus 147. A poměr 2 : 4 : 5 se rozpadne ve chvíli, kdy díly sečtete na jedenáct a částku 4 620 vydělíte jimi, místo abyste ji dělili postupně. Všechny tři příklady tedy nabízejí zkrácení dřív, než se vůbec začne násobit, a kdo tuhle nabídku přejde, počítá s většími čísly, než musel.` },
+  { min: 7, max: 9, text: `Do plného počtu z titulku zbývá jeden až tři body a právě ty poslední jsou nejdražší. Rozdíl mezi devítkou a desítkou nedělá znalost postupu, ale ochota udělat krok navíc u dvou konkrétních zadání. Prvním je řada 3, 5, 15, 17, 51, kde ten, kdo hledá jedno pravidlo, neuvidí nic, protože se v ní střídá přičtení dvojky s vynásobením třemi. Druhým je 9 × 24 − 17 × 6, kde se dá odečíst dřív, než jsou hotové oba součiny. Obojí má stejný lék: než začnete počítat, řekněte si, kolik kroků vás čeká. Kdo ví, že jsou tři, nekončí po druhém.` },
+  { min: 10, max: 10, text: `Titulek se ptal na deset příkladů bez jediné chyby a vy jste je odevzdali. Cena téhle desítky je v tom, že se nedá vysedět: stačí jedno přepsané číslo u druhé mocniny 47 nebo u poměru 2 : 4 : 5 a celé pásmo je pryč. Vaše hlava tedy nejen počítá, ale hlavně drží, a to je vzácnější než tempo. Škála tohohle testu vám už ale nemá co nabídnout. Příště si zadejte něco, co nemá hezký konec: dělení, u kterého vyjde perioda, mocninu, kterou nejde rozložit na desítky a jednotky, nebo rozdělení částky mezi čtyři nestejné díly.` }
+];
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryEl = document.getElementById(`retry`);
+var inputs = [];
+var done = false;
+
+function normalize(value) {
+  return String(value)
+    .normalize(`NFD`)
+    .replace(/[\u0300-\u036f]/g, ``)
+    .toLowerCase()
+    .replace(/[\s\u00a0\u202f\u2009]/g, ``)
+    .replace(/[.,](?=\d{3}\b)/g, ``)
+    .trim();
+}
+
+function buildQuiz() {
+  quizEl.innerHTML = ``;
+  inputs = [];
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+
+    var text = document.createElement(`p`);
+    text.className = `q-text`;
+    text.textContent = QUESTIONS[i].q;
+    box.appendChild(text);
+
+    var field = document.createElement(`input`);
+    field.type = `text`;
+    field.className = `answer`;
+    field.setAttribute(`inputmode`, `numeric`);
+    field.setAttribute(`autocomplete`, `off`);
+    field.setAttribute(`placeholder`, `Napište výsledek`);
+    field.setAttribute(`aria-label`, QUESTIONS[i].q);
+    field.addEventListener(`input`, refreshSubmit);
+    box.appendChild(field);
+    inputs.push(field);
+
+    var note = document.createElement(`p`);
+    note.className = `solution`;
+    note.style.display = `none`;
+    box.appendChild(note);
+
+    quizEl.appendChild(box);
+  }
+}
+
+function allAnswered() {
+  for (var i = 0; i < inputs.length; i++) {
+    if (normalize(inputs[i].value) === ``) { return false; }
+  }
+  return true;
+}
+
+function refreshSubmit() {
+  if (done) { return; }
+  var ready = allAnswered();
+  submitEl.disabled = !ready;
+  if (ready) { warnEl.textContent = ``; }
+}
+
+function evaluate() {
+  if (done) { return; }
+  if (!allAnswered()) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  done = true;
+  warnEl.textContent = ``;
+  var score = 0;
+
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    var field = inputs[i];
+    var given = normalize(field.value);
+    var accepted = QUESTIONS[i].a;
+    var hit = false;
+    for (var j = 0; j < accepted.length; j++) {
+      if (normalize(accepted[j]) === given) { hit = true; }
+    }
+    field.readOnly = true;
+    field.classList.add(`locked`);
+    var note = field.parentNode.querySelector(`.solution`);
+    if (hit) {
+      score++;
+      field.classList.add(`correct`);
+      note.textContent = `Správně`;
+      note.className = `solution`;
+    } else {
+      field.classList.add(`wrong`);
+      note.textContent = `Správná odpověď: ` + accepted[0];
+      note.className = `solution miss`;
+    }
+    note.style.display = `block`;
+  }
+
+  var verdict = ``;
+  for (var k = 0; k < BANDS.length; k++) {
+    if (score >= BANDS[k].min && score <= BANDS[k].max) { verdict = BANDS[k].text; }
+  }
+
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  verdictEl.textContent = verdict;
+  submitEl.disabled = true;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  done = false;
+  buildQuiz();
+  resultEl.style.display = `none`;
+  scoreEl.textContent = ``;
+  verdictEl.textContent = ``;
+  warnEl.textContent = ``;
+  submitEl.disabled = true;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+retryEl.addEventListener(`click`, reset);
+buildQuiz();
+</script>
+</body>
+</html>
