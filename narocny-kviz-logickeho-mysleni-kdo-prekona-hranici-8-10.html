@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Náročný kvíz logického myšlení: kdo překoná hranici 8/10, má důvod být na sebe pyšný</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 32px 16px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.5; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+  line-height: 1.45;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.locked .opt { cursor: default; }
+.locked .opt:hover { background: #f7f4f0; }
+.locked .opt.sel:hover { background: #dcd3c7; }
+.opt.right { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.locked .opt.right:hover { background: #d4edda; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.locked .opt.wrong:hover { background: #f8d7da; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+#again {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#again:hover { background: #756658; }
+.hidden { display: none; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  .q, #result { padding: 20px; }
+  h1 { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Náročný kvíz logického myšlení: kdo překoná hranici 8/10, má důvod být na sebe pyšný</h1>
+<p class="perex">Deset úloh na čistý úsudek: co z pravidla plyne, která úvaha neplatí, kam dopadá stín, kdo jak jezdí do práce i kde se dvě slova rozcházejí významem. Skoro bez počítání. Hranici 8/10 překročí menšina. Kolik dáte vy?</p>
+
+<div id="quiz"></div>
+
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warn" class="hidden">Odpovězte prosím na všechny otázky</p>
+
+<div id="result" class="hidden">
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="again">Zkusit znovu</button>
+</div>
+</div>
+
+<script>
+var QUESTIONS = [
+  {
+    q: `V muzeu platí, že fotografovat se smí jen bez blesku. Které tvrzení je pak nutně pravdivé?`,
+    opts: [
+      `Každý návštěvník musí v muzeu fotografovat, jen ne s bleskem`,
+      `Kdo v muzeu fotografuje s bleskem, pravidlo porušuje`,
+      `V muzeu se fotografovat nesmí`,
+      `Kdo přijde bez blesku, smí v muzeu fotografovat kdekoli`
+    ],
+    correct: 1
+  },
+  {
+    q: `Na které straně od vás leží váš stín, vyrazíte-li brzy po východu slunce pěšky na jih?`,
+    opts: [`před vámi`, `za vámi`, `po pravé ruce`, `po levé ruce`],
+    correct: 2
+  },
+  {
+    q: `Ve které z těchto dvojic má první slovo k druhému stejný vztah jako SEMENO ke STROMU?`,
+    opts: [`vejce a hnízdo`, `kořen a květ`, `ryba a hejno`, `housenka a motýl`],
+    correct: 3
+  },
+  {
+    q: `Které z těchto slov je významem nadřazené všem ostatním třem?`,
+    opts: [`bříza`, `listnáč`, `strom`, `dřevina`],
+    correct: 3
+  },
+  {
+    q: `Na vývěsce stojí: „Kdo se přihlásí do pátku, má místo zaručené." Který z těchto případů nemůže nastat?`,
+    opts: [
+      `Někdo se přihlásil v sobotu a místo nedostal`,
+      `Někdo se přihlásil ve středu a místo dostal`,
+      `Někdo se přihlásil ve středu a místo nedostal`,
+      `Někdo se přihlásil v sobotu a místo dostal`
+    ],
+    correct: 2
+  },
+  {
+    q: `Která z těchto úvah neplatí?`,
+    opts: [
+      `Každý kos je pták, tento tvor je pták, tedy je to kos`,
+      `Každá borovice je jehličnan, tento strom není jehličnan, tedy to není borovice`,
+      `Všichni sousedé mají zahradu, Novák je soused, tedy má zahradu`,
+      `Kdo vyhrál, ten hrál, tento hráč nehrál, tedy nevyhrál`
+    ],
+    correct: 0
+  },
+  {
+    q: `Čtyři kolegové, Hana, Libor, Nina a Robert, jezdí do práce každý jinak: autem, na kole, tramvají a metrem. Na kole jezdí Hana, nebo Nina. Libor nejezdí autem ani metrem. Nina nejezdí autem ani na kole. Kdo jezdí autem?`,
+    opts: [`Hana`, `Libor`, `Nina`, `Robert`],
+    correct: 3
+  },
+  {
+    q: `Ve které z těchto dvojic nejsou slova souznačná?`,
+    opts: [`výmluvný a upovídaný`, `svižný a hbitý`, `letmý a zběžný`, `laskavý a vlídný`],
+    correct: 0
+  },
+  {
+    q: `Kolik nejméně propisek musíte poslepu vytáhnout z krabice s deseti modrými, osmi zelenými a šesti žlutými, abyste měli jistě dvě stejné barvy?`,
+    opts: [`3`, `4`, `7`, `9`],
+    correct: 1
+  },
+  {
+    q: `Na který den v týdnu připadne v témže roce 1. červen, připadl-li 1. březen na úterý?`,
+    opts: [`pondělí`, `úterý`, `středa`, `čtvrtek`],
+    correct: 2
+  }
+];
+
+var VERDICTS = [
+  { min: 0, max: 3, text: `Úsudek se dnes rozjížděl ztuha. U několika úloh vás strhla varianta, která zněla rozumně, ale zadání říkalo něco jiného. To je typická past logických úloh a nemá to nic společného s tím, kolik toho víte. Zkuste u každé úlohy nejdřív vypsat, co se v ní vlastně tvrdí, a teprve pak sáhnout po odpovědi. Skóre půjde nahoru rychleji, než čekáte.` },
+  { min: 4, max: 6, text: `Půlka úloh sedla, druhá ne. Přímočará zadání jste rozlouskli, ale tam, kde bylo potřeba spojit dva kroky nebo pohlídat, co přesně ze zadání plyne, vás předběhla intuice. Logické myšlení máte v pořádku, chybí jen zvyk se u lákavé odpovědi na okamžik zastavit a přečíst si zadání ještě jednou. Na hranici 8/10 to dnes nebylo, ale je na dosah.` },
+  { min: 7, max: 9, text: `Silný výkon, a pokud jste dosáhli na osm nebo víc, splnili jste přesně to, co slibuje titulek, a máte důvod být na sebe pyšní. Do tohoto pásma se probojuje jen menšina. Umíte rozlišit, co z tvrzení skutečně vyplývá a co se jen nabízí, poradíte si s rozpletením několika podmínek i s významovými odstíny slov a těsné distraktory vás nerozhodí. K plnému počtu chybělo opravdu málo.` },
+  { min: 10, max: 10, text: `Nejvyšší patro. Nezastavila vás jediná úloha, od pravidla v muzeu přes chybnou úvahu a rozdělení cest do práce mezi čtyři kolegy až po kalendářní počítání. Hranici 8/10, kterou slibuje titulek jako metu, jste nejen překonali, ale nechali daleko za sebou. Takhle přesně a důsledně uvažuje jen zlomek řešitelů. Klobouk dolů.` }
+];
+
+var LETTERS = [`a`, `b`, `c`, `d`];
+var answers = new Array(QUESTIONS.length).fill(null);
+var locked = false;
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var againEl = document.getElementById(`again`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    box.id = `q` + qi;
+
+    var text = document.createElement(`p`);
+    text.className = `q-text`;
+    text.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(text);
+
+    item.opts.forEach(function (opt, oi) {
+      var btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.type = `button`;
+      btn.textContent = LETTERS[oi] + `) ` + opt;
+      btn.addEventListener(`click`, function () {
+        if (locked) { return; }
+        answers[qi] = oi;
+        var all = box.querySelectorAll(`.opt`);
+        for (var i = 0; i < all.length; i++) { all[i].classList.remove(`sel`); }
+        btn.classList.add(`sel`);
+        refresh();
+      });
+      box.appendChild(btn);
+    });
+
+    quizEl.appendChild(box);
+  });
+}
+
+function refresh() {
+  var done = answers.every(function (a) { return a !== null; });
+  var started = answers.some(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+  if (done || !started) { warnEl.classList.add(`hidden`); }
+  else { warnEl.classList.remove(`hidden`); }
+}
+
+submitEl.addEventListener(`click`, function () {
+  if (submitEl.disabled) {
+    warnEl.classList.remove(`hidden`);
+    return;
+  }
+  locked = true;
+  var score = 0;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.getElementById(`q` + qi);
+    box.classList.add(`locked`);
+    var opts = box.querySelectorAll(`.opt`);
+    for (var i = 0; i < opts.length; i++) {
+      opts[i].classList.remove(`sel`);
+      if (i === item.correct) { opts[i].classList.add(`right`); }
+      else if (i === answers[qi]) { opts[i].classList.add(`wrong`); }
+    }
+    if (answers[qi] === item.correct) { score++; }
+  });
+
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  var v = VERDICTS.filter(function (r) { return score >= r.min && score <= r.max; })[0];
+  verdictEl.textContent = v ? v.text : ``;
+  resultEl.classList.remove(`hidden`);
+  submitEl.classList.add(`hidden`);
+  warnEl.classList.add(`hidden`);
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+againEl.addEventListener(`click`, function () {
+  locked = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  build();
+  resultEl.classList.add(`hidden`);
+  submitEl.classList.remove(`hidden`);
+  submitEl.disabled = true;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+refresh();
+</script>
+</body>
+</html>
