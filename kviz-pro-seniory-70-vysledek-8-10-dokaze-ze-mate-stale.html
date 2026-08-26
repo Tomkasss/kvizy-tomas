@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro seniory 70+: výsledek 8/10 dokáže, že máte stále skvělý přehled</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 36px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover:not(:disabled) { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  #vyhodnotit, #znovu {
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit { background: #5b7e5f; }
+  #vyhodnotit:hover:not(:disabled) { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; }
+  #znovu:hover { background: #756658; }
+  .hlaska { text-align: center; color: #8a5a5a; margin-top: 14px; font-size: .95rem; }
+  #vysledek {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 40px;
+    display: none;
+  }
+  .skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  .hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka, #vysledek { padding: 20px; }
+    #vyhodnotit, #znovu { width: 100%; padding: 16px 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz pro seniory 70+: výsledek 8/10 dokáže, že máte stále skvělý přehled</h1>
+  <p class="perex">Sedmdesátka není důvod slevit z nároků. Deset otázek z dějin, zeměpisu, sportu, architektury, kuchyně, zahrady i techniky ukáže, kolik vám toho v hlavě zůstalo. Osm bodů je hranice, za kterou se dostane jen část řešitelů.</p>
+
+  <div id="kviz"></div>
+
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p class="hlaska" id="hlaska"></p>
+
+  <div id="vysledek">
+    <p class="skore" id="skore"></p>
+    <p class="hodnoceni" id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var otazky = [
+  {
+    zneni: `1. Jak se nazývá nejsevernější rovnoběžka, nad níž může být Slunce v poledne přesně v nadhlavníku?`,
+    varianty: [`rovník`, `severní polární kruh`, `obratník Kozoroha`, `obratník Raka`],
+    spravna: 3
+  },
+  {
+    zneni: `2. Ze které části vepřového masa se tradičně vyrábí pravá pražská šunka?`,
+    varianty: [`z kýty`, `z plece`, `z boku`, `z krkovice`],
+    spravna: 0
+  },
+  {
+    zneni: `3. Jak se nazývá místo uvnitř Země, kde zemětřesení vzniká a odkud se šíří seizmické vlny?`,
+    varianty: [`epicentrum`, `hypocentrum`, `astenosféra`, `tektonický zlom`],
+    spravna: 1
+  },
+  {
+    zneni: `4. Která trofej se v NHL uděluje nejužitečnějšímu hráči základní části?`,
+    varianty: [`Vezinova trofej`, `Norrisova trofej`, `Calderova trofej`, `Hartova trofej`],
+    spravna: 3
+  },
+  {
+    zneni: `5. Do kterého moře ústí řeka Rhôna?`,
+    varianty: [`Severního`, `Černého`, `Středozemního`, `Baltského`],
+    spravna: 2
+  },
+  {
+    zneni: `6. V jakém slohu byl postaven zámek v Litomyšli, zapsaný na seznamu UNESCO?`,
+    varianty: [`gotickém`, `renesančním`, `barokním`, `klasicistním`],
+    spravna: 1
+  },
+  {
+    zneni: `7. Ve kterém městě se v roce 1945 konala konference Stalina, Roosevelta a Churchilla?`,
+    varianty: [`v Jaltě`, `v Postupimi`, `v Teheránu`, `v Káhiře`],
+    spravna: 0
+  },
+  {
+    zneni: `8. Kterou měnou se dnes platí v Chorvatsku?`,
+    varianty: [`kunou`, `eurem`, `dinárem`, `konvertibilní markou`],
+    spravna: 1
+  },
+  {
+    zneni: `9. Jak se nazývá zahradnický způsob množení ovocných stromů, při kterém se výhon ušlechtilé odrůdy spojí s podnoží jiného stromu?`,
+    varianty: [`řízkování`, `hřížení`, `roubování`, `pikýrování`],
+    spravna: 2
+  },
+  {
+    zneni: `10. Do kterého města vedla koněspřežná železnice z Českých Budějovic?`,
+    varianty: [`do Pasova`, `do Vídně`, `do Lince`, `do Salcburku`],
+    spravna: 2
+  }
+];
+
+var hodnoceni = [
+  { min: 0, max: 3, text: `Otázky mířily napříč devíti obory a každá se ptala na jednu konkrétní věc, ne na obecné povědomí. V tomhle pásmu končí ten, komu se sešlo hned několik oborů, které nikdy nesledoval. Nic to nevypovídá o hlavě, jen o tom, že se kvíz zeptal jinam, než kde máte silné stránky. Zkuste si další, s jiným složením oborů to může dopadnout úplně opačně.` },
+  { min: 4, max: 6, text: `Solidní základ, ale pod průměrem, který tenhle kvíz obvykle vykazuje. Zhruba polovinu otázek jste rozlouskli, u druhé poloviny rozhodly varianty schválně nalepené blízko sebe, ať už šlo o dva obratníky, o část vepřového na pražskou šunku, nebo o zahradnické způsoby množení. Přehled máte poctivý, jen se rozprostírá do menšího počtu oborů, než kolik jich kvíz obsáhl.` },
+  { min: 7, max: 9, text: `Tady se pohybuje většina řešitelů a je to výsledek, za který se nikdo stydět nemusí. Sedm bodů je průměr a zároveň těsně pod hranicí, o které mluví titulek, takže chybí opravdu málo. Od osmi výš je slib splněný: osm správných odpovědí v kvízu, kde i ty snazší otázky měly nachystanou blízkou variantu, znamená, že váš přehled je stále skvělý. Devět bodů říká, že jste zvládli i některou z otázek, u kterých se nejčastěji chybuje, třeba měnu v Chorvatsku nebo sloh litomyšlského zámku.` },
+  { min: 10, max: 10, text: `Naprostá špička. Deset otázek z devíti oborů, mezi nimi hokejová trofej pro nejužitečnějšího hráče základní části, kterou mimo fanoušky pojmenuje jen zlomek lidí, a takový výsledek se tipováním netrefí. Prošli jste zeměpisem, kuchyní, geologií, sportem, architekturou, dějinami, měnami, zahradou i technikou bez jediného zaváhání. Takový přehled by vám mohla závidět i polovina maturantů.` }
+];
+
+var odpovedi = new Array(otazky.length).fill(null);
+var hotovo = false;
+
+var kvizEl = document.getElementById('kviz');
+var vyhodnotitEl = document.getElementById('vyhodnotit');
+var hlaskaEl = document.getElementById('hlaska');
+var vysledekEl = document.getElementById('vysledek');
+var skoreEl = document.getElementById('skore');
+var hodnoceniEl = document.getElementById('hodnoceni');
+var znovuEl = document.getElementById('znovu');
+
+function vykresli() {
+  kvizEl.innerHTML = '';
+  otazky.forEach(function (o, i) {
+    var box = document.createElement('div');
+    box.className = 'otazka';
+
+    var zneni = document.createElement('p');
+    zneni.className = 'zneni';
+    zneni.textContent = o.zneni;
+    box.appendChild(zneni);
+
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement('button');
+      btn.className = 'varianta';
+      btn.type = 'button';
+      btn.textContent = String.fromCharCode(97 + j) + ') ' + v;
+      btn.addEventListener('click', function () {
+        if (hotovo) return;
+        odpovedi[i] = j;
+        var vsechny = box.querySelectorAll('.varianta');
+        for (var k = 0; k < vsechny.length; k++) {
+          vsechny[k].classList.remove('vybrana');
+        }
+        btn.classList.add('vybrana');
+        hlaskaEl.textContent = '';
+        zkontrolujPripravenost();
+      });
+      box.appendChild(btn);
+    });
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujPripravenost() {
+  var vse = odpovedi.every(function (o) { return o !== null; });
+  vyhodnotitEl.disabled = !vse;
+}
+
+vyhodnotitEl.addEventListener('click', function () {
+  if (vyhodnotitEl.disabled) {
+    hlaskaEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  if (!odpovedi.every(function (o) { return o !== null; })) {
+    hlaskaEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+
+  hotovo = true;
+  var skore = 0;
+  var boxy = kvizEl.querySelectorAll('.otazka');
+
+  otazky.forEach(function (o, i) {
+    var tlacitka = boxy[i].querySelectorAll('.varianta');
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove('vybrana');
+      if (j === o.spravna) {
+        tlacitka[j].classList.add('spravna');
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add('spatna');
+      }
+    }
+    if (odpovedi[i] === o.spravna) skore++;
+  });
+
+  vyhodnotitEl.disabled = true;
+  hlaskaEl.textContent = '';
+  skoreEl.textContent = skore + ' z ' + otazky.length;
+
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore >= hodnoceni[h].min && skore <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+
+  vysledekEl.style.display = 'block';
+  vysledekEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+znovuEl.addEventListener('click', function () {
+  odpovedi = new Array(otazky.length).fill(null);
+  hotovo = false;
+  vysledekEl.style.display = 'none';
+  hlaskaEl.textContent = '';
+  vyhodnotitEl.disabled = true;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+vykresli();
+</script>
+</body>
+</html>
