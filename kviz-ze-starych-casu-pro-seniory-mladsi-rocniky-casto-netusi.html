@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz ze starých časů pro seniory: mladší ročníky často netuší, k čemu těchto 10 věcí sloužilo</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  line-height: 1.5;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.varianta:last-child { margin-bottom: 0; }
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta:disabled { cursor: default; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.2em; }
+#vysledek {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+  display: none;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 14px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 767px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz ze starých časů pro seniory: mladší ročníky často netuší, k čemu těchto 10 věcí sloužilo</h1>
+<p class="perex">Věci, které vám kdysi ležely v kuchyni, ve školní brašně i v kanceláři, dnes vnuci berou do ruky s otazníkem v očích. Deset otázek na to, k čemu se doopravdy používaly. Vy jste je zažili, tak si ověřte, kolik z nich máte pořád v paměti.</p>
+<div id="kviz"></div>
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<div id="hlaska"></div>
+<div id="vysledek">
+  <div id="skore"></div>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var otazky = [
+  {
+    zneni: `1. K čemu žákům sloužil griflík?`,
+    varianty: [`k psaní na břidlicovou tabulku`, `k setření napsaného z břidlicové tabulky`, `k narýsování linek na prázdný list papíru`, `k rozetření kaňky rozlitého inkoustu`],
+    spravna: 0
+  },
+  {
+    zneni: `2. K čemu v kanceláři sloužil cyklostyl?`,
+    varianty: [`k pořízení jediného průpisu při psaní na stroji`, `k vyražení úředního razítka do listiny`, `k oříznutí archů papíru na jednotný formát`, `k rozmnožení napsaného textu ve větším počtu výtisků`],
+    spravna: 3
+  },
+  {
+    zneni: `3. K čemu se v domácnosti používala slaměná ošatka?`,
+    varianty: [`k prosetí mouky před zaděláním těsta`, `k odměření mouky na jeden bochník`, `k vykynutí bochníku těsta před vsazením do pece`, `k vynesení upečeného chleba z pece`],
+    spravna: 2
+  },
+  {
+    zneni: `4. K čemu na petrolejové lampě sloužil skleněný cylindr?`,
+    varianty: [`k zabránění úniku petroleje z nádobky při naklonění lampy`, `k vytvoření tahu, který přivádí k plameni dostatek vzduchu`, `k soustředění světla plamene do jednoho směru na pracovní stůl`, `k zachycení sazí, aby nepadaly na ubrus pod lampou`],
+    spravna: 1
+  },
+  {
+    zneni: `5. K čemu na statku sloužil chomout?`,
+    varianty: [`k připoutání koně ve stáji ke žlabu`, `k ochraně koňského hřbetu pod sedlem`, `k vedení koně otěžemi drženými z kozlíku`, `k rozložení tahu na plece koně zapřaženého do vozu`],
+    spravna: 3
+  },
+  {
+    zneni: `6. K čemu sloužila litinová kolečka vsazená do plotny kuchyňských kamen na uhlí?`,
+    varianty: [`k přizpůsobení otvoru nad ohněm průměru hrnce`, `k regulaci množství vzduchu přiváděného do ohniště`, `k vyhrnování popela z ohniště do popelníku`, `k odměření uhlí na jedno přiložení`],
+    spravna: 0
+  },
+  {
+    zneni: `7. K čemu se při šití používalo krejčovské rádýlko?`,
+    varianty: [`k obnitkování okraje látky proti třepení`, `k rovnoměrnému nabrání látky do řasení`, `k obkreslení obrysu střihu na látku`, `k vyznačení stejných rozestupů mezi knoflíkovými dírkami`],
+    spravna: 2
+  },
+  {
+    zneni: `8. K čemu sloužil epidiaskop?`,
+    varianty: [`k promítání zvukového filmu na plátno`, `k promítání diapozitivů i neprůhledných předloh`, `k zvětšení negativu při výrobě fotografických zvětšenin`, `k promítání jednoho diapozitivu na dvě plátna současně`],
+    spravna: 1
+  },
+  {
+    zneni: `9. K čemu sloužil sytič, který řidiči starších vozů vytahovali knoflíkem na palubní desce?`,
+    varianty: [`k obohacení palivové směsi při startu studeného motoru`, `k přivedení většího množství vzduchu do karburátoru při startu`, `k předehřátí nasávaného vzduchu teplem od výfukového potrubí`, `k ručnímu načerpání benzinu do plovákové komory karburátoru před startem`],
+    spravna: 0
+  },
+  {
+    zneni: `10. K čemu na nástěnných kyvadlových hodinách sloužila zavěšená závaží?`,
+    varianty: [`k udržení skříně hodin ve svislé poloze na stěně`, `k pohonu hodinového stroje tím, jak pomalu klesala`, `k seřízení hodin, aby se nepředbíhaly`, `k napnutí struny, na kterou hodiny odbíjely`],
+    spravna: 1
+  }
+];
+
+var hodnoceni = [
+  { min: 0, max: 3, text: `Většina těchto věcí vám prošla kolem očí, ale jejich účel se ve vzpomínkách nezachytil. Poznáte tak nanejvýš, že jde o něco starého, k čemu to ale doopravdy sloužilo, zůstává otázkou. Tenhle výsledek se dnes běžně stává i lidem, kteří dobu pamatují.` },
+  { min: 4, max: 6, text: `Slušný půlkrok. Předměty ze světnice a ze školní lavice vám naskočily, ale jakmile došlo na hospodářství, na šicí koš nebo na techniku od kanceláře po motor, začali jste vybírat podle citu. Půlku jste trefili jistě, u zbytku rozhodovala mezi dvěma podobnými možnostmi náhoda.` },
+  { min: 7, max: 9, text: `Tohle je výsledek člověka, kterému staré věci opravdu prošly rukama. Účel poznáte napříč obory, od školní lavice přes kuchyň a zápřah až po promítání a motor, a nespletou vás ani varianty, které zní věrohodně. Mladší ročníky se na takové skóre nedostanou.` },
+  { min: 10, max: 10, text: `Plný počet dá jen menšina a vy jste mezi ní. Rozeznáte i věci, které dnes většina lidí zná nanejvýš z půdy nebo z muzejní vitríny, a víte přesně, jaký úkon se s nimi dělal. Paměť na dobové předměty vám zůstala v naprostém pořádku.` }
+];
+
+var pismena = [`a) `, `b) `, `c) `, `d) `];
+var odpovedi = [];
+var hotovo = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoVyhodnotit = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var tlacitkoZnovu = document.getElementById(`znovu`);
+
+function postav() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = o.zneni;
+    box.appendChild(zneni);
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement(`button`);
+      btn.className = `varianta`;
+      btn.type = `button`;
+      btn.textContent = pismena[j] + v;
+      btn.setAttribute(`data-otazka`, i);
+      btn.setAttribute(`data-varianta`, j);
+      btn.addEventListener(`click`, function () { vyber(i, j); });
+      box.appendChild(btn);
+    });
+    kvizEl.appendChild(box);
+  });
+}
+
+function vyber(i, j) {
+  if (hotovo) { return; }
+  odpovedi[i] = j;
+  var boxy = kvizEl.getElementsByClassName(`otazka`);
+  var tlacitka = boxy[i].getElementsByClassName(`varianta`);
+  for (var k = 0; k < tlacitka.length; k++) {
+    if (k === j) {
+      tlacitka[k].classList.add(`vybrana`);
+    } else {
+      tlacitka[k].classList.remove(`vybrana`);
+    }
+  }
+  hlaskaEl.textContent = ``;
+  zkontrolujUplnost();
+}
+
+function zkontrolujUplnost() {
+  var vse = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] !== `number`) { vse = false; }
+  }
+  tlacitkoVyhodnotit.disabled = !vse;
+}
+
+function vyhodnot() {
+  var vse = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] !== `number`) { vse = false; }
+  }
+  if (!vse) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  hotovo = true;
+  var bodu = 0;
+  var boxy = kvizEl.getElementsByClassName(`otazka`);
+  for (var i = 0; i < otazky.length; i++) {
+    var tlacitka = boxy[i].getElementsByClassName(`varianta`);
+    for (var k = 0; k < tlacitka.length; k++) {
+      tlacitka[k].classList.remove(`vybrana`);
+      tlacitka[k].disabled = true;
+      if (k === otazky[i].spravna) {
+        tlacitka[k].classList.add(`spravna`);
+      } else if (k === odpovedi[i]) {
+        tlacitka[k].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === otazky[i].spravna) { bodu++; }
+  }
+  tlacitkoVyhodnotit.disabled = true;
+  skoreEl.textContent = bodu + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (bodu >= hodnoceni[h].min && bodu <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+    }
+  }
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function znovu() {
+  hotovo = false;
+  odpovedi = [];
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  tlacitkoVyhodnotit.disabled = true;
+  postav();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+tlacitkoVyhodnotit.addEventListener(`click`, vyhodnot);
+tlacitkoZnovu.addEventListener(`click`, znovu);
+postav();
+</script>
+</body>
+</html>
