@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matematický test z 5. třídy: děti ho zvládnout musí, ale dospělí v něm často chybují</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 20px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zadani { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: Georgia, "Times New Roman", serif;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-of-type { margin-bottom: 0; }
+  .varianta:hover:enabled { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravne { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; font-weight: bold; }
+  .varianta.spatne { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  .odpoved {
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: Georgia, "Times New Roman", serif;
+  }
+  .odpoved:focus { outline: none; background: #ede8e1; border-color: #a89e92; }
+  .odpoved:disabled { opacity: 1; }
+  .odpoved.spravne { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; font-weight: bold; }
+  .odpoved.spatne { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .reseni { margin-top: 14px; font-size: 1rem; color: #1e5631; }
+  #vyhodnotit, #znovu {
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: Georgia, "Times New Roman", serif;
+  }
+  #vyhodnotit { background: #5b7e5f; }
+  #vyhodnotit:hover:enabled { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; }
+  #znovu:hover { background: #756658; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.4em; }
+  #vysledek {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; }
+  @media (max-width: 767px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka, #vysledek { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Matematický test z 5. třídy: děti ho zvládnout musí, ale dospělí v něm často chybují</h1>
+  <p class="perex">Zlomky, desetinná čísla, převody jednotek, aritmetický průměr i pořadí operací se závorkou. Deset úloh z učiva páté třídy, tužka a papír stačí, kalkulačka zůstane zavřená. Školák je bere jako samozřejmost, dospělým v nich body utíkají.</p>
+
+  <div id="kviz"></div>
+
+  <button id="vyhodnotit" type="button" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+
+  <div id="vysledek">
+    <div id="skore"></div>
+    <div id="hodnoceni"></div>
+    <button id="znovu" type="button">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  var otazky = [
+    {
+      zadani: `1. Jaké číslo dostaneme zaokrouhlením čísla 38 462 na tisíce?`,
+      varianty: [`30 000`, `39 000`, `40 000`, `38 000`],
+      spravna: 3
+    },
+    {
+      zadani: `2. Kolik centimetrů čtverečních měří plocha o obsahu 2,5 metru čtverečního?`,
+      varianty: [`250`, `2 500`, `25 000`, `250 000`],
+      spravna: 2
+    },
+    {
+      zadani: `3. Kolik je 2,5 × 4 × 3,6? Výsledek zapište jako celé číslo bez jednotky.`,
+      odpovedi: [`36`]
+    },
+    {
+      zadani: `4. Který z těchto zlomků má největší hodnotu?`,
+      varianty: [`tři čtvrtiny`, `tři osminy`, `jedna polovina`, `pět osmin`],
+      spravna: 0
+    },
+    {
+      zadani: `5. Kolik je 6 × (41 − 27) + 105 ÷ 7?`,
+      odpovedi: [`99`]
+    },
+    {
+      zadani: `6. Kolik plných beden po 8 kusech se naplní ze 100 kusů zboží?`,
+      varianty: [`11`, `12`, `13`, `14`],
+      spravna: 1
+    },
+    {
+      zadani: `7. Rodina koupila tři dospělé vstupenky po 185 korunách a dvě dětské po 95 korunách. Kolik korun zaplatila celkem?`,
+      odpovedi: [`745`]
+    },
+    {
+      zadani: `8. Kolik celých stovek je obsaženo v čísle 52 908?`,
+      odpovedi: [`529`]
+    },
+    {
+      zadani: `9. Aritmetický průměr čtyř čísel je 52 a tři z nich jsou 38, 57 a 49. Kolik je čtvrté číslo?`,
+      odpovedi: [`64`]
+    },
+    {
+      zadani: `10. Obdélníkový pozemek má rozměry 30 metrů a 20 metrů. O kolik metrů čtverečních vzroste jeho obsah, jestliže se každý z obou rozměrů zvětší o 2 metry?`,
+      odpovedi: [`104`]
+    }
+  ];
+
+  var hodnoceni = [
+    { max: 3, text: `Proti páťákovi byste v tomhle testu neobstáli. Většina bodů padla tam, kde se rozhoduje ještě před počítáním: která číslice určuje zaokrouhlení, kolikrát se násobí u převodu obsahu, co se má spočítat dřív a co až potom. Žák páté třídy má tahle pravidla čerstvá a používá je denně, u vás je překryla léta, kdy stačilo sáhnout po mobilu. Vezměte si jediný okruh, třeba pořadí operací se závorkou, a projděte si ho od pravidla k příkladu.` },
+    { max: 6, text: `Přesný střed, tedy zhruba to, co v páté třídě odpovídá trojce. Kratší úlohy vám vyšly, ztráty přišly u zadání o dvou krocích a u těch, kde se výsledek nezískává přímo, ale musí se k němu dojít obráceně. Páťák je v tomhle okamžiku ve výhodě ne proto, že by počítal rychleji, ale proto, že postup má nacvičený a nemusí si ho vymýšlet znovu. Rozdíl mezi tímhle pásmem a sedmičkou nedělá rychlost, ale zvyk říct si nahlas, kolik kroků úloha má.` },
+    { max: 9, text: `Se školákem z páté třídy jste vyrovnaní a v několika úlohách jste ho předběhli. Zaokrouhlování, převody jednotek i řetězené operace se závorkou vám drží a poradili jste si i tam, kde se nabízí odpověď, která je o kousek vedle. Chybějící bod nebo tři zůstaly nejspíš u průměru, který se má dopočítat pozpátku z už známého výsledku, nebo u poslední úlohy, ve které se mění oba rozměry naráz. Obojí se dá dopočítat, jen to vyžaduje krok navíc.` },
+    { max: 10, text: `Plný počet, a to je výsledek, který v páté třídě odevzdá jen několik dětí ve třídě. Prošli jste bez zaváhání zaokrouhlováním, převodem jednotek obsahu, desetinnými čísly, porovnáním zlomků, pořadím operací se závorkou, dělením se zbytkem, dvoukrokovou slovní úlohou, stavbou čísla, obráceným průměrem i změnou obsahu obdélníku. Deset okruhů, deset zásahů a ani jedna past, která by vás dostala. Různě těžké úlohy vám po letech nejen zůstaly, ale umíte je i použít.` }
+  ];
+
+  var pismena = [`a) `, `b) `, `c) `, `d) `];
+
+  var kviz = document.getElementById(`kviz`);
+  var tlacitko = document.getElementById(`vyhodnotit`);
+  var hlaska = document.getElementById(`hlaska`);
+  var vysledek = document.getElementById(`vysledek`);
+  var skore = document.getElementById(`skore`);
+  var textHodnoceni = document.getElementById(`hodnoceni`);
+  var znovu = document.getElementById(`znovu`);
+  var pole = [];
+  var hotovo = false;
+
+  function normalizuj(text) {
+    return text
+      .toLowerCase()
+      .normalize(`NFD`)
+      .replace(/[̀-ͯ]/g, ``)
+      .replace(/\s+/g, ``)
+      .replace(/[.,]$/, ``);
+  }
+
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    var zadani = document.createElement(`div`);
+    zadani.className = `zadani`;
+    zadani.textContent = o.zadani;
+    box.appendChild(zadani);
+
+    var reseni = document.createElement(`div`);
+    reseni.className = `reseni`;
+    reseni.style.display = `none`;
+
+    if (o.varianty) {
+      var tlacitka = [];
+      o.varianty.forEach(function (text, j) {
+        var b = document.createElement(`button`);
+        b.type = `button`;
+        b.className = `varianta`;
+        b.textContent = pismena[j] + text;
+        b.addEventListener(`click`, function () {
+          if (hotovo) { return; }
+          tlacitka.forEach(function (jine) { jine.classList.remove(`vybrana`); });
+          b.classList.add(`vybrana`);
+          pole[i].vybrano = j;
+          zkontrolujVyplneni();
+        });
+        tlacitka.push(b);
+        box.appendChild(b);
+      });
+      box.appendChild(reseni);
+      kviz.appendChild(box);
+      pole.push({ typ: `vyber`, tlacitka: tlacitka, vybrano: null, reseni: reseni });
+    } else {
+      var vstup = document.createElement(`input`);
+      vstup.type = `text`;
+      vstup.className = `odpoved`;
+      vstup.setAttribute(`inputmode`, `numeric`);
+      vstup.setAttribute(`autocomplete`, `off`);
+      vstup.setAttribute(`aria-label`, `Odpověď na otázku ` + (i + 1));
+      vstup.placeholder = `Napište odpověď`;
+      box.appendChild(vstup);
+      box.appendChild(reseni);
+      kviz.appendChild(box);
+      pole.push({ typ: `text`, vstup: vstup, reseni: reseni });
+      vstup.addEventListener(`input`, zkontrolujVyplneni);
+    }
+  });
+
+  function zkontrolujVyplneni() {
+    if (hotovo) { return; }
+    var vseVyplneno = pole.every(function (p) {
+      if (p.typ === `vyber`) { return p.vybrano !== null; }
+      return p.vstup.value.trim() !== ``;
+    });
+    tlacitko.disabled = !vseVyplneno;
+    if (vseVyplneno) { hlaska.textContent = ``; }
+  }
+
+  tlacitko.addEventListener(`click`, function () {
+    if (tlacitko.disabled) {
+      hlaska.textContent = `Odpovězte prosím na všechny otázky`;
+      return;
+    }
+    var body = 0;
+    pole.forEach(function (p, i) {
+      var o = otazky[i];
+      if (p.typ === `vyber`) {
+        p.tlacitka.forEach(function (b, j) {
+          b.disabled = true;
+          b.classList.remove(`vybrana`);
+          if (j === o.spravna) {
+            b.classList.add(`spravne`);
+          } else if (j === p.vybrano) {
+            b.classList.add(`spatne`);
+          }
+        });
+        if (p.vybrano === o.spravna) { body = body + 1; }
+      } else {
+        var zadano = normalizuj(p.vstup.value);
+        var spravne = o.odpovedi.some(function (v) {
+          return normalizuj(v) === zadano;
+        });
+        p.vstup.disabled = true;
+        if (spravne) {
+          p.vstup.classList.add(`spravne`);
+          body = body + 1;
+        } else {
+          p.vstup.classList.add(`spatne`);
+          p.reseni.textContent = `Správná odpověď: ` + o.odpovedi[0];
+          p.reseni.style.display = `block`;
+        }
+      }
+    });
+
+    hotovo = true;
+    tlacitko.disabled = true;
+    hlaska.textContent = ``;
+
+    skore.textContent = body + ` z 10`;
+    for (var j = 0; j < hodnoceni.length; j++) {
+      if (body <= hodnoceni[j].max) {
+        textHodnoceni.textContent = hodnoceni[j].text;
+        break;
+      }
+    }
+    vysledek.style.display = `block`;
+    vysledek.scrollIntoView({ behavior: `smooth`, block: `start` });
+  });
+
+  znovu.addEventListener(`click`, function () {
+    pole.forEach(function (p) {
+      if (p.typ === `vyber`) {
+        p.vybrano = null;
+        p.tlacitka.forEach(function (b) {
+          b.disabled = false;
+          b.classList.remove(`vybrana`);
+          b.classList.remove(`spravne`);
+          b.classList.remove(`spatne`);
+        });
+      } else {
+        p.vstup.value = ``;
+        p.vstup.disabled = false;
+        p.vstup.classList.remove(`spravne`);
+        p.vstup.classList.remove(`spatne`);
+      }
+      p.reseni.style.display = `none`;
+      p.reseni.textContent = ``;
+    });
+    hotovo = false;
+    vysledek.style.display = `none`;
+    tlacitko.disabled = true;
+    hlaska.textContent = ``;
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  });
+})();
+</script>
+</body>
+</html>
