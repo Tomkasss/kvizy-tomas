@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test školních znalostí pro seniory: zvládnete i po letech alespoň 7 z 10 otázek?</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 36px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+.txtin {
+  width: 100%;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+}
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 24px;
+  display: none;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 14px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#retry:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test školních znalostí pro seniory: zvládnete i po letech alespoň 7 z 10 otázek?</h1>
+<p class="perex">Čeština, literatura, geometrie, přírodní vědy, dějepis i zeměpis. Deset otázek z předmětů, které jste kdysi brali ve škole, ukáže, kolik vám po letech zůstalo. Milí senioři, laťka je sedm správných odpovědí. Přeskočíte ji?</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warn"></p>
+<div id="result">
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  { q: `Jak se odborně nazývá kuchyňská sůl?`,
+    o: [`uhličitan sodný`, `hydroxid sodný`, `dusičnan sodný`, `chlorid sodný`], c: 3 },
+  { q: `Jak se nazývá přímka, která má s kružnicí právě jeden společný bod?`,
+    o: [`sečna`, `tečna`, `normála`, `vnější přímka`], c: 1 },
+  { q: `Ve které části plic se vyměňuje kyslík a oxid uhličitý?`,
+    o: [`v plicních sklípcích`, `v průduškách`, `v pohrudnici`, `v průdušnici`], c: 0 },
+  { q: `Jak se nazývá nejmohutnější vrstva Země, která vyplňuje celý prostor mezi zemskou kůrou a jádrem?`,
+    o: [`litosféra`, `magma`, `zemský plášť`, `astenosféra`], c: 2 },
+  { q: `Který hrdina řecké mytologie zabil Medúzu?`,
+    o: [`Théseus`, `Perseus`, `Bellerofón`, `Achilles`], c: 1 },
+  { q: `Čím je u zvuku určena výška tónu?`,
+    o: [`amplitudou kmitání`, `rychlostí šíření zvuku`, `frekvencí kmitání`, `tvarem zvukové vlny`], c: 2 },
+  { q: `Kdo je autorem románu Chaloupka strýčka Toma?`,
+    o: [`Harriet Beecher Stoweová`, `Charles Dickens`, `Mark Twain`, `Louisa May Alcottová`], c: 0 },
+  { q: `Kdo se v roce 1947 stal prvním předsedou vlády nezávislé Indie?`,
+    o: [`Mahátma Gándhí`, `Muhammad Alí Džinnáh`, `Džaváharlál Néhrú`, `Subhás Čandra Bose`], c: 2 },
+  { q: `Které z těchto sloves je dokonavé?`,
+    o: [`koupit`, `sedět`, `běhat`, `čítávat`], c: 0 },
+  { q: `Který pražský arcibiskup se stal prvním kancléřem pražské univerzity?`,
+    o: [`Jan Očko z Vlašimi`, `Arnošt z Pardubic`, `Jan z Jenštejna`, `Zbyněk Zajíc z Hazmburka`], c: 1 }
+];
+
+var LETTERS = [`a`, `b`, `c`, `d`];
+
+var VERDICTS = [
+  { min: 0, max: 3, t: `Na sedmičku, kterou slibuje titulek, to tentokrát nebylo. Školní léta jsou dávno pryč a spolu s nimi i většina probrané látky, což je po desítkách let naprosto pochopitelné. Projděte si správné odpovědi, ať víte, kde ta laťka sedmi bodů vlastně leží, a u příštího kvízu se skóre posune výš.` },
+  { min: 4, max: 6, t: `Někde kolem poloviny, laťka sedmi bodů vám ale utekla. Něco vám ze školy zůstalo v hlavě pevně, jinde se za ta desetiletí vzpomínka rozostřila nebo rozhodlo váhání mezi dvěma blízkými možnostmi. Právě tam leží ten jeden až tři body, které vás od hranice dělí, a stačí si projít odpovědi, u nichž jste tápali.` },
+  { min: 7, max: 9, t: `Laťku sedmi bodů jste přeskočili, přesně jak titulek nabízel. Po všech těch letech se napříč předměty ztratíte jen výjimečně a zastavily vás nanejvýš tři nejzáludnější otázky. Kdo dosáhl devíti, chyběl mu k plnému počtu už jen krůček.` },
+  { min: 10, max: 10, t: `Plný počet, ani jedno zaváhání napříč všemi šesti předměty. Čeština, přírodní vědy, dějiny i literatura vám drží v hlavě tak pevně, jako byste ze školní lavice vstali minulý týden. Laťku sedmi bodů jste nejen překonali, vy jste ji smetli. Klobouk dolů.` }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var locked = false;
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryEl = document.getElementById(`retry`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var title = document.createElement(`p`);
+    title.className = `qtext`;
+    title.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(title);
+    item.o.forEach(function (opt, oi) {
+      var btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.type = `button`;
+      btn.textContent = LETTERS[oi] + `) ` + opt;
+      btn.setAttribute(`data-q`, String(qi));
+      btn.setAttribute(`data-o`, String(oi));
+      btn.addEventListener(`click`, onPick);
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function onPick(e) {
+  if (locked) { return; }
+  var btn = e.currentTarget;
+  var qi = parseInt(btn.getAttribute(`data-q`), 10);
+  var oi = parseInt(btn.getAttribute(`data-o`), 10);
+  answers[qi] = oi;
+  var siblings = btn.parentNode.querySelectorAll(`.opt`);
+  for (var i = 0; i < siblings.length; i++) { siblings[i].classList.remove(`sel`); }
+  btn.classList.add(`sel`);
+  warnEl.textContent = ``;
+  updateSubmit();
+}
+
+function updateSubmit() {
+  var done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+}
+
+function evaluate() {
+  if (locked) { return; }
+  if (!answers.every(function (a) { return a !== null; })) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  var score = 0;
+  var boxes = quizEl.querySelectorAll(`.q`);
+  QUESTIONS.forEach(function (item, qi) {
+    var opts = boxes[qi].querySelectorAll(`.opt`);
+    for (var i = 0; i < opts.length; i++) {
+      opts[i].classList.remove(`sel`);
+      opts[i].disabled = true;
+      if (i === item.c) { opts[i].classList.add(`correct`); }
+      else if (i === answers[qi]) { opts[i].classList.add(`wrong`); }
+    }
+    if (answers[qi] === item.c) { score++; }
+  });
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score >= VERDICTS[v].min && score <= VERDICTS[v].max) {
+      verdictEl.textContent = VERDICTS[v].t;
+      break;
+    }
+  }
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  locked = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.style.display = `none`;
+  warnEl.textContent = ``;
+  build();
+  updateSubmit();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+retryEl.addEventListener(`click`, reset);
+build();
+updateSubmit();
+</script>
+</body>
+</html>
