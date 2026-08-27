@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test přísloví a pořekadel: kdo správně doplní všech 10, vyzná se v češtině dokonale</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.ok { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.bad { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+#eval {
+  display: block;
+  margin: 40px auto 0;
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+#eval:hover { background: #4a6b4e; }
+#eval:disabled { background: #b5b5b5; cursor: not-allowed; }
+#again {
+  display: block;
+  margin: 40px auto 0;
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+#again:hover { background: #756658; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+}
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+.verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+.warn { text-align: center; color: #a33; margin-top: 14px; font-size: .95rem; }
+.hidden { display: none; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  .q { padding: 20px; }
+  h1 { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test přísloví a pořekadel: kdo správně doplní všech 10, vyzná se v češtině dokonale</h1>
+<p class="perex">Deset úloh na lidovou moudrost, která se dnes slýchá čím dál míň. U některých budete lovit v paměti přesné znění, u jiných půjde o to, jestli rozumíte, co se tím doopravdy myslí.</p>
+<div id="quiz"></div>
+<button id="eval" disabled>Vyhodnotit</button>
+<p id="warn" class="warn hidden">Odpovězte prosím na všechny otázky</p>
+<div id="result" class="hidden">
+  <p class="score" id="score"></p>
+  <p class="verdict" id="verdict"></p>
+  <button id="again">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  { q: `1. Jak zní druhá půlka přísloví „Dobrá hospodyňka pro pírko ...“?`,
+    o: [`i do bláta sáhne`, `i na půdu vyleze`, `i přes plot skočí`, `i přes potok přeběhne`], a: 2 },
+  { q: `2. Co se míní rčením „dopadnout jako sedláci u Chlumce“?`,
+    o: [`dopadnout co nejhůř, prohrát na celé čáře`, `přijít o všechno vlastní nedbalostí a hloupostí`, `domluvit se na kompromisu, se kterým není spokojený nikdo`, `prosadit se navzdory drtivé přesile protivníka`], a: 0 },
+  { q: `3. Jakou druhou půlku má přísloví „Kdo chce psa bít, ...“?`,
+    o: [`bič si vždycky najde`, `prut si vždycky najde`, `hůl si vždycky najde`, `řemen si vždycky najde`], a: 2 },
+  { q: `4. Co znamená, když někdo někomu vypálí rybník?`,
+    o: [`způsobí mu ze msty velkou škodu na majetku`, `předejde ho a získá to, oč druhý usiloval`, `přesvědčí ho, aby od svého záměru sám ustoupil`, `veřejně ho zesměšní před ostatními lidmi`], a: 1 },
+  { q: `5. Čím pokračuje přísloví „Komu není shůry dáno, ...“?`,
+    o: [`ten se nadarmo nadře`, `tomu ani škola nepomůže`, `v apatyce nekoupí`, `u felčara se toho nedočká`], a: 2 },
+  { q: `6. Jak zní ustálené pokračování rady „Sedávej panenko v koutě, ...“?`,
+    o: [`budeš-li hodná, najdou tě`, `budeš-li milá, uslyší tě`, `budeš-li trpělivá, všimnou si tě`, `budeš-li skromná, ocení tě`], a: 0 },
+  { q: `7. Co se míní pořekadlem „Když ptáčka lapají, pěkně mu zpívají“?`,
+    o: [`kdo chce něco získat, musí být trpělivý a nespěchat`, `kdo se ocitne v pasti, obvykle si toho dlouho nevšimne`, `kdo hodně mluví, obvykle nakonec sám sebe prozradí`, `kdo chce někoho nachytat, obalí ho napřed lichotkami a sliby`], a: 3 },
+  { q: `8. Které z těchto znění je ustálenou podobou českého přísloví o tom, že pracovitému člověku se daří?`,
+    o: [`Kdo se nelení, tomu se zelení`, `Komu se nelení, tomu se zelení`, `Komu se nelení, tomu se zazelená`, `Kdo se nelení, ten se zelení`], a: 1 },
+  { q: `9. Odkud pochází rčení „vzít si někoho na paškál“?`,
+    o: [`z vojenského výcviku`, `ze soudního jednání`, `z hornického cechu`, `z církevních obřadů`], a: 3 },
+  { q: `10. Ke kterému řemeslu se váže původ rčení „je to na jedno brdo“?`,
+    o: [`k hrnčířství`, `k tkalcovství`, `ke kovářství`, `k mlynářství`], a: 1 }
+];
+
+var VERDICTS = [
+  { min: 0, max: 3, t: `Přísloví berete spíš podle citu než podle přesného znění. Druhé půlky vám splývají a u méně průhledných rčení jste sázeli na to, co znělo logicky. V češtině se domluvíte bez potíží, ale její obrazná vrstva vám zatím leží stranou. Stačí si u pár úsloví ověřit, jak přesně znějí, a příště naskočí sama.` },
+  { min: 4, max: 6, t: `Běžný slušný průměr. Nejznámější přísloví doplníte bez zaváhání a smysl většiny rčení odhadnete správně, jenže tam, kde jde o přesné ustálené znění nebo o původ pořekadla, začínáte tápat. Vaše čeština je zdravá a živá, jen ta starší, kořeněná vrstva vám ještě nesedí celá.` },
+  { min: 7, max: 9, t: `Tady už je vidět člověk, který se v češtině vyzná nadprůměrně. Ustálená znění držíte přesně, méně obvyklá rčení vyložíte správně a nenecháte se zmást variantami, které znějí skoro stejně. Ke zcela suverénnímu výsledku vám chybí jen ta poslední vrstva, kde už nestačí rčení používat, ale je potřeba vědět, na čem stojí.` },
+  { min: 10, max: 10, t: `Plný počet, a to je v tomto testu vzácnost. Druhé půlky jste doplnili přesně tak, jak jsou ustálené, méně průhledná rčení jste vyložili správně, rozeznali jste správné znění mezi téměř totožnými variantami a trefili i prostředí, odkud se pořekadla vzala. Čeština u vás nekončí u pravopisu, rozumíte jí i tam, kde mluví v obrazech. Vyznáte se v ní dokonale.` }
+];
+
+var LETTERS = [`a`, `b`, `c`, `d`];
+var answers = [];
+var locked = false;
+var quizEl = document.getElementById(`quiz`);
+var evalBtn = document.getElementById(`eval`);
+var againBtn = document.getElementById(`again`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  answers = [];
+  locked = false;
+  QUESTIONS.forEach(function (item, qi) {
+    answers.push(null);
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var p = document.createElement(`p`);
+    p.className = `q-text`;
+    p.textContent = item.q;
+    box.appendChild(p);
+    item.o.forEach(function (opt, oi) {
+      var b = document.createElement(`button`);
+      b.className = `opt`;
+      b.type = `button`;
+      b.textContent = LETTERS[oi] + `) ` + opt;
+      b.setAttribute(`data-q`, String(qi));
+      b.setAttribute(`data-o`, String(oi));
+      b.addEventListener(`click`, function () { pick(qi, oi); });
+      box.appendChild(b);
+    });
+    quizEl.appendChild(box);
+  });
+  evalBtn.disabled = true;
+  warnEl.classList.add(`hidden`);
+  resultEl.classList.add(`hidden`);
+}
+
+function pick(qi, oi) {
+  if (locked) { return; }
+  answers[qi] = oi;
+  var boxes = quizEl.getElementsByClassName(`q`);
+  var btns = boxes[qi].getElementsByClassName(`opt`);
+  for (var i = 0; i < btns.length; i++) {
+    if (i === oi) { btns[i].classList.add(`sel`); } else { btns[i].classList.remove(`sel`); }
+  }
+  var done = answers.every(function (a) { return a !== null; });
+  evalBtn.disabled = !done;
+  if (done) { warnEl.classList.add(`hidden`); }
+}
+
+evalBtn.addEventListener(`click`, function () {
+  var done = answers.every(function (a) { return a !== null; });
+  if (!done) { warnEl.classList.remove(`hidden`); return; }
+  locked = true;
+  var score = 0;
+  var boxes = quizEl.getElementsByClassName(`q`);
+  QUESTIONS.forEach(function (item, qi) {
+    var btns = boxes[qi].getElementsByClassName(`opt`);
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].disabled = true;
+      btns[i].classList.remove(`sel`);
+      if (i === item.a) { btns[i].classList.add(`ok`); }
+      else if (i === answers[qi]) { btns[i].classList.add(`bad`); }
+    }
+    if (answers[qi] === item.a) { score++; }
+  });
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  var v = VERDICTS.filter(function (r) { return score >= r.min && score <= r.max; })[0];
+  verdictEl.textContent = v ? v.t : ``;
+  evalBtn.classList.add(`hidden`);
+  resultEl.classList.remove(`hidden`);
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+againBtn.addEventListener(`click`, function () {
+  build();
+  evalBtn.classList.remove(`hidden`);
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+</script>
+</body>
+</html>
