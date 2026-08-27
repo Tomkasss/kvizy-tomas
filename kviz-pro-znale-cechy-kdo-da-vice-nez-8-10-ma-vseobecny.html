@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro znalé Čechy: kdo dá více než 8/10, má všeobecný přehled na jedničku</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover:not(:disabled) { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#retry:hover { background: #756658; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 24px;
+  display: none;
+}
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+.verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#warn { text-align: center; color: #8c4a4a; margin-top: 14px; min-height: 1.2em; }
+@media (max-width: 767px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro znalé Čechy: kdo dá více než 8/10, má všeobecný přehled na jedničku</h1>
+<p class="perex">Deset otázek pro Čechy, kteří si na svůj přehled věří: zoologie, kuchyně, fyzika, náboženství, divadlo, čeština, zeměpis, dějepis, sport i materiály. Průměrný řešitel se zastaví u sedmi bodů. Přes osmičku se dostane jen menšina.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warn"></p>
+<div id="result">
+  <p class="score" id="score"></p>
+  <p class="verdict" id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const QUESTIONS = [
+  { q: `1. Do které skupiny živočichů patří štír?`, opts: [`hmyz`, `korýši`, `pavoukovci`, `stonožky`], correct: 2 },
+  { q: `2. Co jsou kapary?`, opts: [`nezralé plody olivovníku`, `naložená květní poupata keře`, `semena hořčice bílé`, `sušené mořské řasy`], correct: 1 },
+  { q: `3. Proč působí kovová klika na dotek chladněji než dřevěná o stejné teplotě?`, opts: [`dřevo dodává ruce vlastní teplo`, `kov pohlcuje vlhkost z pokožky`, `kov odvádí teplo z ruky rychleji než dřevo`, `kov obsahuje více vzduchových dutin než dřevo`], correct: 2 },
+  { q: `4. Ve kterém městě stojí svatyně Kaaba?`, opts: [`Medina`, `Damašek`, `Bagdád`, `Mekka`], correct: 3 },
+  { q: `5. Kdo napsal divadelní hru Audience?`, opts: [`Václav Havel`, `Pavel Kohout`, `Josef Topol`, `Ivan Klíma`], correct: 0 },
+  { q: `6. Jak se odborně nazývá slovo opačného významu?`, opts: [`synonymum`, `antonymum`, `homonymum`, `paronymum`], correct: 1 },
+  { q: `7. Ve které zemi leží město Valparaíso?`, opts: [`Chile`, `Peru`, `Argentina`, `Ekvádor`], correct: 0 },
+  { q: `8. Proti které zemi vyplula španělská Armada?`, opts: [`Nizozemsko`, `Francie`, `Portugalsko`, `Anglie`], correct: 3 },
+  { q: `9. Ve které zemi vznikla dnešní podoba florbalu?`, opts: [`Finsko`, `Švédsko`, `Kanada`, `Švýcarsko`], correct: 1 },
+  { q: `10. Která nerostná surovina tvoří hlavní složku porcelánu?`, opts: [`magnezit`, `baryt`, `hematit`, `kaolin`], correct: 3 }
+];
+
+const VERDICTS = [
+  { max: 3, text: `Otázky přeskakovaly obor od oboru a pokaždé narazily na místo, kde znalost chybí. Většinu bodů tady rozhodl odhad, ne jistota. Není to nic proti bystrosti, jen znamení, že si přehled zatím držíte v pár oblastech a jinde je řídký.` },
+  { max: 6, text: `Poloviční úspěšnost, se kterou odchází velká část řešitelů. V tématech, která máte blízko, jste zabodovali, jinde vás dostaly varianty postavené těsně vedle sebe. K hranici z titulku vede ještě několik bodů cesty.` },
+  { max: 9, text: `Sedm bodů je přesně tam, kde se pohybuje průměrný Čech se slušným přehledem, a osm bodů už je nad ním. Ani jedno ale ještě není to, co slibuje titulek, protože ten mluví o výsledku vyšším než osm. S devíti body jste laťku překonali a váš všeobecný přehled si opravdu zaslouží jedničku, protože jste uspěli i v oborech, které spolu nemají nic společného a nedaly se pokrýt jednou vášní.` },
+  { max: 10, text: `Naprostá špička. Plný počet znamená trefit se v deseti různých oborech naráz, od zoologie po materiály, a neztratit bod ani u varianty, která byla postavená těsně vedle té správné. Váš přehled je na jedničku bez jakékoli výhrady a takový výsledek se náhodou poskládat nedá.` }
+];
+
+const LETTERS = [`a`, `b`, `c`, `d`];
+const answers = new Array(QUESTIONS.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const submitEl = document.getElementById(`submit`);
+const warnEl = document.getElementById(`warn`);
+const resultEl = document.getElementById(`result`);
+const scoreEl = document.getElementById(`score`);
+const verdictEl = document.getElementById(`verdict`);
+const retryEl = document.getElementById(`retry`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const title = document.createElement(`p`);
+    title.className = `q-text`;
+    title.textContent = item.q;
+    box.appendChild(title);
+    item.opts.forEach(function (opt, oi) {
+      const btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.type = `button`;
+      btn.textContent = LETTERS[oi] + `) ` + opt;
+      btn.addEventListener(`click`, function () {
+        if (locked) return;
+        answers[qi] = oi;
+        Array.prototype.forEach.call(box.querySelectorAll(`.opt`), function (b) {
+          b.classList.remove(`selected`);
+        });
+        btn.classList.add(`selected`);
+        warnEl.textContent = ``;
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  submitEl.disabled = answers.indexOf(null) !== -1;
+}
+
+submitEl.addEventListener(`click`, function () {
+  if (answers.indexOf(null) !== -1) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  QUESTIONS.forEach(function (item, qi) {
+    const opts = boxes[qi].querySelectorAll(`.opt`);
+    Array.prototype.forEach.call(opts, function (b, oi) {
+      b.disabled = true;
+      b.classList.remove(`selected`);
+      if (oi === item.correct) b.classList.add(`correct`);
+      else if (oi === answers[qi]) b.classList.add(`wrong`);
+    });
+    if (answers[qi] === item.correct) score++;
+  });
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  let text = VERDICTS[VERDICTS.length - 1].text;
+  for (let i = 0; i < VERDICTS.length; i++) {
+    if (score <= VERDICTS[i].max) { text = VERDICTS[i].text; break; }
+  }
+  verdictEl.textContent = text;
+  submitEl.style.display = `none`;
+  warnEl.textContent = ``;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+retryEl.addEventListener(`click`, function () {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  build();
+  resultEl.style.display = `none`;
+  submitEl.style.display = `block`;
+  submitEl.disabled = true;
+  warnEl.textContent = ``;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+updateSubmit();
+</script>
+</body>
+</html>
