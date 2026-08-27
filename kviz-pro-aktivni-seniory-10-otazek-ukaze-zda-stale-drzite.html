@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro aktivní seniory: 10 otázek ukáže, zda stále držíte krok s dnešním světem</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.varianta:last-child { margin-bottom: 0; }
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.hlaska { text-align: center; color: #721c24; margin-top: 16px; min-height: 1.2em; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#vysledek {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+  display: none;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 767px) {
+  body { padding: 16px; }
+  .otazka, #vysledek { padding: 20px; }
+  h1 { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro aktivní seniory: 10 otázek ukáže, zda stále držíte krok s dnešním světem</h1>
+<p class="perex">Aktivní senior sleduje dění a nenechá se zaskočit. Deset otázek z techniky, filmu, sportu, jídla, energetiky i vesmíru ukáže, jestli vám dnešní svět neutíká. U každé jsou čtyři možnosti a platí jen jedna.</p>
+
+<div id="kviz"></div>
+
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p class="hlaska" id="hlaska"></p>
+
+<div id="vysledek">
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+
+<script>
+var otazky = [
+  {
+    zneni: `1. Která firma vlastní vyhledávač Google, videoportál YouTube i operační systém Android?`,
+    varianty: [`Meta`, `Microsoft`, `Alphabet`, `Amazon`],
+    spravna: 2
+  },
+  {
+    zneni: `2. Prodejem jakého zboží začínal internetový obchod Amazon?`,
+    varianty: [`knihy`, `hudební nahrávky`, `domácí elektronika`, `sportovní oblečení`],
+    spravna: 0
+  },
+  {
+    zneni: `3. Ve kterém sportu kromě snowboardingu vyhrála Ester Ledecká zlato na zimní olympiádě v roce 2018?`,
+    varianty: [`rychlobruslení`, `akrobatické lyžování`, `sjezdové lyžování`, `běh na lyžích`],
+    spravna: 2
+  },
+  {
+    zneni: `4. Který stát vstoupil do Severoatlantické aliance v roce 2023?`,
+    varianty: [`Rakousko`, `Finsko`, `Švédsko`, `Irsko`],
+    spravna: 1
+  },
+  {
+    zneni: `5. Který nabíjecí konektor musí mít nové mobilní telefony prodávané v Evropské unii?`,
+    varianty: [`USB-C`, `micro USB`, `Lightning`, `USB-A`],
+    spravna: 0
+  },
+  {
+    zneni: `6. Který snímek se stal prvním neanglicky mluveným filmem oceněným Oscarem za nejlepší film?`,
+    varianty: [`Parazit`, `Roma`, `Tygr a drak`, `Život je krásný`],
+    spravna: 0
+  },
+  {
+    zneni: `7. Co je matcha?`,
+    varianty: [`sladká pasta z červených fazolí`, `jemně mletý zelený čaj`, `mořská řasa lisovaná do tenkých plátů`, `kvašený nápoj z čajové houby`],
+    spravna: 1
+  },
+  {
+    zneni: `8. Ve kterém mezinárodním ujednání se státy zavázaly udržet oteplení planety výrazně pod dvěma stupni Celsia?`,
+    varianty: [`Kjótský protokol`, `Montrealský protokol`, `Rámcová úmluva OSN o změně klimatu`, `Pařížská dohoda`],
+    spravna: 3
+  },
+  {
+    zneni: `9. Ze které země pochází firma, která v roce 2024 vyhrála tendr na stavbu nových jaderných bloků v Dukovanech?`,
+    varianty: [`Francie`, `Spojené státy`, `Čína`, `Jižní Korea`],
+    spravna: 3
+  },
+  {
+    zneni: `10. Jak se jmenuje kosmická loď, ve které astronauti programu Artemis obletěli Měsíc?`,
+    varianty: [`Starship`, `Orion`, `Dragon`, `Sojuz`],
+    spravna: 1
+  }
+];
+
+var pismena = [`a)`, `b)`, `c)`, `d)`];
+
+var hodnoceni = [
+  { max: 3, text: `Dnešní svět se v posledních letech proměnil na několika frontách naráz a tenhle výsledek říká, že vám část těch změn proběhla kolem, aniž byste se u nich zastavili. Nic ztraceného. Projděte si správné odpovědi a hned budete mít v ruce několik pojmů, které se ve zprávách i v rodinných hovorech objevují stále dokola.` },
+  { max: 6, text: `Krok s dnešním světem držíte tam, kde se o věcech mluvilo nahlas a dlouho. Jakmile ale otázka sáhla po detailu, který se nikde zvlášť nevysvětluje, jistota zakolísala. Základ tedy máte a chybějící kousky doplníte rychle, stačí u zpráv občas zůstat o minutu déle a nepřeskakovat témata, která na první pohled vypadají odtažitě.` },
+  { max: 9, text: `Výborný výsledek, který ukazuje člověka se skutečným zájmem o dění kolem sebe. Ve většině oborů, kterých se kvíz dotkl, jste se neztratili, a v řadě otázek jste uspěli tam, kde chybuje i spousta mnohem mladších řešitelů. Jedna až tři odpovědi vám unikly a bývají to právě ty, o kterých se ve zprávách mluvilo jen okrajově a odpověď se schovávala v detailu. Krok s dnešním světem držíte, jen si ho na pár místech doladíte.` },
+  { max: 10, text: `Naprostá špička. Od internetových gigantů a evropských pravidel pro techniku přes film, jídlo a klimatickou politiku až po energetiku a lety k Měsíci jste prošli bez jediného zaváhání. Takhle kompletní přehled nevznikne náhodou a plný počet v tomto kvízu dá jen menšina. Dnešní svět vám neutíká ani o krok.` }
+];
+
+var odpovedi = new Array(otazky.length).fill(null);
+var zamceno = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoVyhodnotit = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var tlacitkoZnovu = document.getElementById(`znovu`);
+
+function vykresli() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = o.zneni;
+    box.appendChild(zneni);
+
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement(`button`);
+      btn.className = `varianta`;
+      btn.type = `button`;
+      btn.textContent = pismena[j] + ` ` + v;
+      btn.addEventListener(`click`, function () {
+        if (zamceno) { return; }
+        odpovedi[i] = j;
+        var sourozenci = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < sourozenci.length; k++) {
+          sourozenci[k].classList.remove(`vybrana`);
+        }
+        btn.classList.add(`vybrana`);
+        hlaskaEl.textContent = ``;
+        zkontrolujHotovo();
+      });
+      box.appendChild(btn);
+    });
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujHotovo() {
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  tlacitkoVyhodnotit.disabled = !hotovo;
+}
+
+tlacitkoVyhodnotit.addEventListener(`click`, function () {
+  if (tlacitkoVyhodnotit.disabled) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  zamceno = true;
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+
+  otazky.forEach(function (o, i) {
+    var tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].classList.remove(`vybrana`);
+      if (j === o.spravna) {
+        tlacitka[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === o.spravna) { body++; }
+  });
+
+  tlacitkoVyhodnotit.disabled = true;
+  skoreEl.textContent = body + ` z ` + otazky.length;
+
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+tlacitkoZnovu.addEventListener(`click`, function () {
+  odpovedi = new Array(otazky.length).fill(null);
+  zamceno = false;
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  tlacitkoVyhodnotit.disabled = true;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+vykresli();
+</script>
+</body>
+</html>
