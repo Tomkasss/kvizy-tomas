@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz pro generaci Husákových dětí: těchto 10 věcí vám okamžitě připomene mládí</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 32px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    line-height: 1.5;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .locked .opt { cursor: default; }
+  .locked .opt:hover { background: #f7f4f0; }
+  .locked .opt.selected:hover { background: #dcd3c7; }
+  .locked .opt.correct:hover { background: #d4edda; }
+  .locked .opt.wrong:hover { background: #f8d7da; }
+  #submit, #retry {
+    display: block;
+    margin: 40px auto 0;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    color: #fff;
+    cursor: pointer;
+  }
+  #submit { background: #5b7e5f; }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #retry { background: #8c7b6b; }
+  #retry:hover { background: #756658; }
+  #warn { text-align: center; color: #721c24; margin: 14px 0 0; font-size: 1rem; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+  }
+  .score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  .verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  .hidden { display: none; }
+  @media (max-width: 767px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .q, #result { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="title"></h1>
+  <p class="perex" id="perex"></p>
+  <div id="quiz"></div>
+  <button id="submit" disabled></button>
+  <p id="warn" class="hidden"></p>
+  <div id="result" class="hidden">
+    <p class="score" id="score"></p>
+    <p class="verdict" id="verdict"></p>
+    <button id="retry"></button>
+  </div>
+</div>
+<script>
+var TITLE = `Kvíz pro generaci Husákových dětí: těchto 10 věcí vám okamžitě připomene mládí`;
+var PEREX = `Narodili jste se v sedmdesátých letech a dětství se vám dnes vybavuje spíš v útržcích? Deset otázek z běžného života normalizačního Československa ukáže, kolik z vlastního mládí vám pořád zůstalo v hlavě a co už se stihlo vytratit.`;
+
+var QUESTIONS = [
+  {
+    q: `Jak se jmenoval televizní cyklus tří krátkých povídek, které psali scenáristé podle příběhů zaslaných diváky?`,
+    o: [`Bakaláři`, `Rozpaky kuchaře Svatopluka`, `Chalupáři`, `Taková normální rodinka`],
+    a: 0
+  },
+  {
+    q: `Jak se jmenovala síť prodejen spotřebních družstev, která zásobovala československý venkov?`,
+    o: [`Zdroj`, `Pramen`, `Jednota`, `Včela`],
+    a: 2
+  },
+  {
+    q: `Jak se jmenoval sobotní dopolední populárně-vědecký magazín Československého rozhlasu?`,
+    o: [`Mikrofórum`, `Meteor`, `Zelená vlna`, `Domino`],
+    a: 1
+  },
+  {
+    q: `Jak se jmenovalo zařízení, kam děti v socialistickém Československu chodily po vyučování do zájmových kroužků, od modelářského přes výtvarný až po turistický?`,
+    o: [`Osvětová beseda`, `Lidová škola umění`, `Dům pionýrů a mládeže`, `Okresní kulturní středisko`],
+    a: 2
+  },
+  {
+    q: `Jak se jmenovala jednotná dobrovolná tělovýchovná organizace, která od roku 1957 až do konce socialistického Československa zastřešovala všechny sportovní oddíly?`,
+    o: [`ČSTV`, `Sokol`, `Svazarm`, `ROH`],
+    a: 0
+  },
+  {
+    q: `Co měl v socialistickém Československu na starosti podnik OPBH?`,
+    o: [`přidělování stavebních povolení na rodinné domy`, `výstavbu nových panelových sídlišť`, `prodej bytů do osobního vlastnictví`, `správu a údržbu státních nájemních domů`],
+    a: 3
+  },
+  {
+    q: `Co byla v socialistickém Československu brigáda socialistické práce?`,
+    o: [`letní výpomoc studentů na chmelu`, `pracovní kolektiv soutěžící o čestný titul`, `skupina dělníků vyslaná na výpomoc do zaostávajícího podniku`, `mimořádná směna odpracovaná zdarma ve prospěch státu`],
+    a: 1
+  },
+  {
+    q: `Jaký systém barevného televizního vysílání šířily československé televizní vysílače od zavedení barevného vysílání až do konce normalizace v roce 1989?`,
+    o: [`PAL`, `NTSC`, `SECAM`, `MAC`],
+    a: 2
+  },
+  {
+    q: `Co udává prostřední číslice v označení školního sešitu, například 544?`,
+    o: [`počet listů`, `formát sešitu`, `typ liniatury`, `gramáž papíru`],
+    a: 0
+  },
+  {
+    q: `Která pražská instituce od roku 1959 připravovala vzorové módní kolekce pro československé oděvní podniky a její modely pravidelně plnily stránky časopisu Žena a móda?`,
+    o: [`Vkus`, `Textilní tvorba`, `Ústav bytové a oděvní kultury`, `Ústav pro oděvní průmysl`],
+    a: 2
+  }
+];
+
+var BANDS = [
+  { min: 0, max: 3, text: `Normalizační všednodennost se vám z paměti vytratila skoro beze zbytku. Zůstaly nálady, vůně a tváře, ale konkrétní názvy pořadů, podniků a značek se rozplynuly. Zkuste se na pár otázek zeptat sourozenců nebo spolužáků, vzpomínky se obvykle probouzejí jedna od druhé.` },
+  { min: 4, max: 6, text: `Slušný výsledek člověka, který tu dobu prožil, ale neschovával si ji v hlavě po kouscích. To nejviditelnější z dětství naskočí hned, jenže názvy podniků, organizací a pořadů se po čtyřiceti letech v paměti snadno zadrhnou. Zkuste si projít otázky, u kterých jste tipovali; obvykle stačí jediné vodítko a vybaví se i zbytek.` },
+  { min: 7, max: 9, text: `Výborný výkon. Mládí za normalizace máte srovnané napříč obory, od televizního a rozhlasového programu přes prodejny a bydlení až po organizace, do kterých byl tehdy zapsaný skoro každý. K plnému počtu vám chybělo jen pár detailů, na které si dnes vzpomene málokdo.` },
+  { min: 10, max: 10, text: `Plný počet. Vaše dětství a mládí v socialistickém Československu vám neleží v paměti jako mlha, ale jako přesně popsaný seznam. Znáte i věci, které si většina vrstevníků dávno přestala vybavovat, a to se povede opravdu jen menšině.` }
+];
+
+var LABEL_SUBMIT = `Vyhodnotit`;
+var LABEL_RETRY = `Zkusit znovu`;
+var LABEL_WARN = `Odpovězte prosím na všechny otázky`;
+
+var answers = [];
+var locked = false;
+
+var titleEl = document.getElementById(`title`);
+var perexEl = document.getElementById(`perex`);
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryEl = document.getElementById(`retry`);
+
+titleEl.textContent = TITLE;
+perexEl.textContent = PEREX;
+submitEl.textContent = LABEL_SUBMIT;
+retryEl.textContent = LABEL_RETRY;
+warnEl.textContent = LABEL_WARN;
+
+function build() {
+  quizEl.innerHTML = ``;
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var qp = document.createElement(`p`);
+    qp.className = `q-text`;
+    qp.textContent = (i + 1) + `. ` + QUESTIONS[i].q;
+    box.appendChild(qp);
+    for (var j = 0; j < QUESTIONS[i].o.length; j++) {
+      var btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.type = `button`;
+      btn.textContent = QUESTIONS[i].o[j];
+      btn.setAttribute(`data-q`, String(i));
+      btn.setAttribute(`data-o`, String(j));
+      btn.addEventListener(`click`, onPick);
+      box.appendChild(btn);
+    }
+    quizEl.appendChild(box);
+  }
+}
+
+function onPick(e) {
+  if (locked) { return; }
+  var qi = parseInt(e.currentTarget.getAttribute(`data-q`), 10);
+  var oi = parseInt(e.currentTarget.getAttribute(`data-o`), 10);
+  answers[qi] = oi;
+  var box = quizEl.children[qi];
+  var opts = box.querySelectorAll(`.opt`);
+  for (var k = 0; k < opts.length; k++) {
+    opts[k].classList.remove(`selected`);
+  }
+  e.currentTarget.classList.add(`selected`);
+  refresh();
+}
+
+function allAnswered() {
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    if (typeof answers[i] !== `number`) { return false; }
+  }
+  return true;
+}
+
+function refresh() {
+  var ready = allAnswered();
+  submitEl.disabled = !ready;
+  if (ready) { warnEl.classList.add(`hidden`); }
+}
+
+function evaluate() {
+  if (!allAnswered()) {
+    warnEl.classList.remove(`hidden`);
+    return;
+  }
+  locked = true;
+  var score = 0;
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    var box = quizEl.children[i];
+    box.classList.add(`locked`);
+    var opts = box.querySelectorAll(`.opt`);
+    var correct = QUESTIONS[i].a;
+    if (answers[i] === correct) { score++; }
+    for (var j = 0; j < opts.length; j++) {
+      opts[j].classList.remove(`selected`);
+      if (j === correct) {
+        opts[j].classList.add(`correct`);
+      } else if (j === answers[i]) {
+        opts[j].classList.add(`wrong`);
+      }
+    }
+  }
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  var verdict = ``;
+  for (var b = 0; b < BANDS.length; b++) {
+    if (score >= BANDS[b].min && score <= BANDS[b].max) { verdict = BANDS[b].text; }
+  }
+  verdictEl.textContent = verdict;
+  resultEl.classList.remove(`hidden`);
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  answers = [];
+  locked = false;
+  resultEl.classList.add(`hidden`);
+  warnEl.classList.add(`hidden`);
+  submitEl.disabled = true;
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+retryEl.addEventListener(`click`, reset);
+
+build();
+refresh();
+</script>
+</body>
+</html>
