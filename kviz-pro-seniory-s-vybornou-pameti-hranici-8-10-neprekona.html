@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro seniory s výbornou pamětí: hranici 8/10 nepřekoná jen tak někdo</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 32px 16px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.5; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+  line-height: 1.45;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.locked .opt { cursor: default; }
+.locked .opt:hover { background: #f7f4f0; }
+.locked .opt.sel:hover { background: #dcd3c7; }
+.locked .opt.correct:hover { background: #d4edda; }
+.locked .opt.wrong:hover { background: #f8d7da; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+  display: none;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#retry:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  .q { padding: 20px; }
+  h1 { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro seniory s výbornou pamětí: hranici 8/10 nepřekoná jen tak někdo</h1>
+<p class="perex">Deset otázek z různých oborů pro seniory, kteří se na svou paměť spoléhají. Do sedmi bodů se dostane každý se slušným přehledem, ale hranice osmi bodů oddělí ty, kterým ze školy i ze života zůstalo v hlavě opravdu hodně.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<div id="warn"></div>
+<div id="result">
+  <div id="score"></div>
+  <p id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  {
+    q: `1. Podle jakého znaku na těle se pozná zmije obecná?`,
+    o: [`podle klikaté tmavé čáry na hřbetě`, `podle dvou žlutých půlměsíčků za hlavou`, `podle bílého kroužku kolem oka`, `podle příčných černých pruhů na ocasu`],
+    a: 0
+  },
+  {
+    q: `2. Z jaké suroviny se vyrábí seitan?`,
+    o: [`ze sójových bobů`, `z pšeničného lepku`, `z kokosového mléka`, `z mletých mandlí`],
+    a: 1
+  },
+  {
+    q: `3. Ke kterému státu patří Velikonoční ostrov?`,
+    o: [`k Peru`, `k Novému Zélandu`, `k Francii`, `k Chile`],
+    a: 3
+  },
+  {
+    q: `4. Hlídač má o každém víkendu právě jednu službu, buď v sobotu, nebo v neděli. Kdykoli slouží v sobotu, zamyká navíc bránu u skladu. Tento víkend zůstala brána u skladu odemčená. Kdy měl hlídač službu?`,
+    o: [`v sobotu`, `v neděli`, `tento víkend nesloužil vůbec`, `ze zadání to nelze určit`],
+    a: 1
+  },
+  {
+    q: `5. Které tři zbraně se používají ve sportovním šermu?`,
+    o: [`fleret, kord a šavle`, `fleret, rapír a dýka`, `kord, rapír a meč`, `šavle, dýka a meč`],
+    a: 0
+  },
+  {
+    q: `6. K čemu slouží alternátor v automobilu?`,
+    o: [`k roztočení motoru při startování`, `k chlazení motoru`, `k výrobě elektřiny a dobíjení akumulátoru`, `k regulaci množství paliva`],
+    a: 2
+  },
+  {
+    q: `7. Co znamená příslovce zhusta?`,
+    o: [`narychlo`, `často`, `stěží`, `nahlas`],
+    a: 1
+  },
+  {
+    q: `8. Ve které pražské budově sídlí Česká filharmonie?`,
+    o: [`v Obecním domě`, `v Klementinu`, `v Rudolfinu`, `ve Stavovském divadle`],
+    a: 2
+  },
+  {
+    q: `9. Pro kterého panovníka byla postavena největší pyramida v Gíze?`,
+    o: [`pro Cheopse`, `pro Tutanchamona`, `pro Ramesse II.`, `pro Achnatona`],
+    a: 0
+  },
+  {
+    q: `10. Jakou jednotkou se udává rychlost lodi?`,
+    o: [`sáhem`, `uzlem`, `mílí`, `kabelem`],
+    a: 1
+  }
+];
+
+var VERDICTS = [
+  { min: 0, max: 3, t: `Tenhle kvíz vás zastavil dřív, než jste se rozjeli. Otázky mířily do deseti různých oborů a k některým jste se možná roky nedostali, takže se znalosti prostě někam zasunuly. Vyplatí se projít si odpovědi a všimnout si, které obory vám dělaly potíže. Paměť na takové věci reaguje rychle a příště bude výsledek jiný.` },
+  { min: 4, max: 7, t: `Slušný základ, ke slíbené hranici osmi bodů to ale ještě nestačí. Část otázek jste zvládli, u zbytku vás nejspíš dostaly nabídnuté možnosti, které stály blízko sebe. To je přesně místo, kde se pozná, jestli si člověk fakt vybavuje, nebo jen tipuje. Zkuste si nad chybnými odpověďmi vzpomenout, odkud jste tu látku znali.` },
+  { min: 8, max: 9, t: `Hranici z názvu kvízu jste překonali, a to nezvládne jen tak někdo. Osm a devět bodů znamená paměť, na kterou je spolehnutí napříč obory, od přírody přes techniku až po dějiny. Vaše hlava si zjevně drží nejen školní učivo, ale i věci nasbírané za desítky let běžného života. K plnému počtu vám chyběla jedna až dvě odpovědi.` },
+  { min: 10, max: 10, t: `Plný počet, a to v kvízu, kde se otázky střídaly napříč deseti obory a kde ani jedna varianta nebyla nabídnutá náhodou. Prošli jste bez zaváhání přírodou, zeměpisem, sportem, technikou, češtinou, pražskou kulturou i starověkými dějinami, poradili jste si s jednotkou, kterou se měří rychlost lodi, i s tím, z čeho se dělá jedna známá náhražka masa, a nenechali jste se svést ani u úlohy, která nabízela pohodlné „nelze určit". Tohle nezvládne ani většina těch, kdo hranici osmi bodů překonají.` }
+];
+
+var picked = [];
+var done = false;
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryEl = document.getElementById(`retry`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  picked = [];
+  done = false;
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    picked.push(null);
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    box.setAttribute(`data-q`, String(i));
+    var qt = document.createElement(`p`);
+    qt.className = `q-text`;
+    qt.textContent = QUESTIONS[i].q;
+    box.appendChild(qt);
+    for (var j = 0; j < QUESTIONS[i].o.length; j++) {
+      var btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.type = `button`;
+      btn.setAttribute(`data-q`, String(i));
+      btn.setAttribute(`data-o`, String(j));
+      btn.textContent = QUESTIONS[i].o[j];
+      btn.addEventListener(`click`, onPick);
+      box.appendChild(btn);
+    }
+    quizEl.appendChild(box);
+  }
+  submitEl.disabled = true;
+  warnEl.textContent = ``;
+  resultEl.style.display = `none`;
+}
+
+function onPick(e) {
+  if (done) return;
+  var qi = parseInt(e.currentTarget.getAttribute(`data-q`), 10);
+  var oi = parseInt(e.currentTarget.getAttribute(`data-o`), 10);
+  picked[qi] = oi;
+  var box = quizEl.querySelector(`.q[data-q="` + qi + `"]`);
+  var opts = box.querySelectorAll(`.opt`);
+  for (var k = 0; k < opts.length; k++) { opts[k].classList.remove(`sel`); }
+  e.currentTarget.classList.add(`sel`);
+  refresh();
+}
+
+function allAnswered() {
+  for (var i = 0; i < picked.length; i++) { if (picked[i] === null) return false; }
+  return true;
+}
+
+function refresh() {
+  if (allAnswered()) {
+    submitEl.disabled = false;
+    warnEl.textContent = ``;
+  } else {
+    submitEl.disabled = true;
+  }
+}
+
+function evaluate() {
+  if (!allAnswered()) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  done = true;
+  var score = 0;
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    var box = quizEl.querySelector(`.q[data-q="` + i + `"]`);
+    box.classList.add(`locked`);
+    var opts = box.querySelectorAll(`.opt`);
+    for (var j = 0; j < opts.length; j++) {
+      opts[j].classList.remove(`sel`);
+      if (j === QUESTIONS[i].a) {
+        opts[j].classList.add(`correct`);
+      } else if (j === picked[i]) {
+        opts[j].classList.add(`wrong`);
+      }
+    }
+    if (picked[i] === QUESTIONS[i].a) score++;
+  }
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  var text = ``;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score >= VERDICTS[v].min && score <= VERDICTS[v].max) { text = VERDICTS[v].t; break; }
+  }
+  verdictEl.textContent = text;
+  submitEl.disabled = true;
+  warnEl.textContent = ``;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+retryEl.addEventListener(`click`, function () {
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+</script>
+</body>
+</html>
