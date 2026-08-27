@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Náročný vědomostní mix: hranici 8/10 překonají pouze lidé s mimořádným rozhledem</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.varianta:last-child { margin-bottom: 0; }
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta:disabled { cursor: default; }
+#vyhodnotit, #znovu {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#znovu { background: #8c7b6b; }
+#znovu:hover { background: #756658; }
+#hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.4em; }
+#vysledek {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 24px;
+  display: none;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+@media (max-width: 767px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Náročný vědomostní mix: hranici 8/10 překonají pouze lidé s mimořádným rozhledem</h1>
+<p class="perex">Deset otázek napříč obory, kde snadné začátky rychle vystřídají místa, na kterých se běžný přehled zadrhne. Průměr se drží kolem šesti bodů, osmý správný zásah je zlom. Kdo hranici 8/10 překoná, patří mezi opravdu rozhledené.</p>
+<div id="kviz"></div>
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p id="hlaska"></p>
+<div id="vysledek">
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const otazky = [
+  { zneni: `1. Kterou zemí protéká řeka Pád?`, varianty: [`Itálie`, `Francie`, `Španělsko`, `Rumunsko`], spravna: 0 },
+  { zneni: `2. Který papež svolal tridentský koncil?`, varianty: [`Lev X.`, `Klement VII.`, `Pius IV.`, `Pavel III.`], spravna: 3 },
+  { zneni: `3. Jak se nazývá typografický znak &?`, varianty: [`tilda`, `ampersand`, `cedilla`, `obelisk`], spravna: 1 },
+  { zneni: `4. Kdo je autorem výtvarných návrhů současné řady českých bankovek?`, varianty: [`Alfons Mucha`, `Max Švabinský`, `Oldřich Kulhánek`, `Zdeněk Sklenář`], spravna: 2 },
+  { zneni: `5. Z kolika soudců se skládá Ústavní soud České republiky?`, varianty: [`11`, `13`, `15`, `17`], spravna: 2 },
+  { zneni: `6. Jednotkou jaké veličiny je dioptrie?`, varianty: [`optická mohutnost`, `ohnisková vzdálenost`, `index lomu`, `zorný úhel`], spravna: 0 },
+  { zneni: `7. Na které hoře podle biblického vyprávění přijal Mojžíš desatero?`, varianty: [`Ararat`, `Sinaj`, `Olivetská hora`, `Golgota`], spravna: 1 },
+  { zneni: `8. Které mapové zobrazení nápadně zvětšuje plochu Grónska?`, varianty: [`Mollweidovo`, `Gall-Petersovo`, `Robinsonovo`, `Mercatorovo`], spravna: 3 },
+  { zneni: `9. Který chemický prvek má ze všech prvků nejvyšší elektronegativitu?`, varianty: [`fluor`, `kyslík`, `chlor`, `dusík`], spravna: 0 },
+  { zneni: `10. Jak dlouhé je trestné kolo, které biatlonista objíždí ve sprintu za každý minutý terč?`, varianty: [`100 metrů`, `150 metrů`, `200 metrů`, `250 metrů`], spravna: 1 }
+];
+
+const hodnoceni = [
+  { min: 0, max: 3, text: `Mix vás dostal hned na několika místech naráz. Otázky schválně střídaly obory tak, aby se nedalo spoléhat na jedinou silnou stránku, a tenhle výsledek říká, že se opora našla jen výjimečně. K hranici 8/10 je odsud daleko, chybějící body ale nejčastěji odešly u jmen a termínů, které se dají doplnit jedním odpolednem čtení.` },
+  { min: 4, max: 6, text: `Přesně tady se pohybuje běžný řešitel, průměr tohoto kvízu je šest bodů. Znamená to solidní všeobecný základ, který spolehlivě zabral u snazších otázek a rozpadl se tam, kde bylo potřeba znát konkrétní jméno, číslo nebo termín místo obecné kategorie. Hranice 8/10 zůstala nepřekonaná, chybí k ní ale jen dvě až čtyři odpovědi.` },
+  { min: 7, max: 9, text: `Sedm bodů je nadprůměr a zároveň poslední příčka pod laťkou, do překonání hranice chyběla jediná odpověď. Od osmi bodů výš je slib titulku splněný: osm správných znamená, že jste k pěti středně těžkým otázkám přidali i něco z horního patra, kde už nestačí obor tipnout a je nutné trefit přesný údaj. Devět bodů posouvá výsledek ještě dál, protože k němu vedla cesta jedině přes dvě ze tří nejtěžších položek.` },
+  { min: 10, max: 10, text: `Plný počet, který se v tomhle kvízu vidí zřídka. Museli jste zvládnout všechny tři otázky z horního patra, u kterých se drtivá většina řešitelů dohaduje mezi dvěma blízkými variantami, a přitom nezakolísat u žádné z jednodušších. Takový výsledek nevzniká z jednoho oboru ani ze štěstí při hádání, ale ze skutečně mimořádného rozhledu, který sahá od církevních dějin přes autory českých bankovek až po detaily sportovních pravidel.` }
+];
+
+const pismena = [`a)`, `b)`, `c)`, `d)`];
+let odpovedi = new Array(otazky.length).fill(null);
+let hotovo = false;
+
+const kvizEl = document.getElementById(`kviz`);
+const btnVyhodnotit = document.getElementById(`vyhodnotit`);
+const hlaskaEl = document.getElementById(`hlaska`);
+const vysledekEl = document.getElementById(`vysledek`);
+const skoreEl = document.getElementById(`skore`);
+const hodnoceniEl = document.getElementById(`hodnoceni`);
+const btnZnovu = document.getElementById(`znovu`);
+
+function vykresli() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach((o, i) => {
+    const box = document.createElement(`div`);
+    box.className = `otazka`;
+    const p = document.createElement(`p`);
+    p.className = `zneni`;
+    p.textContent = o.zneni;
+    box.appendChild(p);
+    o.varianty.forEach((v, j) => {
+      const b = document.createElement(`button`);
+      b.className = `varianta`;
+      b.textContent = pismena[j] + ` ` + v;
+      b.addEventListener(`click`, () => {
+        if (hotovo) return;
+        odpovedi[i] = j;
+        Array.from(box.querySelectorAll(`.varianta`)).forEach(x => x.classList.remove(`vybrana`));
+        b.classList.add(`vybrana`);
+        zkontrolujPripravenost();
+      });
+      box.appendChild(b);
+    });
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujPripravenost() {
+  const vse = odpovedi.every(x => x !== null);
+  btnVyhodnotit.disabled = !vse;
+  if (vse) hlaskaEl.textContent = ``;
+}
+
+btnVyhodnotit.addEventListener(`click`, () => {
+  if (odpovedi.some(x => x === null)) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  hotovo = true;
+  let skore = 0;
+  const boxy = kvizEl.querySelectorAll(`.otazka`);
+  boxy.forEach((box, i) => {
+    const tlacitka = box.querySelectorAll(`.varianta`);
+    tlacitka.forEach((b, j) => {
+      b.disabled = true;
+      b.classList.remove(`vybrana`);
+      if (j === otazky[i].spravna) b.classList.add(`spravna`);
+      else if (j === odpovedi[i]) b.classList.add(`spatna`);
+    });
+    if (odpovedi[i] === otazky[i].spravna) skore++;
+  });
+  btnVyhodnotit.disabled = true;
+  skoreEl.textContent = skore + ` z ` + otazky.length;
+  const h = hodnoceni.find(x => skore >= x.min && skore <= x.max);
+  hodnoceniEl.textContent = h ? h.text : ``;
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth` });
+});
+
+btnZnovu.addEventListener(`click`, () => {
+  odpovedi = new Array(otazky.length).fill(null);
+  hotovo = false;
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  btnVyhodnotit.disabled = true;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+vykresli();
+</script>
+</body>
+</html>
