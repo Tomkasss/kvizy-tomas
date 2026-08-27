@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rychlý vědomostní test pro seniory nad 60 let: zvládnete 10 otázek během pouhých 3 minut?</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qt { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.good { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.bad { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt.lock { cursor: default; }
+.btn {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+.btn:hover { background: #4a6b4e; }
+.btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+.btn.again { background: #8c7b6b; }
+.btn.again:hover { background: #756658; }
+.msg { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+.res {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 14px; }
+.verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+.hidden { display: none; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.45rem; }
+  .q, .res { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Rychlý vědomostní test pro seniory nad 60 let: zvládnete 10 otázek během pouhých 3 minut?</h1>
+<p class="perex">Deset otázek napříč obory pro čtenáře po šedesátce, od přírody a dopravy přes dějiny, sport a jídlo až po víru, architekturu a kulturu. Na celý test máte tři minuty, takže dlouho neváhejte a sázejte na to, co vám naskočí první.</p>
+
+<div id="quiz"></div>
+
+<button class="btn" id="submit" disabled>Vyhodnotit</button>
+<p class="msg hidden" id="msg">Odpovězte prosím na všechny otázky</p>
+
+<div class="res hidden" id="res">
+  <p class="score" id="score"></p>
+  <p class="verdict" id="verdict"></p>
+  <button class="btn again" id="again">Zkusit znovu</button>
+</div>
+</div>
+
+<script>
+var QUESTIONS = [
+  { q: `Jak se nazývá látka, kterou včely vyrábějí z pryskyřice nasbírané na pupenech stromů?`,
+    o: [`včelí vosk`, `propolis`, `mateří kašička`, `pyl`], a: 1 },
+  { q: `Jak se nazývá železniční dráha, která odbočuje z tratě přímo do areálu závodu nebo skladu?`,
+    o: [`točna`, `výhybna`, `úvrať`, `vlečka`], a: 3 },
+  { q: `Ve kterém století byla v českých zemích robota definitivně a natrvalo zrušena?`,
+    o: [`17. století`, `18. století`, `19. století`, `20. století`], a: 2 },
+  { q: `Jak se v golfu označuje výsledek, kdy hráč zahraje jamku o jednu ránu pod par?`,
+    o: [`bogey`, `birdie`, `eagle`, `albatros`], a: 1 },
+  { q: `Ze kterého masa se tradičně připravuje pravý maďarský guláš?`,
+    o: [`z hovězího`, `z vepřového`, `z jehněčího`, `z drůbežího`], a: 0 },
+  { q: `Kdy začíná židovský šabat?`,
+    o: [`v pátek se západem slunce`, `o půlnoci z pátku na sobotu`, `v sobotu s východem slunce`, `v sobotu v poledne`], a: 0 },
+  { q: `Ve kterém městě stojí chrám Hagia Sofia?`,
+    o: [`Alexandrie`, `Damašek`, `Istanbul`, `Jeruzalém`], a: 2 },
+  { q: `Co udává u zlata údaj v karátech?`,
+    o: [`hmotnost`, `tvrdost`, `barvu`, `ryzost`], a: 3 },
+  { q: `Jak se nazývá nejstarší slovanské písmo?`,
+    o: [`cyrilice`, `hlaholice`, `runové písmo`, `švabach`], a: 1 },
+  { q: `Ve kterém městě sídlí Divadlo Husa na provázku?`,
+    o: [`Brno`, `Olomouc`, `Ostrava`, `Praha`], a: 0 }
+];
+
+var LETTERS = [`a)`, `b)`, `c)`, `d)`];
+
+var VERDICTS = [
+  { max: 3, t: `Tenhle výsledek říká, že vás tříminutový limit dohnal dřív než otázky samotné. Většina bodů se ztrácí u oborů, kterých se člověk běžně nedotkne, a to se dá napravit už příštím testem. Zkuste to znovu bez hodinek a uvidíte, o kolik se číslo posune.` },
+  { max: 6, t: `Polovina otázek sedla, druhá polovina utekla, a skoro vždycky to byly ty, kde nestačí obecná představa a je potřeba konkrétní detail. Tři minuty jsou krátká doba na rozmýšlení, takže část bodů nejspíš padla za oběť hodinkám, ne paměti. Projděte si klidně ještě jednou jen ty otázky, u kterých jste tápali, a příště se posunete o kus výš.` },
+  { max: 9, t: `Tohle je výsledek, na který test mířil, a vy jste ho trefili. Znalosti napříč obory vám zůstaly v hlavě i po letech a rychlé tempo vás nerozhodilo. K plnému počtu vám scházela jedna dvě otázky z okraje běžného přehledu.` },
+  { max: 10, t: `Deset z deseti znamená, že vás nezastavila ani otázka postavená na detailu, který se ve škole nikdy neprobíral, a stihli jste to během tří minut. Takový rozhled se nedá nabít narychlo, ten se sbírá celý život.` }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var done = false;
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var msgEl = document.getElementById(`msg`);
+var resEl = document.getElementById(`res`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var againEl = document.getElementById(`again`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var title = document.createElement(`p`);
+    title.className = `qt`;
+    title.textContent = (i + 1) + `. ` + QUESTIONS[i].q;
+    box.appendChild(title);
+    for (var j = 0; j < QUESTIONS[i].o.length; j++) {
+      var b = document.createElement(`button`);
+      b.className = `opt`;
+      b.type = `button`;
+      b.textContent = LETTERS[j] + ` ` + QUESTIONS[i].o[j];
+      b.setAttribute(`data-q`, i);
+      b.setAttribute(`data-o`, j);
+      b.addEventListener(`click`, onPick);
+      box.appendChild(b);
+    }
+    quizEl.appendChild(box);
+  }
+}
+
+function onPick(e) {
+  if (done) { return; }
+  var qi = parseInt(e.currentTarget.getAttribute(`data-q`), 10);
+  var oi = parseInt(e.currentTarget.getAttribute(`data-o`), 10);
+  answers[qi] = oi;
+  var boxes = quizEl.children[qi].querySelectorAll(`.opt`);
+  for (var k = 0; k < boxes.length; k++) { boxes[k].classList.remove(`sel`); }
+  e.currentTarget.classList.add(`sel`);
+  refresh();
+}
+
+function refresh() {
+  var all = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !all;
+  if (all) { msgEl.classList.add(`hidden`); }
+}
+
+function evaluate() {
+  if (!answers.every(function (a) { return a !== null; })) {
+    msgEl.classList.remove(`hidden`);
+    return;
+  }
+  done = true;
+  var score = 0;
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    var boxes = quizEl.children[i].querySelectorAll(`.opt`);
+    for (var j = 0; j < boxes.length; j++) {
+      boxes[j].classList.remove(`sel`);
+      boxes[j].classList.add(`lock`);
+      if (j === QUESTIONS[i].a) { boxes[j].classList.add(`good`); }
+      else if (j === answers[i]) { boxes[j].classList.add(`bad`); }
+    }
+    if (answers[i] === QUESTIONS[i].a) { score++; }
+  }
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score <= VERDICTS[v].max) { verdictEl.textContent = VERDICTS[v].t; break; }
+  }
+  submitEl.disabled = true;
+  submitEl.classList.add(`hidden`);
+  resEl.classList.remove(`hidden`);
+  resEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  done = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  build();
+  resEl.classList.add(`hidden`);
+  submitEl.classList.remove(`hidden`);
+  submitEl.disabled = true;
+  msgEl.classList.add(`hidden`);
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+againEl.addEventListener(`click`, reset);
+build();
+</script>
+</body>
+</html>
