@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test pro milovníky českého jazyka: 10 neobvyklých výrazů prověří vaši slovní zásobu</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 36px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    line-height: 1.5;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  #vyhodnotit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #hlaska { text-align: center; color: #8c5b5b; margin-top: 14px; min-height: 1.2em; }
+  #vysledek {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 14px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #znovu {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #znovu:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test pro milovníky českého jazyka: 10 neobvyklých výrazů prověří vaši slovní zásobu</h1>
+  <p class="perex">Deset slov, která z běžné mluvy skoro vymizela, ale ve starších knihách na ně narazíte pořád. Některá znali ještě naši prarodiče, jiná už jen slovníky. Poznáte u všech ten správný význam, nebo vás zradí nabídnuté varianty?</p>
+
+  <div id="kviz"></div>
+
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+
+  <div id="vysledek">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var otazky = [
+  {
+    zneni: `1. Co znamená slovo „slota"?`,
+    varianty: [
+      `tenká vrstva ledu, která se po nočním mrazu udrží na cestách`,
+      `prudký, ale krátký déšť spadlý z jediného mraku`,
+      `dlouhé nevlídné počasí s deštěm a chladem`,
+      `hustá mlha držící se v údolí po celý den`
+    ],
+    spravna: 2
+  },
+  {
+    zneni: `2. Co znamená slovo „souchotiny"?`,
+    varianty: [
+      `plicní tuberkulóza provázená vleklým chřadnutím`,
+      `dlouhotrvající zánět průdušek provázený chrapotem`,
+      `záduch se záchvaty dušnosti a sípáním`,
+      `horečnaté onemocnění s vyrážkou po celém těle`
+    ],
+    spravna: 0
+  },
+  {
+    zneni: `3. Co označuje slovo „kvelb"?`,
+    varianty: [
+      `dřevěná bouda, ve které se na trhu prodávalo`,
+      `výklenek ve zdi pro svatý obrázek`,
+      `podloubí lemující náměstí`,
+      `klenutá místnost, zejména krám či obchod`
+    ],
+    spravna: 3
+  },
+  {
+    zneni: `4. Co znamená přídavné jméno „čacký"?`,
+    varianty: [
+      `bystrý a rychle chápající`,
+      `statečný a udatný`,
+      `poctivý a beze lsti`,
+      `urostlý a pohledný`
+    ],
+    spravna: 1
+  },
+  {
+    zneni: `5. Co označuje slovo „šlojíř"?`,
+    varianty: [
+      `šněrovaný živůtek nošený přes košili`,
+      `plátěná pokrývka hlavy vázaná pod bradou`,
+      `závoj zahalující hlavu a tvář`,
+      `dlouhý plášť s kapucí do nepohody`
+    ],
+    spravna: 2
+  },
+  {
+    zneni: `6. Co označuje slovo „šalmaj"?`,
+    varianty: [
+      `pastýřská píšťala příjemného zvuku`,
+      `strunný nástroj rozeznívaný otáčeným kolečkem`,
+      `malé ruční varhánky nošené na popruhu`,
+      `kovová trubka, na kterou troubívali ponocní`
+    ],
+    spravna: 0
+  },
+  {
+    zneni: `7. Co označuje slovo „slať"?`,
+    varianty: [
+      `bahnitý břeh rybníka zarostlý rákosem`,
+      `rašeliniště s vrstvou mechu a zakrslými borovicemi`,
+      `travnatá mýtina uprostřed vysokého lesa`,
+      `mělká tůň v korytě lesního potoka`
+    ],
+    spravna: 1
+  },
+  {
+    zneni: `8. Co označuje slovo „kaldoun"?`,
+    varianty: [
+      `vykrmená husa určená na svatomartinský stůl`,
+      `nadívaný husí krk pečený v troubě`,
+      `sádlo vyškvařené z husích odřezků`,
+      `vnitřnosti, krk a křidélka z drůbeže`
+    ],
+    spravna: 3
+  },
+  {
+    zneni: `9. Co označuje slovo „lomenice"?`,
+    varianty: [
+      `dřevěný štít, kterým je zakončena čelní stěna stavení`,
+      `šikmý přesah střechy vysunutý nad vchod`,
+      `krytá pavlač vedoucí podél patra domu`,
+      `trámový překlad nad vraty stodoly`
+    ],
+    spravna: 0
+  },
+  {
+    zneni: `10. Co označuje slovo „barchet"?`,
+    varianty: [
+      `hrubé plátno z konopí užívané na pytle a plachty`,
+      `silná teplá bavlněná látka s měkkým vlasem na rubu`,
+      `tenká průsvitná tkanina užívaná na záclony`,
+      `hladká lesklá tkanina z česané vlněné příze`
+    ],
+    spravna: 1
+  }
+];
+
+var hodnoceni = [
+  {
+    min: 0, max: 3,
+    text: `Vaše slovní zásoba stojí pevně na dnešní češtině a starší vrstva jazyka do ní zatím nezasahuje. Slova z venkovských stavení, kuchyní a starých šatníků jste museli odhadovat a nabídnuté varianty vás většinou svedly. Dobrá zpráva je, že tahle vrstva se dá číst: stačí sáhnout po starší české próze a významy se začnou skládat samy.`
+  },
+  {
+    min: 4, max: 6,
+    text: `Máte slovní zásobu, jaká se čtenáři vybuduje běžnou četbou. Výrazy pro počasí, nemoci a lidské vlastnosti jste zvládli, protože je nesou romány a pohádky. Zaváhali jste tam, kde slovo pojmenovává konkrétní věc, kterou jste nikdy neviděli. To je přesně hranice, za kterou začíná zapomenutá čeština.`
+  },
+  {
+    min: 7, max: 9,
+    text: `Vaše slovní zásoba sahá výrazně dál než slovní zásoba průměrného čtenáře. Rozeznáte knižní přídavné jméno, poznáte hudební nástroj i typ krajiny a nenecháte se zmást variantou, která zní skoro stejně. Chybí vám jen ta nejužší vrstva slov, která přežila výhradně v popisech starých řemesel a venkovské domácnosti.`
+  },
+  {
+    min: 10, max: 10,
+    text: `Ovládáte i tu část české slovní zásoby, kterou dnes najdete většinou už jen ve slovníku. Rozlišili jste teplou bavlněnou látku od hrubého plátna, trefili jste staré označení pro drůbky i zapomenuté jméno klenutého krámu, tedy přesně ta místa, kde se chybuje nejčastěji. Takový výsledek uhraje málokdo a vypovídá o mimořádně bohaté slovní zásobě.`
+  }
+];
+
+var pismena = [`a) `, `b) `, `c) `, `d) `];
+var odpovedi = new Array(otazky.length).fill(null);
+var vyhodnoceno = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var vyhodnotitEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function postav() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = o.zneni;
+    box.appendChild(zneni);
+
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement(`button`);
+      btn.className = `varianta`;
+      btn.type = `button`;
+      btn.textContent = pismena[j] + v;
+      btn.addEventListener(`click`, function () {
+        if (vyhodnoceno) return;
+        odpovedi[i] = j;
+        var vsechny = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < vsechny.length; k++) {
+          vsechny[k].classList.remove(`vybrana`);
+        }
+        btn.classList.add(`vybrana`);
+        zkontrolujHotovo();
+      });
+      box.appendChild(btn);
+    });
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujHotovo() {
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  vyhodnotitEl.disabled = !hotovo;
+  if (hotovo) hlaskaEl.textContent = ``;
+}
+
+vyhodnotitEl.addEventListener(`click`, function () {
+  if (vyhodnotitEl.disabled) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  if (vyhodnoceno) return;
+  vyhodnoceno = true;
+
+  var skore = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  otazky.forEach(function (o, i) {
+    var tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove(`vybrana`);
+      if (j === o.spravna) {
+        tlacitka[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === o.spravna) skore++;
+  });
+
+  skoreEl.textContent = skore + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore >= hodnoceni[h].min && skore <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+
+  vyhodnotitEl.disabled = true;
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+znovuEl.addEventListener(`click`, function () {
+  odpovedi = new Array(otazky.length).fill(null);
+  vyhodnoceno = false;
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  vyhodnotitEl.disabled = true;
+  postav();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+postav();
+</script>
+</body>
+</html>
