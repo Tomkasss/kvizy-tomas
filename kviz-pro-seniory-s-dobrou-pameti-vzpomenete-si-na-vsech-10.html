@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz pro seniory s dobrou pamětí: vzpomenete si na všech 10 událostí minulého století?</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+.varianta:last-child { margin-bottom: 0; }
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta[disabled] { cursor: default; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hlaska { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; min-height: 1.2em; }
+#vysledek {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+  border-top: 4px solid #5b7e5f;
+  display: none;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka { padding: 20px; }
+  #vyhodnotit, #znovu { width: 100%; padding: 16px 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro seniory s dobrou pamětí: vzpomenete si na všech 10 událostí minulého století?</h1>
+<p class="perex">Deset událostí minulého století napříč obory: vesmír, válečný odboj, medicína, letectví, přírodní katastrofy, olympijské hry, film, archeologie, mezinárodní politika i každodenní život v Československu. Vy, kdo jste je zažili, máte náskok. Kolik jich dokážete zařadit?</p>
+
+<div id="kviz"></div>
+
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p class="hlaska" id="hlaska"></p>
+
+<div id="vysledek">
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+
+<script>
+var otazky = [
+  {
+    zneni: `1. Která dvojice psů se v roce 1960 jako první živá vrátila z oběžné dráhy Země?`,
+    varianty: [`Lajka a Albina`, `Dezik a Cygan`, `Bělka a Strelka`, `Ugoljok a Veterok`],
+    spravna: 2
+  },
+  {
+    zneni: `2. Jak se jmenovala operace, při níž českoslovenští parašutisté provedli atentát na Reinharda Heydricha?`,
+    varianty: [`Silver A`, `Anthropoid`, `Out Distance`, `Bioscop`],
+    spravna: 1
+  },
+  {
+    zneni: `3. Proti které nemoci vyvinul Jonas Salk vakcínu?`,
+    varianty: [`proti záškrtu`, `proti spalničkám`, `proti tuberkulóze`, `proti dětské obrně`],
+    spravna: 3
+  },
+  {
+    zneni: `4. Kdo jako první překonal v letadle rychlost zvuku?`,
+    varianty: [`Chuck Yeager`, `Howard Hughes`, `Scott Crossfield`, `James Doolittle`],
+    spravna: 0
+  },
+  {
+    zneni: `5. Které americké město zničilo v roce 1906 zemětřesení a následný požár?`,
+    varianty: [`Seattle`, `San Francisco`, `Los Angeles`, `Chicago`],
+    spravna: 1
+  },
+  {
+    zneni: `6. Na kterých olympijských hrách zaútočila palestinská skupina Černé září na izraelskou výpravu?`,
+    varianty: [`v Římě 1960`, `v Mexico City 1968`, `v Mnichově 1972`, `v Montrealu 1976`],
+    spravna: 2
+  },
+  {
+    zneni: `7. Který snímek byl prvním celovečerním filmem, ve kterém diváci slyšeli herce mluvit?`,
+    varianty: [`Zrození národa`, `Nosferatu`, `Světla velkoměsta`, `Jazzový zpěvák`],
+    spravna: 3
+  },
+  {
+    zneni: `8. Kdo objevil v roce 1922 Tutanchamonovu hrobku?`,
+    varianty: [`Arthur Evans`, `James Henry Breasted`, `Howard Carter`, `Flinders Petrie`],
+    spravna: 2
+  },
+  {
+    zneni: `9. Který stát byl jako jediný v dějinách vyloučen ze Společnosti národů?`,
+    varianty: [`Sovětský svaz`, `Německo`, `Itálie`, `Japonsko`],
+    spravna: 0
+  },
+  {
+    zneni: `10. Ve kterém roce byl v Československu celostátně zaveden pětidenní pracovní týden?`,
+    varianty: [`1958`, `1968`, `1972`, `1978`],
+    spravna: 1
+  }
+];
+
+var hodnoceniTexty = [
+  { min: 0, max: 3, text: `Zařadit se vám podařilo nejvýš tři události z deseti. Dvacáté století bylo natolik nabité, že se v paměti slévá do jednoho pásma, a jakmile přijde na konkrétní jméno nebo rok, jistota kolísá. Projděte si správné odpovědi, při druhém průchodu jich padne podstatně víc.` },
+  { min: 4, max: 6, text: `Polovina událostí sedí, druhá polovina vám proklouzla. Velké mezníky máte v hlavě spolehlivě, zaváhali jste tam, kde se dvě varianty držely těsně u sebe. Stačí si u těch sporných projít správnou odpověď a příště se rozdíl mezi nimi vybaví sám.` },
+  { min: 7, max: 9, text: `Sedm až devět zařazených událostí z deseti je slušný výsledek, na kterém se většina těch, kdo století zažili, potká. Nespoléháte na mlhavé povědomí, ale trefujete konkrétní jména, města i roky, a to napříč obory od vesmíru přes archeologii až po film. K plnému počtu, na který se ptá název kvízu, vám chyběly nanejvýš tři položky.` },
+  { min: 10, max: 10, text: `Všech deset událostí zařazeno bez jediného zaváhání, přesně jak slibuje název kvízu. Nezaskočili vás psí pasažéři z počátků kosmonautiky, krycí název jednoho z nejznámějších výsadků, ani letec, který jako první prolomil zvukovou bariéru. Takový výsledek dá jen menšina řešitelů.` }
+];
+
+var pismena = [`a) `, `b) `, `c) `, `d) `];
+var odpovedi = [];
+var vyhodnoceno = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoVyhodnotit = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var tlacitkoZnovu = document.getElementById(`znovu`);
+
+function vykresli() {
+  kvizEl.innerHTML = ``;
+  for (var i = 0; i < otazky.length; i++) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    var zneniEl = document.createElement(`p`);
+    zneniEl.className = `zneni`;
+    zneniEl.textContent = otazky[i].zneni;
+    box.appendChild(zneniEl);
+
+    for (var j = 0; j < otazky[i].varianty.length; j++) {
+      var btn = document.createElement(`button`);
+      btn.className = `varianta`;
+      btn.type = `button`;
+      btn.textContent = pismena[j] + otazky[i].varianty[j];
+      btn.setAttribute(`data-otazka`, i);
+      btn.setAttribute(`data-varianta`, j);
+      btn.addEventListener(`click`, klikVarianta);
+      box.appendChild(btn);
+    }
+    kvizEl.appendChild(box);
+  }
+}
+
+function klikVarianta(e) {
+  if (vyhodnoceno) { return; }
+  var btn = e.currentTarget;
+  var oIndex = parseInt(btn.getAttribute(`data-otazka`), 10);
+  var vIndex = parseInt(btn.getAttribute(`data-varianta`), 10);
+
+  var box = btn.parentNode;
+  var tlacitka = box.getElementsByClassName(`varianta`);
+  for (var k = 0; k < tlacitka.length; k++) {
+    tlacitka[k].classList.remove(`vybrana`);
+  }
+  btn.classList.add(`vybrana`);
+  odpovedi[oIndex] = vIndex;
+  zkontrolujHotovo();
+}
+
+function zkontrolujHotovo() {
+  var hotovo = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] !== `number`) { hotovo = false; }
+  }
+  tlacitkoVyhodnotit.disabled = !hotovo;
+  if (hotovo) { hlaskaEl.textContent = ``; }
+}
+
+function vyhodnot() {
+  var hotovo = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] !== `number`) { hotovo = false; }
+  }
+  if (!hotovo) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+
+  vyhodnoceno = true;
+  var skore = 0;
+  var boxy = kvizEl.getElementsByClassName(`otazka`);
+
+  for (var o = 0; o < otazky.length; o++) {
+    var tlacitka = boxy[o].getElementsByClassName(`varianta`);
+    var spravna = otazky[o].spravna;
+    var zvolena = odpovedi[o];
+    if (zvolena === spravna) { skore++; }
+
+    for (var v = 0; v < tlacitka.length; v++) {
+      tlacitka[v].disabled = true;
+      tlacitka[v].classList.remove(`vybrana`);
+      if (v === spravna) {
+        tlacitka[v].classList.add(`spravna`);
+      } else if (v === zvolena) {
+        tlacitka[v].classList.add(`spatna`);
+      }
+    }
+  }
+
+  tlacitkoVyhodnotit.disabled = true;
+  skoreEl.textContent = skore + ` z ` + otazky.length;
+
+  var text = ``;
+  for (var h = 0; h < hodnoceniTexty.length; h++) {
+    if (skore >= hodnoceniTexty[h].min && skore <= hodnoceniTexty[h].max) {
+      text = hodnoceniTexty[h].text;
+    }
+  }
+  hodnoceniEl.textContent = text;
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function znovu() {
+  odpovedi = [];
+  vyhodnoceno = false;
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  tlacitkoVyhodnotit.disabled = true;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+tlacitkoVyhodnotit.addEventListener(`click`, vyhodnot);
+tlacitkoZnovu.addEventListener(`click`, znovu);
+vykresli();
+</script>
+</body>
+</html>
