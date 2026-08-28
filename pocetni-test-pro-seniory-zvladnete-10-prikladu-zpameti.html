@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Početní test pro seniory: zvládnete 10 příkladů zpaměti rychleji než dnešní školáci?</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 36px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zadani { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; }
+  input[type="text"] {
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: Georgia, "Times New Roman", serif;
+  }
+  input[type="text"]:focus { outline: none; border: 1px solid #a89e92; background: #ede8e1; }
+  input.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; font-weight: bold; }
+  input.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .reseni { margin-top: 14px; font-size: 1rem; color: #1e5631; font-weight: bold; }
+  .reseni.chybne { color: #721c24; }
+  button {
+    display: block;
+    margin: 40px auto 0;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #fff;
+    background: #5b7e5f;
+    cursor: pointer;
+    font-family: Georgia, "Times New Roman", serif;
+  }
+  button:hover { background: #4a6b4e; }
+  button:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; }
+  #znovu:hover { background: #756658; }
+  #vysledek {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 16px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; font-size: 1rem; }
+  .skryto { display: none; }
+  @media (max-width: 767px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka, #vysledek { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Početní test pro seniory: zvládnete 10 příkladů zpaměti rychleji než dnešní školáci?</h1>
+  <p class="perex">Ve škole jste se bez pomůcek obešli a tady platí totéž: kalkulačka ani tužka do toho nemluví. Odpovědí je pokaždé jedno číslo. U části zadání se navíc musí nejdřív zvolit postup a teprve pak počítat.</p>
+
+  <div id="kviz"></div>
+
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska" class="skryto">Odpovězte prosím na všechny otázky</p>
+
+  <div id="vysledek" class="skryto">
+    <div id="skore"></div>
+    <div id="hodnoceni"></div>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var otazky = [
+  { zadani: `1. Kolik je aritmetický průměr čísel 61, 45, 78 a 36?`, odpovedi: [`55`] },
+  { zadani: `2. Jaký je zbytek po dělení čísla 500 číslem 14?`, odpovedi: [`10`] },
+  { zadani: `3. Kolik je (154 ÷ 7) + (38 × 3)?`, odpovedi: [`136`] },
+  { zadani: `4. Jakým číslem pokračuje řada 64, 96, 144, 216, 324?`, odpovedi: [`486`] },
+  { zadani: `5. Kolik je 24² − 12²?`, odpovedi: [`432`] },
+  { zadani: `6. Kolik je 35 % z 460?`, odpovedi: [`161`] },
+  { zadani: `7. Kolik je 28 × 16?`, odpovedi: [`448`] },
+  { zadani: `8. Kolik procent odpovídá zlomku sedm osmin?`, odpovedi: [`87,5`, `87.5`] },
+  { zadani: `9. Kolik je největší ze tří dílů, na které se číslo 1 400 rozdělí v poměru 1 : 2 : 4?`, odpovedi: [`800`] },
+  { zadani: `10. Kolik je 174 děleno třemi čtvrtinami?`, odpovedi: [`232`] }
+];
+
+var hodnoceni = [
+  { min: 0, max: 3, text: `Dnešní školáci mají tuhle látku právě probranou a s takovým počtem bodů by domů nešli rádi. O vaší hlavě to ale neříká skoro nic, spíš o tom, že se pár převodů za ta léta vytratilo z paměti. Nejsnáze se body získávají u zlomků přeložených do procent, protože ty se dají odvodit půlením: polovina je 50, čtvrtina 25, osmina 12,5, a sedm osmin je tedy sedmkrát 12,5. Druhý jistý bod nabízí zbytek po dělení, kde u 500 a 14 stačí najít nejbližší násobek čtrnácti pod pětistovkou a odpovědí je to, co nad ním zůstane. Dva takové převody zvládnuté nazpaměť posunou příště skóre samy o sobě.` },
+  { min: 4, max: 6, text: `Přesně tady se pohybuje většina dospělých a ve školní třídě by to byl solidní průměr. Počítat tedy umíte a proti dnešním žákům nejste pozadu ve znalostech, jen v cviku. Sada navíc obsahuje místa, kde se školní postup vyplatí opustit. Ukázkou je 24² − 12². Kdo poctivě umocní obě čísla a odečte je, dojde ke správnému výsledku, ale tahá v hlavě trojciferná čísla. Kdo si vzpomene, že rozdíl dvou čtverců je součin rozdílu a součtu, počítá jen 12 krát 36. Zkratek tohohle druhu je v počítání z hlavy víc než poctivých postupů a stačí se u každého zadání nejdřív zeptat, jestli se některá nenabízí sama.` },
+  { min: 7, max: 9, text: `Takový výsledek odevzdají ve třídě dva nebo tři žáci a vy jste se k němu dostali bez papíru, na kterém oni počítají. To vypovídá hlavně o soustředění: mezi prvním a posledním krokem jste v příkladech neztratili nit, což je při počítání z hlavy podstatnější než znalost vzorců. Z celé sady vyčnívá jediné zadání, řada 64, 96, 144, 216, 324. Rozdíly mezi jejími členy nedávají žádný vzorec a pravidlo se ukáže teprve v podílu sousedních čísel, který je jedna a půl. Jestli právě tady jeden bod utekl, nechyběl vám počtář, ale nápad, kde pravidlo hledat. U každé další řady proto nejdřív dělte, teprve potom odčítejte.` },
+  { min: 10, max: 10, text: `Na deset z deseti dosáhne jen menšina řešitelů a nerozhoduje o tom paměť na vzorce, ale ochota uvěřit výsledku, který vypadá podezřele. Číslo 174 dělené třemi čtvrtinami dá 232, tedy víc, než s čím jste do dělení vůbec šli, a rozdíl dvou mocnin se vám naopak scvrkl na jediný nenápadný součin. Obojí svádí k tomu vrátit se a počítat znovu, přestože na postupu nebylo nic špatně. Kdo se v takové chvíli nedá zviklat, nezná jenom postupy, ale rozumí tomu, co se s čísly opravdu děje. A právě v tom jste proti dnešní třídě jinde: školák dojde ke stejným číslům také, má k tomu ale sešit a často i kalkulačku, kdežto vaše počítání z hlavy stojí na porozumění, ne na nacvičeném zápisu.` }
+];
+
+var hotovo = false;
+
+function normalizuj(text) {
+  return text
+    .toLowerCase()
+    .normalize(`NFD`)
+    .replace(/[̀-ͯ]/g, ``)
+    .replace(/\s/g, ``)
+    .replace(/\./g, `,`)
+    .trim();
+}
+
+var kvizEl = document.getElementById(`kviz`);
+var vyhodnotitEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function postavKviz() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    var zadani = document.createElement(`div`);
+    zadani.className = `zadani`;
+    zadani.textContent = o.zadani;
+    box.appendChild(zadani);
+
+    var pole = document.createElement(`input`);
+    pole.type = `text`;
+    pole.setAttribute(`inputmode`, `decimal`);
+    pole.setAttribute(`autocomplete`, `off`);
+    pole.id = `pole-` + i;
+    pole.addEventListener(`input`, zkontrolujVyplneni);
+    box.appendChild(pole);
+
+    var reseni = document.createElement(`div`);
+    reseni.className = `reseni skryto`;
+    reseni.id = `reseni-` + i;
+    box.appendChild(reseni);
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujVyplneni() {
+  if (hotovo) { return; }
+  var vsechny = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (document.getElementById(`pole-` + i).value.trim() === ``) { vsechny = false; }
+  }
+  vyhodnotitEl.disabled = !vsechny;
+  if (vsechny) { hlaskaEl.classList.add(`skryto`); }
+}
+
+function vyhodnot() {
+  if (hotovo) { return; }
+  var vsechny = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (document.getElementById(`pole-` + i).value.trim() === ``) { vsechny = false; }
+  }
+  if (!vsechny) {
+    hlaskaEl.classList.remove(`skryto`);
+    return;
+  }
+
+  var body = 0;
+  otazky.forEach(function (o, i) {
+    var pole = document.getElementById(`pole-` + i);
+    var reseni = document.getElementById(`reseni-` + i);
+    var zadano = normalizuj(pole.value);
+    var spravne = o.odpovedi.some(function (a) { return normalizuj(a) === zadano; });
+
+    pole.disabled = true;
+    reseni.classList.remove(`skryto`);
+
+    if (spravne) {
+      body++;
+      pole.className = `spravna`;
+      reseni.className = `reseni`;
+      reseni.textContent = `Správně`;
+    } else {
+      pole.className = `spatna`;
+      reseni.className = `reseni chybne`;
+      reseni.textContent = `Správná odpověď: ` + o.odpovedi[0];
+    }
+  });
+
+  hotovo = true;
+  vyhodnotitEl.disabled = true;
+  hlaskaEl.classList.add(`skryto`);
+
+  skoreEl.textContent = body + ` z ` + otazky.length;
+  var text = ``;
+  hodnoceni.forEach(function (h) {
+    if (body >= h.min && body <= h.max) { text = h.text; }
+  });
+  hodnoceniEl.textContent = text;
+  vysledekEl.classList.remove(`skryto`);
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function zkusitZnovu() {
+  hotovo = false;
+  vysledekEl.classList.add(`skryto`);
+  hlaskaEl.classList.add(`skryto`);
+  vyhodnotitEl.disabled = true;
+  postavKviz();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+vyhodnotitEl.addEventListener(`click`, vyhodnot);
+znovuEl.addEventListener(`click`, zkusitZnovu);
+postavKviz();
+</script>
+</body>
+</html>
