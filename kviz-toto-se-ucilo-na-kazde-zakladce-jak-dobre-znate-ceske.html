@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz: Toto se učilo na každé základce. Jak dobře znáte české dějiny?</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 16px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; line-height: 1.45; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.locked .opt { cursor: default; }
+.locked .opt:hover { background: #f7f4f0; }
+.locked .opt.selected:hover { background: #dcd3c7; }
+.locked .opt.correct:hover { background: #d4edda; }
+.locked .opt.wrong:hover { background: #f8d7da; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; display: none; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+  border-top: 4px solid #5b7e5f;
+  display: none;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 14px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; }
+#again {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#again:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 20px 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz: Toto se učilo na každé základce. Jak dobře znáte české dějiny?</h1>
+<p class="perex">Deset otázek přeskakuje mezi raným středověkem a dvacátým stoletím: panovníci, války, církevní dějiny, ztracená území, národní obrození i vznik společného státu. U každé čtyři možnosti, z nichž se dvě vždy drží těsně u sebe.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warn">Odpovězte prosím na všechny otázky</p>
+<div id="result">
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="again">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  {
+    q: `Za kterého panovníka dosáhla Velká Morava největšího územního rozsahu?`,
+    o: [`Mojmír I.`, `Rostislav`, `Svatopluk I.`, `Mojmír II.`],
+    a: 2
+  },
+  {
+    q: `Který přemyslovský kníže zavedl stařešinský řád?`,
+    o: [`Boleslav I.`, `Břetislav I.`, `Vratislav II.`, `Soběslav I.`],
+    a: 1
+  },
+  {
+    q: `Který panovník dal na pravém břehu Vltavy vyměřit Nové Město pražské?`,
+    o: [`Přemysl Otakar II.`, `Jan Lucemburský`, `Karel IV.`, `Václav IV.`],
+    a: 2
+  },
+  {
+    q: `U kterého města zemřel Jan Žižka?`,
+    o: [`Přibyslav`, `Čáslav`, `Havlíčkův Brod`, `Chotěboř`],
+    a: 0
+  },
+  {
+    q: `Kdo pořídil překlad Bible kralické?`,
+    o: [`čeští bratři`, `utrakvisté`, `luteráni`, `kalvinisté`],
+    a: 0
+  },
+  {
+    q: `Které zemi postoupila Koruna česká roku 1635 Horní a Dolní Lužici?`,
+    o: [`Braniborsku`, `Bavorsku`, `Sasku`, `Polsku`],
+    a: 2
+  },
+  {
+    q: `Ve které válce přišla habsburská monarchie o většinu Slezska ve prospěch Pruska?`,
+    o: [`ve třicetileté válce`, `ve válce o rakouské dědictví`, `v sedmileté válce`, `ve válce o polské dědictví`],
+    a: 1
+  },
+  {
+    q: `Která dvojice stála roku 1862 u založení pražské tělocvičné jednoty, z níž vyrostl Sokol?`,
+    o: [`František Palacký a František Ladislav Rieger`, `Josef Kajetán Tyl a Karel Havlíček Borovský`, `Miroslav Tyrš a Jindřich Fügner`, `Vojtěch Náprstek a Julius Grégr`],
+    a: 2
+  },
+  {
+    q: `Ve kterém americkém městě podepsali v květnu 1918 zástupci českých a slovenských krajanských spolků dohodu o uspořádání společného státu?`,
+    o: [`Cleveland`, `Chicago`, `Washington`, `Pittsburgh`],
+    a: 3
+  },
+  {
+    q: `Kterou osadu srovnali nacisté se zemí kvůli ukryté vysílačce výsadku Silver A?`,
+    o: [`Lidice`, `Ležáky`, `Javoříčko`, `Ploština`],
+    a: 1
+  }
+];
+
+var VERDICTS = [
+  { max: 3, text: `Ze základoškolského dějepisu vám zůstala jména, ne jejich zařazení. Svatopluka i Žižku poznáte, jenže přiřadit je ke správnému městu, období nebo válce je jiná disciplína a přesně na ní tenhle kvíz stojí. Body se ztrácejí tam, kde nestačí povědomí a musí přijít konkrétní odpověď. Projděte si správné odpovědi po řadě, většina z nich patří k látce, kterou stačí jednou obnovit.` },
+  { max: 6, text: `Kostra základoškolské látky drží. Velké mezníky, panovnické rody i vznik Československa vám něco říkají a v polovině otázek jste je zařadili správně. Ztráty přišly tam, kde se dvě nabízené možnosti liší jediným detailem, tedy u sousedních měst, blízkých panovníků nebo dvou válek téhož století. Právě tahle část učiva se probírala rychle a bez opakování se rozostří první.` },
+  { max: 9, text: `Základoškolskou látku máte pokrytou celou a přidali jste k ní i to, co se ve škole nanejvýš zmíní. Trefili jste jména i místa, u kterých se nabízela těsně vedlejší varianta, a nenechali jste se svést tím, co zní podobně. K plnému počtu chyběla otázka mimo školní jádro, tedy ta, na kterou v hodinách dějepisu na základní škole nezbývá čas.` },
+  { max: 10, text: `Všech deset, a to už je víc, než se na základní škole probere. Zvládli jste velkomoravské panovníky, přemyslovské nástupnictví, založení Nového Města pražského, konec Jana Žižky, kralický překlad Bible, postoupení Lužice Sasku, ztrátu Slezska ve válce o rakouské dědictví, zakladatele Sokola, pittsburskou dohodu i osadu vyhlazenou za heydrichiády. Přinejmenším postoupení Lužice přitom ve školních osnovách zůstává u jediné věty, pokud v něm vůbec zazní.` }
+];
+
+var LETTERS = [`a)`, `b)`, `c)`, `d)`];
+var answers = new Array(QUESTIONS.length).fill(null);
+var evaluated = false;
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var againEl = document.getElementById(`again`);
+
+function build() {
+  quizEl.textContent = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var t = document.createElement(`div`);
+    t.className = `qtext`;
+    t.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(t);
+    item.o.forEach(function (opt, oi) {
+      var b = document.createElement(`button`);
+      b.className = `opt`;
+      b.type = `button`;
+      b.textContent = LETTERS[oi] + ` ` + opt;
+      b.addEventListener(`click`, function () {
+        if (evaluated) { return; }
+        answers[qi] = oi;
+        var sibs = box.querySelectorAll(`.opt`);
+        for (var i = 0; i < sibs.length; i++) { sibs[i].classList.remove(`selected`); }
+        b.classList.add(`selected`);
+        refresh();
+      });
+      box.appendChild(b);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function refresh() {
+  var done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+  if (done) { warnEl.style.display = `none`; }
+}
+
+submitEl.addEventListener(`click`, function () {
+  if (submitEl.disabled) { warnEl.style.display = `block`; return; }
+  evaluated = true;
+  var score = 0;
+  var boxes = quizEl.querySelectorAll(`.q`);
+  for (var i = 0; i < boxes.length; i++) {
+    var opts = boxes[i].querySelectorAll(`.opt`);
+    var right = QUESTIONS[i].a;
+    if (answers[i] === right) { score++; }
+    for (var j = 0; j < opts.length; j++) {
+      opts[j].classList.remove(`selected`);
+      if (j === right) { opts[j].classList.add(`correct`); }
+      else if (j === answers[i]) { opts[j].classList.add(`wrong`); }
+    }
+    boxes[i].classList.add(`locked`);
+  }
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  for (var k = 0; k < VERDICTS.length; k++) {
+    if (score <= VERDICTS[k].max) { verdictEl.textContent = VERDICTS[k].text; break; }
+  }
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+againEl.addEventListener(`click`, function () {
+  evaluated = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.style.display = `none`;
+  warnEl.style.display = `none`;
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+refresh();
+</script>
+</body>
+</html>
