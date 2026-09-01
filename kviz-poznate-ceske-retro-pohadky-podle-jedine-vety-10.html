@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz: Poznáte české retro pohádky podle jediné věty? 10 hlášek, které zná celá republika</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; line-height: 1.5; margin: 0 0 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .hotovo .varianta { cursor: default; }
+  #vyhodnotit, #znovu {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; }
+  #znovu:hover { background: #756658; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; font-size: 1rem; min-height: 1.2em; }
+  #vysledek {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 24px;
+    border-top: 4px solid #5b7e5f;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 14px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka, #vysledek { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz: Poznáte české retro pohádky podle jediné věty? 10 hlášek, které zná celá republika</h1>
+  <p class="perex">Stačí jedna věta a víte, o kterou pohádku jde. Hlášky z českých a československých pohádek od padesátých do osmdesátých let, k tomu otázky na herce, kteří je hráli. Kolik z deseti otázek zvládnete?</p>
+
+  <div id="kviz"></div>
+
+  <button id="vyhodnotit" type="button" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+
+  <div id="vysledek">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu" type="button">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var otazky = [
+  {
+    zneni: `1. Ze které pohádky je hláška „Odvolávám, co jsem odvolal, a slibuji, co jsem slíbil"?`,
+    varianty: [`a) Obušku, z pytle ven!`, `b) Dařbuján a Pandrhola`, `c) Pyšná princezna`, `d) Princ Bajaja`],
+    spravna: 2
+  },
+  {
+    zneni: `2. Ze které pohádky je hláška „Až naprší a uschne, pitomci!"?`,
+    varianty: [`a) Tři oříšky pro Popelku`, `b) Princ a Večernice`, `c) Malá mořská víla`, `d) Panna a netvor`],
+    spravna: 0
+  },
+  {
+    zneni: `3. Ze které pohádky je hláška „Já to řeknu tatínkovi a ten vám vyhlásí válku!"?`,
+    varianty: [`a) Třetí princ`, `b) O princezně Jasněnce a létajícím ševci`, `c) Sůl nad zlato`, `d) S čerty nejsou žerty`],
+    spravna: 3
+  },
+  {
+    zneni: `4. Ze které pohádky je hláška „Fujtajbl ve spolek!"?`,
+    varianty: [`a) Jak se budí princezny`, `b) Ať žijí duchové!`, `c) Princové jsou na draka`, `d) Honza málem králem`],
+    spravna: 1
+  },
+  {
+    zneni: `5. Ze které pohádky je hláška „Vidím, i když spím"?`,
+    varianty: [`a) Šíleně smutná princezna`, `b) Zlatovláska`, `c) Král drozdí brada`, `d) Za humny je drak`],
+    spravna: 0
+  },
+  {
+    zneni: `6. Ze které pohádky je hláška „Ani hnout, chlape, sic máš kuli v játrech!"?`,
+    varianty: [`a) Deváté srdce`, `b) Rumburak`, `c) Hrátky s čertem`, `d) Nebojsa`],
+    spravna: 2
+  },
+  {
+    zneni: `7. Která herečka ztvárnila čarodějnici Saxanu ve filmové pohádce Dívka na koštěti?`,
+    varianty: [`a) Naďa Konvalinková`, `b) Petra Černocká`, `c) Jitka Molavcová`, `d) Marta Kubišová`],
+    spravna: 1
+  },
+  {
+    zneni: `8. Který herec ztvárnil prince Radovana ve filmové pohádce Princezna se zlatou hvězdou?`,
+    varianty: [`a) Vladimír Ráž`, `b) Eduard Cupák`, `c) Josef Bek`, `d) Josef Zíma`],
+    spravna: 3
+  },
+  {
+    zneni: `9. Ze které pohádky je hláška „Já s chobotem žít nebudu!"?`,
+    varianty: [`a) Čertův švagr`, `b) O zatoulané princezně`, `c) Tři veteráni`, `d) Ať přiletí čáp, královno!`],
+    spravna: 2
+  },
+  {
+    zneni: `10. Ze které pohádky je hláška „Já jsem tajtrlík? Zaprvé nevím, co to je, a zadruhé mě to uráží!"?`,
+    varianty: [`a) Byl jednou jeden král`, `b) Tři zlaté vlasy děda Vševěda`, `c) O medvědu Ondřejovi`, `d) Šípková Růženka`],
+    spravna: 0
+  }
+];
+
+var hodnoceni = [
+  { max: 3, text: `Hlášky vám zní povědomě, ale přiřadit je ke správné pohádce se nedaří. Staré tituly jste nejspíš vídali na půl oka, jako kulisu nedělního odpoledne. Zkuste si některý z nich pustit celý a uvidíte, kolik vět vám naskočí samo.` },
+  { max: 6, text: `Poctivý průměr. Nejomílanější věty poznáte podle prvních slov, jenže jakmile přijde na méně citované repliky a na jména herců, jistota mizí. Přesně tady končí většina těch, kdo pohádky znají z opakování o svátcích.` },
+  { max: 9, text: `Výborný výkon a znalost, která se sbírá jen mnoha zhlédnutími. Věty spojujete se správnými tituly i tehdy, když se nabízí pohádka ze stejné doby nebo se stejným laděním. K plnému počtu vám chybí poslední vrstva podrobností, kterou má v hlavě málokdo.` },
+  { max: 10, text: `Plný počet, na který dosáhne jen menšina. Poznáte pohádku podle jediné věty a k tomu víte, kdo koho hrál. Tohle už není nostalgie, tohle je pořádně zažitá znalost českých pohádkových klasik.` }
+];
+
+var odpovedi = new Array(otazky.length).fill(null);
+var vyhodnoceno = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+otazky.forEach(function (o, i) {
+  var box = document.createElement(`div`);
+  box.className = `otazka`;
+
+  var zneni = document.createElement(`p`);
+  zneni.className = `zneni`;
+  zneni.textContent = o.zneni;
+  box.appendChild(zneni);
+
+  o.varianty.forEach(function (v, j) {
+    var btn = document.createElement(`button`);
+    btn.type = `button`;
+    btn.className = `varianta`;
+    btn.textContent = v;
+    btn.addEventListener(`click`, function () {
+      if (vyhodnoceno) { return; }
+      odpovedi[i] = j;
+      var vsechny = box.querySelectorAll(`.varianta`);
+      for (var k = 0; k < vsechny.length; k++) {
+        vsechny[k].classList.remove(`vybrana`);
+      }
+      btn.classList.add(`vybrana`);
+      hlaskaEl.textContent = ``;
+      zkontrolujStav();
+    });
+    box.appendChild(btn);
+  });
+
+  kvizEl.appendChild(box);
+});
+
+function zkontrolujStav() {
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  tlacitkoEl.disabled = !hotovo;
+}
+
+tlacitkoEl.addEventListener(`click`, function () {
+  if (vyhodnoceno) { return; }
+  if (!odpovedi.every(function (o) { return o !== null; })) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  vyhodnoceno = true;
+  hlaskaEl.textContent = ``;
+  tlacitkoEl.disabled = true;
+
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  var skore = 0;
+
+  for (var i = 0; i < otazky.length; i++) {
+    var box = boxy[i];
+    box.classList.add(`hotovo`);
+    var vsechny = box.querySelectorAll(`.varianta`);
+    for (var j = 0; j < vsechny.length; j++) {
+      vsechny[j].classList.remove(`vybrana`);
+      if (j === otazky[i].spravna) {
+        vsechny[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        vsechny[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === otazky[i].spravna) { skore++; }
+  }
+
+  skoreEl.textContent = skore + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+znovuEl.addEventListener(`click`, function () {
+  vyhodnoceno = false;
+  odpovedi = new Array(otazky.length).fill(null);
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  for (var i = 0; i < boxy.length; i++) {
+    boxy[i].classList.remove(`hotovo`);
+    var vsechny = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < vsechny.length; j++) {
+      vsechny[j].classList.remove(`vybrana`, `spravna`, `spatna`);
+    }
+  }
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  tlacitkoEl.disabled = true;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+</script>
+</body>
+</html>
