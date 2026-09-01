@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz, kterým projde jen 1 člověk z 10. Většina lidí to vzdá u páté otázky</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; line-height: 1.5; margin: 0 0 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .hotovo .varianta { cursor: default; }
+  #vyhodnotit, #znovu {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; }
+  #znovu:hover { background: #756658; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; font-size: 1rem; min-height: 1.2em; }
+  #vysledek {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 24px;
+    border-top: 4px solid #5b7e5f;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 14px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka, #vysledek { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz, kterým projde jen 1 člověk z 10. Většina lidí to vzdá u páté otázky</h1>
+  <p class="perex">Deset otázek napříč obory, od přírody přes jazyk a filozofii až po sport a zeměpis. Pátá otázka bývá ta, u které to většina zabalí. Plný počet dá zhruba jeden člověk z deseti. Zvládnete zůstat mezi nimi?</p>
+
+  <div id="kviz"></div>
+
+  <button id="vyhodnotit" type="button" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+
+  <div id="vysledek">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu" type="button">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var otazky = [
+  {
+    zneni: `1. Jaký úkol plní ve včelím úlu trubec?`,
+    varianty: [`a) sbírá nektar a pyl`, `b) oplodňuje matku`, `c) staví voskové plástve`, `d) hlídá česno před vetřelci`],
+    spravna: 1
+  },
+  {
+    zneni: `2. Ve kterém století se v Evropě objevil knihtisk?`,
+    varianty: [`a) ve 13. století`, `b) ve 14. století`, `c) v 15. století`, `d) v 16. století`],
+    spravna: 2
+  },
+  {
+    zneni: `3. Jak se nazývá hlavní křesťanský chrám, v němž sídlí biskup?`,
+    varianty: [`a) bazilika`, `b) poutní kostel`, `c) klášterní kostel`, `d) katedrála`],
+    spravna: 3
+  },
+  {
+    zneni: `4. Který chemický prvek je jedinou složkou čistého diamantu?`,
+    varianty: [`a) křemík`, `b) uhlík`, `c) hliník`, `d) síra`],
+    spravna: 1
+  },
+  {
+    zneni: `5. Co znamená přídavné jméno perfidní?`,
+    varianty: [`a) okázalý a honosný`, `b) puntičkářský a úzkostlivě přesný`, `c) neproniknutelný a tajemný`, `d) proradný a věrolomný`],
+    spravna: 3
+  },
+  {
+    zneni: `6. Který filozof je autorem podobenství o jeskyni?`,
+    varianty: [`a) Sókratés`, `b) Aristotelés`, `c) Platón`, `d) Hérakleitos`],
+    spravna: 2
+  },
+  {
+    zneni: `7. Jak se nazývá stroj, který mění mechanickou energii na elektrickou?`,
+    varianty: [`a) generátor`, `b) transformátor`, `c) elektromotor`, `d) usměrňovač`],
+    spravna: 0
+  },
+  {
+    zneni: `8. Kolik jamek má standardní golfové hřiště pro plné kolo?`,
+    varianty: [`a) devět`, `b) dvanáct`, `c) osmnáct`, `d) čtyřiadvacet`],
+    spravna: 2
+  },
+  {
+    zneni: `9. Z čeho se vyrábí pravý balzamikový ocet z Modeny?`,
+    varianty: [`a) z hroznového moštu`, `b) z červeného vína`, `c) z jablečného moštu`, `d) z fíkového sirupu`],
+    spravna: 0
+  },
+  {
+    zneni: `10. Která hora je nejvyšší na české straně Šumavy?`,
+    varianty: [`a) Plechý`, `b) Boubín`, `c) Poledník`, `d) Špičák`],
+    spravna: 0
+  }
+];
+
+var hodnoceni = [
+  { max: 3, text: `Deset otázek zamířilo do deseti různých oborů a stačí pár oblastí, kterým se člověk roky nevěnoval, aby se výsledek zastavil tady. Nejčastěji rozhodne pátá otázka o významu cizího slova, u které většina řešitelů opravdu končí. Projděte si správné odpovědi a zkuste kvíz znovu s odstupem, posun bývá znatelný.` },
+  { max: 6, text: `Polovina otázek sedla, druhá polovina ne, a to je výsledek, se kterým odchází největší část lidí. Obvykle je to tak, že přírodopis, historie a stavby projdou hladce, zatímco cizí slovo, počet jamek na golfovém hřišti nebo italská potravina uhnou o jednu variantu vedle. K sedmičce chybí opravdu málo.` },
+  { max: 9, text: `Tohle je pásmo, do kterého se dostane jen menšina. Přehled máte široký a přes obory přecházíte bez zaváhání, jenže někde jedna varianta stála příliš blízko té správné a vzala vám plný počet. Většinou to bývá otázka, kde se rozhoduje mezi dvěma pravděpodobnými odpověďmi a člověk si vybere tu obvyklejší.` },
+  { max: 10, text: `Plný počet, na který podle titulku dosáhne zhruba jeden člověk z deseti. Neshodil vás úkol trubce v úlu, ani století knihtisku, ani chrám se sídlem biskupa, ani prvek v čistém diamantu, ani cizí slovo z páté otázky, u které to většina lidí vzdává. Vedle toho vám sedl i autor podobenství o jeskyni, stroj vyrábějící elektřinu, počet jamek na golfovém hřišti, surovina balzamikového octa i nejvyšší hora české Šumavy. Takový rozptyl znalostí se netipuje, ten se musí opravdu mít.` }
+];
+
+var odpovedi = new Array(otazky.length).fill(null);
+var vyhodnoceno = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+otazky.forEach(function (o, i) {
+  var box = document.createElement(`div`);
+  box.className = `otazka`;
+
+  var zneni = document.createElement(`p`);
+  zneni.className = `zneni`;
+  zneni.textContent = o.zneni;
+  box.appendChild(zneni);
+
+  o.varianty.forEach(function (v, j) {
+    var btn = document.createElement(`button`);
+    btn.type = `button`;
+    btn.className = `varianta`;
+    btn.textContent = v;
+    btn.addEventListener(`click`, function () {
+      if (vyhodnoceno) { return; }
+      odpovedi[i] = j;
+      var vsechny = box.querySelectorAll(`.varianta`);
+      for (var k = 0; k < vsechny.length; k++) {
+        vsechny[k].classList.remove(`vybrana`);
+      }
+      btn.classList.add(`vybrana`);
+      hlaskaEl.textContent = ``;
+      zkontrolujStav();
+    });
+    box.appendChild(btn);
+  });
+
+  kvizEl.appendChild(box);
+});
+
+function zkontrolujStav() {
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  tlacitkoEl.disabled = !hotovo;
+}
+
+tlacitkoEl.addEventListener(`click`, function () {
+  if (vyhodnoceno) { return; }
+  if (!odpovedi.every(function (o) { return o !== null; })) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  vyhodnoceno = true;
+  hlaskaEl.textContent = ``;
+  tlacitkoEl.disabled = true;
+
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  var skore = 0;
+
+  for (var i = 0; i < otazky.length; i++) {
+    var box = boxy[i];
+    box.classList.add(`hotovo`);
+    var vsechny = box.querySelectorAll(`.varianta`);
+    for (var j = 0; j < vsechny.length; j++) {
+      vsechny[j].classList.remove(`vybrana`);
+      if (j === otazky[i].spravna) {
+        vsechny[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        vsechny[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === otazky[i].spravna) { skore++; }
+  }
+
+  skoreEl.textContent = skore + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+znovuEl.addEventListener(`click`, function () {
+  vyhodnoceno = false;
+  odpovedi = new Array(otazky.length).fill(null);
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  for (var i = 0; i < boxy.length; i++) {
+    boxy[i].classList.remove(`hotovo`);
+    var vsechny = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < vsechny.length; j++) {
+      vsechny[j].classList.remove(`vybrana`, `spravna`, `spatna`);
+    }
+  }
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  tlacitkoEl.disabled = true;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+</script>
+</body>
+</html>
