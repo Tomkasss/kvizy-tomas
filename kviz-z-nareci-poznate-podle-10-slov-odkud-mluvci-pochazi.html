@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz z nářečí: poznáte podle 10 slov, odkud mluvčí pochází? Lidé z Prahy se často nechytají</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zadani { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.5; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta:disabled { cursor: default; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#hlaska { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; min-height: 1.2em; }
+#vysledek {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+  display: none;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz z nářečí: poznáte podle 10 slov, odkud mluvčí pochází? Lidé z Prahy se často nechytají</h1>
+<p class="perex">Deset slov a u každého jediný úkol: odhadnout, odkud mluvčí pochází. Na výběr jsou pokaždé čtyři oblasti z různých koutů republiky. U některých napoví zvuk slova, u jiných rozhodne jen to, jestli jste je někdy slyšeli.</p>
+<div id="kviz"></div>
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p id="hlaska"></p>
+<div id="vysledek">
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var otazky = [
+  { text: `1. Odkud pochází mluvčí, který místo kráva řekne krava?`,
+    varianty: [`Slovácko`, `jižní Čechy`, `Ostravsko`, `Valašsko`], spravna: 2 },
+  { text: `2. Odkud pochází mluvčí, který holi říká čagan?`,
+    varianty: [`Podkrkonoší`, `Valašsko`, `Chodsko`, `Plzeňsko`], spravna: 1 },
+  { text: `3. Odkud pochází mluvčí, který si k obědu usmaží vošouch?`,
+    varianty: [`Plzeňsko`, `Těšínsko`, `Podkrkonoší`, `Slovácko`], spravna: 0 },
+  { text: `4. Odkud pochází mluvčí, který mladíkovi řekne šohaj?`,
+    varianty: [`Haná`, `Valašsko`, `Těšínsko`, `Slovácko`], spravna: 3 },
+  { text: `5. Odkud pochází mluvčí, který si k večeři upeče sejkory?`,
+    varianty: [`Ostravsko`, `Podkrkonoší`, `Brněnsko`, `Plzeňsko`], spravna: 1 },
+  { text: `6. Odkud pochází mluvčí, který o sobě řekne, že je gorol?`,
+    varianty: [`Valašsko`, `Podkrkonoší`, `Chodsko`, `Těšínsko`], spravna: 3 },
+  { text: `7. Odkud pochází mluvčí, který místo byl řekne bul?`,
+    varianty: [`Chodsko`, `Brněnsko`, `Haná`, `Podkrkonoší`], spravna: 0 },
+  { text: `8. Odkud pochází mluvčí, který místo mouka řekne móka?`,
+    varianty: [`Slovácko`, `Plzeňsko`, `Haná`, `Chodsko`], spravna: 2 },
+  { text: `9. Odkud pochází mluvčí, který ráno odchází na hoknu?`,
+    varianty: [`Těšínsko`, `Brněnsko`, `jižní Čechy`, `Valašsko`], spravna: 1 },
+  { text: `10. Odkud pochází mluvčí, který si v bufetu objedná pikador?`,
+    varianty: [`jižní Čechy`, `Haná`, `Chodsko`, `Ostravsko`], spravna: 0 }
+];
+
+var pismena = [`a) `, `b) `, `c) `, `d) `];
+var odpovedi = [];
+var hotovo = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var vyhodnotitEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function vykresli() {
+  kvizEl.innerHTML = ``;
+  for (var i = 0; i < otazky.length; i++) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var zadani = document.createElement(`p`);
+    zadani.className = `zadani`;
+    zadani.textContent = otazky[i].text;
+    box.appendChild(zadani);
+    for (var j = 0; j < otazky[i].varianty.length; j++) {
+      var btn = document.createElement(`button`);
+      btn.className = `varianta`;
+      btn.type = `button`;
+      btn.textContent = pismena[j] + otazky[i].varianty[j];
+      btn.setAttribute(`data-otazka`, i);
+      btn.setAttribute(`data-varianta`, j);
+      btn.addEventListener(`click`, klikVarianta);
+      box.appendChild(btn);
+    }
+    kvizEl.appendChild(box);
+  }
+}
+
+function klikVarianta(e) {
+  if (hotovo) { return; }
+  var btn = e.currentTarget;
+  var oi = parseInt(btn.getAttribute(`data-otazka`), 10);
+  var vi = parseInt(btn.getAttribute(`data-varianta`), 10);
+  odpovedi[oi] = vi;
+  var box = btn.parentNode;
+  var tlacitka = box.querySelectorAll(`.varianta`);
+  for (var k = 0; k < tlacitka.length; k++) {
+    tlacitka[k].classList.remove(`vybrana`);
+  }
+  btn.classList.add(`vybrana`);
+  hlaskaEl.textContent = ``;
+  zkontrolujStav();
+}
+
+function zkontrolujStav() {
+  var vsechny = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] !== `number`) { vsechny = false; }
+  }
+  vyhodnotitEl.disabled = !vsechny;
+}
+
+function hodnoceniText(skore) {
+  if (skore <= 3) {
+    return `Původ mluvčího zatím odhadujete spíš podle melodie hlasu než podle slov. Do správné oblasti jste zařadili nanejvýš tři slova z deseti, u zbytku rozhodl náhodný výběr ze čtyř nabídek. Nabízené oblasti přitom pokrývaly celou republiku, takže vám zatím nepomohlo ani hrubé dělení na západ a východ.`;
+  }
+  if (skore <= 6) {
+    return `Slušný průměr. Výrazy, které se z domovské oblasti rozšířily dál a občas zaznějí i v médiích, zvládáte, jakmile ale slovo zůstalo doma, byla trefa ze čtyř nabídek věcí náhody. Rozeznat půlku mapy vám jde, přesnější zařazení do konkrétní národopisné oblasti už ne.`;
+  }
+  if (skore <= 9) {
+    return `Velmi dobrý výsledek. Poznáte nejen nejokoukanější výrazy, ale i ty, které se z domovské oblasti nikam nerozšířily. Jedno až tři slova vás dostala, nejspíš ta, u nichž zvuk slova nenapověděl vůbec nic. Mluvčího dokážete zařadit do konkrétní části republiky, ne jen na půlku mapy.`;
+  }
+  return `Plný počet, který dá menšina řešitelů. Sedly vám i položky, které mimo domovský kraj prakticky nikdo neslyšel, a to i tam, kde samo slovo žádné vodítko nedávalo a všechny čtyři nabídky byly stejně věrohodné. Deset slov vám stačí k tomu, abyste mluvčího umístili na mapu i bez jediné další věty.`;
+}
+
+vyhodnotitEl.addEventListener(`click`, function () {
+  var vsechny = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] !== `number`) { vsechny = false; }
+  }
+  if (!vsechny) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  hotovo = true;
+  var skore = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  for (var q = 0; q < otazky.length; q++) {
+    var tlacitka = boxy[q].querySelectorAll(`.varianta`);
+    for (var v = 0; v < tlacitka.length; v++) {
+      tlacitka[v].disabled = true;
+      tlacitka[v].classList.remove(`vybrana`);
+      if (v === otazky[q].spravna) {
+        tlacitka[v].classList.add(`spravna`);
+      } else if (v === odpovedi[q]) {
+        tlacitka[v].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[q] === otazky[q].spravna) { skore++; }
+  }
+  vyhodnotitEl.disabled = true;
+  hlaskaEl.textContent = ``;
+  skoreEl.textContent = skore + ` z ` + otazky.length;
+  hodnoceniEl.textContent = hodnoceniText(skore);
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+znovuEl.addEventListener(`click`, function () {
+  hotovo = false;
+  odpovedi = [];
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  vyhodnotitEl.disabled = true;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+vykresli();
+</script>
+</body>
+</html>
