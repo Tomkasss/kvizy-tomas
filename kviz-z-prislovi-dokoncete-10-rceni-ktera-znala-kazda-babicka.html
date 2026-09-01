@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz z přísloví: dokončete 10 rčení, která znala každá babička</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 36px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; line-height: 1.5; margin-bottom: 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    line-height: 1.45;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  #vyhodnotit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover:enabled { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; min-height: 1.2em; }
+  #vysledek {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 14px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; }
+  #znovu {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #znovu:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka, #vysledek { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz z přísloví: dokončete 10 rčení, která znala každá babička</h1>
+  <p class="perex">Tahle úsloví si člověk ze školních lavic většinou neodnesl. Přebírala se doma, u kamen a na zahradě, od těch, kdo byli o generaci napřed. Deset otázek se čtyřmi možnostmi teď prověří, co vám z toho dědictví zůstalo.</p>
+
+  <div id="kviz"></div>
+
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <div id="hlaska"></div>
+
+  <div id="vysledek">
+    <div id="skore"></div>
+    <div id="hodnoceni"></div>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var otazky = [
+  {
+    zneni: `1. Co podle rčení naučila nouze Dalibora?`,
+    varianty: [`psáti`, `čísti`, `housti`, `přísti`],
+    spravna: 2
+  },
+  {
+    zneni: `2. Které slovo patří do přísloví „Mladí ležáci, staří ..."?`,
+    varianty: [`chudáci`, `žebráci`, `nuzáci`, `vandráci`],
+    spravna: 1
+  },
+  {
+    zneni: `3. Co se míní příslovím „Boží mlýny melou pomalu, ale jistě"?`,
+    varianty: [
+      `kdo trpělivě čeká, dočká se nakonec odměny`,
+      `velké dílo se nedá uspěchat a musí uzrát`,
+      `osud rozdává rány, proti nimž je člověk bezmocný`,
+      `spravedlivý trest nakonec přijde, i když se opozdí`
+    ],
+    spravna: 3
+  },
+  {
+    zneni: `4. Čím končí přísloví „Zvyk je železná ..."?`,
+    varianty: [`halena`, `košile`, `kazajka`, `zástěra`],
+    spravna: 1
+  },
+  {
+    zneni: `5. Co znamená přísloví „Odříkaného chleba největší krajíc"?`,
+    varianty: [
+      `kdo se uskromní, nakonec získá ze všech nejvíc`,
+      `o co je nouze, toho si člověk cení nejvíc`,
+      `čeho se člověk hlasitě zříká, toho si nakonec užije nejvíc`,
+      `kdo o jídlo nestojí, tomu ho ostatní nabízejí nejčastěji`
+    ],
+    spravna: 2
+  },
+  {
+    zneni: `6. Které zvíře patří do přísloví „Dočkej času jako ... klasu"?`,
+    varianty: [`kachna`, `kráva`, `koza`, `husa`],
+    spravna: 3
+  },
+  {
+    zneni: `7. Co se míní příslovím „Panská láska po zajících skáče"?`,
+    varianty: [
+      `přízeň mocných je vrtkavá a bez varování se obrátí jinam`,
+      `urozený člověk dává své city najevo méně nápadně než prostý`,
+      `kdo se uchází o pánovu přízeň, musí za ním pořád běhat`,
+      `mezi pánem a čeledínem opravdové přátelství nevznikne`
+    ],
+    spravna: 0
+  },
+  {
+    zneni: `8. Jak zní ustálený konec přísloví „Chudoba cti ..."?`,
+    varianty: [`neztrácí`, `netratí`, `nehyzdí`, `nekalí`],
+    spravna: 1
+  },
+  {
+    zneni: `9. Co se míní příslovím „Bližší košile než kabát"?`,
+    varianty: [
+      `skromnost sluší člověku víc než okázalost`,
+      `na drobnostech záleží víc než na velkých gestech`,
+      `co má člověk po ruce, toho si obvykle cení nejvíc`,
+      `vlastní zájem a nejbližší lidé mají u člověka přednost`
+    ],
+    spravna: 3
+  },
+  {
+    zneni: `10. Co se míní rčením „pozdě bycha honiti"?`,
+    varianty: [
+      `je zbytečné litovat toho, co se už stalo`,
+      `kdo se rozmýšlí příliš dlouho, o všechno přijde`,
+      `kdo přijde pozdě, musí se spokojit s tím, co zbylo`,
+      `na stará kolena se člověk už nezmění`
+    ],
+    spravna: 0
+  }
+];
+
+var pismena = [`a) `, `b) `, `c) `, `d) `];
+
+var hodnoceni = [
+  { max: 3, text: `Přísloví jste spíš odhadovali, než si je vybavili. Chybějící slova jste doplňovali podle toho, co znělo hezky, a u výkladů jste sázeli na nejpravděpodobnější možnost. Nic ale není ztraceno, tahle řeč se vrací, jakmile ji člověk zase začne slýchat.` },
+  { max: 6, text: `Poctivý průměr. Co se dodnes běžně říká, jste doplnili bez zaváhání, jenže tam, kde už se přísloví z každodenní mluvy vytratilo, jste tápali. Základ máte pevný, chybí vám jen ta starší vrstva.` },
+  { max: 9, text: `Tohle je řeč, kterou se kdysi mluvilo v každé kuchyni, a vy jí rozumíte. Trefili jste i pořekadla, která se dnes skoro neslyší, a nenechali jste se zmást slovy, jež do přísloví sedla rytmem, ale ne významem. K plnému počtu chybělo opravdu málo.` },
+  { max: 10, text: `Plný počet, a ten se v tomhle kvízu povede jen hrstce lidí. Chybějící slova jste doplnili přesně tak, jak se odjakživa říkají, a správně jste vyložili i rčení, které dnes zná málokdo. Lidová moudrost u vás žije dál v celé své šíři. Klobouk dolů.` }
+];
+
+var odpovedi = new Array(otazky.length).fill(null);
+var vyhodnoceno = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoVyhodnotit = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var tlacitkoZnovu = document.getElementById(`znovu`);
+
+function vykresli() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    var zneniEl = document.createElement(`div`);
+    zneniEl.className = `zneni`;
+    zneniEl.textContent = o.zneni;
+    box.appendChild(zneniEl);
+
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `varianta`;
+      btn.textContent = pismena[j] + v;
+      btn.addEventListener(`click`, function () {
+        if (vyhodnoceno) { return; }
+        odpovedi[i] = j;
+        var sourozenci = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < sourozenci.length; k++) {
+          sourozenci[k].classList.remove(`vybrana`);
+        }
+        btn.classList.add(`vybrana`);
+        hlaskaEl.textContent = ``;
+        zkontrolujHotovo();
+      });
+      box.appendChild(btn);
+    });
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujHotovo() {
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  tlacitkoVyhodnotit.disabled = !hotovo;
+}
+
+tlacitkoVyhodnotit.addEventListener(`click`, function () {
+  if (tlacitkoVyhodnotit.disabled) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  vyhodnoceno = true;
+  var skore = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+
+  otazky.forEach(function (o, i) {
+    var tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].classList.remove(`vybrana`);
+      tlacitka[j].disabled = true;
+      if (j === o.spravna) {
+        tlacitka[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === o.spravna) { skore++; }
+  });
+
+  tlacitkoVyhodnotit.disabled = true;
+  hlaskaEl.textContent = ``;
+  skoreEl.textContent = skore + ` z ` + otazky.length;
+
+  var text = hodnoceni[hodnoceni.length - 1].text;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore <= hodnoceni[h].max) { text = hodnoceni[h].text; break; }
+  }
+  hodnoceniEl.textContent = text;
+
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+tlacitkoZnovu.addEventListener(`click`, function () {
+  odpovedi = new Array(otazky.length).fill(null);
+  vyhodnoceno = false;
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  tlacitkoVyhodnotit.disabled = true;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+vykresli();
+</script>
+</body>
+</html>
