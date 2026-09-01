@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz ze staročeských slov: 10 výrazů, které se z jazyka vytratily. Kdo dá 9/10, má hlavu jako ve třiceti</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 18px; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  #vyhodnotit, #znovu {
+    display: block;
+    margin: 40px auto 0;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #fff;
+    cursor: pointer;
+  }
+  #vyhodnotit { background: #5b7e5f; }
+  #vyhodnotit:hover:enabled { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; }
+  #znovu:hover { background: #756658; }
+  .hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.4em; }
+  #vysledek {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+  }
+  .skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  .hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka, #vysledek { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz ze staročeských slov: 10 výrazů, které se z jazyka vytratily. Kdo dá 9/10, má hlavu jako ve třiceti</h1>
+  <p class="perex">Naše babičky je měly v běžné řeči, dnes je potkáte leda v pohádce nebo ve slovníku. Deset slov, která z češtiny tiše zmizela. Poznáte, co doopravdy znamenala, nebo vás zmate to, jak dnes znějí?</p>
+
+  <div id="kviz"></div>
+
+  <button id="vyhodnotit" type="button" disabled>Vyhodnotit</button>
+  <p class="hlaska" id="hlaska"></p>
+
+  <div id="vysledek" hidden>
+    <p class="skore" id="skore"></p>
+    <p class="hodnoceni" id="hodnoceni"></p>
+    <button id="znovu" type="button">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var otazky = [
+  {
+    zneni: `1. Co byl na venkovském statku výměnek?`,
+    varianty: [
+      `díl úrody, který hospodář každoročně odváděl vrchnosti jako povinnou dávku`,
+      `doživotní bydlení a strava, které si při předání statku zajistil ustupující hospodář`,
+      `věno, které si nevěsta přinášela z rodného statku do manželství`,
+      `pozemek, který si hospodář vyměnil se sousedem za jiný stejné výměry`
+    ],
+    spravna: 1
+  },
+  {
+    zneni: `2. Kdo byla markytánka?`,
+    varianty: [
+      `žena, která s vojskem táhla do pole a prodávala mu jídlo a pití`,
+      `žena, která na městském trhu prodávala máslo, sýry a vejce`,
+      `žena, která po městě roznášela psaní a úřední vyhlášky`,
+      `žena, která pekla chléb pro panskou kuchyni na zámku`
+    ],
+    spravna: 0
+  },
+  {
+    zneni: `3. Co byl podomek?`,
+    varianty: [
+      `podomní obchodník, který s nůší chodil dům od domu se zbožím`,
+      `domovník, který v nájemním domě vybíral činži od nájemníků`,
+      `nádeník najímaný na den, který ve městě odklízel sníh a nečistoty`,
+      `sluha v hostinci, který obstarával koně a povozy hostů`
+    ],
+    spravna: 3
+  },
+  {
+    zneni: `4. Co byl krchov?`,
+    varianty: [
+      `obecní pastvina, na kterou se sháněl dobytek z celé vsi`,
+      `prostranství před kostelem, kde se po mši scházela ves`,
+      `hřbitov, obehnaný nízkou zdí na kraji vesnice`,
+      `obecní domek, ve kterém přebývali vesničtí chudí`
+    ],
+    spravna: 2
+  },
+  {
+    zneni: `5. Co byla mošna?`,
+    varianty: [
+      `dřevěná schránka na doklady a peníze, nošená u pasu`,
+      `plochý měšec na drobné mince, zavěšený na opasku`,
+      `proutěný koš nošený na zádech na dvou řemenech`,
+      `plátěná nebo kožená taška nošená přes rameno`
+    ],
+    spravna: 3
+  },
+  {
+    zneni: `6. Koho na vesnici oslovovali pantáto?`,
+    varianty: [
+      `rychtáře, který ve vsi rozsuzoval spory sousedů`,
+      `sedláka, kterému patřil statek, tedy hospodáře`,
+      `faráře, který ve vsi sloužil mše a vedl matriku`,
+      `učitele, který ve vsi vedl jednotřídní školu`
+    ],
+    spravna: 1
+  },
+  {
+    zneni: `7. Co byla šalanda?`,
+    varianty: [
+      `společná místnost, kde bydlela a jedla čeleď nebo dělníci`,
+      `kancelář správce, odkud se ve dvoře rozdělovala práce`,
+      `nevytápěná síň mezi vchodem a světnicí ve stavení`,
+      `dílna, ve které se přes zimu opravovalo hospodářské nářadí`
+    ],
+    spravna: 0
+  },
+  {
+    zneni: `8. Co byla ponůcka?`,
+    varianty: [
+      `hlídání vsi po setmění, které si sousedé střídali`,
+      `povinná výpomoc na panském poli v době žní`,
+      `ranní obchůzka pastýře, který sháněl dobytek z chalup`,
+      `společné draní peří a předení o zimních večerech`
+    ],
+    spravna: 0
+  },
+  {
+    zneni: `9. Co dělal ten, kdo někoho fedroval?`,
+    varianty: [
+      `hlídal ho a nespouštěl z něj po celý den oči`,
+      `pobízel ho do práce a popoháněl ho k spěchu`,
+      `svým vlivem ho podporoval a pomáhal mu nahoru`,
+      `šidil ho při vyúčtování a bral mu z podílu`
+    ],
+    spravna: 2
+  },
+  {
+    zneni: `10. Co byl pohůnek?`,
+    varianty: [
+      `tovaryš prvního roku, který se učil v kovárně`,
+      `mladší čeledín, který při orbě vedl potah`,
+      `nádeník, který o žních svážel snopy s párem volů`,
+      `chlapec, který ve mlýně sypal obilí do násypky`
+    ],
+    spravna: 1
+  }
+];
+
+var pismena = [`a) `, `b) `, `c) `, `d) `];
+
+var hodnoceni = [
+  { max: 3, text: `Vaše slovní zásoba stojí pevně na dnešní češtině a starší vrstva jazyka vám zůstala stranou. Trefil jste zhruba to, co by dal i náhodný tip, takže tahle slova pro vás nejsou vybledlá vzpomínka, ale úplná novinka. Dobrá zpráva je, že se dají získat zpátky během pár večerů se starší knihou.` },
+  { max: 6, text: `Průměr českého čtenáře. Několik výrazů máte usazených z pohádek a filmů, u zbytku jste odhadoval podle zvuku slova, a právě tam vás nachytaly varianty, které zněly rozumně. Vaše aktivní slovní zásoba je běžná, pasivní o něco širší, jen se k ní hůř dostáváte.` },
+  { max: 9, text: `Nadprůměr. Ve slovech, která už z běžné mluvy vypadla, se orientujete líp než většina lidí kolem vás, a nespletly vás ani varianty postavené na tom, jak slovo dnes vypadá. To znamená široké pasivní porozumění a rychlé vybavování. Devět bodů z deseti znamená pasivní slovní zásobu na úrovni pravidelného čtenáře starší české prózy, tedy o vrstvu nad běžným mluvčím dnešní češtiny.` },
+  { max: 10, text: `Plný počet, na který dosáhne jen zlomek řešitelů. Rozeznáváte odstíny významů tam, kde ostatní tipují, a udrželo se vám i to, co z běžné mluvy zmizelo o generace dřív. Vaše slovní zásoba je na úrovni sečtělého čtenáře, který se starou češtinou zabývá cíleně.` }
+];
+
+var odpovedi = [];
+var hotovo = false;
+
+var elKviz = document.getElementById(`kviz`);
+var elVyhodnotit = document.getElementById(`vyhodnotit`);
+var elHlaska = document.getElementById(`hlaska`);
+var elVysledek = document.getElementById(`vysledek`);
+var elSkore = document.getElementById(`skore`);
+var elHodnoceni = document.getElementById(`hodnoceni`);
+var elZnovu = document.getElementById(`znovu`);
+
+function postav() {
+  elKviz.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = o.zneni;
+    box.appendChild(zneni);
+
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement(`button`);
+      btn.className = `varianta`;
+      btn.type = `button`;
+      btn.textContent = pismena[j] + v;
+      btn.addEventListener(`click`, function () {
+        if (hotovo) { return; }
+        odpovedi[i] = j;
+        var vsechny = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < vsechny.length; k++) {
+          vsechny[k].classList.remove(`vybrana`);
+        }
+        btn.classList.add(`vybrana`);
+        zkontrolujHotovost();
+      });
+      box.appendChild(btn);
+    });
+
+    elKviz.appendChild(box);
+  });
+}
+
+function zkontrolujHotovost() {
+  var vse = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] !== `number`) { vse = false; break; }
+  }
+  elVyhodnotit.disabled = !vse;
+  if (vse) { elHlaska.textContent = ``; }
+}
+
+elVyhodnotit.addEventListener(`click`, function () {
+  if (elVyhodnotit.disabled) {
+    elHlaska.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  hotovo = true;
+  var body = 0;
+  var boxy = elKviz.querySelectorAll(`.otazka`);
+  for (var i = 0; i < otazky.length; i++) {
+    var tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove(`vybrana`);
+      if (j === otazky[i].spravna) {
+        tlacitka[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === otazky[i].spravna) { body++; }
+  }
+
+  elSkore.textContent = body + ` z ` + otazky.length;
+  var text = hodnoceni[hodnoceni.length - 1].text;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body <= hodnoceni[h].max) { text = hodnoceni[h].text; break; }
+  }
+  elHodnoceni.textContent = text;
+
+  elVyhodnotit.disabled = true;
+  elHlaska.textContent = ``;
+  elVysledek.hidden = false;
+  elVysledek.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+elZnovu.addEventListener(`click`, function () {
+  hotovo = false;
+  odpovedi = [];
+  elVysledek.hidden = true;
+  elHlaska.textContent = ``;
+  elVyhodnotit.disabled = true;
+  postav();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+postav();
+</script>
+</body>
+</html>
