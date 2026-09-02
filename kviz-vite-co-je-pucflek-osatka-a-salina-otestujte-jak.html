@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KVÍZ: Víte, co je pucflek, ošatka a šalina? Otestujte, jak rozumíte řeči našich babiček</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 32px 16px;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.8rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.4; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+    line-height: 1.4;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.good { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.bad { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .locked .opt { cursor: default; }
+  #submit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #warn { text-align: center; color: #8c3b3b; margin: 14px 0 0; font-size: .95rem; }
+  #result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 32px;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 14px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+  #again {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+  }
+  #again:hover { background: #756658; }
+  .hidden { display: none; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.45rem; }
+    .q { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>KVÍZ: Víte, co je pucflek, ošatka a šalina? Otestujte, jak rozumíte řeči našich babiček</h1>
+  <p class="perex">Řeč našich babiček a dědečků byla plná slov, která dnes v obchodě ani v televizi neuslyšíte. Něco přinesla stará domácnost, něco venkovské řemeslo, něco Valašsko a Slezsko. Deset otázek ukáže, kolik jich ještě dokážete vyložit.</p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <p id="warn" class="hidden">Odpovězte prosím na všechny otázky</p>
+  <div id="result" class="hidden">
+    <p id="score"></p>
+    <p id="verdict"></p>
+    <button id="again">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var QUESTIONS = [
+  {
+    q: `1. Co je krajáč?`,
+    o: [`dřevěná palice na tlučení másla`, `hliněná forma na pečení bábovky`, `velký hrnec na mléko nebo smetanu`, `plechová konev na nošení vody ze studny`],
+    a: 2
+  },
+  {
+    q: `2. Co znamená slovo „lajntuch"?`,
+    o: [`prostěradlo`, `povlak na peřinu`, `plátěná plena`, `hrubý ubrus na sváteční stůl`],
+    a: 0
+  },
+  {
+    q: `3. Co je frgál?`,
+    o: [`tenká bramborová placka pečená na plotně`, `kynutý knedlík plněný povidly`, `sladká kaše z krup a sušeného ovoce`, `velký kulatý koláč s vrstvou náplně`],
+    a: 3
+  },
+  {
+    q: `4. K čemu sloužila kvedlačka?`,
+    o: [`k roztloukání koření na jemný prášek`, `k rozšlehání vajec a rozmíchání těsta`, `k obracení bramboráků na rozpálené plotně`, `k prosévání mouky před vysypáním na vál`],
+    a: 1
+  },
+  {
+    q: `5. Co je kordulka?`,
+    o: [`plátěná zástěra vázaná přes sukni`, `široký naškrobený rukáv u ženské košile`, `vyšívaný šátek uvazovaný pod bradou`, `vesta bez rukávů jako součást lidového kroje`],
+    a: 3
+  },
+  {
+    q: `6. Co je věrtel?`,
+    o: [`stará délková míra odpovídající zhruba metru`, `stará dutá míra na obilí, asi třiadvacet litrů`, `stará míra na plátno, asi tři lokte`, `stará váhová jednotka odpovídající zhruba půl kilogramu`],
+    a: 1
+  },
+  {
+    q: `7. Čím se živil bečvář?`,
+    o: [`výrobou kádí a sudů`, `pletením košů z vrbového proutí`, `tesáním trámů na roubené stavby`, `broušením kos a srpů pro sedláky`],
+    a: 0
+  },
+  {
+    q: `8. Co je přeslice?`,
+    o: [`dřevěný člunek, kterým se protahovala nit osnovou`, `hřeben se železnými hroty na česání lnu`, `tyč, na kterou se při ručním předení upevňoval len`, `rám, na němž se sušilo vyprané plátno`],
+    a: 2
+  },
+  {
+    q: `9. Co znamená ve slezských nářečích slovo „borok"?`,
+    o: [`skoupý člověk, který nikomu nic nedá`, `člověk hodný politování, chudák`, `hrubý a nevychovaný člověk`, `statný a silný muž`],
+    a: 1
+  },
+  {
+    q: `10. Co je pučálka?`,
+    o: [`naklíčené obilí usušené a semleté na mouku`, `hustá kaše z krup zapražená na sádle`, `pražená mouka zavařená do vody místo polévky`, `naklíčený hrách opražený a osolený`],
+    a: 3
+  }
+];
+
+var VERDICTS = [
+  { max: 3, text: `Řeč babiček a dědečků je pro vás zatím spíš cizí jazyk. Rozumíte jednotlivým slovům, která se udržela v rodinách, ale jakmile přijde na řemeslo, kroj nebo starou míru, ztrácíte nit. Zkuste se příště zaposlouchat, když někdo starší vzpomíná. Většina těchto slov se dá odposlechnout ještě dnes.` },
+  { max: 6, text: `Základ staré řeči máte a v běžném vyprávění byste se neztratili. Poznáte, co se v domácnosti používalo a co se jedlo, ale u výrazů z dílny, z pole a z nářečí vám význam uniká. Jste na tom jako většina lidí, kteří stará slova znají z doslechu, ne z každodenního užívání.` },
+  { max: 9, text: `Řeči našich babiček rozumíte opravdu dobře. Netápete u slov z kuchyně, z truhly ani ze statku a poznáte i výrazy, které se drží jen v některých krajích. Tolik jich dnes vyloží málokdo. Tahle slovní zásoba se nedá nastudovat za večer, ta se poslouchá roky.` },
+  { max: 10, text: `Plný počet a klobouk dolů. Staré řeči rozumíte tak, jako byste v ní vyrostli. Zvládli jste nářeční výrazy, zapomenuté řemeslo, starou míru i jídlo, které dnes neuvaří skoro nikdo. Takový výsledek zvládne jen menšina. Vaše slovní zásoba je kus živé paměti a stojí za to předat ji dál.` }
+];
+
+var LETTERS = [`a)`, `b)`, `c)`, `d)`];
+var answers = [];
+var evaluated = false;
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var againEl = document.getElementById(`again`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  answers = [];
+  evaluated = false;
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    answers.push(null);
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    box.setAttribute(`data-q`, String(i));
+    var p = document.createElement(`p`);
+    p.className = `q-text`;
+    p.textContent = QUESTIONS[i].q;
+    box.appendChild(p);
+    for (var j = 0; j < QUESTIONS[i].o.length; j++) {
+      var btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.type = `button`;
+      btn.textContent = LETTERS[j] + ` ` + QUESTIONS[i].o[j];
+      btn.setAttribute(`data-q`, String(i));
+      btn.setAttribute(`data-o`, String(j));
+      btn.addEventListener(`click`, onPick);
+      box.appendChild(btn);
+    }
+    quizEl.appendChild(box);
+  }
+  submitEl.disabled = true;
+  warnEl.classList.add(`hidden`);
+  resultEl.classList.add(`hidden`);
+}
+
+function onPick(e) {
+  if (evaluated) { return; }
+  var qi = parseInt(e.currentTarget.getAttribute(`data-q`), 10);
+  var oi = parseInt(e.currentTarget.getAttribute(`data-o`), 10);
+  answers[qi] = oi;
+  var box = quizEl.querySelector(`.q[data-q="` + qi + `"]`);
+  var opts = box.querySelectorAll(`.opt`);
+  for (var k = 0; k < opts.length; k++) { opts[k].classList.remove(`sel`); }
+  e.currentTarget.classList.add(`sel`);
+  checkReady();
+}
+
+function checkReady() {
+  var done = true;
+  for (var i = 0; i < answers.length; i++) {
+    if (answers[i] === null) { done = false; break; }
+  }
+  submitEl.disabled = !done;
+  if (done) { warnEl.classList.add(`hidden`); }
+}
+
+function evaluate() {
+  if (submitEl.disabled) {
+    warnEl.classList.remove(`hidden`);
+    return;
+  }
+  evaluated = true;
+  var score = 0;
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    var box = quizEl.querySelector(`.q[data-q="` + i + `"]`);
+    box.classList.add(`locked`);
+    var opts = box.querySelectorAll(`.opt`);
+    for (var j = 0; j < opts.length; j++) {
+      opts[j].classList.remove(`sel`);
+      if (j === QUESTIONS[i].a) {
+        opts[j].classList.add(`good`);
+      } else if (j === answers[i]) {
+        opts[j].classList.add(`bad`);
+      }
+    }
+    if (answers[i] === QUESTIONS[i].a) { score++; }
+  }
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  var text = VERDICTS[VERDICTS.length - 1].text;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score <= VERDICTS[v].max) { text = VERDICTS[v].text; break; }
+  }
+  verdictEl.textContent = text;
+  resultEl.classList.remove(`hidden`);
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+againEl.addEventListener(`click`, function () {
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+build();
+</script>
+</body>
+</html>
