@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Obecný test pro seniory: 10 otázek ze všeho možného. Kdo dá 8/10, má hlavu jako ve třiceti</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 32px 16px;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; line-height: 1.45; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta:disabled { cursor: default; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.2em; }
+#vysledek {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 40px;
+  display: none;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  .otazka { padding: 20px; }
+  h1 { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Obecný test pro seniory: 10 otázek ze všeho možného. Kdo dá 8/10, má hlavu jako ve třiceti</h1>
+<p class="perex">Deset otázek a deset oborů: zeměpis, jídlo, sport, víra, divadlo, dějiny, film, technika, logika i měřictví. Nic se nepočítá zpaměti, všechno se jen vybavuje. Osm a víc bodů znamená hlavu, která si pořád drží tempo.</p>
+<div id="kviz"></div>
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p id="hlaska"></p>
+<div id="vysledek">
+  <div id="skore"></div>
+  <div id="hodnoceni"></div>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var otazky = [
+  {
+    zneni: `1. Které pohoří tvoří přirozenou hranici mezi Španělskem a Francií?`,
+    varianty: [`Alpy`, `Apeniny`, `Karpaty`, `Pyreneje`],
+    spravna: 3
+  },
+  {
+    zneni: `2. Ze které země pochází sýr eidam?`,
+    varianty: [`z Německa`, `z Dánska`, `z Belgie`, `z Nizozemska`],
+    spravna: 3
+  },
+  {
+    zneni: `3. Jak se jmenuje zimní olympijský sport, ve kterém hráči po ledě posílají těžké žulové kameny a metlami před nimi zametají plochu?`,
+    varianty: [`bandy`, `short track`, `curling`, `skeleton`],
+    spravna: 2
+  },
+  {
+    zneni: `4. Ke kterému náboženství patří posvátná řeka Ganga?`,
+    varianty: [`k hinduismu`, `k buddhismu`, `k šintoismu`, `k sikhismu`],
+    spravna: 0
+  },
+  {
+    zneni: `5. Kdo napsal divadelní hru Lucerna?`,
+    varianty: [`Václav Kliment Klicpera`, `Alois Jirásek`, `František Ferdinand Šamberk`, `Jaroslav Vrchlický`],
+    spravna: 1
+  },
+  {
+    zneni: `6. Kterému státu odstoupilo Československo po druhé světové válce Podkarpatskou Rus?`,
+    varianty: [`Polsku`, `Maďarsku`, `Sovětskému svazu`, `Rumunsku`],
+    spravna: 2
+  },
+  {
+    zneni: `7. Na kterém filmovém festivalu se uděluje Zlatý medvěd?`,
+    varianty: [`v Cannes`, `v Berlíně`, `v Benátkách`, `v Karlových Varech`],
+    spravna: 1
+  },
+  {
+    zneni: `8. Která součástka v domovním rozvaděči při zkratu obvod sama vypne a dá se pak znovu zapnout pákou?`,
+    varianty: [`jistič`, `pojistka`, `stykač`, `relé`],
+    spravna: 0
+  },
+  {
+    zneni: `9. V jedné obci platí, že každý, kdo tam chová včely, má zahradu. Pan Novák z této obce zahradu nemá. Který závěr z toho vyplývá?`,
+    varianty: [`Pan Novák chová včely.`, `Pan Novák nechová včely.`, `Každý, kdo má v obci zahradu, chová včely.`, `O chovu včel u pana Nováka nelze rozhodnout.`],
+    spravna: 1
+  },
+  {
+    zneni: `10. Co se teodolitem měří přímo?`,
+    varianty: [`úhly`, `vzdálenosti mezi dvěma body`, `nadmořská výška`, `výměra pozemku`],
+    spravna: 0
+  }
+];
+
+var hodnoceni = [
+  {
+    max: 3,
+    text: `Tentokrát to zůstalo u pár trefených otázek a zbytek si vzaly lákavější varianty. Nejde o to, že by znalosti zmizely, jen se dlouho nikam nevytáhly a leží hlouběji, než by člověk čekal. Projděte si správné odpovědi v klidu a všimněte si, které obory vás stáhly nejvíc. Za pár dní zkuste kvíz znovu, druhé kolo bývá výrazně lepší.`
+  },
+  {
+    max: 6,
+    text: `Solidní základ, na kterém se dá stavět. Zhruba polovina otázek vyšla a druhá ne, přičemž nejtěžší body téhle desítky leží u poválečné hranice a u měřického přístroje ze závěru testu. Ty prověří i sečtělého člověka. K hranici, o které mluví název, zbývá ještě kus cesty, ale jde o obory, které se dají doplnit během jednoho odpoledne s knihou.`
+  },
+  {
+    max: 9,
+    text: `Tohle je výsledek, kterým se dá chlubit. Sedm bodů znamená rozhled, který drží pohromadě napříč obory, a od osmi bodů výš platí slib z názvu doslova: takhle přesně si fakty vybavuje hlava, která je na tom stejně jako ve třiceti, jen má za sebou o pár desetiletí čtení a zkušeností navíc. Devět bodů už dělí od plného počtu jediná otázka, nejspíš ta nejzáludnější z celého testu.`
+  },
+  {
+    max: 10,
+    text: `Plný počet, a to napříč deseti obory, které spolu nemají nic společného. Trefit sýr, zimní sport, divadelní hru, poválečnou hranici i geodetický přístroj v jednom testu zvládne opravdu jen menšina. Vaše paměť sedí přesně tam, kam ji název umisťuje, a klidně můžete tenhle kvíz předložit o generaci mladším. Výsledek mluví za vás.`
+  }
+];
+
+var odpovedi = [];
+var vyhodnoceno = false;
+var kvizEl = document.getElementById('kviz');
+var vyhodnotitEl = document.getElementById('vyhodnotit');
+var hlaskaEl = document.getElementById('hlaska');
+var vysledekEl = document.getElementById('vysledek');
+var skoreEl = document.getElementById('skore');
+var hodnoceniEl = document.getElementById('hodnoceni');
+var znovuEl = document.getElementById('znovu');
+var pismena = [`a) `, `b) `, `c) `, `d) `];
+
+function vykresli() {
+  kvizEl.innerHTML = '';
+  otazky.forEach(function (o, i) {
+    var box = document.createElement('div');
+    box.className = 'otazka';
+    var z = document.createElement('div');
+    z.className = 'zneni';
+    z.textContent = o.zneni;
+    box.appendChild(z);
+    o.varianty.forEach(function (v, j) {
+      var b = document.createElement('button');
+      b.className = 'varianta';
+      b.type = 'button';
+      b.textContent = pismena[j] + v;
+      b.addEventListener('click', function () {
+        if (vyhodnoceno) { return; }
+        odpovedi[i] = j;
+        var sourozenci = box.querySelectorAll('.varianta');
+        for (var k = 0; k < sourozenci.length; k++) {
+          sourozenci[k].classList.remove('vybrana');
+        }
+        b.classList.add('vybrana');
+        zkontrolujHotovo();
+      });
+      box.appendChild(b);
+    });
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujHotovo() {
+  var hotovo = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (odpovedi[i] === undefined) { hotovo = false; break; }
+  }
+  vyhodnotitEl.disabled = !hotovo;
+  if (hotovo) { hlaskaEl.textContent = ''; }
+}
+
+vyhodnotitEl.addEventListener('click', function () {
+  if (vyhodnotitEl.disabled) { return; }
+  var chybi = false;
+  for (var i = 0; i < otazky.length; i++) {
+    if (odpovedi[i] === undefined) { chybi = true; break; }
+  }
+  if (chybi) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  vyhodnoceno = true;
+  var skore = 0;
+  var boxy = kvizEl.querySelectorAll('.otazka');
+  for (var q = 0; q < otazky.length; q++) {
+    var tlacitka = boxy[q].querySelectorAll('.varianta');
+    for (var t = 0; t < tlacitka.length; t++) {
+      tlacitka[t].disabled = true;
+      tlacitka[t].classList.remove('vybrana');
+      if (t === otazky[q].spravna) {
+        tlacitka[t].classList.add('spravna');
+      } else if (t === odpovedi[q]) {
+        tlacitka[t].classList.add('spatna');
+      }
+    }
+    if (odpovedi[q] === otazky[q].spravna) { skore++; }
+  }
+  vyhodnotitEl.disabled = true;
+  skoreEl.textContent = skore + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+  vysledekEl.style.display = 'block';
+  vysledekEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+znovuEl.addEventListener('click', function () {
+  odpovedi = [];
+  vyhodnoceno = false;
+  vysledekEl.style.display = 'none';
+  hlaskaEl.textContent = '';
+  vyhodnotitEl.disabled = true;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+vykresli();
+</script>
+</body>
+</html>
