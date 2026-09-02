@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz pro seniory: 10 otázek, které dnešní mladí nedají, ale ročníky 60+, zvládnou klidně 10/10</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#hlaska { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+#vysledek {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 24px;
+  border-top: 4px solid #5b7e5f;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 14px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro seniory: 10 otázek, které dnešní mladí nedají, ale ročníky 60+, zvládnou klidně 10/10</h1>
+<p class="perex">Deset otázek napříč obory, u kterých má pamětník navrch. Domácnost, dobová technika, divadlo, hudba, příroda, zdraví, zeměpis i dějiny. Vy jste tu dobu prožili, mladší o ní jen slyšeli vyprávět. Kolik z deseti trefíte?</p>
+<div id="kviz"></div>
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p id="hlaska"></p>
+<div id="vysledek" style="display:none">
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var otazky = [
+  { q: `Co znamená výraz šrajtofle?`, o: [`aktovka`, `opasek`, `peněženka`, `kapesník`], s: 2 },
+  { q: `Ve kterém pohoří pramení Labe?`, o: [`v Krkonoších`, `v Jeseníkách`, `v Orlických horách`, `v Krušných horách`], s: 0 },
+  { q: `Které pražské divadlo vedl ve druhé polovině padesátých let Jan Werich?`, o: [`Divadlo ABC`, `Semafor`, `Divadlo Na zábradlí`, `Divadlo Rokoko`], s: 0 },
+  { q: `K čemu sloužil mandl?`, o: [`k praní prádla`, `k bělení prádla`, `k sušení prádla`, `k hlazení prádla`], s: 3 },
+  { q: `Ve kterém městě se začaly vyrábět traktory Zetor?`, o: [`ve Zlíně`, `v Brně`, `v Martině`, `v Přerově`], s: 1 },
+  { q: `Jak se jmenuje tvrdá umělá hmota, ze které se od třicátých let vyráběly telefonní přístroje a vypínače?`, o: [`celuloid`, `novodur`, `bakelit`, `ebonit`], s: 2 },
+  { q: `Který z těchto ptáků hnízdí u nás nejčastěji ve stodolách a v kostelních věžích?`, o: [`puštík obecný`, `sova pálená`, `kalous ušatý`, `výr velký`], s: 1 },
+  { q: `Kterou zemi reprezentoval Karel Gott na Eurovizi v roce 1968?`, o: [`Československo`, `Německo`, `Švýcarsko`, `Rakousko`], s: 3 },
+  { q: `Ve které zemi vzniklo nezávislé odborové hnutí Solidarita?`, o: [`v Maďarsku`, `v Rumunsku`, `v Polsku`, `v Jugoslávii`], s: 2 },
+  { q: `Jakým způsobem dostávaly děti v Československu na začátku šedesátých let vakcínu proti dětské obrně?`, o: [`na kostce cukru`, `injekcí do paže`, `nosními kapkami`, `v šumivé tabletě`], s: 0 }
+];
+
+var hodnoceni = [
+  { max: 3, t: `Trefili jste jen pár otázek a zbytek zůstal viset ve vzduchu. Nejvíc bodů odešlo tam, kde vedle správné odpovědi stála varianta, která vypadala stejně věrohodně, a rozhodovala jediná znalost navíc. Projděte si řešení, většinu z toho stačí jednou srovnat a příště půjde kvíz o poznání hladčeji.` },
+  { max: 6, t: `Poloviční úspěch. Otázky z domácnosti a z každodenního jazyka vám naskočily samy, u průmyslu, přírody nebo zdravotnictví jste ale několik pustili. Kdo tu dobu zažil, sahá obvykle výš, takže tady je ještě kus prostoru. Projděte si řešení a uvidíte, že většina z toho je vám vlastně blízká.` },
+  { max: 9, t: `Výborný výsledek a přesně to pásmo, kde se schází většina pamětníků. Poznáte věci z domácnosti, orientujete se v divadle, v hudbě i na mapě a na lákavější varianty jste nenaletěli. K plnému počtu chyběla jedna až tři otázky, u kterých se rozhodovalo mezi dvěma velmi podobnými možnostmi.` },
+  { max: 10, t: `Deset z deseti, přesně jak se od znalce těchhle reálií čeká. Neminuli jste jedinou nastraženou variantu: ani u divadla, ani u hmoty starých vypínačů, ani u sovy, kterou od ostatních odlišuje místo hnízdění. Tohle už není vzpomínání, ale jistý přehled napříč obory, a plný počet je jeho zaslouženým výsledkem. Klobouk dolů.` }
+];
+
+var pismena = [`a) `, `b) `, `c) `, `d) `];
+var odpovedi = new Array(otazky.length).fill(null);
+var hotovo = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoVyhodnotit = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var tlacitkoZnovu = document.getElementById(`znovu`);
+
+function vykresli() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (ot, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = (i + 1) + `. ` + ot.q;
+    box.appendChild(zneni);
+    ot.o.forEach(function (varianta, j) {
+      var btn = document.createElement(`button`);
+      btn.className = `varianta`;
+      btn.type = `button`;
+      btn.textContent = pismena[j] + varianta;
+      btn.addEventListener(`click`, function () { vyber(i, j); });
+      box.appendChild(btn);
+    });
+    kvizEl.appendChild(box);
+  });
+}
+
+function vyber(i, j) {
+  if (hotovo) { return; }
+  odpovedi[i] = j;
+  var boxy = kvizEl.getElementsByClassName(`otazka`);
+  var tlacitka = boxy[i].getElementsByClassName(`varianta`);
+  for (var k = 0; k < tlacitka.length; k++) {
+    tlacitka[k].classList.remove(`vybrana`);
+  }
+  tlacitka[j].classList.add(`vybrana`);
+  hlaskaEl.textContent = ``;
+  aktualizujTlacitko();
+}
+
+function aktualizujTlacitko() {
+  var vse = odpovedi.every(function (o) { return o !== null; });
+  tlacitkoVyhodnotit.disabled = !vse;
+}
+
+function vyhodnot() {
+  var vse = odpovedi.every(function (o) { return o !== null; });
+  if (!vse) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  hotovo = true;
+  var body = 0;
+  var boxy = kvizEl.getElementsByClassName(`otazka`);
+  otazky.forEach(function (ot, i) {
+    var tlacitka = boxy[i].getElementsByClassName(`varianta`);
+    for (var k = 0; k < tlacitka.length; k++) {
+      tlacitka[k].classList.remove(`vybrana`);
+      tlacitka[k].disabled = true;
+    }
+    tlacitka[ot.s].classList.add(`spravna`);
+    if (odpovedi[i] === ot.s) {
+      body++;
+    } else {
+      tlacitka[odpovedi[i]].classList.add(`spatna`);
+    }
+  });
+  tlacitkoVyhodnotit.disabled = true;
+  skoreEl.textContent = body + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].t;
+      break;
+    }
+  }
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function znovu() {
+  hotovo = false;
+  odpovedi = new Array(otazky.length).fill(null);
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  vykresli();
+  aktualizujTlacitko();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+tlacitkoVyhodnotit.addEventListener(`click`, vyhodnot);
+tlacitkoZnovu.addEventListener(`click`, znovu);
+vykresli();
+aktualizujTlacitko();
+</script>
+</body>
+</html>
