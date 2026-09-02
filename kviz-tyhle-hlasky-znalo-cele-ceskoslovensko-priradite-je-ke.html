@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KVÍZ: Tyhle hlášky znalo celé Československo. Přiřadíte je ke správným filmům?</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 20px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .zamek .varianta { cursor: default; }
+  .zamek .varianta:hover { background: #f7f4f0; }
+  .zamek .varianta.vybrana:hover { background: #dcd3c7; }
+  .zamek .varianta.spravna:hover { background: #d4edda; }
+  .zamek .varianta.spatna:hover { background: #f8d7da; }
+  #vyhodnotit, #znovu {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; margin: 24px auto 0; }
+  #znovu:hover { background: #756658; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.4em; }
+  #vysledek {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>KVÍZ: Tyhle hlášky znalo celé Československo. Přiřadíte je ke správným filmům?</h1>
+  <p class="perex">Některé věty z československých filmů zlidověly tak, že je lidé opakují dodnes, i když si film třeba nevybaví. Deset z nich tu stojí bez nápovědy a ke každé patří jeden jediný titul. Kolik jich přiřadíte správně?</p>
+  <div id="kviz"></div>
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+  <div id="vysledek">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var otazky = [
+  {
+    text: `1. Ze kterého filmu je hláška „Zavřete oči, odcházím"?`,
+    varianty: [`Eva tropí hlouposti`, `Kristian`, `Hotel Modrá hvězda`, `Roztomilý člověk`],
+    spravna: 1
+  },
+  {
+    text: `2. Ze kterého filmu je hláška „Alkohol podávaný v malých dávkách neškodí v jakémkoliv množství"?`,
+    varianty: [`Limonádový Joe`, `Fantom Morrisvillu`, `Starci na chmelu`, `Kdyby tisíc klarinetů`],
+    spravna: 0
+  },
+  {
+    text: `3. Ve kterém filmu vítá majitel říčních lázní hosty slovy „Vejděte, vejděte bez zdráhání. Nedejte se odstrašiti chladem, jejž pociťujete"?`,
+    varianty: [`Adéla ještě nevečeřela`, `Báječní muži s klikou`, `Rozmarné léto`, `Jára Cimrman ležící, spící`],
+    spravna: 2
+  },
+  {
+    text: `4. Ze kterého filmu je hláška „Slezte z toho lustru, Donalde, vidím vás"?`,
+    varianty: [`Kulový blesk`, `Zítra vstanu a opařím se čajem`, `Což takhle dát si špenát`, `Jáchyme, hoď ho do stroje!`],
+    spravna: 3
+  },
+  {
+    text: `5. Ze kterého filmu je hláška „Já když kouřím, tak zvracím"?`,
+    varianty: [`Marečku, podejte mi pero!`, `Trhák`, `Nejistá sezóna`, `Rozpuštěný a vypuštěný`],
+    spravna: 0
+  },
+  {
+    text: `6. Ze kterého filmu je hláška „Zuzanko, dýchej, ať se ti roztáhne hrudní košíček"?`,
+    varianty: [`Léto s kovbojem`, `Na samotě u lesa`, `Slunce, seno, jahody`, `Zítra to roztočíme, drahoušku...!`],
+    spravna: 1
+  },
+  {
+    text: `7. Ze kterého filmu je hláška „To je hadrák, pane. Ten neublíží, ten leští!"?`,
+    varianty: [`Jak básníci přicházejí o iluze`, `Vrať se do hrobu!`, `Vrchní, prchni!`, `Bony a klid`],
+    spravna: 2
+  },
+  {
+    text: `8. Ze kterého filmu je hláška „Je to sice dál, ale zato horší cesta"?`,
+    varianty: [`Discopříběh`, `Jak svět přichází o básníky`, `Kamarád do deště`, `Sněženky a machři`],
+    spravna: 3
+  },
+  {
+    text: `9. Ze kterého filmu je hláška „Chlapi, nelejte to pivo z voken, podívejte se, jak vypadám"?`,
+    varianty: [`Vesničko má středisková`, `Postřižiny`, `Slavnosti sněženek`, `Konec starých časů`],
+    spravna: 0
+  },
+  {
+    text: `10. Ze kterého filmu je hláška „Čo bolo, to bolo, terazky som majorom"?`,
+    varianty: [`Tankový prapor`, `Černí baroni`, `Dobrý voják Švejk`, `Copak je to za vojáka...`],
+    spravna: 1
+  }
+];
+
+var hodnoceni = [
+  { max: 3, text: `Hlášky vám zní povědomě, ale spojit je s konkrétním titulem se zatím nedaří. Většina těchhle vět se dostala do řeči dřív, než si člověk stačil zapamatovat, odkud jsou, takže vám kvíz nabídl samé pasti. Pusťte si některou z těch komedií celou a příště poznáte i to, co dnes prošlo mimo.` },
+  { max: 6, text: `Zůstali jste pod očekávaným průměrem, který u tohohle kvízu leží na sedmi bodech. Nejznámější hlášky trefíte spolehlivě, jenže ve středním pásmu, kde se nabízejí dva podobné tituly ze stejné doby, začínáte ztrácet. Právě tam se rozhoduje, jestli se přes průměr dostanete, nebo pod ním zůstanete.` },
+  { max: 9, text: `Sedm bodů je přesně splněný průměr, teprve osm a devět znamená výsledek nad ním. Poradili jste si i s replikami, které nepatří k těm nejcitovanějším, a nenachytaly vás ani varianty ze stejného žánru nebo od stejných tvůrců. K plnému počtu vám chyběl jediný krok, nejspíš u té nejméně citované hlášky, kterou zná už jen ten, kdo film opravdu viděl.` },
+  { max: 10, text: `Plný počet, na který dosáhne jen menšina. Přiřadili jste správně všech deset vět od černobílé klasiky s Oldřichem Novým po vojenskou komedii z devadesátek. Tohle už není nostalgie, ale opravdu zažitá znalost československého filmu.` }
+];
+
+var pismena = [`a) `, `b) `, `c) `, `d) `];
+var odpovedi = new Array(otazky.length).fill(null);
+var vyhodnoceno = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function vykresli() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = o.text;
+    box.appendChild(zneni);
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `varianta`;
+      btn.textContent = pismena[j] + v;
+      btn.addEventListener(`click`, function () {
+        if (vyhodnoceno) return;
+        odpovedi[i] = j;
+        var sourozenci = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < sourozenci.length; k++) {
+          sourozenci[k].classList.remove(`vybrana`);
+        }
+        btn.classList.add(`vybrana`);
+        hlaskaEl.textContent = ``;
+        zkontrolujHotovo();
+      });
+      box.appendChild(btn);
+    });
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujHotovo() {
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  tlacitkoEl.disabled = !hotovo;
+}
+
+tlacitkoEl.addEventListener(`click`, function () {
+  if (tlacitkoEl.disabled) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  if (!hotovo) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  vyhodnoceno = true;
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  otazky.forEach(function (o, i) {
+    var box = boxy[i];
+    box.classList.add(`zamek`);
+    var tlacitka = box.querySelectorAll(`.varianta`);
+    if (odpovedi[i] === o.spravna) body++;
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].classList.remove(`vybrana`);
+      if (j === o.spravna) {
+        tlacitka[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add(`spatna`);
+      }
+    }
+  });
+  tlacitkoEl.disabled = true;
+  hlaskaEl.textContent = ``;
+  skoreEl.textContent = body + ` z ` + otazky.length;
+  var text = hodnoceni[hodnoceni.length - 1].text;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body <= hodnoceni[h].max) { text = hodnoceni[h].text; break; }
+  }
+  hodnoceniEl.textContent = text;
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+znovuEl.addEventListener(`click`, function () {
+  odpovedi = new Array(otazky.length).fill(null);
+  vyhodnoceno = false;
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  tlacitkoEl.disabled = true;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+vykresli();
+</script>
+</body>
+</html>
