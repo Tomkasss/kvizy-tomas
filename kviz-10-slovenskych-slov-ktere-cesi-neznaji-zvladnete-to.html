@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz: 10 slovenských slov, které Češi neznají. Zvládnete to bez chyby, nebo bez slovníku neuhodnete?</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 16px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.65; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+  line-height: 1.45;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.locked .opt { cursor: default; }
+.locked .opt:hover { background: #f7f4f0; }
+.locked .opt.selected:hover { background: #dcd3c7; }
+.locked .opt.correct:hover { background: #d4edda; }
+.locked .opt.wrong:hover { background: #f8d7da; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 40px;
+}
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+.verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#retry:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 24px 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz: 10 slovenských slov, které Češi neznají. Zvládnete to bez chyby, nebo bez slovníku neuhodnete?</h1>
+<p class="perex">Většina slovenských slov si s češtinou podá ruku a význam dojde sám. Těchhle deset ne. Nepřipomínají nic, co byste znali z domova, a odhad podle citu u nich vede jinam. Slovník nechte zavřený.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<div id="warn"></div>
+<div id="result" style="display:none;">
+  <p class="score" id="score"></p>
+  <p class="verdict" id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  { q: `1. Co znamená slovenské slovo „riad"?`,
+    o: [`jídelní lístek podávaný v restauraci`, `nádobí, které se po jídle myje`, `prostírání rozložené pod talířem`, `spíž na uskladnění zásob potravin`],
+    a: 1 },
+  { q: `2. Co znamená slovenské slovo „marhuľa"?`,
+    o: [`meruňka, oranžová peckovice se sametovou slupkou`, `broskev, větší peckovice s chlupatou slupkou`, `mirabelka, drobná žlutá slívka s hladkou slupkou`, `nektarinka, peckovice s hladkou lesklou slupkou`],
+    a: 0 },
+  { q: `3. Co znamená slovenské slovo „šošovica"?`,
+    o: [`hrách, kulaté zelené semeno rostoucí v lusku`, `fazole, podlouhlé semeno v dlouhém lusku`, `čočka, drobné ploché semeno vařené na kaši`, `mák, drobné modročerné semínko do koláčů`],
+    a: 2 },
+  { q: `4. Co znamená slovenské slovo „konár"?`,
+    o: [`kmen, na kterém stojí celý vzrostlý strom`, `kořen rozrůstající se hluboko pod zemí`, `pařez, který zbude po pokáceném stromě`, `větev vyrůstající z kmene do strany`],
+    a: 3 },
+  { q: `5. Co znamená slovenské slovo „šarkan"?`,
+    o: [`obr, který v pohádkách bydlí v horách`, `drak, který v pohádkách hlídá princeznu`, `čert, který v pohádkách pokouší lakomce`, `vodník, který v pohádkách sedí u rybníka`],
+    a: 1 },
+  { q: `6. Co znamená slovenské slovo „rušňovodič"?`,
+    o: [`průvodčí, který ve vlaku kontroluje jízdenky`, `posunovač, který na nádraží řadí vagony k sobě`, `strojvedoucí, který řídí vlakovou lokomotivu`, `výpravčí, který vypravuje vlaky ze stanice`],
+    a: 2 },
+  { q: `7. Co znamená slovenské slovo „morka"?`,
+    o: [`krůta, velký hrabavý pták chovaný na maso`, `husa, velký vodní pták chovaný na peří i maso`, `kachna, menší vodní pták chovaný na maso i vejce`, `perlička, drobný tečkovaný pták chovaný na maso`],
+    a: 0 },
+  { q: `8. Co znamená slovenské slovo „uterák"?`,
+    o: [`utěrka na utírání mokrého nádobí v kuchyni`, `hadr na vytírání podlahy v místnosti`, `žínka na mytí těla při koupeli ve vaně`, `ručník na utírání těla po vykoupání`],
+    a: 3 },
+  { q: `9. Co znamená slovenské slovo „murár"?`,
+    o: [`tesař stavějící dřevěné krovy nad domem`, `pokrývač pokládající střešní krytinu`, `zedník stavějící zdi z cihel a tvárnic`, `malíř natírající stěny v pokojích`],
+    a: 2 },
+  { q: `10. Co znamená slovenské slovo „pečiatka"?`,
+    o: [`obálka, do které se vkládá úřední dopis`, `razítko, kterým se otiskne text na papír`, `kolek nalepený na vyplněnou úřední žádost`, `podpis připojený pod hotovou úřední listinu`],
+    a: 1 }
+];
+
+var VERDICTS = [
+  { max: 3, t: `Slovenština vám zní povědomě, ale jakmile zmizí slovo, které se dá odhadnout z češtiny, opora je pryč. Většinu těchhle výrazů přitom stačí jednou slyšet v kontextu a zůstanou napořád.` },
+  { max: 6, t: `Solidní základ, ale pod tím, co kvíz čeká. Slova ze společných témat máte jistá, u těch, kde čeština nenabídne nic podobného, jste sázeli na cit, a přesně tam se to lámalo.` },
+  { max: 9, t: `Přesně tady končí většina lidí. Poradili jste si i se slovy, u kterých se český protějšek vůbec nepodobá; k plnému počtu, který slibuje titulek, vám chybělo jedno až tři slova.` },
+  { max: 10, t: `Bez chyby a bez slovníku, přesně jak zní titulek. Trefili jste i slovo, u kterého se čeština nemá čeho chytit a u kterého končí i ti, kdo slovenštinu roky poslouchali. Tohle už není pasivní znalost, tohle je opravdové porozumění.` }
+];
+
+var LETTERS = [`a`, `b`, `c`, `d`];
+var answers = [];
+var locked = false;
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryEl = document.getElementById(`retry`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    box.id = `q` + qi;
+    var t = document.createElement(`p`);
+    t.className = `q-text`;
+    t.textContent = item.q;
+    box.appendChild(t);
+    item.o.forEach(function (opt, oi) {
+      var b = document.createElement(`button`);
+      b.className = `opt`;
+      b.type = `button`;
+      b.textContent = LETTERS[oi] + `) ` + opt;
+      b.addEventListener(`click`, function () { pick(qi, oi); });
+      box.appendChild(b);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function pick(qi, oi) {
+  if (locked) { return; }
+  answers[qi] = oi;
+  var box = document.getElementById(`q` + qi);
+  var btns = box.getElementsByClassName(`opt`);
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].className = (i === oi) ? `opt selected` : `opt`;
+  }
+  warnEl.textContent = ``;
+  submitEl.disabled = !complete();
+}
+
+function complete() {
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    if (typeof answers[i] !== `number`) { return false; }
+  }
+  return true;
+}
+
+function evaluate() {
+  if (!complete()) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  var score = 0;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.getElementById(`q` + qi);
+    box.className = `q locked`;
+    var btns = box.getElementsByClassName(`opt`);
+    if (answers[qi] === item.a) { score++; }
+    for (var i = 0; i < btns.length; i++) {
+      if (i === item.a) {
+        btns[i].className = `opt correct`;
+      } else if (i === answers[qi]) {
+        btns[i].className = `opt wrong`;
+      } else {
+        btns[i].className = `opt`;
+      }
+    }
+  });
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score <= VERDICTS[v].max) { verdictEl.textContent = VERDICTS[v].t; break; }
+  }
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  answers = [];
+  locked = false;
+  build();
+  submitEl.disabled = true;
+  warnEl.textContent = ``;
+  resultEl.style.display = `none`;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+retryEl.addEventListener(`click`, reset);
+build();
+</script>
+</body>
+</html>
