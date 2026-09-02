@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test: 9 z 10 lidí se sekne u čtvrté otázky. Zvládnete test ze všeho na plný počet?</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+.question {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.4em; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 24px;
+  display: none;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#retry:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .question { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test: 9 z 10 lidí se sekne u čtvrté otázky. Zvládnete test ze všeho na plný počet?</h1>
+<p class="perex">Deset otázek napříč obory: rostlinné vlákno, ptáci, hudba, architektura, vitaminy, kvašení, psí plemeno, cizí slovo, stavební surovina a dějiny. Čtyři možnosti, jediná správná. Spolehněte se jen na to, co máte v hlavě.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warn"></p>
+<div id="result">
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const QUESTIONS = [
+  {q: `1. Ze které části lnu se získává vlákno na plátno?`, opts: [`ze semen`, `z listů`, `ze stonku`, `z kořene`], correct: 2},
+  {q: `2. Který pták je největším pěvcem Evropy?`, opts: [`krkavec`, `straka`, `sojka`, `žluva`], correct: 0},
+  {q: `3. V jakém taktu se hraje valčík?`, opts: [`dvoučtvrťovém`, `čtyřčtvrťovém`, `pětičtvrťovém`, `tříčtvrťovém`], correct: 3},
+  {q: `4. Jak se v architektuře nazývá podpěra vytesaná do podoby ženské postavy, která nahrazuje sloup?`, opts: [`arkýř`, `karyatida`, `fiála`, `atika`], correct: 1},
+  {q: `5. Nedostatek kterého vitaminu způsobuje nemoc beri-beri?`, opts: [`vitamin A`, `vitamin B1`, `vitamin C`, `vitamin D`], correct: 1},
+  {q: `6. Jaký druh kvašení mění čerstvé zelí na kysané?`, opts: [`mléčné kvašení`, `alkoholové kvašení`, `octové kvašení`, `máselné kvašení`], correct: 0},
+  {q: `7. Ze které země pochází psí plemeno šarpej?`, opts: [`Japonsko`, `Korea`, `Čína`, `Mongolsko`], correct: 2},
+  {q: `8. Co znamená slovo eminentní?`, opts: [`naléhavý`, `vynikající`, `rozhodující`, `obsáhlý`], correct: 1},
+  {q: `9. Která hornina je hlavní surovinou pro výrobu cementu?`, opts: [`žula`, `pískovec`, `čedič`, `vápenec`], correct: 3},
+  {q: `10. Od kterého státu koupily Spojené státy americké území Louisiany?`, opts: [`Španělsko`, `Velká Británie`, `Francie`, `Mexiko`], correct: 2}
+];
+
+const LETTERS = [`a`, `b`, `c`, `d`];
+
+const VERDICTS = [
+  {min: 0, max: 3, text: `Tady se to zadrhlo hned na začátku a už se to nesrovnalo. Sypaly se i otázky, u kterých stačí běžný přehled a člověk je má za pár vteřin. Dobrá zpráva je, že přesně takové věci se doplňují nejrychleji.`},
+  {min: 4, max: 6, text: `Rozjezd jste zvládli, ale někde mezi čtvrtou otázkou a cizím slovem se to zlomilo. Právě tam se podle titulku láme devět řešitelů z deseti. Do vyššího pásma přitom chybí málo, obvykle jedna dvě otázky, u kterých jste váhali mezi dvěma možnostmi.`},
+  {min: 7, max: 9, text: `Sedmička a výš znamená, že jste udrželi tempo skoro celým testem. Minuly vás jedna až tři otázky, a jestli mezi nimi byla i ta čtvrtá, na které se podle titulku láme celý test, zbytek jste posbírali o to jistěji. Do plného počtu vám chybí jeden až tři body.`},
+  {min: 10, max: 10, text: `Plný počet, na který podle titulku dosáhne opravdu jen menšina. Neshodila vás čtvrtá otázka o architektonickém pojmu, u které se seká devět lidí z deseti, ani hudební takt, ani kvašení, ani psí plemeno, ani cizí slovo, ani surovina pro cement. Takhle rozprostřený rozhled se netipuje, ten se musí mít.`}
+];
+
+const answers = new Array(QUESTIONS.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const submitEl = document.getElementById(`submit`);
+const warnEl = document.getElementById(`warn`);
+const resultEl = document.getElementById(`result`);
+const scoreEl = document.getElementById(`score`);
+const verdictEl = document.getElementById(`verdict`);
+const retryEl = document.getElementById(`retry`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    const box = document.createElement(`div`);
+    box.className = `question`;
+
+    const qt = document.createElement(`p`);
+    qt.className = `qtext`;
+    qt.textContent = item.q;
+    box.appendChild(qt);
+
+    item.opts.forEach(function (opt, oi) {
+      const btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.type = `button`;
+      btn.textContent = LETTERS[oi] + `) ` + opt;
+      btn.dataset.q = String(qi);
+      btn.dataset.o = String(oi);
+      btn.addEventListener(`click`, onPick);
+      box.appendChild(btn);
+    });
+
+    quizEl.appendChild(box);
+  });
+}
+
+function onPick(ev) {
+  if (locked) { return; }
+  const btn = ev.currentTarget;
+  const qi = Number(btn.dataset.q);
+  const oi = Number(btn.dataset.o);
+  answers[qi] = oi;
+  const siblings = btn.parentNode.querySelectorAll(`.opt`);
+  for (let i = 0; i < siblings.length; i++) {
+    siblings[i].classList.remove(`selected`);
+  }
+  btn.classList.add(`selected`);
+  refresh();
+}
+
+function refresh() {
+  const done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+  if (done) { warnEl.textContent = ``; }
+}
+
+function evaluate() {
+  if (answers.some(function (a) { return a === null; })) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.question`);
+  QUESTIONS.forEach(function (item, qi) {
+    const opts = boxes[qi].querySelectorAll(`.opt`);
+    for (let i = 0; i < opts.length; i++) {
+      opts[i].disabled = true;
+      opts[i].classList.remove(`selected`);
+    }
+    if (answers[qi] === item.correct) { score++; }
+    else { opts[answers[qi]].classList.add(`wrong`); }
+    opts[item.correct].classList.add(`correct`);
+  });
+
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  let text = ``;
+  for (let i = 0; i < VERDICTS.length; i++) {
+    if (score >= VERDICTS[i].min && score <= VERDICTS[i].max) { text = VERDICTS[i].text; }
+  }
+  verdictEl.textContent = text;
+  resultEl.style.display = `block`;
+  submitEl.disabled = true;
+  resultEl.scrollIntoView({behavior: `smooth`, block: `start`});
+}
+
+function reset() {
+  locked = false;
+  for (let i = 0; i < answers.length; i++) { answers[i] = null; }
+  resultEl.style.display = `none`;
+  warnEl.textContent = ``;
+  build();
+  refresh();
+  window.scrollTo({top: 0, behavior: `smooth`});
+}
+
+submitEl.addEventListener(`click`, evaluate);
+retryEl.addEventListener(`click`, reset);
+build();
+refresh();
+</script>
+</body>
+</html>
