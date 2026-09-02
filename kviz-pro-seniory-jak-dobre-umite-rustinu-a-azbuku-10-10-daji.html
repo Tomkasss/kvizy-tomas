@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro seniory: jak dobře umíte ruštinu a azbuku? 10/10 dají jen ti, co ji ještě měli ve škole</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover:not(:disabled) { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  input[type="text"] {
+    display: block;
+    width: 100%;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+  }
+  #vyhodnotit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover:not(:disabled) { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.4em; }
+  #vysledek {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 40px;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 14px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #znovu {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #znovu:hover { background: #756658; }
+  .skryto { display: none; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz pro seniory: jak dobře umíte ruštinu a azbuku? 10/10 dají jen ti, co ji ještě měli ve škole</h1>
+  <p class="perex">Povinná ruština vám kdysi dala azbuku, slovíčka i pravopisná pravidla. Deset otázek prověří, co z toho ve vás po letech zůstalo: názvy písmen, číslovky, slovesa i běžnou slovní zásobu, kterou jste tehdy uměli nazpaměť.</p>
+
+  <div id="otazky"></div>
+
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+
+  <div id="vysledek" class="skryto">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var otazky = [
+  {
+    zneni: `1. Jak se v češtině nazývá ruské písmeno ъ?`,
+    varianty: [`měkký znak`, `krátké i`, `tvrdý znak`, `tvrdé y`],
+    spravna: 2
+  },
+  {
+    zneni: `2. Kterou číslovku označuje ruské slovo „сорок"?`,
+    varianty: [`4`, `40`, `14`, `400`],
+    spravna: 1
+  },
+  {
+    zneni: `3. Co znamená ruské slovo „фамилия"?`,
+    varianty: [`rodina`, `příjmení`, `domácnost`, `rodokmen`],
+    spravna: 1
+  },
+  {
+    zneni: `4. Co znamená ruské slovo „полотенце"?`,
+    varianty: [`ubrus`, `kapesník`, `zástěra`, `ručník`],
+    spravna: 3
+  },
+  {
+    zneni: `5. Kterým slovesem Rus vyjádří, že právě jede do práce autem nebo vlakem, a ne jde pěšky?`,
+    varianty: [`идти`, `ходить`, `ехать`, `бежать`],
+    spravna: 2
+  },
+  {
+    zneni: `6. Jak se v ruštině správně píše slovo pro život?`,
+    varianty: [`жизнь`, `жызнь`, `жиснь`, `жизнъ`],
+    spravna: 0
+  },
+  {
+    zneni: `7. Co znamená ruské slovo „чёрствый"?`,
+    varianty: [`čerstvý`, `okoralý`, `chutný`, `teplý`],
+    spravna: 1
+  },
+  {
+    zneni: `8. Kolik pádů rozlišuje ruština?`,
+    varianty: [`čtyři`, `pět`, `šest`, `sedm`],
+    spravna: 2
+  },
+  {
+    zneni: `9. Které ruské příjmení se do češtiny přepisuje jako Ščerbakov?`,
+    varianty: [`Шербаков`, `Счербаков`, `Чербаков`, `Щербаков`],
+    spravna: 3
+  },
+  {
+    zneni: `10. Které ruské písmeno nestojí na začátku běžných ruských slov?`,
+    varianty: [`ы`, `э`, `ю`, `я`],
+    spravna: 0
+  }
+];
+
+var hodnoceni = [
+  { max: 3, text: `Výsledek na úrovni tipování ze čtyř nabídek. Azbuka ani slovní zásoba se z vás nevybavily a zrádná slova vás poslala přesně tam, kam napovídala česká podoba. Tolik bodů sbírá i ten, kdo ruštinu ve škole nikdy neměl.` },
+  { max: 6, text: `Základ ve vás zůstal. Poradili jste si tam, kde stačí vybavit si běžné slovo nebo číslovku, ale u pravopisných pravidel, přepisu do češtiny a slov s obráceným významem už jste sáhli vedle. Slušný výsledek po letech bez ruštiny.` },
+  { max: 9, text: `Tohle už je výkon člověka, kterému povinná ruština opravdu něco dala. Zvládli jste i otázky, kde nestačí odhad a je potřeba přesně vědět, jak se které písmeno jmenuje nebo píše. K plnému počtu vám chybělo jedno až tři místa, nejspíš ta nejzáludnější.` },
+  { max: 10, text: `Plný počet, na který v tomhle kvízu dosáhne jen menšina. Nezaváhali jste u pravopisu, u přepisu do češtiny ani u slova, které v ruštině znamená pravý opak toho, co čekáte v češtině. Ruštinu ze školních lavic máte v hlavě dodnes, jako byste ji nikdy neodložili.` }
+];
+
+var odpovedi = new Array(otazky.length).fill(null);
+var vyhodnoceno = false;
+
+var obalOtazek = document.getElementById(`otazky`);
+var tlacitkoVyhodnotit = document.getElementById(`vyhodnotit`);
+var hlaska = document.getElementById(`hlaska`);
+var vysledek = document.getElementById(`vysledek`);
+var skore = document.getElementById(`skore`);
+var textHodnoceni = document.getElementById(`hodnoceni`);
+var tlacitkoZnovu = document.getElementById(`znovu`);
+
+function vykresli() {
+  obalOtazek.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = o.zneni;
+    box.appendChild(zneni);
+
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `varianta`;
+      btn.textContent = v;
+      btn.setAttribute(`data-otazka`, String(i));
+      btn.setAttribute(`data-varianta`, String(j));
+      btn.addEventListener(`click`, function () {
+        if (vyhodnoceno) { return; }
+        odpovedi[i] = j;
+        var sourozenci = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < sourozenci.length; k++) {
+          sourozenci[k].classList.remove(`vybrana`);
+        }
+        btn.classList.add(`vybrana`);
+        hlaska.textContent = ``;
+        zkontrolujHotovo();
+      });
+      box.appendChild(btn);
+    });
+
+    obalOtazek.appendChild(box);
+  });
+}
+
+function zkontrolujHotovo() {
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  tlacitkoVyhodnotit.disabled = !hotovo;
+}
+
+tlacitkoVyhodnotit.addEventListener(`click`, function () {
+  if (tlacitkoVyhodnotit.disabled) {
+    hlaska.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  if (!odpovedi.every(function (o) { return o !== null; })) {
+    hlaska.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+
+  vyhodnoceno = true;
+  var body = 0;
+  var boxy = obalOtazek.querySelectorAll(`.otazka`);
+
+  otazky.forEach(function (o, i) {
+    var tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove(`vybrana`);
+      if (j === o.spravna) {
+        tlacitka[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === o.spravna) { body++; }
+  });
+
+  tlacitkoVyhodnotit.disabled = true;
+  hlaska.textContent = ``;
+  skore.textContent = body + ` z ` + otazky.length;
+
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body <= hodnoceni[h].max) {
+      textHodnoceni.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+
+  vysledek.classList.remove(`skryto`);
+  vysledek.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+tlacitkoZnovu.addEventListener(`click`, function () {
+  odpovedi = new Array(otazky.length).fill(null);
+  vyhodnoceno = false;
+  vysledek.classList.add(`skryto`);
+  hlaska.textContent = ``;
+  tlacitkoVyhodnotit.disabled = true;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+vykresli();
+</script>
+</body>
+</html>
