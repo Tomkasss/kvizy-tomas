@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Velký test pro ročníky 1950 až 1965: deset otázek, na které většina mladších nezná odpověď</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 36px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .hotovo .varianta { cursor: default; }
+  .hotovo .varianta:hover { background: #f7f4f0; }
+  .hotovo .varianta.vybrana:hover { background: #dcd3c7; }
+  .varianta.spravna,
+  .hotovo .varianta.spravna:hover {
+    background: #d4edda; border: 1px solid #7cb987; color: #1e5631;
+  }
+  .varianta.spatna,
+  .hotovo .varianta.spatna:hover {
+    background: #f8d7da; border: 1px solid #d4848a; color: #721c24;
+  }
+  #vyhodnotit, #znovu {
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit { background: #5b7e5f; }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; }
+  #znovu:hover { background: #756658; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.4em; }
+  #vysledek {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  .skryte { display: none; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka, #vysledek { padding: 20px; }
+    #vyhodnotit, #znovu { width: 100%; padding: 16px 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Velký test pro ročníky 1950 až 1965: deset otázek, na které většina mladších nezná odpověď</h1>
+  <p class="perex">Deset otázek pro ročníky 1950 až 1965. Domácnost, rozhlas, vlaky, hudba i dobové výrazy tak, jak se s nimi tehdy potkával každý. Kdo tu dobu prožil, má náskok. Dnešní třicátníci a čtyřicátníci u většiny otázek tápou.</p>
+
+  <div id="kviz"></div>
+
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+
+  <div id="vysledek" class="skryte">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var otazky = [
+  {
+    zneni: `1. Jak se jmenovalo fialové antiseptické barvivo, kterým se v československých ordinacích i domácnostech potíraly odřeniny, opary a afty?`,
+    varianty: [`a) jodová tinktura`, `b) genciánka`, `c) rivanol`, `d) framykoin`],
+    spravna: 1
+  },
+  {
+    zneni: `2. Jak se přezdívalo dvounápravovým motorovým vozům, které od konce 40. let obsluhovaly československé lokálky?`,
+    varianty: [`a) Orchestrion`, `b) Sergej`, `c) Hurvínek`, `d) Bardotka`],
+    spravna: 2
+  },
+  {
+    zneni: `3. Který československý hokejista nastoupil jako vůbec první hráč z východního bloku v NHL?`,
+    varianty: [`a) Jaroslav Jiřík`, `b) Václav Nedomanský`, `c) Ivan Hlinka`, `d) Jiří Bubla`],
+    spravna: 0
+  },
+  {
+    zneni: `4. Co označovala zkratka RVHP?`,
+    varianty: [`a) Rada východoevropské hospodářské pomoci`, `b) Rada vzájemné hospodářské podpory`, `c) Rada vzájemné hospodářské politiky`, `d) Rada vzájemné hospodářské pomoci`],
+    spravna: 3
+  },
+  {
+    zneni: `5. Jak se jmenovala celostátní sportovně branná hra pro dětské kolektivy mladých požárníků, která v Československu vznikla v roce 1972?`,
+    varianty: [`a) Jiskra`, `b) Plamen`, `c) Pochodeň`, `d) Vatra`],
+    spravna: 1
+  },
+  {
+    zneni: `6. Jak se jmenoval celoplošný zpravodajský okruh Československého rozhlasu?`,
+    varianty: [`a) Hvězda`, `b) Vltava`, `c) Devín`, `d) Praha`],
+    spravna: 0
+  },
+  {
+    zneni: `7. Čím se v socialistickém Československu živil vekslák?`,
+    varianty: [`a) opravami spotřebičů načerno po pracovní době`, `b) přeprodejem lístků na vyprodaná představení`, `c) nelegálním obchodem s cizími měnami a tuzexovými poukázkami`, `d) pašováním zboží přes rakouskou hranici`],
+    spravna: 2
+  },
+  {
+    zneni: `8. V čele které country skupiny stál zpěvák a textař Jan Vyčítal?`,
+    varianty: [`a) Fešáci`, `b) Rangers`, `c) Kamelot`, `d) Greenhorns`],
+    spravna: 3
+  },
+  {
+    zneni: `9. Z praženého kořene které rostliny se vyráběla cikorka, dobová náhražka zrnkové kávy?`,
+    varianty: [`a) z pampelišky`, `b) z lopuchu`, `c) z čekanky`, `d) z topinamburu`],
+    spravna: 2
+  },
+  {
+    zneni: `10. Jaký oficiální název přijal v roce 1984 africký stát, který se do té doby jmenoval Horní Volta?`,
+    varianty: [`a) Burkina Faso`, `b) Benin`, `c) Mali`, `d) Niger`],
+    spravna: 0
+  }
+];
+
+var hodnoceni = [
+  { max: 3, text: `Doba, o které se tu mluví, vám splývá do jedné mlhy. Jednotlivé názvy, zkratky a jména se vytratily a zbyl jen obecný dojem. Na tomhle skóre končí ten, komu z celé té éry zůstaly nanejvýš útržky.` },
+  { max: 6, text: `Poctivá půlka. Věci, které se dodnes občas připomenou, jste trefili, ale jakmile došlo na okruh v rádiu, na přezdívku ze železnice nebo na jméno z kapely, začali jste vybírat podle citu. Právě tady obvykle skončí ten, kdo tuhle éru na vlastní kůži nezažil, a láme se tu i většina ostatních řešitelů.` },
+  { max: 9, text: `Výborný výkon a hranice, přes kterou se mladší ročníky prakticky nedostanou. Rozhlas, dráhy, obchod i sport té doby vám sedí a nezaskočí vás ani varianty, které se drží těsně u sebe. K plnému počtu chybělo pár drobností.` },
+  { max: 10, text: `Plný počet, který dá jen menšina. Poznáte nejen to, co se dodnes připomíná, ale i věci, o kterých už se nemluví, od dětské branné hry přes zpravodajský okruh až po hráče, který jako první prorazil za oceán. Takový přehled o téhle době má dnes málokdo.` }
+];
+
+var odpovedi = new Array(otazky.length).fill(null);
+var uzavreno = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var vyhodnotitEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function postavKviz() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = o.zneni;
+    box.appendChild(zneni);
+
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `varianta`;
+      btn.textContent = v;
+      btn.addEventListener(`click`, function () {
+        vyberVariantu(i, j);
+      });
+      box.appendChild(btn);
+    });
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function vyberVariantu(i, j) {
+  if (uzavreno) { return; }
+  odpovedi[i] = j;
+  var box = kvizEl.children[i];
+  var tlacitka = box.querySelectorAll(`.varianta`);
+  for (var k = 0; k < tlacitka.length; k++) {
+    if (k === j) {
+      tlacitka[k].classList.add(`vybrana`);
+    } else {
+      tlacitka[k].classList.remove(`vybrana`);
+    }
+  }
+  hlaskaEl.textContent = ``;
+  aktualizujTlacitko();
+}
+
+function aktualizujTlacitko() {
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  vyhodnotitEl.disabled = !hotovo;
+}
+
+function vyhodnot() {
+  if (odpovedi.some(function (o) { return o === null; })) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  uzavreno = true;
+  var skore = 0;
+
+  otazky.forEach(function (o, i) {
+    var box = kvizEl.children[i];
+    box.classList.add(`hotovo`);
+    var tlacitka = box.querySelectorAll(`.varianta`);
+    for (var k = 0; k < tlacitka.length; k++) {
+      if (k === o.spravna) {
+        tlacitka[k].classList.add(`spravna`);
+      } else if (k === odpovedi[i]) {
+        tlacitka[k].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === o.spravna) { skore++; }
+  });
+
+  skoreEl.textContent = skore + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+
+  vyhodnotitEl.disabled = true;
+  hlaskaEl.textContent = ``;
+  vysledekEl.classList.remove(`skryte`);
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function znovu() {
+  odpovedi = new Array(otazky.length).fill(null);
+  uzavreno = false;
+  vysledekEl.classList.add(`skryte`);
+  hlaskaEl.textContent = ``;
+  postavKviz();
+  aktualizujTlacitko();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+vyhodnotitEl.addEventListener(`click`, vyhodnot);
+znovuEl.addEventListener(`click`, znovu);
+
+postavKviz();
+aktualizujTlacitko();
+</script>
+</body>
+</html>
