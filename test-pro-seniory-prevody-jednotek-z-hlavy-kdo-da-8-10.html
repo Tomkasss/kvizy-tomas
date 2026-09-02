@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test pro seniory: převody jednotek z hlavy. Kdo dá 8/10, má mozek jako ve třiceti</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zadani { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .textpole {
+    display: block;
+    width: 100%;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+  }
+  .textpole.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .textpole.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .textpole.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .reseni { margin: 14px 0 0; font-size: 1rem; color: #1e5631; }
+  #vyhodnotit, #znovu {
+    display: block;
+    margin: 40px auto 0;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    color: #fff;
+    background: #5b7e5f;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; }
+  #znovu:hover { background: #756658; }
+  #hlaska { text-align: center; color: #721c24; margin: 14px 0 0; font-size: 1rem; }
+  #vysledek {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  .skryto { display: none; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka, #vysledek { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="nadpis"></h1>
+  <p class="perex" id="perex"></p>
+  <div id="kviz"></div>
+  <button id="vyhodnotit" type="button" disabled></button>
+  <p id="hlaska" class="skryto"></p>
+  <div id="vysledek" class="skryto">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu" type="button"></button>
+  </div>
+</div>
+<script>
+var NADPIS = `Test pro seniory: převody jednotek z hlavy. Kdo dá 8/10, má mozek jako ve třiceti`;
+var PEREX = `Deset převodů jednotek, které jste se učili ve škole a od té doby potkávali spíš jen občas. Kalkulačka zůstane ležet, počítá se z hlavy. Osm správných odpovědí je meta, na kterou dosáhne jen část řešitelů.`;
+
+var OTAZKY = [
+  {
+    text: `Kolik sekund trvá 8,5 minuty? Odpověď napište v sekundách.`,
+    typ: `otevrena`,
+    odpovedi: [`510`, `510,0`, `510.0`],
+    zobrazit: `510`
+  },
+  {
+    text: `Kolik dekagramů odpovídá 0,375 kilogramu?`,
+    typ: `uzavrena`,
+    varianty: [`3,75`, `37,5`, `375`, `3 750`],
+    spravna: 1
+  },
+  {
+    text: `Kolik decilitrů vývaru je 750 mililitrů?`,
+    typ: `uzavrena`,
+    varianty: [`0,75`, `75`, `7,5`, `0,075`],
+    spravna: 2
+  },
+  {
+    text: `Kolik metrů čtverečních je 45 000 centimetrů čtverečních?`,
+    typ: `uzavrena`,
+    varianty: [`0,45`, `4,5`, `45`, `450`],
+    spravna: 1
+  },
+  {
+    text: `Kolik arů měří pozemek o rozloze 0,35 hektaru? Odpověď napište v arech.`,
+    typ: `otevrena`,
+    odpovedi: [`35`, `35,0`, `35.0`],
+    zobrazit: `35`
+  },
+  {
+    text: `Kolik metrů za sekundu odpovídá rychlosti 54 kilometrů za hodinu?`,
+    typ: `uzavrena`,
+    varianty: [`5,4`, `9`, `15`, `18`],
+    spravna: 2
+  },
+  {
+    text: `Kolik kilopascalů odpovídá tlaku 2,2 baru v pneumatice?`,
+    typ: `uzavrena`,
+    varianty: [`220`, `22`, `2 200`, `0,22`],
+    spravna: 0
+  },
+  {
+    text: `Kolik minut trvá 2,25 hodiny? Odpověď napište v minutách.`,
+    typ: `otevrena`,
+    odpovedi: [`135`, `135,0`, `135.0`],
+    zobrazit: `135`
+  },
+  {
+    text: `Kolik stupňů Fahrenheita odpovídá teplotě 30 stupňů Celsia?`,
+    typ: `uzavrena`,
+    varianty: [`54`, `90`, `62`, `86`],
+    spravna: 3
+  },
+  {
+    text: `Kolik litrů vody se vejde do nádrže o objemu 0,4 metru krychlového? Odpověď napište v litrech.`,
+    typ: `otevrena`,
+    odpovedi: [`400`, `400,0`, `400.0`],
+    zobrazit: `400`
+  }
+];
+
+var PASMA = [
+  { min: 0, max: 3, text: `Převodní vztahy se vám za ta léta rozostřily a při počítání z hlavy vám scházel pevný bod, o který se opřít. Chybovalo se hlavně tam, kde bylo potřeba posunout se o víc než jeden stupeň nebo si vybavit přepočet mimo metrickou soustavu. Početní kondice v tomhle výsledku odpovídá zhruba věku 60 až 70 let. Není to nic, s čím by se nedalo hnout: stačí si dvakrát týdně přepočítat něco z běžného dne, třeba objem hrnce nebo výměru záhonu, a čísla se rychle vrátí do ruky.` },
+  { min: 4, max: 6, text: `Poctivý střed, ve kterém končí velká část řešitelů. Základní stupně metrické soustavy vám drží, ale u převodů, kde se násobí jiným číslem než deseti nebo stem, jistota kolísala. Početní kondice s tímhle skóre odpovídá zhruba věku 45 až 55 let. Chybí vám jen pár vztahů, které se dají doplnit za jediné odpoledne, a hned se posunete o pásmo výš.` },
+  { min: 7, max: 9, text: `Výsledek, který kvíz slibuje jako laťku. Zvládli jste nejen školní stupnice, ale i přepočty, kde se musí znát konkrétní číslo a k tomu ho ještě použít ve dvou krocích. Početní kondice v tomhle pásmu odpovídá zhruba věku 30 až 40 let, a kdo nasbíral osm bodů a víc, splnil přesně to, co stojí v titulku: počítá s jednotkami jako člověk ve třiceti. Sedm bodů je předsíň téhle skupiny, jediná otázka od potvrzení.` },
+  { min: 10, max: 10, text: `Plný počet, na který dosáhne jen menšina. Neshodil vás ani přepočet rychlosti, ani tlak, ani plocha, u které se převodní poměr umocňuje na druhou, ani poslední úloha, kde se objem nádrže překlápěl na litry. Početní kondice odpovídá zhruba věku 25 až 30 let. Takhle přesně a rychle počítá z hlavy málokdo bez ohledu na to, kolik toho má za sebou.` }
+];
+
+var TXT_VYHODNOTIT = `Vyhodnotit`;
+var TXT_ZNOVU = `Zkusit znovu`;
+var TXT_HLASKA = `Odpovězte prosím na všechny otázky`;
+var TXT_SPRAVNE = `Správná odpověď: `;
+
+var vybrano = [];
+var zamceno = false;
+
+function normalizuj(s) {
+  return String(s)
+    .toLowerCase()
+    .normalize(`NFD`)
+    .replace(/[̀-ͯ]/g, ``)
+    .replace(/\s+/g, ` `)
+    .trim();
+}
+
+function jakoCislo(s) {
+  var t = normalizuj(s).replace(/\s/g, ``).replace(/,/g, `.`);
+  if (t === `` || !/^-?\d*\.?\d+$/.test(t)) { return null; }
+  return parseFloat(t);
+}
+
+function jeSpravne(i) {
+  var o = OTAZKY[i];
+  if (o.typ === `uzavrena`) { return vybrano[i] === o.spravna; }
+  var vstup = vybrano[i];
+  if (vstup === null || vstup === undefined || normalizuj(vstup) === ``) { return false; }
+  var n = normalizuj(vstup);
+  for (var k = 0; k < o.odpovedi.length; k++) {
+    if (normalizuj(o.odpovedi[k]) === n) { return true; }
+  }
+  var c = jakoCislo(vstup);
+  if (c === null) { return false; }
+  for (var m = 0; m < o.odpovedi.length; m++) {
+    var e = jakoCislo(o.odpovedi[m]);
+    if (e !== null && Math.abs(e - c) < 1e-9) { return true; }
+  }
+  return false;
+}
+
+function zodpovezeno() {
+  for (var i = 0; i < OTAZKY.length; i++) {
+    var v = vybrano[i];
+    if (v === null || v === undefined) { return false; }
+    if (OTAZKY[i].typ === `otevrena` && normalizuj(v) === ``) { return false; }
+  }
+  return true;
+}
+
+function osvez() {
+  var tl = document.getElementById(`vyhodnotit`);
+  tl.disabled = !zodpovezeno();
+  if (!tl.disabled) { document.getElementById(`hlaska`).className = `skryto`; }
+}
+
+function postav() {
+  var kviz = document.getElementById(`kviz`);
+  kviz.innerHTML = ``;
+  vybrano = [];
+  zamceno = false;
+
+  for (var i = 0; i < OTAZKY.length; i++) {
+    vybrano.push(null);
+    var o = OTAZKY[i];
+
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    box.id = `otazka-` + i;
+
+    var zad = document.createElement(`p`);
+    zad.className = `zadani`;
+    zad.textContent = (i + 1) + `. ` + o.text;
+    box.appendChild(zad);
+
+    if (o.typ === `uzavrena`) {
+      for (var j = 0; j < o.varianty.length; j++) {
+        var b = document.createElement(`button`);
+        b.type = `button`;
+        b.className = `varianta`;
+        b.textContent = o.varianty[j];
+        b.setAttribute(`data-otazka`, String(i));
+        b.setAttribute(`data-varianta`, String(j));
+        b.addEventListener(`click`, klikVarianta);
+        box.appendChild(b);
+      }
+    } else {
+      var inp = document.createElement(`input`);
+      inp.type = `text`;
+      inp.className = `textpole`;
+      inp.setAttribute(`inputmode`, `decimal`);
+      inp.setAttribute(`data-otazka`, String(i));
+      inp.addEventListener(`input`, zmenaPole);
+      box.appendChild(inp);
+    }
+
+    kviz.appendChild(box);
+  }
+  osvez();
+}
+
+function klikVarianta(e) {
+  if (zamceno) { return; }
+  var b = e.currentTarget;
+  var oi = parseInt(b.getAttribute(`data-otazka`), 10);
+  var vi = parseInt(b.getAttribute(`data-varianta`), 10);
+  vybrano[oi] = vi;
+  var box = document.getElementById(`otazka-` + oi);
+  var vs = box.getElementsByClassName(`varianta`);
+  for (var k = 0; k < vs.length; k++) { vs[k].className = `varianta`; }
+  b.className = `varianta vybrana`;
+  osvez();
+}
+
+function zmenaPole(e) {
+  if (zamceno) { return; }
+  var inp = e.currentTarget;
+  var oi = parseInt(inp.getAttribute(`data-otazka`), 10);
+  vybrano[oi] = inp.value;
+  inp.className = normalizuj(inp.value) === `` ? `textpole` : `textpole vybrana`;
+  osvez();
+}
+
+function vyhodnot() {
+  if (!zodpovezeno()) {
+    var h = document.getElementById(`hlaska`);
+    h.textContent = TXT_HLASKA;
+    h.className = ``;
+    return;
+  }
+  zamceno = true;
+  var skore = 0;
+
+  for (var i = 0; i < OTAZKY.length; i++) {
+    var o = OTAZKY[i];
+    var box = document.getElementById(`otazka-` + i);
+    var ok = jeSpravne(i);
+    if (ok) { skore++; }
+
+    if (o.typ === `uzavrena`) {
+      var vs = box.getElementsByClassName(`varianta`);
+      for (var j = 0; j < vs.length; j++) {
+        vs[j].disabled = true;
+        if (j === o.spravna) { vs[j].className = `varianta spravna`; }
+        else if (j === vybrano[i]) { vs[j].className = `varianta spatna`; }
+        else { vs[j].className = `varianta`; }
+      }
+    } else {
+      var inp = box.getElementsByClassName(`textpole`)[0];
+      inp.disabled = true;
+      inp.className = ok ? `textpole spravna` : `textpole spatna`;
+      if (!ok) {
+        var p = document.createElement(`p`);
+        p.className = `reseni`;
+        p.textContent = TXT_SPRAVNE + o.zobrazit;
+        box.appendChild(p);
+      }
+    }
+  }
+
+  document.getElementById(`vyhodnotit`).disabled = true;
+  document.getElementById(`hlaska`).className = `skryto`;
+  document.getElementById(`skore`).textContent = skore + ` z ` + OTAZKY.length;
+
+  var txt = ``;
+  for (var p2 = 0; p2 < PASMA.length; p2++) {
+    if (skore >= PASMA[p2].min && skore <= PASMA[p2].max) { txt = PASMA[p2].text; }
+  }
+  document.getElementById(`hodnoceni`).textContent = txt;
+
+  var vys = document.getElementById(`vysledek`);
+  vys.className = ``;
+  vys.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function znovu() {
+  document.getElementById(`vysledek`).className = `skryto`;
+  document.getElementById(`hlaska`).className = `skryto`;
+  postav();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+document.getElementById(`nadpis`).textContent = NADPIS;
+document.getElementById(`perex`).textContent = PEREX;
+document.getElementById(`vyhodnotit`).textContent = TXT_VYHODNOTIT;
+document.getElementById(`znovu`).textContent = TXT_ZNOVU;
+document.getElementById(`vyhodnotit`).addEventListener(`click`, vyhodnot);
+document.getElementById(`znovu`).addEventListener(`click`, znovu);
+postav();
+</script>
+</body>
+</html>
