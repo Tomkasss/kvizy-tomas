@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Namíchaný kvíz pro seniory: dějepis, počty i příroda v 10 otázkách</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 32px 16px;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.varianta:last-child { margin-bottom: 0; }
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta:disabled { cursor: default; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.2em; }
+#vysledek {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  .otazka { padding: 20px; }
+  h1 { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Namíchaný kvíz pro seniory: dějepis, počty i příroda v 10 otázkách</h1>
+<p class="perex">Deset otázek ze tří oblastí, které slibuje název: kousek dějepisu, počítání z hlavy bez papíru a tužky a příroda kolem nás. Milí senioři, u každé otázky jsou čtyři možnosti a jediná z nich je správná. Kolik jich trefíte?</p>
+<div id="kviz"></div>
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p id="hlaska"></p>
+<div id="vysledek" style="display:none">
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var otazky = [
+  { z: `Který volně žijící suchozemský savec dosahuje v Evropě největší tělesné hmotnosti?`,
+    v: [`los evropský`, `zubr evropský`, `jelen lesní`, `medvěd hnědý`], s: 1 },
+  { z: `Které město založili husité jako své hlavní středisko?`,
+    v: [`Tábor`, `Písek`, `Klatovy`, `Žatec`], s: 0 },
+  { z: `Kolik je 26 × 24?`,
+    v: [`604`, `614`, `624`, `644`], s: 2 },
+  { z: `V čele kterého starověkého řeckého městského státu stáli současně dva králové?`,
+    v: [`Athény`, `Korint`, `Théby`, `Sparta`], s: 3 },
+  { z: `Která invazní rostlina způsobuje po potřísnění mízou a oslunění těžké popáleniny kůže?`,
+    v: [`křídlatka japonská`, `bolševník velkolepý`, `netýkavka žláznatá`, `zlatobýl kanadský`], s: 1 },
+  { z: `Kolik je 24 % ze 175?`,
+    v: [`35`, `40`, `42`, `44`], s: 2 },
+  { z: `Které město neúspěšně obléhali Turci v roce 1683?`,
+    v: [`Vídeň`, `Bratislava`, `Krakov`, `Benátky`], s: 0 },
+  { z: `Který brouk stojí za rozsáhlým odumíráním českých lesů v posledním desetiletí?`,
+    v: [`klikoroh borový`, `bělokaz dubový`, `tesařík obrovský`, `lýkožrout smrkový`], s: 3 },
+  { z: `Kolik je 13 × 6 + 252 ÷ 7?`,
+    v: [`102`, `114`, `120`, `126`], s: 1 },
+  { z: `Který pták u nás jako jediný sedí na vejcích už uprostřed zimy?`,
+    v: [`křivka obecná`, `brhlík lesní`, `sýkora babka`, `drozd kvíčala`], s: 0 }
+];
+
+var hodnoceni = [
+  { do: 3, t: `Míchat v jednom kvízu dějepis, počty a přírodu je zrada, protože co člověku jde v jedné oblasti, to ho zradí ve druhé. Když se něco trefilo, je to základ, na kterém se dá stavět. Zkuste si příště nejdřív spočítat příklady a teprve potom se pusťte do zbytku.` },
+  { do: 6, t: `Slušná polovina. Jedna z těch tří oblastí vám nejspíš sedla víc než ostatní a ta druhá vás naopak stáhla dolů. Několik otázek mělo dvě možnosti hodně blízko sebe, tam rozhodovalo, jestli si vzpomenete na detail, nebo hádáte.` },
+  { do: 9, t: `Přesně tam, kam tenhle kvíz mířil, a možná i o kousek výš. Dějiny, počítání z hlavy i příroda vám drží pohromadě a zaváhali jste jen tam, kde bylo potřeba víc než školní základ. K plnému počtu chyběl kousek.` },
+  { do: 10, t: `Všech deset napříč třemi obory naráz, a to se povede opravdu jen menšině řešitelů. Zvládli jste vědomostní otázky i příklady z hlavy bez jediného škobrtnutí. Takový výsledek mluví sám za sebe.` }
+];
+
+var pismena = [`a)`, `b)`, `c)`, `d)`];
+var odpovedi = [];
+var hotovo = false;
+var kvizEl = document.getElementById(`kviz`);
+var btn = document.getElementById(`vyhodnotit`);
+var hlaska = document.getElementById(`hlaska`);
+var vysledek = document.getElementById(`vysledek`);
+
+function postav() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var z = document.createElement(`p`);
+    z.className = `zneni`;
+    z.textContent = (i + 1) + `. ` + o.z;
+    box.appendChild(z);
+    o.v.forEach(function (text, j) {
+      var b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `varianta`;
+      b.textContent = pismena[j] + ` ` + text;
+      b.setAttribute(`data-o`, i);
+      b.setAttribute(`data-v`, j);
+      b.addEventListener(`click`, klik);
+      box.appendChild(b);
+    });
+    kvizEl.appendChild(box);
+  });
+}
+
+function klik(e) {
+  if (hotovo) return;
+  var i = parseInt(e.currentTarget.getAttribute(`data-o`), 10);
+  var j = parseInt(e.currentTarget.getAttribute(`data-v`), 10);
+  odpovedi[i] = j;
+  var sourozenci = e.currentTarget.parentNode.querySelectorAll(`.varianta`);
+  for (var k = 0; k < sourozenci.length; k++) {
+    sourozenci[k].classList.remove(`vybrana`);
+  }
+  e.currentTarget.classList.add(`vybrana`);
+  hlaska.textContent = ``;
+  zkontrolujTlacitko();
+}
+
+function zkontrolujTlacitko() {
+  var vse = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] !== `number`) { vse = false; break; }
+  }
+  btn.disabled = !vse;
+}
+
+btn.addEventListener(`click`, function () {
+  var vse = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] !== `number`) { vse = false; break; }
+  }
+  if (!vse) {
+    hlaska.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  hotovo = true;
+  var skore = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  for (var q = 0; q < otazky.length; q++) {
+    var tlacitka = boxy[q].querySelectorAll(`.varianta`);
+    for (var t = 0; t < tlacitka.length; t++) {
+      tlacitka[t].disabled = true;
+      tlacitka[t].classList.remove(`vybrana`);
+      if (t === otazky[q].s) {
+        tlacitka[t].classList.add(`spravna`);
+      } else if (t === odpovedi[q]) {
+        tlacitka[t].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[q] === otazky[q].s) skore++;
+  }
+  btn.disabled = true;
+  document.getElementById(`skore`).textContent = skore + ` z ` + otazky.length;
+  var text = hodnoceni[hodnoceni.length - 1].t;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore <= hodnoceni[h].do) { text = hodnoceni[h].t; break; }
+  }
+  document.getElementById(`hodnoceni`).textContent = text;
+  vysledek.style.display = `block`;
+  vysledek.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+document.getElementById(`znovu`).addEventListener(`click`, function () {
+  odpovedi = [];
+  hotovo = false;
+  vysledek.style.display = `none`;
+  hlaska.textContent = ``;
+  btn.disabled = true;
+  postav();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+postav();
+</script>
+</body>
+</html>
