@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zapeklitý kvíz pro seniory: 10 otázek, na kterých pohoří i většina mladých lidí</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+#evaluate, #retry {
+  display: block;
+  margin: 40px auto 0;
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+}
+#evaluate:hover { background: #4a6b4e; }
+#evaluate:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry { background: #8c7b6b; }
+#retry:hover { background: #756658; }
+#warning { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.4em; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+  border-top: 4px solid #5b7e5f;
+  display: none;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  .q { padding: 20px; }
+  h1 { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Zapeklitý kvíz pro seniory: 10 otázek, na kterých pohoří i většina mladých lidí</h1>
+<p class="perex">Deset otázek pro seniory z deseti oborů: příroda, mytologie, čeština, film, sport, hudba, dějiny, literatura, malířství i kuchyně. Většina se zastaví kolem sedmi bodů a plný počet dá jen menšina, mladší ročníky v tom nejsou o nic lepší.</p>
+<div id="quiz"></div>
+<button id="evaluate" disabled>Vyhodnotit</button>
+<div id="warning"></div>
+<div id="result">
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var questions = [
+  { q: `Do kterého řádu savců patří svišť horský?`,
+    o: [`šelmy`, `zajícovci`, `hlodavci`, `sudokopytníci`], a: 2 },
+  { q: `Která římská bohyně byla manželkou nejvyššího boha Jupitera a ochránkyní manželství?`,
+    o: [`Ceres`, `Juno`, `Minerva`, `Diana`], a: 1 },
+  { q: `V jakém pádě stojí slovo sousedovi ve větě Podal klíče sousedovi?`,
+    o: [`ve 3. pádě`, `ve 2. pádě`, `ve 4. pádě`, `v 6. pádě`], a: 0 },
+  { q: `Který komik němé éry vstoupil do dějin filmu s přezdívkou muž s kamennou tváří?`,
+    o: [`Charlie Chaplin`, `Harold Lloyd`, `Buster Keaton`, `Max Linder`], a: 2 },
+  { q: `Který sport se hraje pálkou a míčem na oválném hřišti a jeho nejvyšší mezistátní zápasy trvají až pět dní?`,
+    o: [`kriket`, `baseball`, `softbal`, `pálkovaná`], a: 0 },
+  { q: `Který skladatel bývá pro více než sto vlastních symfonií označován za otce symfonie?`,
+    o: [`Wolfgang Amadeus Mozart`, `Ludwig van Beethoven`, `Franz Schubert`, `Joseph Haydn`], a: 3 },
+  { q: `Ve kterém francouzském městě byl roku 1429 za přítomnosti Johanky z Arku korunován král Karel VII.?`,
+    o: [`Orléans`, `Remeš`, `Rouen`, `Chinon`], a: 1 },
+  { q: `Kdo napsal román Červený a černý?`,
+    o: [`Honoré de Balzac`, `Gustave Flaubert`, `Guy de Maupassant`, `Stendhal`], a: 3 },
+  { q: `Kdo je autorem obrazu U nás v Kameničkách?`,
+    o: [`Josef Mánes`, `Antonín Slavíček`, `Mikoláš Aleš`, `Julius Mařák`], a: 1 },
+  { q: `Který sýr tvoří základ krému tradičního italského tiramisu?`,
+    o: [`ricotta`, `mozzarella`, `mascarpone`, `gorgonzola`], a: 2 }
+];
+
+var letters = [`a) `, `b) `, `c) `, `d) `];
+var answers = new Array(questions.length).fill(null);
+var locked = false;
+
+var quizEl = document.getElementById(`quiz`);
+var evalBtn = document.getElementById(`evaluate`);
+var warnEl = document.getElementById(`warning`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryBtn = document.getElementById(`retry`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  questions.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var text = document.createElement(`p`);
+    text.className = `q-text`;
+    text.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(text);
+    item.o.forEach(function (opt, oi) {
+      var btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.type = `button`;
+      btn.textContent = letters[oi] + opt;
+      btn.setAttribute(`data-q`, String(qi));
+      btn.setAttribute(`data-o`, String(oi));
+      btn.addEventListener(`click`, function () { select(qi, oi); });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function select(qi, oi) {
+  if (locked) { return; }
+  answers[qi] = oi;
+  var btns = quizEl.querySelectorAll(`button[data-q="` + qi + `"]`);
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].classList.remove(`sel`);
+  }
+  btns[oi].classList.add(`sel`);
+  warnEl.textContent = ``;
+  evalBtn.disabled = answers.indexOf(null) !== -1;
+}
+
+function verdictText(score) {
+  if (score <= 3) {
+    return `Zapeklitý název nelhal a tentokrát si vybral svou daň. Otázky mířily do deseti různých oborů za sebou a na tenhle výsledek stačí, aby vám hned sedm z nich nic neřeklo. Není to nic, za co byste se měli stydět, končí tu i řada podstatně mladších řešitelů. Zkuste kvíz s odstupem znovu, pár bodů navíc se najde skoro vždycky.`;
+  }
+  if (score <= 6) {
+    return `Tady se pohybuje slušná část řešitelů bez ohledu na věk. Půlku otázek jste zvládli s jistotou, u zbytku vás stáhla nabídka, kde stály dvě odpovědi těsně vedle sebe. Na typický průměr, který se u tohohle kvízu drží kolem sedmi bodů, to zatím nestačí, chybí vám k němu bod nebo dva.`;
+  }
+  if (score <= 9) {
+    return `Přesně tohle je pásmo, kde se pozná široký přehled. Zvládli jste přírodu, dějiny, jazyk i kulturu a nachytat vás šlo jen na těch nejtěsnějších nabídkách. Většina mladších lidí se sem nedostane, protože k tomu nestačí jeden obor, ale záběr přes všechny. K plnému počtu chyběl kousek.`;
+  }
+  return `Plný počet, na který podle názvu dosáhne jen menšina. Neshodil vás horský hlodavec, římská ochránkyně manželství, mluvnický pád, komik s kamennou tváří, pálkařský sport s vícedenními zápasy, otec symfonie, město francouzské korunovace, klasický román, česká krajinomalba ani italský dezert. Takový rozptyl znalostí se netipuje, ten se musí opravdu mít, a mladší generace by na něj většinou nestačila.`;
+}
+
+evalBtn.addEventListener(`click`, function () {
+  if (answers.indexOf(null) !== -1) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  var score = 0;
+  questions.forEach(function (item, qi) {
+    var btns = quizEl.querySelectorAll(`button[data-q="` + qi + `"]`);
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].disabled = true;
+      btns[i].classList.remove(`sel`);
+    }
+    btns[item.a].classList.add(`correct`);
+    if (answers[qi] === item.a) {
+      score++;
+    } else {
+      btns[answers[qi]].classList.add(`wrong`);
+    }
+  });
+  evalBtn.disabled = true;
+  scoreEl.textContent = score + ` z ` + questions.length;
+  verdictEl.textContent = verdictText(score);
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+retryBtn.addEventListener(`click`, function () {
+  locked = false;
+  answers = new Array(questions.length).fill(null);
+  resultEl.style.display = `none`;
+  warnEl.textContent = ``;
+  evalBtn.disabled = true;
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+</script>
+</body>
+</html>
