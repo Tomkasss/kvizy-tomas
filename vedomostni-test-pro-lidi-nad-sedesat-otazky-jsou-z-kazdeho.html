@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vědomostní test pro lidi nad šedesát. Otázky jsou z každého soudku a málokdo dá 10/10</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 20px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  #vyhodnotit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.2em; }
+  #vysledek {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 40px;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #znovu {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #znovu:hover { background: #756658; }
+  .skryto { display: none; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Vědomostní test pro lidi nad šedesát. Otázky jsou z každého soudku a málokdo dá 10/10</h1>
+  <p class="perex">Deset otázek pro každého po šedesátce, každá z jiného oboru: mluvnice, zeměpis, divadlo, sport, hudba, počasí, zdraví, svátky, horniny i stromy. Žádné počítání, jen to, co vám za život zůstalo v hlavě.</p>
+  <div id="kviz"></div>
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+  <div id="vysledek" class="skryto">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+const otazky = [
+  {
+    zneni: `1. Podle kterého vzoru se skloňuje podstatné jméno „chlapec“?`,
+    varianty: [`pán`, `muž`, `předseda`, `soudce`],
+    spravna: 1
+  },
+  {
+    zneni: `2. Ke kterému státu patří poloostrov Kamčatka?`,
+    varianty: [`k Rusku`, `ke Kanadě`, `k Japonsku`, `ke Spojeným státům`],
+    spravna: 0
+  },
+  {
+    zneni: `3. Jak se v divadle nazývá snížený prostor mezi jevištěm a hledištěm, kde při představení sedí hudebníci?`,
+    varianty: [`foyer`, `proscénium`, `orchestřiště`, `galerie`],
+    spravna: 2
+  },
+  {
+    zneni: `4. Kolik hráčů jednoho družstva je při zápase ledního hokeje v základní hrací době a v plném počtu současně na ledě?`,
+    varianty: [`čtyři`, `sedm`, `pět`, `šest`],
+    spravna: 3
+  },
+  {
+    zneni: `5. Který žesťový nástroj mění výšku tónu vysouváním snižce místo ventilů?`,
+    varianty: [`pozoun`, `trubka`, `lesní roh`, `tuba`],
+    spravna: 0
+  },
+  {
+    zneni: `6. Jak se v předpovědi počasí nazývá teplota, při které je vzduch plně nasycen vodní parou a začíná kondenzace?`,
+    varianty: [`absolutní vlhkost`, `rosný bod`, `pocitová teplota`, `atmosférický tlak`],
+    spravna: 1
+  },
+  {
+    zneni: `7. Nedostatek kterého prvku ve stravě nejčastěji vede ke zvětšení štítné žlázy, kterému se říká vole?`,
+    varianty: [`železa`, `vápníku`, `jódu`, `hořčíku`],
+    spravna: 2
+  },
+  {
+    zneni: `8. Který křesťanský svátek připomíná seslání Ducha svatého na apoštoly?`,
+    varianty: [`advent`, `Nanebevstoupení Páně`, `Popeleční středa`, `Letnice`],
+    spravna: 3
+  },
+  {
+    zneni: `9. Která z uvedených hornin patří mezi vyvřelé?`,
+    varianty: [`rula`, `pískovec`, `čedič`, `mramor`],
+    spravna: 2
+  },
+  {
+    zneni: `10. Který strom s vějířovitými listy bývá označován za živoucí fosilii?`,
+    varianty: [`jinan dvoulaločný`, `liliovník tulipánokvětý`, `katalpa trubačovitá`, `ambroň západní`],
+    spravna: 0
+  }
+];
+
+const hodnoceni = [
+  { min: 0, max: 3, text: `Deset oborů za sebou je nemilosrdná zkouška, protože stačí, aby vás většina z nich minula, a skóre spadne až sem. Zkuste test znovu s odstupem, hranice čtyř bodů je blíž, než to teď vypadá.` },
+  { min: 4, max: 6, text: `Poctivý průměr. Rozjezd jste zvládli a ztráceli jste tam, kde už nestačí obecné povědomí a je potřeba si vybavit konkrétní zařazení. Do pásma, kterým se dá chlubit, vám chybí jedna až tři otázky.` },
+  { min: 7, max: 9, text: `Přesně sem míří titulek. Sedm bodů drží běžný řešitel, každý další nad tím už je znát a devět bodů znamená, že jste minuli jedinou otázku z deseti různých oborů. Rozhled, který stojí za řeč.` },
+  { min: 10, max: 10, text: `Plný počet, a ten opravdu dá málokdo. Trefili jste i tu nejtěžší otázku, na které ostatní tápou, a nechali jste za sebou drtivou většinu lidí, kteří test zkusili. Výborný výsledek.` }
+];
+
+const pismena = [`a`, `b`, `c`, `d`];
+const odpovedi = new Array(otazky.length).fill(null);
+let vyhodnoceno = false;
+
+const kvizEl = document.getElementById(`kviz`);
+const tlacitkoVyhodnotit = document.getElementById(`vyhodnotit`);
+const hlaskaEl = document.getElementById(`hlaska`);
+const vysledekEl = document.getElementById(`vysledek`);
+const skoreEl = document.getElementById(`skore`);
+const hodnoceniEl = document.getElementById(`hodnoceni`);
+const tlacitkoZnovu = document.getElementById(`znovu`);
+
+function postavKviz() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    const box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    const zneniEl = document.createElement(`p`);
+    zneniEl.className = `zneni`;
+    zneniEl.textContent = o.zneni;
+    box.appendChild(zneniEl);
+
+    o.varianty.forEach(function (v, j) {
+      const btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `varianta`;
+      btn.textContent = pismena[j] + `) ` + v;
+      btn.dataset.otazka = String(i);
+      btn.dataset.varianta = String(j);
+      btn.addEventListener(`click`, function () {
+        if (vyhodnoceno) { return; }
+        odpovedi[i] = j;
+        const sourozenci = box.querySelectorAll(`.varianta`);
+        sourozenci.forEach(function (s) { s.classList.remove(`vybrana`); });
+        btn.classList.add(`vybrana`);
+        hlaskaEl.textContent = ``;
+        aktualizujTlacitko();
+      });
+      box.appendChild(btn);
+    });
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function aktualizujTlacitko() {
+  const hotovo = odpovedi.every(function (o) { return o !== null; });
+  tlacitkoVyhodnotit.disabled = !hotovo;
+}
+
+tlacitkoVyhodnotit.addEventListener(`click`, function () {
+  if (vyhodnoceno) { return; }
+  if (!odpovedi.every(function (o) { return o !== null; })) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  vyhodnoceno = true;
+  hlaskaEl.textContent = ``;
+
+  let body = 0;
+  const boxy = kvizEl.querySelectorAll(`.otazka`);
+  boxy.forEach(function (box, i) {
+    const tlacitka = box.querySelectorAll(`.varianta`);
+    tlacitka.forEach(function (btn, j) {
+      btn.disabled = true;
+      btn.classList.remove(`vybrana`);
+      if (j === otazky[i].spravna) {
+        btn.classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        btn.classList.add(`spatna`);
+      }
+    });
+    if (odpovedi[i] === otazky[i].spravna) { body++; }
+  });
+
+  tlacitkoVyhodnotit.disabled = true;
+  skoreEl.textContent = body + ` z ` + otazky.length;
+  const pasmo = hodnoceni.find(function (h) { return body >= h.min && body <= h.max; });
+  hodnoceniEl.textContent = pasmo ? pasmo.text : ``;
+  vysledekEl.classList.remove(`skryto`);
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+tlacitkoZnovu.addEventListener(`click`, function () {
+  vyhodnoceno = false;
+  for (let i = 0; i < odpovedi.length; i++) { odpovedi[i] = null; }
+  vysledekEl.classList.add(`skryto`);
+  hlaskaEl.textContent = ``;
+  postavKviz();
+  aktualizujTlacitko();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+postavKviz();
+aktualizujTlacitko();
+</script>
+</body>
+</html>
