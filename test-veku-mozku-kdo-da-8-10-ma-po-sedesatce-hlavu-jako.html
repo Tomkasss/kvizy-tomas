@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test věku mozku: kdo dá 8/10, má po šedesátce hlavu jako čtyřicátník</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+#evalBtn, #againBtn {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#evalBtn:hover { background: #4a6b4e; }
+#evalBtn:disabled { background: #b5b5b5; cursor: not-allowed; }
+#againBtn { background: #8c7b6b; }
+#againBtn:hover { background: #756658; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 40px;
+}
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+.verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+.warn { text-align: center; color: #721c24; margin-top: 16px; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  .q { padding: 20px; }
+  h1 { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test věku mozku: kdo dá 8/10, má po šedesátce hlavu jako čtyřicátník</h1>
+<p class="perex">Deset otázek z dějin, zeměpisu, hudby, sportu i logiky prověří, jak rychle vám to po šedesátce zapaluje. Osm správných odpovědí znamená hlavu čtyřicátníka. Zkuste to bez nápovědy a bez telefonu po ruce.</p>
+<div id="quiz"></div>
+<button id="evalBtn" disabled>Vyhodnotit</button>
+<p class="warn" id="warn" style="display:none">Odpovězte prosím na všechny otázky</p>
+</div>
+<script>
+const QUESTIONS = [
+  {
+    q: `1. Který rytířský řád zrušil papež na počátku 14. století?`,
+    opts: [`johanité`, `řád německých rytířů`, `templáři`, `řád Božího hrobu`],
+    correct: 2
+  },
+  {
+    q: `2. Které souostroví ležící jihozápadně od Srí Lanky tvoří samostatný stát a je zároveň nejníže položenou zemí světa?`,
+    opts: [`Seychely`, `Maledivy`, `Mauricius`, `Komory`],
+    correct: 1
+  },
+  {
+    q: `3. Kolem kterého data nastává na severní polokouli den s nejdelší nocí v roce?`,
+    opts: [`21. září`, `21. června`, `21. prosince`, `21. března`],
+    correct: 2
+  },
+  {
+    q: `4. Kterou nestvůru zabil podle řecké báje Théseus v labyrintu na Krétě?`,
+    opts: [`Kyklopa`, `Mínótaura`, `Medúzu`, `Kerbera`],
+    correct: 1
+  },
+  {
+    q: `5. Jak se v hudbě nazývá ozdoba, při níž se rychle střídá hlavní tón se sousedním vyšším tónem?`,
+    opts: [`triola`, `synkopa`, `trylek`, `glissando`],
+    correct: 2
+  },
+  {
+    q: `6. Jak se nazývá rým se schématem abba?`,
+    opts: [`sdružený`, `obkročný`, `střídavý`, `přerývaný`],
+    correct: 1
+  },
+  {
+    q: `7. Který jednoduchý stroj umožňuje zvedat břemeno nahoru tak, že se za lano tahá směrem dolů?`,
+    opts: [`páka`, `nakloněná rovina`, `kladka`, `klín`],
+    correct: 2
+  },
+  {
+    q: `8. Ve které jezdecké disciplíně předvádí jezdec se svým koněm předepsanou sestavu cviků na obdélníku o rozměrech 20 × 60 metrů?`,
+    opts: [`parkur`, `voltiž`, `drezura`, `dostih`],
+    correct: 2
+  },
+  {
+    q: `9. Jak se nazývá kámen ve vrcholu klenby, ve kterém se sbíhají žebra?`,
+    opts: [`svorník`, `konzola`, `překlad`, `patka`],
+    correct: 0
+  },
+  {
+    q: `10. Do soutěže postoupí jen ten, kdo odevzdá přihlášku včas. Michal odevzdal přihlášku včas, a přesto nepostoupil. Co z toho jistě plyne?`,
+    opts: [
+      `Michal nesplnil ještě další podmínku, kterou pořadatel předem nezveřejnil.`,
+      `Včasná přihláška sama o sobě k postupu nestačila.`,
+      `Kdo odevzdal přihlášku po termínu, mohl postoupit místo Michala.`,
+      `Pořadatel pravidlo o včasné přihlášce porušil.`
+    ],
+    correct: 1
+  }
+];
+
+const RESULTS = [
+  { min: 0, max: 3, text: `Věk vašeho mozku vychází zhruba na sedmdesát let. Odpovědi se rodily pomalu a nejistota převládla i tam, kde se dvě varianty lišily jen jemným detailem. Nic ztraceného, tempo se dá vrátit křížovkami, čtením a pravidelnou procházkou, při které se hlava provětrá spolu s nohama.` },
+  { min: 4, max: 6, text: `Věk vašeho mozku odpovídá zhruba šedesáti letům, tedy solidnímu průměru. Základní přehled držíte pevně, ale otázky, které chtěly spojit dva údaje dohromady, vás zbrzdily. Sedm bodů je odtud otázkou jedné dvou odpovědí, které uhnuly o variantu vedle.` },
+  { min: 7, max: 9, text: `Věk vašeho mozku se pohybuje kolem pětačtyřiceti až padesáti let a kdo dosáhl osmi bodů a výš, uvažuje na úrovni čtyřicátníka. Rychle jste rozlišili blízké možnosti a nenechali se svést podobně znějícími pojmy. Tohle je výsledek, na který v desetiotázkovém testu dosáhne jen menšina řešitelů.` },
+  { min: 10, max: 10, text: `Věk vašeho mozku vychází zhruba na pětatřicet let, což je pásmo, do kterého se dostane opravdu jen menšina. Trefili jste i svorník a obkročný rým, tedy pojmy, na kterých končí i lidé s čerstvou maturitou. Vaše hlava pracuje přesně a bez zaváhání, takže si příště klidně troufněte na těžší ligu.` }
+];
+
+const LETTERS = [`a`, `b`, `c`, `d`];
+const answers = new Array(QUESTIONS.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`evalBtn`);
+const warnEl = document.getElementById(`warn`);
+
+QUESTIONS.forEach(function (item, qi) {
+  const box = document.createElement(`div`);
+  box.className = `q`;
+  const qt = document.createElement(`p`);
+  qt.className = `q-text`;
+  qt.textContent = item.q;
+  box.appendChild(qt);
+  item.opts.forEach(function (opt, oi) {
+    const btn = document.createElement(`button`);
+    btn.className = `opt`;
+    btn.type = `button`;
+    btn.textContent = LETTERS[oi] + `) ` + opt;
+    btn.setAttribute(`data-q`, String(qi));
+    btn.setAttribute(`data-o`, String(oi));
+    btn.addEventListener(`click`, function () {
+      if (locked) return;
+      answers[qi] = oi;
+      const siblings = box.querySelectorAll(`.opt`);
+      siblings.forEach(function (s) { s.classList.remove(`sel`); });
+      btn.classList.add(`sel`);
+      updateBtn();
+    });
+    box.appendChild(btn);
+  });
+  quizEl.appendChild(box);
+});
+
+function updateBtn() {
+  const done = answers.every(function (a) { return a !== null; });
+  evalBtn.disabled = !done;
+  if (done) warnEl.style.display = `none`;
+}
+
+evalBtn.addEventListener(`click`, function () {
+  if (evalBtn.disabled) {
+    warnEl.style.display = `block`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  QUESTIONS.forEach(function (item, qi) {
+    const opts = boxes[qi].querySelectorAll(`.opt`);
+    opts.forEach(function (o, oi) {
+      o.disabled = true;
+      o.classList.remove(`sel`);
+      if (oi === item.correct) o.classList.add(`correct`);
+      else if (oi === answers[qi]) o.classList.add(`wrong`);
+    });
+    if (answers[qi] === item.correct) score++;
+  });
+  evalBtn.style.display = `none`;
+  showResult(score);
+});
+
+function showResult(score) {
+  const band = RESULTS.find(function (r) { return score >= r.min && score <= r.max; });
+  const box = document.createElement(`div`);
+  box.id = `result`;
+  const sc = document.createElement(`p`);
+  sc.className = `score`;
+  sc.textContent = score + ` z ` + QUESTIONS.length;
+  const vd = document.createElement(`p`);
+  vd.className = `verdict`;
+  vd.textContent = band ? band.text : ``;
+  box.appendChild(sc);
+  box.appendChild(vd);
+  document.querySelector(`.wrap`).appendChild(box);
+
+  const again = document.createElement(`button`);
+  again.id = `againBtn`;
+  again.type = `button`;
+  again.textContent = `Zkusit znovu`;
+  again.addEventListener(`click`, function () { window.location.reload(); });
+  document.querySelector(`.wrap`).appendChild(again);
+
+  box.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+</script>
+</body>
+</html>
