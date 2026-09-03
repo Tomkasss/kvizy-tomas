@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro sečtělé seniory: 8/10 dají jen ti s opravdu širokým rozhledem</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 32px 16px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 18px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.varianta:last-child { margin-bottom: 0; }
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.hlaska { text-align: center; color: #8c5a5a; margin-top: 14px; font-size: .95rem; min-height: 1.2em; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover:not(:disabled) { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#vysledek {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+  border-top: 4px solid #5b7e5f;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro sečtělé seniory: 8/10 dají jen ti s opravdu širokým rozhledem</h1>
+<p class="perex">Deset otázek pro čtenáře, kteří celý život sbírali znalosti z knih, novin i cestování. Míří napříč obory, od kuchyně a lidové kultury přes státní symboly a dějiny až po hudbu i literaturu.</p>
+<div id="kviz"></div>
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p class="hlaska" id="hlaska"></p>
+</div>
+<script>
+var otazky = [
+  {
+    zneni: `1. Z které obiloviny se vyrábějí kroupy používané do jelit a do houbového kuby?`,
+    varianty: [`z ovsa`, `z ječmene`, `ze žita`, `z pšenice`],
+    spravna: 1
+  },
+  {
+    zneni: `2. Jak se v šachu nazývá situace, kdy hráč na tahu nemá žádný možný tah, ale jeho král přitom není ohrožen?`,
+    varianty: [`mat`, `pat`, `rošáda`, `gambit`],
+    spravna: 1
+  },
+  {
+    zneni: `3. Který hudební nástroj je vyobrazen ve státním znaku Irska?`,
+    varianty: [`dudy`, `housle`, `flétna`, `harfa`],
+    spravna: 3
+  },
+  {
+    zneni: `4. Co udává Beaufortova stupnice?`,
+    varianty: [`sílu větru`, `tvrdost nerostů`, `sílu zemětřesení`, `hlasitost zvuku`],
+    spravna: 0
+  },
+  {
+    zneni: `5. Na které řece leží Viktoriiny vodopády?`,
+    varianty: [`na Nilu`, `na Kongu`, `na Zambezi`, `na Limpopu`],
+    spravna: 2
+  },
+  {
+    zneni: `6. Která planeta Sluneční soustavy obíhá od Slunce nejdále?`,
+    varianty: [`Saturn`, `Uran`, `Jupiter`, `Neptun`],
+    spravna: 3
+  },
+  {
+    zneni: `7. Co je valaška?`,
+    varianty: [`sekera s dlouhou násadou`, `hliněný džbán na mléko`, `dřevěná pastýřská píšťala`, `vlněná pokrývka na ramena`],
+    spravna: 0
+  },
+  {
+    zneni: `8. Které francouzské město bylo za druhé světové války sídlem kolaborantské vlády?`,
+    varianty: [`Tours`, `Limoges`, `Vichy`, `Poitiers`],
+    spravna: 2
+  },
+  {
+    zneni: `9. Kde se narodil Antonín Dvořák?`,
+    varianty: [`v Litomyšli`, `na Hukvaldech`, `v Nelahozevsi`, `v Křečovicích`],
+    spravna: 2
+  },
+  {
+    zneni: `10. Kdo napsal knihu Malý Bobeš?`,
+    varianty: [`Josef Věromír Pleva`, `Eduard Štorch`, `Jaroslav Foglar`, `František Nepil`],
+    spravna: 0
+  }
+];
+
+var hodnoceni = [
+  {
+    min: 0, max: 3,
+    text: `Trať vedla od obilí v kuchyni přes šachovnici a irský státní znak až k francouzské kolaborantské vládě a české próze pro děti. V takovém rozptylu se body ztrácejí rychle, protože každá otázka míří do jiného oboru a stačí, aby vás minuly tři čtyři z nich. Projděte si správné odpovědi v klidu a zkuste kvíz s odstupem znovu, pásmo od čtyř bodů výš je blíž, než to teď vypadá.`
+  },
+  {
+    min: 4, max: 6,
+    text: `Rozjezdové otázky o šachovém patu, Beaufortově stupnici, Viktoriiných vodopádech a nejvzdálenější planetě jste nejspíš zvládli a ztráceli jste až ve středním pásmu, kde rozhodovaly kroupy, irský státní znak, valaška, sídlo kolaborantské vlády a rodiště Antonína Dvořáka. K hranici z titulku vám chybí dvě až čtyři otázky a právě tady se láme běžný přehled a opravdu široký rozhled.`
+  },
+  {
+    min: 7, max: 9,
+    text: `Osm bodů je hranice, kterou titulek slibuje, a vy jste ji buď dosáhli, nebo těsně minuli. Sedm znamená, že vedle rozjezdu utáhnete i většinu středního pásma. Osm a devět ukazují, že jste se neztratili ani tam, kde se nabízené varianty liší jen v detailu, tedy u obilí na kroupy, u šachového patu nebo u planety na okraji soustavy. Takový výsledek nevznikne z jednoho zdroje, ale z let čtení napříč obory.`
+  },
+  {
+    min: 10, max: 10,
+    text: `Plný počet zvládne menšina. Znamená, že jste kromě celého středního pásma trefili i nejtěžší otázku kvízu, tedy autora Malého Bobše, kterého si čtenáři pletou s Eduardem Štorchem i s Jaroslavem Foglarem. Zároveň jste nezaváhali u irského státního znaku ani u francouzského města, které dalo jméno celému režimu, a to jsou dvě místa, na kterých padá i dobře čtený řešitel.`
+  }
+];
+
+var pismena = [`a)`, `b)`, `c)`, `d)`];
+var odpovedi = new Array(otazky.length).fill(null);
+var vyhodnoceno = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+
+function postavKviz() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = o.zneni;
+    box.appendChild(zneni);
+
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `varianta`;
+      btn.textContent = pismena[j] + ` ` + v;
+      btn.setAttribute(`data-otazka`, String(i));
+      btn.setAttribute(`data-varianta`, String(j));
+      btn.addEventListener(`click`, function () {
+        if (vyhodnoceno) { return; }
+        odpovedi[i] = j;
+        var sourozenci = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < sourozenci.length; k++) {
+          sourozenci[k].classList.remove(`vybrana`);
+        }
+        btn.classList.add(`vybrana`);
+        aktualizujTlacitko();
+      });
+      box.appendChild(btn);
+    });
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function aktualizujTlacitko() {
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  tlacitkoEl.disabled = !hotovo;
+  if (hotovo) { hlaskaEl.textContent = ``; }
+}
+
+function vyhodnot() {
+  if (odpovedi.some(function (o) { return o === null; })) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  vyhodnoceno = true;
+  hlaskaEl.textContent = ``;
+  var skore = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+
+  otazky.forEach(function (o, i) {
+    var tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].classList.remove(`vybrana`);
+      if (j === o.spravna) {
+        tlacitka[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === o.spravna) { skore++; }
+  });
+
+  tlacitkoEl.disabled = true;
+
+  var text = ``;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore >= hodnoceni[h].min && skore <= hodnoceni[h].max) {
+      text = hodnoceni[h].text;
+      break;
+    }
+  }
+
+  var vysledek = document.createElement(`div`);
+  vysledek.id = `vysledek`;
+
+  var skoreEl = document.createElement(`p`);
+  skoreEl.id = `skore`;
+  skoreEl.textContent = skore + ` z ` + otazky.length;
+  vysledek.appendChild(skoreEl);
+
+  var hodnoceniEl = document.createElement(`p`);
+  hodnoceniEl.id = `hodnoceni`;
+  hodnoceniEl.textContent = text;
+  vysledek.appendChild(hodnoceniEl);
+
+  var znovu = document.createElement(`button`);
+  znovu.type = `button`;
+  znovu.id = `znovu`;
+  znovu.textContent = `Zkusit znovu`;
+  znovu.addEventListener(`click`, resetuj);
+  vysledek.appendChild(znovu);
+
+  tlacitkoEl.parentNode.insertBefore(vysledek, hlaskaEl);
+  vysledek.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function resetuj() {
+  var stary = document.getElementById(`vysledek`);
+  if (stary) { stary.parentNode.removeChild(stary); }
+  odpovedi = new Array(otazky.length).fill(null);
+  vyhodnoceno = false;
+  postavKviz();
+  tlacitkoEl.disabled = true;
+  hlaskaEl.textContent = ``;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+tlacitkoEl.addEventListener(`click`, vyhodnot);
+postavKviz();
+</script>
+</body>
+</html>
