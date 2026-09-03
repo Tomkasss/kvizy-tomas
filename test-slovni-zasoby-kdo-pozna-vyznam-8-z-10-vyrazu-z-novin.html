@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test slovní zásoby: kdo pozná význam 8 z 10 výrazů z novin, má nadstandardní přehled</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  line-height: 1.5;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta:disabled { cursor: default; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; pointer-events: none; }
+#obal-vyhodnotit { cursor: not-allowed; }
+#hlaska { text-align: center; color: #8c5b5b; margin-top: 14px; min-height: 1.4em; }
+#vysledek {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 640px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test slovní zásoby: kdo pozná význam 8 z 10 výrazů z novin, má nadstandardní přehled</h1>
+  <p class="perex">Zpravodajství má svou vlastní vrstvu slov. Nejsou to výrazy z hovoru u kávy, ale ani hantýrka pro zasvěcené. Deset takových jsme posbírali napříč rubrikami, od diplomacie a soudní síně až po medicínu a sport. Dáte osm?</p>
+  <div id="kviz"></div>
+  <div id="obal-vyhodnotit"><button id="vyhodnotit" disabled>Vyhodnotit</button></div>
+  <p id="hlaska"></p>
+  <div id="vysledek" style="display:none">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var otazky = [
+  {
+    z: `Co znamená slovo „ratifikace“?`,
+    v: [
+      `podpis, jímž vyjednavači stvrzují dohodnuté znění textu smlouvy`,
+      `závazné potvrzení mezinárodní smlouvy příslušným orgánem státu`,
+      `uložení schválené smlouvy u depozitáře, který ji dále spravuje`,
+      `jednostranné vypovězení smlouvy, kterou stát dříve přijal`
+    ],
+    s: 1
+  },
+  {
+    z: `Co znamená slovo „insolvence“?`,
+    v: [
+      `zákaz nakládat s majetkem, který soud uvalí na dlužníka`,
+      `zabavení a prodej dlužníkova majetku, které vede soudní vykonavatel`,
+      `odpuštění části dluhu po dohodě dlužníka s věřiteli`,
+      `neschopnost dlužníka splácet své závazky po lhůtě splatnosti`
+    ],
+    s: 3
+  },
+  {
+    z: `Co znamená slovo „klientelismus“?`,
+    v: [
+      `neoficiální síť protekce a známostí, v níž se výhody směňují za podporu`,
+      `obsazování míst vlastními příbuznými bez ohledu na jejich schopnosti`,
+      `rozdělování veřejných funkcí mezi strany podle jejich volebního zisku`,
+      `přijetí úplatku úředníkem za rozhodnutí ve prospěch toho, kdo platí`
+    ],
+    s: 0
+  },
+  {
+    z: `Co znamená slovo „derniéra“?`,
+    v: [
+      `generální zkouška konaná těsně před prvním uvedením inscenace`,
+      `slavnostní uvedení, kterým inscenace vstupuje na repertoár`,
+      `poslední uvedení inscenace, kterou divadlo stahuje z repertoáru`,
+      `opakované uvedení inscenace, které následuje po jejím prvním večeru`
+    ],
+    s: 2
+  },
+  {
+    z: `Co znamená slovo „komorbidita“?`,
+    v: [
+      `postupné zhoršování nemoci, které přechází do trvalého stavu`,
+      `další onemocnění vyskytující se současně se základní chorobou`,
+      `nemoc, která se objeví jako pozdní následek dříve prodělané choroby`,
+      `souběh příznaků, které společně tvoří obraz jediné choroby`
+    ],
+    s: 1
+  },
+  {
+    z: `Co znamená slovo „kasace“?`,
+    v: [
+      `zrušení rozhodnutí nadřízeným soudem a jeho vrácení k novému projednání`,
+      `změna rozhodnutí nadřízeným soudem, který ve věci rozhodne rovnou sám`,
+      `odklad vykonatelnosti rozhodnutí do doby, než bude věc přezkoumána`,
+      `potvrzení rozhodnutí nadřízeným soudem, jímž se věc definitivně uzavírá`
+    ],
+    s: 0
+  },
+  {
+    z: `Co znamená slovo „baráž“?`,
+    v: [
+      `utkání o třetí místo, které spolu sehrají oba poražení semifinalisté`,
+      `přípravné utkání sehrané krátce před začátkem nové soutěžní sezony`,
+      `utkání nařízené znovu poté, co byl původní zápas předčasně ukončen`,
+      `utkání navíc, které rozhoduje o postupu do vyšší soutěže či o sestupu`
+    ],
+    s: 3
+  },
+  {
+    z: `Co znamená slovo „rekultivace“?`,
+    v: [
+      `trvalé vyjmutí pozemku z využívání, aby se na něm obnovila divočina`,
+      `zúrodnění půdy pravidelným střídáním pěstovaných plodin`,
+      `obnova krajiny narušené těžbou či skládkou do využitelného stavu`,
+      `nové rozdělení pozemků a úprava jejich hranic mezi vlastníky`
+    ],
+    s: 2
+  },
+  {
+    z: `Co znamená přídavné jméno „empirický“?`,
+    v: [
+      `opřený o zkušenost a soustavné pozorování skutečnosti, nikoli o pouhou úvahu`,
+      `odvozený logickým postupem z předpokladů, které se pokládají za platné`,
+      `vycházející z prvního dojmu, aniž by se věc dále ověřovala nebo měřila`,
+      `přijímaný na základě shody odborníků, kteří se na věci mezi sebou dohodli`
+    ],
+    s: 0
+  },
+  {
+    z: `Co znamená slovo „anexe“?`,
+    v: [
+      `dobrovolné sloučení dvou států, které stvrdí smlouva mezi nimi`,
+      `mocenské připojení cizího území k vlastnímu státu bez jeho souhlasu`,
+      `dočasná vojenská správa obsazeného území, jež zůstává součástí cizího státu`,
+      `uznání nově vzniklého státu ostatními zeměmi, které s ním naváží styky`
+    ],
+    s: 1
+  }
+];
+
+var hodnoceni = [
+  { max: 3, text: `Vaše slovní zásoba pokrývá běžnou mluvu, novinová vrstva výrazů do ní zatím nepatří. U většiny slov rozhodoval jejich zvuk a nabízené výklady si byly příliš blízké na to, aby cit stačil. Při čtení zpráv vám tak smysl vět skládá spíš okolní text než samotné slovo. Deset přesných významů ale právě přibylo.` },
+  { max: 6, text: `Polovina novinové vrstvy slov vám sedí, druhá zůstala na dohad. Slova, na která jste v textech narazili častěji, držíte pevně, u ostatních rozhodl nejpravděpodobněji znějící výklad a kus z toho vedl vedle. Rozdíl mezi dvěma blízkými významy zatím spíš tušíte, než abyste ho uměli pojmenovat.` },
+  { max: 9, text: `Přehled, který titulek slibuje na hranici osmi bodů, a sedm bodů k němu má hodně blízko. Vaše slovní zásoba sahá napříč rubrikami a nezastavuje se u titulků: rozeznali jste i dvojice, kde se běžně chybuje, a nenachytala vás slova, která podle zvuku slibují docela jiný význam. Zpravodajský text čtete bez dohadování, co které slovo vlastně znamená.` },
+  { max: 10, text: `Plný počet, který se v tomhle kvízu povede jen menšině. Zvládli jste naráz všechny rubriky, do kterých kvíz sáhl, od diplomacie a politiky přes finance, soudní řeč a medicínu až po vědu, krajinu, kulturu i sport, a neuspěl proti vám ani jeden z těsných podobných významů. Nad novinami vám neuteče ani odstín, na kterém stojí smysl celé věty.` }
+];
+
+var pismena = [`a)`, `b)`, `c)`, `d)`];
+var odpovedi = new Array(otazky.length).fill(null);
+var hotovo = false;
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function vykresli() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var p = document.createElement(`p`);
+    p.className = `zneni`;
+    p.textContent = (i + 1) + `. ` + o.z;
+    box.appendChild(p);
+    o.v.forEach(function (text, j) {
+      var b = document.createElement(`button`);
+      b.className = `varianta`;
+      b.type = `button`;
+      b.textContent = pismena[j] + ` ` + text;
+      b.addEventListener(`click`, function () {
+        if (hotovo) { return; }
+        odpovedi[i] = j;
+        var sourozenci = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < sourozenci.length; k++) {
+          sourozenci[k].classList.remove(`vybrana`);
+        }
+        b.classList.add(`vybrana`);
+        hlaskaEl.textContent = ``;
+        zkontrolujHotovost();
+      });
+      box.appendChild(b);
+    });
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujHotovost() {
+  var vse = odpovedi.every(function (o) { return o !== null; });
+  tlacitkoEl.disabled = !vse;
+}
+
+document.getElementById(`obal-vyhodnotit`).addEventListener(`click`, function () {
+  if (tlacitkoEl.disabled && !hotovo) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+  }
+});
+
+tlacitkoEl.addEventListener(`click`, function () {
+  if (tlacitkoEl.disabled) { return; }
+  hotovo = true;
+  var skore = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  otazky.forEach(function (o, i) {
+    var tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove(`vybrana`);
+      if (j === o.s) {
+        tlacitka[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === o.s) { skore++; }
+  });
+  tlacitkoEl.disabled = true;
+  hlaskaEl.textContent = ``;
+  skoreEl.textContent = skore + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+znovuEl.addEventListener(`click`, function () {
+  hotovo = false;
+  odpovedi = new Array(otazky.length).fill(null);
+  vysledekEl.style.display = `none`;
+  tlacitkoEl.disabled = true;
+  hlaskaEl.textContent = ``;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+vykresli();
+</script>
+</body>
+</html>
