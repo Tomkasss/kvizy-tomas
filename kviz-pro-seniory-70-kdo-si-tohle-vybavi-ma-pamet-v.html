@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz pro seniory 70+: kdo si tohle vybaví, má paměť v naprostém pořádku i ve vyšším věku</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 32px 16px 64px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.locked .opt { cursor: default; }
+.locked .opt:hover { background: #f7f4f0; }
+.locked .opt.selected:hover { background: #dcd3c7; }
+.locked .opt.correct:hover { background: #d4edda; }
+.locked .opt.wrong:hover { background: #f8d7da; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+  border-top: 4px solid #5b7e5f;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#again {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#again:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 20px 16px 48px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro seniory 70+: kdo si tohle vybaví, má paměť v naprostém pořádku i ve vyšším věku</h1>
+<p class="perex">Deset otázek pro ročníky, které zažily padesátá až osmdesátá léta na vlastní kůži. Čeká vás film, hudba, sport, staré značky, zeměpis, příroda, čeština i jedna úloha na logiku. Žádné počítání, jen vybavování.</p>
+
+<div id="quiz"></div>
+
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warn"></p>
+
+<div id="result" style="display:none">
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="again">Zkusit znovu</button>
+</div>
+</div>
+
+<script>
+var QUESTIONS = [
+  {
+    q: `1. Který živočich je největším hlodavcem žijícím v Evropě?`,
+    opts: [`bobr evropský`, `ondatra pižmová`, `nutrie říční`, `sysel obecný`],
+    correct: 0
+  },
+  {
+    q: `2. Který kůň jako jediný v historii vyhrál Velkou pardubickou čtyřikrát?`,
+    opts: [`Korok`, `Železník`, `Sagar`, `Peruán`],
+    correct: 1
+  },
+  {
+    q: `3. Jaké zboží proslavilo národní podnik Tofa Semily?`,
+    opts: [`obuv`, `nábytek`, `jízdní kola`, `hračky`],
+    correct: 3
+  },
+  {
+    q: `4. Ve kterém fiktivním okresním městě se odehrával seriál Nemocnice na kraji města?`,
+    opts: [`Hrádek`, `Kamýk`, `Rokytnice`, `Bor`],
+    correct: 3
+  },
+  {
+    q: `5. Kdo režíroval filmovou komedii Světáci?`,
+    opts: [`Oldřich Lipský`, `Václav Vorlíček`, `Zdeněk Podskalský`, `Ladislav Rychman`],
+    correct: 2
+  },
+  {
+    q: `6. Kdo napsal český text k písni Lásko, voníš deštěm?`,
+    opts: [`Zdeněk Rytíř`, `Jaromír Nohavica`, `Pavel Vrba`, `Zdeněk Borovec`],
+    correct: 1
+  },
+  {
+    q: `7. Co znamená slovo kvapík?`,
+    opts: [`rychlý společenský tanec`, `krátký hudební úvod k opeře`, `spěšná zpráva doručená poslem`, `rychlý pochodový krok vojenského oddílu`],
+    correct: 0
+  },
+  {
+    q: `8. Jak se jmenuje nejdelší slovenská řeka?`,
+    opts: [`Hron`, `Nitra`, `Váh`, `Morava`],
+    correct: 2
+  },
+  {
+    q: `9. Co jistě plyne z toho, že všechny knihy v Karlově knihovně mají tvrdé desky a že žádná kniha s tvrdými deskami se nevejde do Karlovy kapsy?`,
+    opts: [`žádná kniha z Karlovy knihovny se do jeho kapsy nevejde`, `některé knihy z Karlovy knihovny se do jeho kapsy vejdou`, `všechny knihy s tvrdými deskami patří do Karlovy knihovny`, `Karel nemá v kapse žádnou knihu`],
+    correct: 0
+  },
+  {
+    q: `10. Jak se jmenovala první československá umělá družice?`,
+    opts: [`Interkosmos`, `Magion`, `Vega`, `Meteor`],
+    correct: 1
+  }
+];
+
+var VERDICTS = [
+  { max: 3, text: `Vybavování dnes vázlo. Většina otázek mířila na věci, které jste kdysi znali, jenže vzpomínka se neozvala včas a rozhodovaly tipy. To samo o sobě nic neznamená, paměť pracuje po vlnách a záleží na únavě i na tom, kdy jste si dané téma naposledy připomněli. Zkuste kvíz znovu za pár dní, výsledek bývá znatelně jiný.` },
+  { max: 6, text: `Solidní střed. Vaše paměť drží pevně to, co se opakovaně vracelo, a zaváhala tam, kde bylo potřeba vylovit jméno nebo název uložený hluboko. Přesně tak funguje vybavování ve zdravé podobě, snadno dostupné vrstvy jdou samy, ty vzdálenější potřebují chvíli. Nic tu nenapovídá, že by vám něco vypadávalo.` },
+  { max: 9, text: `Tady už jde o skutečně dobrou paměť. Trefili jste jména, značky i pojmy, které si člověk nemůže odvodit a musí je mít uložené, a minuli nanejvýš tři položky, u kterých rozhodovala vteřina navíc. Takové skóre ukazuje, že se vám vybavuje rychle a přesně, a to je přesně ten druh výkonu, na kterém záleží víc než na počtu odžitých let.` },
+  { max: 10, text: `Plný počet, na který dosáhne jen menšina. Neshodil vás největší evropský hlodavec, legendární kůň slavného dostihu, semilská hračkářská značka, fiktivní město ze slavného nemocničního seriálu, režisér kultovní komedie, autor textu k jedné z nejhranějších balad, staré české slovo, slovenská řeka, přísná logická úloha ani první tuzemská družice. Vybavit si tohle všechno napoprvé znamená paměť v naprostém pořádku, o jaké se dá mluvit jako o výjimečné v jakémkoli věku.` }
+];
+
+var LETTERS = [`a`, `b`, `c`, `d`];
+var answers = new Array(QUESTIONS.length).fill(null);
+var evaluated = false;
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var againEl = document.getElementById(`again`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    box.id = `q` + qi;
+
+    var text = document.createElement(`p`);
+    text.className = `q-text`;
+    text.textContent = item.q;
+    box.appendChild(text);
+
+    item.opts.forEach(function (opt, oi) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `opt`;
+      btn.textContent = LETTERS[oi] + `) ` + opt;
+      btn.addEventListener(`click`, function () {
+        if (evaluated) return;
+        answers[qi] = oi;
+        var all = box.querySelectorAll(`.opt`);
+        for (var i = 0; i < all.length; i++) {
+          all[i].classList.remove(`selected`);
+        }
+        btn.classList.add(`selected`);
+        refresh();
+      });
+      box.appendChild(btn);
+    });
+
+    quizEl.appendChild(box);
+  });
+}
+
+function refresh() {
+  var done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+  if (done) warnEl.textContent = ``;
+}
+
+submitEl.addEventListener(`click`, function () {
+  if (evaluated) return;
+  if (answers.some(function (a) { return a === null; })) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  evaluated = true;
+  warnEl.textContent = ``;
+  submitEl.disabled = true;
+
+  var score = 0;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.getElementById(`q` + qi);
+    box.classList.add(`locked`);
+    var opts = box.querySelectorAll(`.opt`);
+    for (var oi = 0; oi < opts.length; oi++) {
+      opts[oi].classList.remove(`selected`);
+      if (oi === item.correct) {
+        opts[oi].classList.add(`correct`);
+      } else if (oi === answers[qi]) {
+        opts[oi].classList.add(`wrong`);
+      }
+    }
+    if (answers[qi] === item.correct) score++;
+  });
+
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  for (var i = 0; i < VERDICTS.length; i++) {
+    if (score <= VERDICTS[i].max) {
+      verdictEl.textContent = VERDICTS[i].text;
+      break;
+    }
+  }
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+againEl.addEventListener(`click`, function () {
+  evaluated = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.style.display = `none`;
+  warnEl.textContent = ``;
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+refresh();
+</script>
+</body>
+</html>
