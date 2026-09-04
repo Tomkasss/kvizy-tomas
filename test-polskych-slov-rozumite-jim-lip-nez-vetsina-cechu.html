@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test polských slov: rozumíte jim líp než většina Čechů? Průměr nedá ani 6/10</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zadani { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta:disabled { cursor: default; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.4em; }
+#vysledek {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test polských slov: rozumíte jim líp než většina Čechů? Průměr nedá ani 6/10</h1>
+<p class="perex">Polské titulky v televizi, polský obal na másle, polský leták ve schránce. Rozumět půlce stačí ke klidu, jenže pak přijde slovo, které v hlavě znamená něco jiného než ve skutečnosti. Následuje deset takových.</p>
+<div id="kviz"></div>
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p id="hlaska"></p>
+<div id="vysledek" style="display:none">
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var otazky = [
+  { q: `Co znamená polské slovo „dworzec"?`, o: [`tenisový kurt`, `přístaviště pro lodě`, `nádraží`, `tržiště pod širým nebem`], s: 2 },
+  { q: `Co znamená polské slovo „upał"?`, o: [`velké vedro`, `úžeh ze slunce`, `prudký liják`, `dusno před bouřkou`], s: 0 },
+  { q: `Co znamená polské slovo „łazienka"?`, o: [`veřejné lázně s bazénem`, `koupelna`, `prádelna`, `šatna u vchodu`], s: 1 },
+  { q: `Co znamená polské slovo „ogród"?`, o: [`ohrada pro dobytek`, `pole s obilím`, `živý plot kolem domu`, `zahrada`], s: 3 },
+  { q: `Co znamená polské slovo „sukienka"?`, o: [`dámské šaty`, `sukně`, `halenka`, `zástěra`], s: 0 },
+  { q: `Co znamená polské slovo „zawód"?`, o: [`pracovní směna`, `tovární provoz`, `povolání`, `pracovní smlouva`], s: 2 },
+  { q: `Co znamená polské slovo „wesele"?`, o: [`masopustní průvod`, `svatební hostina`, `taneční zábava v hospodě`, `narozeninová oslava`], s: 1 },
+  { q: `Co znamená polské slovo „pensja"?`, o: [`starobní důchod`, `kapesné pro děti`, `jednorázová odměna`, `pravidelný plat`], s: 3 },
+  { q: `Co znamená polské slovo „rosół"?`, o: [`masový vývar`, `huspenina z masa`, `hustá zelná polévka`, `smetanová omáčka`], s: 0 },
+  { q: `Co znamená polské slovo „czaszka"?`, o: [`čéška v koleni`, `lopatka`, `lebka`, `klíční kost`], s: 2 }
+];
+
+var hodnoceni = [
+  { max: 3, text: `Tři body a míň znamenají, že jste zůstali hluboko pod hranicí, u které se zastavuje průměrný řešitel tohoto testu, a ta leží těsně pod šesti body. Polština vám zatím funguje jako kulisa, ve které rozeznáte zvuk, ne jednotlivá slova. Deset výrazů je přitom krátký seznam a po jednom přečtení se v hlavě udrží.` },
+  { max: 6, text: `Tady končí většina lidí. Průměrný výsledek se zastavuje těsně pod šesti body, takže se čtyřmi a pěti jste pod ním a se šesti jste ho právě překročili. Sbírali jste u slov, na kterých se obě řeči shodly, a přicházeli o body tam, kde se jejich cesty rozešly. Tuhle část slovníku nejde vytušit, jen si ji osvojit za pochodu.` },
+  { max: 9, text: `Sedm až devět bodů je zřetelně nad hranicí, pod kterou zůstává průměr tohoto testu. Mimo zůstaly nanejvýš tři výrazy a téměř jistě to byly ty, k nimž čeština nabízí zvukově blízký protějšek s jiným významem. Na nákupu, u stolu v restauraci i při ptaní se na cestu byste v Polsku telefon vytahovat nemuseli.` },
+  { max: 10, text: `Deset z deseti nasbírá jen menšina. Obstáli jste i na místech, kde se obě řeči rozcházejí nejvíc, a stejně tak u slova, k němuž čeština žádnou nápovědu nenabízí. Průměr tohoto testu leží pod šesti body a vy jste nad ním o víc než čtyři. Polským slovům rozumíte líp než drtivá většina Čechů.` }
+];
+
+var pismena = [`a`, `b`, `c`, `d`];
+var odpovedi = [];
+var hotovo = false;
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function postav() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (ot, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var zadani = document.createElement(`p`);
+    zadani.className = `zadani`;
+    zadani.textContent = (i + 1) + `. ` + ot.q;
+    box.appendChild(zadani);
+    ot.o.forEach(function (varianta, j) {
+      var btn = document.createElement(`button`);
+      btn.className = `varianta`;
+      btn.textContent = pismena[j] + `) ` + varianta;
+      btn.setAttribute(`data-o`, i);
+      btn.setAttribute(`data-v`, j);
+      btn.addEventListener(`click`, function () { vyber(i, j); });
+      box.appendChild(btn);
+    });
+    kvizEl.appendChild(box);
+  });
+}
+
+function vyber(i, j) {
+  if (hotovo) { return; }
+  odpovedi[i] = j;
+  var tlacitka = kvizEl.querySelectorAll(`[data-o="` + i + `"]`);
+  for (var k = 0; k < tlacitka.length; k++) {
+    tlacitka[k].classList.remove(`vybrana`);
+  }
+  kvizEl.querySelector(`[data-o="` + i + `"][data-v="` + j + `"]`).classList.add(`vybrana`);
+  zkontrolujHotovost();
+}
+
+function zkontrolujHotovost() {
+  var vse = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] !== `number`) { vse = false; }
+  }
+  tlacitkoEl.disabled = !vse;
+  if (vse) { hlaskaEl.textContent = ``; }
+}
+
+tlacitkoEl.addEventListener(`click`, function () {
+  var vse = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] !== `number`) { vse = false; }
+  }
+  if (!vse) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  hotovo = true;
+  var skore = 0;
+  otazky.forEach(function (ot, i) {
+    var tlacitka = kvizEl.querySelectorAll(`[data-o="` + i + `"]`);
+    for (var k = 0; k < tlacitka.length; k++) {
+      tlacitka[k].disabled = true;
+      tlacitka[k].classList.remove(`vybrana`);
+    }
+    kvizEl.querySelector(`[data-o="` + i + `"][data-v="` + ot.s + `"]`).classList.add(`spravna`);
+    if (odpovedi[i] === ot.s) {
+      skore++;
+    } else {
+      kvizEl.querySelector(`[data-o="` + i + `"][data-v="` + odpovedi[i] + `"]`).classList.add(`spatna`);
+    }
+  });
+  tlacitkoEl.disabled = true;
+  hlaskaEl.textContent = ``;
+  skoreEl.textContent = skore + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore <= hodnoceni[h].max) { hodnoceniEl.textContent = hodnoceni[h].text; break; }
+  }
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth` });
+});
+
+znovuEl.addEventListener(`click`, function () {
+  odpovedi = [];
+  hotovo = false;
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  tlacitkoEl.disabled = true;
+  postav();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+postav();
+</script>
+</body>
+</html>
