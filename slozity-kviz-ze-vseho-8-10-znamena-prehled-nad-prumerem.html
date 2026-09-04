@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Složitý kvíz ze všeho: 8/10 znamená přehled nad průměrem</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .opt:hover { background: #ede8e1; }
+  .opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.good { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.bad { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .locked .opt { cursor: default; }
+  .locked .opt:hover { background: #f7f4f0; }
+  .locked .opt.sel:hover { background: #dcd3c7; }
+  .locked .opt.good:hover { background: #d4edda; }
+  .locked .opt.bad:hover { background: #f8d7da; }
+  #submit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #warn { text-align: center; color: #721c24; margin-top: 14px; }
+  #result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 40px;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #again {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #again:hover { background: #756658; }
+  .hidden { display: none; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .q { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Složitý kvíz ze všeho: 8/10 znamená přehled nad průměrem</h1>
+  <p class="perex">Deset otázek, deset různých oborů a u každé čtyři možnosti. Nic se nepočítá, jen se vybírá. Hranice osmi bodů z deseti tady odděluje běžný přehled od toho nadprůměrného a plný počet nasbírá jen menšina.</p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <p id="warn" class="hidden">Odpovězte prosím na všechny otázky</p>
+  <div id="result" class="hidden">
+    <p id="score"></p>
+    <p id="verdict"></p>
+    <button id="again">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var QUESTIONS = [
+  { q: `1. Z čeho se pálí italská grappa?`,
+    o: [`z jablečného moštu`, `z ječného sladu`, `z bramborového škrobu`, `z hroznových matolin`], a: 3 },
+  { q: `2. Kdo je autorem výroku Myslím, tedy jsem?`,
+    o: [`René Descartes`, `Immanuel Kant`, `John Locke`, `Baruch Spinoza`], a: 0 },
+  { q: `3. Jak se nazývala tajná policie v bývalé Německé demokratické republice?`,
+    o: [`Securitate`, `Gestapo`, `Stasi`, `Ochranka`], a: 2 },
+  { q: `4. Co v hudbě znamená označení a cappella?`,
+    o: [`zpěv doprovázený varhanami`, `zpěv bez nástrojového doprovodu`, `sborový zpěv v latinském jazyce`, `zpěv v nejvyšší hlasové poloze`], a: 1 },
+  { q: `5. Jak se nazývá fyzikální zákon, podle kterého se tlak vyvolaný vnější silou šíří v uzavřené kapalině do všech jejích míst stejně?`,
+    o: [`Hookův zákon`, `Pascalův zákon`, `Ohmův zákon`, `Archimédův zákon`], a: 1 },
+  { q: `6. Ze které země pochází automobilka SEAT?`,
+    o: [`Itálie`, `Švédsko`, `Španělsko`, `Francie`], a: 2 },
+  { q: `7. Jak se nazývá kriminalistická metoda identifikace osob podle otisků prstů?`,
+    o: [`grafologie`, `balistika`, `antropometrie`, `daktyloskopie`], a: 3 },
+  { q: `8. Ve kterém městě sídlí Evropská centrální banka?`,
+    o: [`Milán`, `Frankfurt nad Mohanem`, `Amsterodam`, `Paříž`], a: 1 },
+  { q: `9. Jakou barvu má nerost malachit?`,
+    o: [`modrou`, `žlutou`, `zelenou`, `červenou`], a: 2 },
+  { q: `10. Jak se v typografii nazývá znak &?`,
+    o: [`ampersand`, `asterisk`, `tilda`, `cedilla`], a: 0 }
+];
+
+var VERDICTS = [
+  { max: 3, t: `Body zůstaly ležet napříč celou desítkou, i tam, kde se ptáme na věci, které se běžně mihnou v učebnici, ve zprávách i v běžném hovoru. K hranici osmi bodů, kterou titulek spojuje s přehledem nad průměrem, vám schází pět a víc odpovědí. Není to propast, spíš signál, že okruhy mimo vaše obvyklé zájmy zatím leží ladem a dají se doplnit rychleji, než to teď vypadá.` },
+  { max: 6, t: `Tohle pásmo obvykle vzniká tak, že polovina otázek sedne a u druhé poloviny už nestačí matný dojem a je potřeba znát přesný pojem, místo nebo název. K nadprůměrnému přehledu z titulku vám chybí dvě až čtyři odpovědi a přesně tady končí většina lidí, kteří sledují dění kolem sebe, ale do jednotlivých oborů se hlouběji nevrtají.` },
+  { max: 9, t: `Sedm bodů z deseti znamená, že vám k hranici z titulku schází jediná odpověď a jste těsně pod ní. Od osmi výš jste přesně tam, kam titulek míří: přehled nad průměrem českého řešitele, a to napříč deseti obory, které spolu nemají nic společného. Devět bodů je pak jediná mezera v celém tom rozptylu.` },
+  { max: 10, t: `Plný počet, na který podle titulku dosáhne jen menšina. Nezastavily vás snadnější otázky, nezastavila vás středně těžká pětice a neuspěla ani závěrečná otázka, u které většina řešitelů odpověď jen tipuje. Deset oborů, deset zásahů a žádná mezera, na kterou by se dalo ukázat.` }
+];
+
+var picks = [];
+var done = false;
+var quizEl = document.getElementById('quiz');
+var submitEl = document.getElementById('submit');
+var warnEl = document.getElementById('warn');
+var resultEl = document.getElementById('result');
+var scoreEl = document.getElementById('score');
+var verdictEl = document.getElementById('verdict');
+var againEl = document.getElementById('again');
+var LETTERS = ['a', 'b', 'c', 'd'];
+
+function build() {
+  quizEl.innerHTML = '';
+  picks = [];
+  done = false;
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    picks.push(null);
+    var box = document.createElement('div');
+    box.className = 'q';
+    var qp = document.createElement('p');
+    qp.className = 'q-text';
+    qp.textContent = QUESTIONS[i].q;
+    box.appendChild(qp);
+    for (var j = 0; j < QUESTIONS[i].o.length; j++) {
+      var btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.type = 'button';
+      btn.textContent = LETTERS[j] + ') ' + QUESTIONS[i].o[j];
+      btn.setAttribute('data-q', String(i));
+      btn.setAttribute('data-o', String(j));
+      btn.addEventListener('click', onPick);
+      box.appendChild(btn);
+    }
+    quizEl.appendChild(box);
+  }
+  resultEl.className = 'hidden';
+  warnEl.className = 'hidden';
+  submitEl.disabled = true;
+}
+
+function onPick(e) {
+  if (done) return;
+  var qi = parseInt(e.currentTarget.getAttribute('data-q'), 10);
+  var oi = parseInt(e.currentTarget.getAttribute('data-o'), 10);
+  picks[qi] = oi;
+  var box = quizEl.children[qi];
+  var opts = box.getElementsByClassName('opt');
+  for (var k = 0; k < opts.length; k++) {
+    opts[k].className = 'opt';
+  }
+  opts[oi].className = 'opt sel';
+  refresh();
+}
+
+function refresh() {
+  var all = true;
+  for (var i = 0; i < picks.length; i++) {
+    if (picks[i] === null) { all = false; break; }
+  }
+  submitEl.disabled = !all;
+  if (all) warnEl.className = 'hidden';
+}
+
+submitEl.addEventListener('click', function () {
+  var all = true;
+  for (var i = 0; i < picks.length; i++) {
+    if (picks[i] === null) { all = false; break; }
+  }
+  if (!all) {
+    warnEl.className = '';
+    return;
+  }
+  done = true;
+  var score = 0;
+  for (var q = 0; q < QUESTIONS.length; q++) {
+    var box = quizEl.children[q];
+    box.className = 'q locked';
+    var opts = box.getElementsByClassName('opt');
+    var correct = QUESTIONS[q].a;
+    if (picks[q] === correct) score++;
+    for (var m = 0; m < opts.length; m++) {
+      opts[m].className = 'opt';
+    }
+    opts[correct].className = 'opt good';
+    if (picks[q] !== correct) {
+      opts[picks[q]].className = 'opt bad';
+    }
+  }
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ' z ' + QUESTIONS.length;
+  var text = VERDICTS[VERDICTS.length - 1].t;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score <= VERDICTS[v].max) { text = VERDICTS[v].t; break; }
+  }
+  verdictEl.textContent = text;
+  resultEl.className = '';
+  resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+againEl.addEventListener('click', function () {
+  build();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+build();
+</script>
+</body>
+</html>
