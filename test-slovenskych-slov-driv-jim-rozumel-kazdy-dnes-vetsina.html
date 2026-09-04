@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test slovenských slov: dřív jim rozuměl každý, dnes většina nedá ani 7/10</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.locked .opt { cursor: default; }
+.locked .opt:hover { background: #f7f4f0; }
+.locked .opt.selected:hover { background: #dcd3c7; }
+.locked .opt.correct:hover { background: #d4edda; }
+.locked .opt.wrong:hover { background: #f8d7da; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #8c3b3b; margin-top: 14px; font-size: .95rem; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 24px;
+  border-top: 4px solid #5b7e5f;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#retry:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  .q, #result { padding: 20px; }
+  h1 { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test slovenských slov: dřív jim rozuměl každý, dnes většina nedá ani 7/10</h1>
+<p class="perex">Slovenština zněla z televize i z rádia každý den a překládat ji nikdo nepotřeboval. Deset běžných slov teď ukáže, kolik z toho porozumění zbylo. Laťka je sedm bodů z deseti a dnes ji přeskočí méně lidí, než byste čekali.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warn"></p>
+</div>
+<script>
+var QUESTIONS = [
+  {
+    q: `Co znamená slovenské slovo „kefa"?`,
+    o: [`hřeben na rozčesávání vlasů`, `kartáč na drhnutí a čištění`, `houba na mytí nádobí`, `koště na zametání podlahy`],
+    a: 1
+  },
+  {
+    q: `Co znamená slovenské slovo „ceruzka"?`,
+    o: [`tužka s tuhou na psaní a kreslení`, `křída na psaní na tabuli`, `guma na mazání napsaného`, `plnicí pero na inkoust`],
+    a: 0
+  },
+  {
+    q: `Co znamená slovenské slovo „vreckovka"?`,
+    o: [`ubrousek pokládaný vedle talíře`, `utěrka na utírání nádobí`, `kapesník na utření nosu`, `šátek uvázaný na hlavě`],
+    a: 2
+  },
+  {
+    q: `Co znamená slovenské slovo „lopta"?`,
+    o: [`puk, se kterým se hraje hokej`, `branka, do níž se střílejí góly`, `pálka na odpalování při hře`, `míč, se kterým se hrají hry`],
+    a: 3
+  },
+  {
+    q: `Co znamená slovenské slovo „mäsiar"?`,
+    o: [`uzenář vyrábějící klobásy a salámy`, `kuchař připravující masitá jídla`, `řezník porcující a prodávající maso`, `hokynář prodávající smíšené zboží`],
+    a: 2
+  },
+  {
+    q: `Co znamená slovenské slovo „pečeň"?`,
+    o: [`slezina uložená pod levým žeberním obloukem`, `ledvina, v níž se tvoří moč`, `žlučník, ve kterém se shromažďuje žluč`, `játra, největší žláza lidského těla`],
+    a: 3
+  },
+  {
+    q: `Co znamená slovenské slovo „lienka"?`,
+    o: [`beruška s tečkovanými krovkami`, `světluška svítící za letních nocí`, `zlatoočka s průsvitnými křídly`, `střevlík pobíhající po zemi`],
+    a: 0
+  },
+  {
+    q: `Co znamená slovenské slovo „klinec"?`,
+    o: [`šroub stažený maticí`, `hřebík zatloukaný kladivem`, `vrut zatáčený šroubovákem do dřeva`, `nýt spojující dva plechy`],
+    a: 1
+  },
+  {
+    q: `Co znamená slovenské slovo „púpava"?`,
+    o: [`sedmikráska rozkvetlá v trávníku`, `kopretina s bílými okvětními lístky`, `pampeliška se žlutým květem`, `podběl kvetoucí časně zjara`],
+    a: 2
+  },
+  {
+    q: `Co znamená slovenské slovo „lievik"?`,
+    o: [`trychtýř na přelévání tekutin do úzkého hrdla`, `cedník na slévání vody z uvařených těstovin`, `naběračka na nabírání polévky z hrnce`, `struhadlo na strouhání zeleniny`],
+    a: 0
+  }
+];
+
+var VERDICTS = [
+  { min: 0, max: 3, t: `Slovenština vám dnes zní jako cizí jazyk. Podobnost s češtinou tady vede jinam, než se zdá, a právě na ní se dá ztratit většina bodů. K laťce sedmi bodů je odsud ještě pořádný kus.` },
+  { min: 4, max: 6, t: `Tady se schází většina řešitelů, na které naráží titulek. Ta nejběžnější slova jste trefili, u zbytku rozhodl odhad. Na sedm bodů to nestačilo, ale chybělo vám k nim jen pár otázek.` },
+  { min: 7, max: 9, t: `Laťku sedmi bodů z deseti, o které mluví titulek, jste přeskočili, a to už se dnes povede menšině. Slova, u kterých čeština nenabízí nic podobného, vás nedostala všechna. Zbylé body vzalo jen pár výrazů, na kterých končí skoro každý.` },
+  { min: 10, max: 10, t: `Plný počet, a ten se dnes povede jen málokomu. Slovenská slova, u nichž čeština nenabízí žádnou oporu, vám nedělají potíže ani tam, kde ostatní tápou. Tohle už není odhad podle podobnosti, ale skutečná znalost jazyka.` }
+];
+
+var LETTERS = [`a`, `b`, `c`, `d`];
+var answers = [];
+var evaluated = false;
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  answers = [];
+  evaluated = false;
+  warnEl.textContent = ``;
+  var old = document.getElementById(`result`);
+  if (old) { old.parentNode.removeChild(old); }
+  var oldRetry = document.getElementById(`retry`);
+  if (oldRetry) { oldRetry.parentNode.removeChild(oldRetry); }
+  submitEl.style.display = `block`;
+  submitEl.disabled = true;
+
+  QUESTIONS.forEach(function (item, qi) {
+    answers.push(null);
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    box.setAttribute(`data-q`, String(qi));
+
+    var text = document.createElement(`p`);
+    text.className = `q-text`;
+    text.textContent = String(qi + 1) + `. ` + item.q;
+    box.appendChild(text);
+
+    item.o.forEach(function (opt, oi) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `opt`;
+      btn.textContent = LETTERS[oi] + `) ` + opt;
+      btn.addEventListener(`click`, function () {
+        if (evaluated) { return; }
+        answers[qi] = oi;
+        var sibs = box.querySelectorAll(`.opt`);
+        for (var i = 0; i < sibs.length; i++) {
+          sibs[i].classList.remove(`selected`);
+        }
+        btn.classList.add(`selected`);
+        refresh();
+      });
+      box.appendChild(btn);
+    });
+
+    quizEl.appendChild(box);
+  });
+}
+
+function allAnswered() {
+  for (var i = 0; i < answers.length; i++) {
+    if (answers[i] === null) { return false; }
+  }
+  return true;
+}
+
+function refresh() {
+  var ready = allAnswered();
+  submitEl.disabled = !ready;
+  if (ready) { warnEl.textContent = ``; }
+}
+
+function verdictFor(score) {
+  for (var i = 0; i < VERDICTS.length; i++) {
+    if (score >= VERDICTS[i].min && score <= VERDICTS[i].max) {
+      return VERDICTS[i].t;
+    }
+  }
+  return ``;
+}
+
+function evaluate() {
+  if (!allAnswered()) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  evaluated = true;
+  var score = 0;
+
+  var boxes = quizEl.querySelectorAll(`.q`);
+  for (var qi = 0; qi < boxes.length; qi++) {
+    var box = boxes[qi];
+    box.classList.add(`locked`);
+    var opts = box.querySelectorAll(`.opt`);
+    var correct = QUESTIONS[qi].a;
+    var picked = answers[qi];
+    if (picked === correct) { score++; }
+    for (var oi = 0; oi < opts.length; oi++) {
+      opts[oi].classList.remove(`selected`);
+      if (oi === correct) {
+        opts[oi].classList.add(`correct`);
+      } else if (oi === picked) {
+        opts[oi].classList.add(`wrong`);
+      }
+    }
+  }
+
+  submitEl.style.display = `none`;
+  warnEl.textContent = ``;
+
+  var res = document.createElement(`div`);
+  res.id = `result`;
+  var sc = document.createElement(`p`);
+  sc.id = `score`;
+  sc.textContent = String(score) + ` z ` + String(QUESTIONS.length);
+  var vd = document.createElement(`p`);
+  vd.id = `verdict`;
+  vd.textContent = verdictFor(score);
+  res.appendChild(sc);
+  res.appendChild(vd);
+
+  var retry = document.createElement(`button`);
+  retry.type = `button`;
+  retry.id = `retry`;
+  retry.textContent = `Zkusit znovu`;
+  retry.addEventListener(`click`, function () {
+    build();
+    window.scrollTo(0, 0);
+  });
+
+  var wrap = document.querySelector(`.wrap`);
+  wrap.appendChild(res);
+  wrap.appendChild(retry);
+  res.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+build();
+</script>
+</body>
+</html>
