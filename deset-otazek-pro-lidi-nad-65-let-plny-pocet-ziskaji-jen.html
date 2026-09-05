@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deset otázek pro lidi nad 65 let: plný počet získají jen skutečně sečtělí senioři</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 32px 16px 64px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #8c3b3b; margin-top: 14px; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 40px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#retry:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Deset otázek pro lidi nad 65 let: plný počet získají jen skutečně sečtělí senioři</h1>
+<p class="perex">Deset otázek pro každého, kdo má za sebou pětašedesát let čtení, poslouchání a dívání se kolem sebe. Každá z jiného oboru, žádné počítání, jen to, co vám v hlavě zůstalo. Čtyři možnosti, jedna správná.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warn" hidden>Odpovězte prosím na všechny otázky</p>
+<div id="result" hidden>
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  {
+    q: `1. Kterého kmene byl Attila králem?`,
+    opts: [`a) Vandalů`, `b) Hunů`, `c) Vizigótů`, `d) Ostrogótů`],
+    correct: 1
+  },
+  {
+    q: `2. Ve kterém časopise začaly v roce 1938 vycházet Rychlé šípy?`,
+    opts: [`a) Vpřed`, `b) Ohníček`, `c) Mladý hlasatel`, `d) Malý čtenář`],
+    correct: 2
+  },
+  {
+    q: `3. Ve kterém státě leží převážná část poloostrova Yucatán?`,
+    opts: [`a) v Mexiku`, `b) v Guatemale`, `c) v Hondurasu`, `d) v Kostarice`],
+    correct: 0
+  },
+  {
+    q: `4. Který pták žijící v české přírodě si nestaví vlastní hnízdo a odchov mláďat přenechává jiným druhům?`,
+    opts: [`a) žluva hajní`, `b) ťuhýk obecný`, `c) kukačka obecná`, `d) dudek chocholatý`],
+    correct: 2
+  },
+  {
+    q: `5. Co znamená slovo ekvilibrista?`,
+    opts: [`a) obchodník smlouvající o ceně`, `b) písař opisující staré rukopisy`, `c) artista provádějící cviky rovnováhy`, `d) jezdec cvičící koně`],
+    correct: 2
+  },
+  {
+    q: `6. Kdo v Mladé Boleslavi založil dílnu, ze které vyrostla dnešní automobilka Škoda Auto?`,
+    opts: [`a) Emil Škoda a Karel Ringhoffer`, `b) Václav Laurin a Václav Klement`, `c) Emil Kolben a Čeněk Daněk`, `d) Josef Sousedík a Hans Ledwinka`],
+    correct: 1
+  },
+  {
+    q: `7. Kdo je autorem cyklu Uherské tance?`,
+    opts: [`a) Bedřich Smetana`, `b) Antonín Dvořák`, `c) Petr Iljič Čajkovskij`, `d) Johannes Brahms`],
+    correct: 3
+  },
+  {
+    q: `8. Který hokejista vyhrál anketu Zlatá hokejka nejvíckrát?`,
+    opts: [`a) Dominik Hašek`, `b) Jaromír Jágr`, `c) David Pastrňák`, `d) Vladimír Růžička`],
+    correct: 1
+  },
+  {
+    q: `9. Ve které biblické knize předává Bůh Mojžíšovi na hoře Sinaj desky s Desaterem?`,
+    opts: [`a) Kniha Exodus`, `b) Kniha Genesis`, `c) Kniha Jozue`, `d) Kniha Žalmů`],
+    correct: 0
+  },
+  {
+    q: `10. Kdo je autorem pomníku mistra Jana Husa na Staroměstském náměstí?`,
+    opts: [`a) Josef Václav Myslbek`, `b) Stanislav Sucharda`, `c) Bohumil Kafka`, `d) Ladislav Šaloun`],
+    correct: 3
+  }
+];
+
+var VERDICTS = [
+  { min: 0, max: 3, text: `Deset oborů je široký záběr a vy jste se chytili jen v několika z nich. Znalosti máte roztroušené a mezi obory zejí mezery, které se během let nikdy nezaplnily. Není to důvod ke smutku, spíš pozvánka. Stačí si vzít jednu oblast, která vás dnes zaskočila, a měsíc jí věnovat trochu pozornosti.` },
+  { min: 4, max: 6, text: `Solidní běžný přehled, přesně ten, se kterým se dá vést rozhovor o čemkoli. Poradili jste si s tím, co se běžně připomíná, a zaváhali tam, kde už otázka vyžadovala víc než mlhavou vzpomínku. Do pásma, které slibuje titulek, vám chybí pár kroků, a jsou to kroky zvládnutelné.` },
+  { min: 7, max: 9, text: `Tohle je výkon nad průměrem. Nesnažíte se vybavovat jen školní učivo, ale máte načteno i to, co se ve škole neprobírá, a poznat jde, že jste roky nečetli jen jeden typ knih. Do plného počtu vám chyběly jedna až tři otázky, tedy detaily, na kterých padá i dobře orientovaný člověk.` },
+  { min: 10, max: 10, text: `Plný počet, a ten zvládne jen menšina. Neshodil vás kmen, v jehož čele stál Attila, předválečný dětský časopis, ve kterém se poprvé objevily Rychlé šípy, středoamerický poloostrov, pták, který odchov mláďat přenechává cizím rodičům, slovo z cirkusového světa, počátky mladoboleslavské automobilky, evropská hudební klasika, rekordman hokejové ankety, biblická kniha s Desaterem ani jméno sochaře, kterého si většina lidí plete s jeho slavnějšími kolegy. To už není běžný přehled, to je opravdová sečtělost, a ta se nedá nasbírat za týden.` }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var locked = false;
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryEl = document.getElementById(`retry`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var title = document.createElement(`p`);
+    title.className = `q-text`;
+    title.textContent = item.q;
+    box.appendChild(title);
+    item.opts.forEach(function (opt, oi) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `opt`;
+      btn.textContent = opt;
+      btn.addEventListener(`click`, function () {
+        if (locked) return;
+        answers[qi] = oi;
+        var siblings = box.querySelectorAll(`.opt`);
+        for (var i = 0; i < siblings.length; i++) {
+          siblings[i].classList.remove(`selected`);
+        }
+        btn.classList.add(`selected`);
+        refresh();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function refresh() {
+  var done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+  if (done) warnEl.hidden = true;
+}
+
+submitEl.addEventListener(`click`, function () {
+  if (locked) return;
+  var done = answers.every(function (a) { return a !== null; });
+  if (!done) {
+    warnEl.hidden = false;
+    return;
+  }
+  locked = true;
+  var score = 0;
+  var boxes = quizEl.querySelectorAll(`.q`);
+  QUESTIONS.forEach(function (item, qi) {
+    var opts = boxes[qi].querySelectorAll(`.opt`);
+    for (var i = 0; i < opts.length; i++) {
+      opts[i].classList.remove(`selected`);
+      opts[i].disabled = true;
+      if (i === item.correct) {
+        opts[i].classList.add(`correct`);
+      } else if (i === answers[qi]) {
+        opts[i].classList.add(`wrong`);
+      }
+    }
+    if (answers[qi] === item.correct) score++;
+  });
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  var v = VERDICTS.filter(function (r) { return score >= r.min && score <= r.max; })[0];
+  verdictEl.textContent = v ? v.text : ``;
+  resultEl.hidden = false;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+retryEl.addEventListener(`click`, function () {
+  locked = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.hidden = true;
+  warnEl.hidden = true;
+  submitEl.disabled = true;
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+</script>
+</body>
+</html>
