@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro aktivní důchodce: kdo nedá alespoň 6/10, tomu možná začíná ujíždět vlak</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 16px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qt { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.ok { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.bad { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #8c5b5b; margin-top: 12px; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 24px;
+  border-top: 4px solid #5b7e5f;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+#again {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#again:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 20px 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro aktivní důchodce: kdo nedá alespoň 6/10, tomu možná začíná ujíždět vlak</h1>
+<p class="perex">Aktivní důchodce se nenechá zaskočit ani otázkou mimo svůj obor. Deset otázek napříč obory, u každé čtyři možnosti a jediná správná. Šest bodů je hranice, od které se dá s klidem říct, že vám vlak neujíždí.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<div id="warn"></div>
+<div id="result" style="display:none">
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="again">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  { q: `1. U kterého města ústí řeka Tajo do Atlantského oceánu?`,
+    o: [`Porto`, `Sevilla`, `Lisabon`, `Cádiz`], c: 2 },
+  { q: `2. Který jazzový hudebník nahrál v roce 1959 album Kind of Blue, nejprodávanější jazzovou desku všech dob?`,
+    o: [`Duke Ellington`, `Miles Davis`, `Louis Armstrong`, `Dizzy Gillespie`], c: 1 },
+  { q: `3. Který herec ztvárnil otce Indiany Jonese ve filmu Indiana Jones a poslední křížová výprava?`,
+    o: [`Michael Caine`, `Christopher Lee`, `Peter O'Toole`, `Sean Connery`], c: 3 },
+  { q: `4. Jak se jmenuje nejvyšší hora Německa?`,
+    o: [`Zugspitze`, `Watzmann`, `Brocken`, `Feldberg`], c: 0 },
+  { q: `5. Která kouzelnice pomohla Iásonovi získat zlaté rouno a poté s ním uprchla z Kolchidy?`,
+    o: [`Ariadné`, `Kirké`, `Médea`, `Kassandra`], c: 2 },
+  { q: `6. Který italský lyžař získal na zimní olympiádě v Calgary 1988 zlato ve slalomu i v obřím slalomu?`,
+    o: [`Alberto Tomba`, `Gustav Thöni`, `Kristian Ghedina`, `Giorgio Rocca`], c: 0 },
+  { q: `7. Kdo byl v době podpisu mnichovské dohody britským premiérem?`,
+    o: [`Winston Churchill`, `Neville Chamberlain`, `Anthony Eden`, `Stanley Baldwin`], c: 1 },
+  { q: `8. Larvy kterého hmyzu žijí ve vodě i několik let, zatímco dospělec má zcela zakrnělé ústní ústrojí, nepřijímá už žádnou potravu a hyne do několika dní?`,
+    o: [`chrostík`, `pošvatka`, `vážka`, `jepice`], c: 3 },
+  { q: `9. Jak se v gotické architektuře nazývá štíhlý čtyřboký jehlan posázený kraby a zakončený křížovou kytkou, který se osazuje na vrcholy opěrných pilířů?`,
+    o: [`chrlič`, `fiála`, `archivolta`, `kružba`], c: 1 },
+  { q: `10. Co znamená podstatné jméno kratochvíle?`,
+    o: [`krátká přestávka v práci`, `rychlé a unáhlené rozhodnutí`, `chvilková slabost nebo závrať`, `zábava a rozptýlení`], c: 3 }
+];
+
+const verdicts = [
+  { max: 3, t: `Tady se nedá nic zaobalovat. Laťka šesti bodů zůstala daleko a titulek v tomhle případě sedí, kus vlaku už vám ujel. Deset otázek z různých oborů je nemilosrdná zkouška a při tomhle výsledku vám jich uteklo nejméně sedm, takže nešlo o jediný obor, který vám nesedl, ale o většinu z nich. Dobrá zpráva je, že dohnat se to dá rychleji, než to teď vypadá. Projděte si správné odpovědi, uvidíte, že většina z nich není žádná exotika a při druhém setkání už vám naskočí sama.` },
+  { max: 6, t: `Rozhoduje se přesně tady. Se čtyřmi nebo pěti body jste kousek pod hranicí, o které mluví titulek, a chybí opravdu málo, obvykle jedna až dvě otázky. Se šesti body jste laťku splnili a vlak vám neujíždí, byť jste na něj naskočili až v posledním okamžiku. V obou případech platí totéž: základ máte pevný a slabinou nebývá paměť, ale obor, kterému se prostě dlouho nevěnujete.` },
+  { max: 9, t: `Výsledek aktivního člověka, který se zajímá o víc věcí najednou. Laťku šesti bodů jste překonali s rezervou a uspěli i tam, kde odpověď nestačí tušit, ale je potřeba ji vědět přesně. Jedna až tři otázky vám utekly, a při takovém skóre už nejde o mezery v celkovém přehledu, ale o jeden nebo dva obory, kterým jste se v životě prostě nikdy nedostali pod kůži. O ujíždějícím vlaku u vás nemůže být řeč, spíš sedíte v jednom z prvních vagonů.` },
+  { max: 10, t: `Naprostá špička a výsledek, na který dosáhne jen menšina. Nesrazila vás iberská řeka, nejprodávanější jazzová deska, italský sportovec ani kamenný detail gotické katedrály, poradili jste si i s kouzelnicí z řeckých bájí a s britským premiérem z osudných dnů roku 1938, a k tomu jste trefili hmyz, jehož dospělci nestihnou pozřít ani sousto, a staré české slovo, které dnes už skoro nikdo nepoužívá. Takový rozptyl znalostí se netipuje. Vlak, o kterém mluví titulek, řídíte.` }
+];
+
+const letters = [`a`, `b`, `c`, `d`];
+const answers = new Array(questions.length).fill(null);
+let done = false;
+
+const quizEl = document.getElementById(`quiz`);
+const submitEl = document.getElementById(`submit`);
+const warnEl = document.getElementById(`warn`);
+const resultEl = document.getElementById(`result`);
+const scoreEl = document.getElementById(`score`);
+const verdictEl = document.getElementById(`verdict`);
+const againEl = document.getElementById(`again`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  questions.forEach(function (item, qi) {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const title = document.createElement(`div`);
+    title.className = `qt`;
+    title.textContent = item.q;
+    box.appendChild(title);
+    item.o.forEach(function (opt, oi) {
+      const btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `opt`;
+      btn.textContent = letters[oi] + `) ` + opt;
+      btn.setAttribute(`data-q`, String(qi));
+      btn.setAttribute(`data-o`, String(oi));
+      btn.addEventListener(`click`, function () {
+        if (done) { return; }
+        answers[qi] = oi;
+        const siblings = box.querySelectorAll(`.opt`);
+        for (let i = 0; i < siblings.length; i++) { siblings[i].classList.remove(`sel`); }
+        btn.classList.add(`sel`);
+        warnEl.textContent = ``;
+        submitEl.disabled = answers.indexOf(null) !== -1;
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+submitEl.addEventListener(`click`, function () {
+  if (answers.indexOf(null) !== -1) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  done = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  for (let qi = 0; qi < questions.length; qi++) {
+    const opts = boxes[qi].querySelectorAll(`.opt`);
+    for (let oi = 0; oi < opts.length; oi++) {
+      opts[oi].disabled = true;
+      opts[oi].classList.remove(`sel`);
+      if (oi === questions[qi].c) { opts[oi].classList.add(`ok`); }
+      else if (oi === answers[qi]) { opts[oi].classList.add(`bad`); }
+    }
+    if (answers[qi] === questions[qi].c) { score++; }
+  }
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ` z ` + questions.length;
+  let text = verdicts[verdicts.length - 1].t;
+  for (let i = 0; i < verdicts.length; i++) {
+    if (score <= verdicts[i].max) { text = verdicts[i].t; break; }
+  }
+  verdictEl.textContent = text;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+});
+
+againEl.addEventListener(`click`, function () {
+  done = false;
+  for (let i = 0; i < answers.length; i++) { answers[i] = null; }
+  build();
+  submitEl.disabled = true;
+  warnEl.textContent = ``;
+  resultEl.style.display = `none`;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+</script>
+</body>
+</html>
