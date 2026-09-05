@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro seniory s dobrou pamětí: 10 otázek ukáže, kolik vám toho zůstalo ze školy</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 32px 16px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qt { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.good { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.bad { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.locked .opt { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 32px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+#again {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#again:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro seniory s dobrou pamětí: 10 otázek ukáže, kolik vám toho zůstalo ze školy</h1>
+<p class="perex">Školní léta máte dávno za sebou, jenže leccos z lavic v hlavě zůstalo. Deset otázek z češtiny, dějepisu, zeměpisu, přírodních věd, matematiky, literatury i hudby ukáže, kolik vám toho po letech opravdu vydrželo.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warn"></p>
+<div id="result" style="display:none">
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="again">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  { q: `1. Který pád odpovídá na otázky koho, co?`, o: [`1. pád`, `2. pád`, `4. pád`, `6. pád`], a: 2 },
+  { q: `2. Ve které opeře vystupuje postava Kecala?`, o: [`Prodaná nevěsta`, `Dalibor`, `Hubička`, `Tajemství`], a: 0 },
+  { q: `3. Jak se nazývá první Newtonův pohybový zákon?`, o: [`zákon síly`, `zákon setrvačnosti`, `zákon akce a reakce`, `zákon zachování hybnosti`], a: 1 },
+  { q: `4. Kdo napsal román Utrpení mladého Werthera?`, o: [`Heinrich Heine`, `Theodor Fontane`, `Novalis`, `Johann Wolfgang Goethe`], a: 3 },
+  { q: `5. Nad kterým zálivem se tyčí sopka Vesuv?`, o: [`Terstským`, `Janovským`, `Neapolským`, `Tarentským`], a: 2 },
+  { q: `6. Jak se nazývá plyn se vzorcem NH3?`, o: [`ozon`, `metan`, `amoniak`, `propan`], a: 2 },
+  { q: `7. Jak se nazývá úsečka, která spojuje vrchol trojúhelníku se středem protější strany?`, o: [`výška`, `osa strany`, `střední příčka`, `těžnice`], a: 3 },
+  { q: `8. Které vojsko obléhalo roku 1648 Staré Město pražské v závěru třicetileté války?`, o: [`bavorské`, `saské`, `braniborské`, `švédské`], a: 3 },
+  { q: `9. Jak se jmenovalo hlavní město aztécké říše?`, o: [`Tenochtitlán`, `Teotihuacán`, `Cuzco`, `Tikal`], a: 0 },
+  { q: `10. Kdo napsal román Zapadlí vlastenci?`, o: [`Alois Jirásek`, `Karel Václav Rais`, `Josef Holeček`, `Antal Stašek`], a: 1 }
+];
+
+var BANDS = [
+  { max: 3, t: `Ze školy zůstaly jednotlivé střípky. Body přišly nanejvýš u těch nejsnazších otázek a v ostatních oborech, kterými kvíz prošel, se opora nenašla. Projděte si správné odpovědi popořadě, patří k tomu, co se kdysi probíralo v každé třídě, a při čtení pohromadě se vám k nim vybaví víc, než kolik se jich podařilo trefit.` },
+  { max: 6, t: `Zůstala vám zhruba polovina školní látky. Drží ta vrstva, která se ze základní školy zapomíná nejhůř, tedy mluvnický pád, postava z nejhranější české opery, první Newtonův pohybový zákon a autor slavného německého románu. K nim jste přidali jednu až dvě položky ze středního pásma. Ztráty přišly tam, kde už je potřeba přesná poloha na mapě, přesný odborný termín nebo přesné jméno z dějepisu. Souvislý základ ze školy tedy držíte, patro nad ním se ale za ta léta zčásti rozpadlo.` },
+  { max: 9, t: `Ze školy vám zůstalo výrazně víc než jen základ. K snadnému začátku, tedy k pádu, opeře, Newtonovu zákonu a německému klasikovi, jste přidali většinu středního pásma: záliv pod Vesuvem, vzorec běžného plynu, geometrický termín i dějepisné otázky na obléhání Prahy a aztécké hlavní město. Chybějící jeden až tři body padly uvnitř právě tohoto pásma, tam, kde se rozhoduje mezi dvěma blízkými možnostmi, a právě tam se vaše školní znalost tenčí.` },
+  { max: 10, t: `Plný počet. Prošli jste bez ztráty všemi obory, kterými kvíz vede, od mluvnice a opery přes fyziku, chemii a geometrii až po dějepis a literaturu, a nezastavila vás ani poslední otázka, u které si dnes většina lidí jméno autora Zapadlých vlastenců nevybaví. Deset z deseti tady dá jen menšina a školní látka je u vás po všech těch letech pořád celá.` }
+];
+
+var LETTERS = [`a)`, `b)`, `c)`, `d)`];
+var picks = [];
+var locked = false;
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var againEl = document.getElementById(`again`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  picks = [];
+  locked = false;
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    picks.push(-1);
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var title = document.createElement(`p`);
+    title.className = `qt`;
+    title.textContent = QUESTIONS[i].q;
+    box.appendChild(title);
+    for (var j = 0; j < QUESTIONS[i].o.length; j++) {
+      var btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.type = `button`;
+      btn.textContent = LETTERS[j] + ` ` + QUESTIONS[i].o[j];
+      btn.setAttribute(`data-q`, String(i));
+      btn.setAttribute(`data-o`, String(j));
+      btn.addEventListener(`click`, onPick);
+      box.appendChild(btn);
+    }
+    quizEl.appendChild(box);
+  }
+  submitEl.disabled = true;
+  warnEl.textContent = ``;
+  resultEl.style.display = `none`;
+}
+
+function onPick(e) {
+  if (locked) { return; }
+  var qi = parseInt(e.currentTarget.getAttribute(`data-q`), 10);
+  var oi = parseInt(e.currentTarget.getAttribute(`data-o`), 10);
+  picks[qi] = oi;
+  var box = quizEl.children[qi];
+  var opts = box.querySelectorAll(`.opt`);
+  for (var k = 0; k < opts.length; k++) { opts[k].classList.remove(`sel`); }
+  e.currentTarget.classList.add(`sel`);
+  var done = true;
+  for (var m = 0; m < picks.length; m++) { if (picks[m] < 0) { done = false; } }
+  submitEl.disabled = !done;
+  if (done) { warnEl.textContent = ``; }
+}
+
+submitEl.addEventListener(`click`, function () {
+  var done = true;
+  for (var m = 0; m < picks.length; m++) { if (picks[m] < 0) { done = false; } }
+  if (!done) { warnEl.textContent = `Odpovězte prosím na všechny otázky`; return; }
+  locked = true;
+  var score = 0;
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    var box = quizEl.children[i];
+    box.classList.add(`locked`);
+    var opts = box.querySelectorAll(`.opt`);
+    var correct = QUESTIONS[i].a;
+    if (picks[i] === correct) { score++; }
+    for (var j = 0; j < opts.length; j++) {
+      opts[j].classList.remove(`sel`);
+      if (j === correct) { opts[j].classList.add(`good`); }
+      else if (j === picks[i]) { opts[j].classList.add(`bad`); }
+    }
+  }
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  var text = BANDS[BANDS.length - 1].t;
+  for (var b = 0; b < BANDS.length; b++) {
+    if (score <= BANDS[b].max) { text = BANDS[b].t; break; }
+  }
+  verdictEl.textContent = text;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+againEl.addEventListener(`click`, function () {
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+</script>
+</body>
+</html>
