@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test znalostí pro zkušené Čechy: lidé nad 60 let v něm často porážejí mladší generaci</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.varianta:hover:not(:disabled) { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta:disabled { cursor: default; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#vyhodnotit:hover:not(:disabled) { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#hlaska { text-align: center; color: #8c3b3b; margin-top: 14px; min-height: 1.4em; }
+#vysledek {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 40px;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test znalostí pro zkušené Čechy: lidé nad 60 let v něm často porážejí mladší generaci</h1>
+<p class="perex">Deset otázek z deseti různých oborů a u každé se hraje hlavně o to, co se za život nasbíralo. Mladší ročníky tu ztrácejí dřív, než samy čekají. Sedm bodů je dobrý výsledek, osm a víc už znamená pořádný náskok.</p>
+<div id="kviz"></div>
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p id="hlaska"></p>
+<div id="vysledek" style="display:none">
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var otazky = [
+  {
+    z: `1. Kdo v řecké báji sestrojil křídla z peří a vosku, na kterých uletěl z Kréty i se svým synem?`,
+    v: [`a) Prométheus`, `b) Héfaistos`, `c) Daidalos`, `d) Tantalos`],
+    s: 2
+  },
+  {
+    z: `2. Co znamená slovo lapálie?`,
+    v: [`a) bezvýznamná maličkost`, `b) hlasitá hádka`, `c) náhlá pohroma`, `d) zdlouhavé vyprávění`],
+    s: 0
+  },
+  {
+    z: `3. Ze kterého světadílu byla do Evropy zavlečena mandelinka bramborová?`,
+    v: [`a) z Asie`, `b) z Afriky`, `c) z Jižní Ameriky`, `d) ze Severní Ameriky`],
+    s: 3
+  },
+  {
+    z: `4. Kterou technikou vytvořil Rembrandt van Rijn většinu svých proslulých grafických listů?`,
+    v: [`a) mědirytinou`, `b) dřevorytem`, `c) litografií`, `d) leptem`],
+    s: 3
+  },
+  {
+    z: `5. K čemu na koňském povozu sloužila oj?`,
+    v: [`a) k zajištění kol proti otáčení při sjezdu z kopce`, `b) ke spojení vozu se zapřaženým potahem`, `c) ke zvedání korby při vysypávání nákladu`, `d) k držení nákladu po stranách vozu`],
+    s: 1
+  },
+  {
+    z: `6. Ve které zemi stojí ruiny antického města Palmýra?`,
+    v: [`a) v Sýrii`, `b) v Iráku`, `c) v Turecku`, `d) v Egyptě`],
+    s: 0
+  },
+  {
+    z: `7. Který americký prezident se ujal úřadu po smrti Franklina Delana Roosevelta?`,
+    v: [`a) Herbert Hoover`, `b) Dwight Eisenhower`, `c) John Fitzgerald Kennedy`, `d) Harry Truman`],
+    s: 3
+  },
+  {
+    z: `8. Které zvíře bylo ve znaku československých čerpacích stanic Benzina?`,
+    v: [`a) jelen`, `b) kůň`, `c) orel`, `d) beran`],
+    s: 1
+  },
+  {
+    z: `9. Kdo jako první roztřídil obrazce otisků prstů do devíti základních typů?`,
+    v: [`a) Jan Evangelista Purkyně`, `b) Gregor Mendel`, `c) Jaroslav Heyrovský`, `d) František Křižík`],
+    s: 0
+  },
+  {
+    z: `10. Kdo napsal román Ze světa lesních samot?`,
+    v: [`a) Karel Václav Rais`, `b) Jindřich Šimon Baar`, `c) Karel Klostermann`, `d) Josef Holeček`],
+    s: 2
+  }
+];
+
+var hodnoceni = [
+  { min: 0, max: 3, text: `Tenhle test jste vzali spíš zlehka a to se hned pozná. Body tu padaly na věcech, které se běžně nepřipomínají, a vaše paměť je zatím nevydala. Výsledek zůstal pod tím, co v tomhle testu bývá obvyklé, takže žádný náskok proti mladším ročníkům tady zatím vidět není. Dobrá zpráva je, že většina zdejších znalostí se dá oprášit rychle, stačí jim dát příležitost.` },
+  { min: 4, max: 6, text: `Solidní střed, který ovšem u tohoto testu zůstává pod jeho běžným průměrem. Zvládli jste rozjezd, ale u otázek na starší reálie a na méně omílané detaily se rozhodovalo na hraně, a právě tam se láme rozdíl mezi ročníky. Mladší generace se v tomhle pásmu drží často, vy do něj patřit nemusíte. K sedmičce vám chybí málo a většinou jde o jednu jedinou vzpomínku, která se nevybavila včas. Ještě jednou projít otázky, u kterých jste váhali, a hranice je na dosah.` },
+  { min: 7, max: 9, text: `Tady se přesně naplňuje to, co slibuje název. Sedm až devět bodů je pásmo, ve kterém se cílová skupina tohoto testu obvykle drží, zato mladší ročníky v něm končí výrazně řidčeji, protože otázky na dobové reálie, výtvarnou techniku a starší českou literaturu se ve škole dnes neberou a v běžném provozu se nepotkávají. Máte široký záběr napříč obory a nespoléháte jen na jeden koutek znalostí.` },
+  { min: 10, max: 10, text: `Plný počet, který v tomto testu dá opravdu jen hrstka lidí. Trefili jste jak rozjezdové otázky, tak tu nejtěžší, u které se láme většina, a to je kombinace, jakou u mladších řešitelů prakticky nepotkáte. Takový výsledek nevznikne náhodou ani odhadem, stojí za ním roky čtení, práce a zvědavosti, které se teď vyplatily do posledního bodu.` }
+];
+
+var odpovedi = [];
+var vyhodnoceno = false;
+var kvizEl = document.getElementById('kviz');
+var tlacitkoVyhodnotit = document.getElementById('vyhodnotit');
+var hlaskaEl = document.getElementById('hlaska');
+var vysledekEl = document.getElementById('vysledek');
+var skoreEl = document.getElementById('skore');
+var hodnoceniEl = document.getElementById('hodnoceni');
+var tlacitkoZnovu = document.getElementById('znovu');
+
+function vykresli() {
+  kvizEl.innerHTML = '';
+  for (var i = 0; i < otazky.length; i++) {
+    var box = document.createElement('div');
+    box.className = 'otazka';
+    var zneni = document.createElement('p');
+    zneni.className = 'zneni';
+    zneni.textContent = otazky[i].z;
+    box.appendChild(zneni);
+    for (var j = 0; j < otazky[i].v.length; j++) {
+      var btn = document.createElement('button');
+      btn.className = 'varianta';
+      btn.textContent = otazky[i].v[j];
+      btn.setAttribute('data-o', i);
+      btn.setAttribute('data-v', j);
+      btn.addEventListener('click', klikVarianta);
+      box.appendChild(btn);
+    }
+    kvizEl.appendChild(box);
+  }
+}
+
+function klikVarianta(e) {
+  if (vyhodnoceno) return;
+  var o = parseInt(e.currentTarget.getAttribute('data-o'), 10);
+  var v = parseInt(e.currentTarget.getAttribute('data-v'), 10);
+  odpovedi[o] = v;
+  var box = e.currentTarget.parentNode;
+  var tlacitka = box.getElementsByClassName('varianta');
+  for (var k = 0; k < tlacitka.length; k++) {
+    tlacitka[k].classList.remove('vybrana');
+  }
+  e.currentTarget.classList.add('vybrana');
+  zkontrolujHotovo();
+}
+
+function zkontrolujHotovo() {
+  var hotovo = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] !== 'number') { hotovo = false; break; }
+  }
+  tlacitkoVyhodnotit.disabled = !hotovo;
+  if (hotovo) hlaskaEl.textContent = '';
+}
+
+tlacitkoVyhodnotit.addEventListener('click', function () {
+  var hotovo = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] !== 'number') { hotovo = false; break; }
+  }
+  if (!hotovo) {
+    hlaskaEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  vyhodnoceno = true;
+  var body = 0;
+  var boxy = kvizEl.getElementsByClassName('otazka');
+  for (var o = 0; o < otazky.length; o++) {
+    var tlacitka = boxy[o].getElementsByClassName('varianta');
+    for (var v = 0; v < tlacitka.length; v++) {
+      tlacitka[v].disabled = true;
+      tlacitka[v].classList.remove('vybrana');
+      if (v === otazky[o].s) {
+        tlacitka[v].classList.add('spravna');
+      } else if (v === odpovedi[o]) {
+        tlacitka[v].classList.add('spatna');
+      }
+    }
+    if (odpovedi[o] === otazky[o].s) body++;
+  }
+  tlacitkoVyhodnotit.disabled = true;
+  skoreEl.textContent = body + ' z ' + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body >= hodnoceni[h].min && body <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+  vysledekEl.style.display = 'block';
+  vysledekEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+tlacitkoZnovu.addEventListener('click', function () {
+  odpovedi = [];
+  vyhodnoceno = false;
+  vysledekEl.style.display = 'none';
+  hlaskaEl.textContent = '';
+  tlacitkoVyhodnotit.disabled = true;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+vykresli();
+</script>
+</body>
+</html>
