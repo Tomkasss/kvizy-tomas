@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vědomostní test pro lidi nad 60 let: hranici 7/10 překonají jen ti, kteří se stále zajímají o svět</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover:not(:disabled) { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  #vyhodnotit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #vyhodnotit:hover:not(:disabled) { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.4em; }
+  #vysledek {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #znovu {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #znovu:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka, #vysledek { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Vědomostní test pro lidi nad 60 let: hranici 7/10 překonají jen ti, kteří se stále zajímají o svět</h1>
+  <p class="perex">Deset otázek napříč obory, u každé čtyři možnosti a jediná správná. Zeměpis, tradice, čeština, sport, příroda, technika, hudba, malířství, literatura i dějiny. Milí čtenáři nad šedesát, hranici sedmi bodů zdaleka nepřekročí každý. Zvládnete ji?</p>
+  <div id="kviz"></div>
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+  <div id="vysledek" hidden>
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var otazky = [
+  {
+    z: `Ve které zemi leží přístavní město Rotterdam?`,
+    v: [`v Belgii`, `v Dánsku`, `v Nizozemsku`, `v Německu`],
+    s: 2
+  },
+  {
+    z: `Který den velikonočního týdne připomíná poslední večeři Ježíše s apoštoly?`,
+    v: [`Škaredá středa`, `Velký pátek`, `Bílá sobota`, `Zelený čtvrtek`],
+    s: 3
+  },
+  {
+    z: `Co znamená sloveso zápolit?`,
+    v: [`tiše naříkat nad ztrátou`, `usilovně se s někým potýkat`, `dávat dohromady rozbité věci`, `bezcílně přecházet sem a tam`],
+    s: 1
+  },
+  {
+    z: `Který sport se odehrává na zápasišti zvaném dohjó?`,
+    v: [`judo`, `karate`, `sumo`, `kendo`],
+    s: 2
+  },
+  {
+    z: `Která část trávicí soustavy nahrazuje ptákům zuby?`,
+    v: [`vole`, `svalnatý žaludek`, `jícen`, `slepé střevo`],
+    s: 1
+  },
+  {
+    z: `K čemu slouží v automobilu diferenciál?`,
+    v: [`umožňuje kolům jedné nápravy otáčet se různou rychlostí`, `tlumí kmitání klikového hřídele`, `rozděluje palivo do jednotlivých válců`, `chladí převodový olej`],
+    s: 0
+  },
+  {
+    z: `Jak se nazývá text opery?`,
+    v: [`partitura`, `árie`, `libreto`, `předehra`],
+    s: 2
+  },
+  {
+    z: `Který malíř je autorem plakátu Moulin Rouge: La Goulue?`,
+    v: [`Paul Gauguin`, `Édouard Manet`, `Georges Seurat`, `Henri de Toulouse-Lautrec`],
+    s: 3
+  },
+  {
+    z: `Kdo je autorem románu Siddhártha?`,
+    v: [`Hermann Hesse`, `Thomas Mann`, `Stefan Zweig`, `Franz Kafka`],
+    s: 0
+  },
+  {
+    z: `Do kterého francouzského města přesídlili ve 14. století papežové z Říma?`,
+    v: [`do Lyonu`, `do Avignonu`, `do Marseille`, `do Remeše`],
+    s: 1
+  }
+];
+
+var hodnoceni = [
+  {
+    max: 3,
+    text: `Hranice sedmi bodů zůstala daleko a otázky vás zastavily hned v několika oborech naráz. Deset různých oblastí za sebou je nápor a tady vás minula většina z nich. Projděte si správné odpovědi a všimněte si, které obory vás stáhly nejvíc. Zpravidla to bývají ty, na které člověk v běžném týdnu nenarazí.`
+  },
+  {
+    max: 6,
+    text: `Slušný výsledek, na sedmičku ale nestačil. Polovina otázek sedla a druhá uhnula většinou o jedinou variantu vedle, protože dvě nabídky stály příliš blízko sebe. Přesně tady se schází nejpočetnější skupina řešitelů. K překonání hranice chybělo opravdu málo a s trochou čtení se příště posunete přes ni.`
+  },
+  {
+    max: 9,
+    text: `Hranici, kterou slibuje titulek, jste překonali. Sedm a víc bodů z deseti oborů dá jen ten, kdo dění kolem sebe stále sleduje a čte, a to je přesně váš případ. Zastavila vás jedna nebo dvě otázky, u kterých rozhodoval detail mimo běžnou školní látku. Na plný počet dosáhne jen menšina, vy jste od ní byli kousek.`
+  },
+  {
+    max: 10,
+    text: `Plný počet, a to je v tomhle testu vzácnost. Neshodil vás zeměpis, tradice, čeština, sport, příroda, technika, hudba, malířství, literatura ani dějiny. Hranici sedmi bodů jste nepřekonali o kousek, ale se značnou rezervou. Takový rozptyl znalostí se tipováním netrefí, ten se musí opravdu mít. Klobouk dolů.`
+  }
+];
+
+var pismena = [`a)`, `b)`, `c)`, `d)`];
+var odpovedi = [];
+var hotovo = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var vyhodnotitEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function postav() {
+  kvizEl.innerHTML = ``;
+  for (var i = 0; i < otazky.length; i++) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = (i + 1) + `. ` + otazky[i].z;
+    box.appendChild(zneni);
+    for (var j = 0; j < otazky[i].v.length; j++) {
+      var tl = document.createElement(`button`);
+      tl.className = `varianta`;
+      tl.type = `button`;
+      tl.textContent = pismena[j] + ` ` + otazky[i].v[j];
+      tl.setAttribute(`data-o`, String(i));
+      tl.setAttribute(`data-v`, String(j));
+      tl.addEventListener(`click`, klik);
+      box.appendChild(tl);
+    }
+    kvizEl.appendChild(box);
+  }
+}
+
+function klik(e) {
+  if (hotovo) { return; }
+  var o = parseInt(e.currentTarget.getAttribute(`data-o`), 10);
+  var v = parseInt(e.currentTarget.getAttribute(`data-v`), 10);
+  odpovedi[o] = v;
+  var sourozenci = e.currentTarget.parentNode.querySelectorAll(`.varianta`);
+  for (var k = 0; k < sourozenci.length; k++) {
+    sourozenci[k].classList.remove(`vybrana`);
+  }
+  e.currentTarget.classList.add(`vybrana`);
+  hlaskaEl.textContent = ``;
+  zkontrolujHotovost();
+}
+
+function zkontrolujHotovost() {
+  var vse = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] !== `number`) { vse = false; break; }
+  }
+  vyhodnotitEl.disabled = !vse;
+}
+
+function vyhodnot() {
+  var vse = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] !== `number`) { vse = false; break; }
+  }
+  if (!vse) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  hotovo = true;
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  for (var o = 0; o < otazky.length; o++) {
+    var tlacitka = boxy[o].querySelectorAll(`.varianta`);
+    for (var v = 0; v < tlacitka.length; v++) {
+      tlacitka[v].disabled = true;
+      tlacitka[v].classList.remove(`vybrana`);
+      if (v === otazky[o].s) {
+        tlacitka[v].classList.add(`spravna`);
+      } else if (v === odpovedi[o]) {
+        tlacitka[v].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[o] === otazky[o].s) { body++; }
+  }
+  vyhodnotitEl.disabled = true;
+  hlaskaEl.textContent = ``;
+  skoreEl.textContent = body + ` z ` + otazky.length;
+  var text = hodnoceni[hodnoceni.length - 1].text;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body <= hodnoceni[h].max) { text = hodnoceni[h].text; break; }
+  }
+  hodnoceniEl.textContent = text;
+  vysledekEl.hidden = false;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function znovu() {
+  hotovo = false;
+  odpovedi = [];
+  vysledekEl.hidden = true;
+  hlaskaEl.textContent = ``;
+  vyhodnotitEl.disabled = true;
+  postav();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+vyhodnotitEl.addEventListener(`click`, vyhodnot);
+znovuEl.addEventListener(`click`, znovu);
+postav();
+</script>
+</body>
+</html>
