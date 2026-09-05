@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro seniory z každého soudku: kdo zvládne 7/10, drží si velmi slušný přehled</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.varianta:last-child { margin-bottom: 0; }
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta:disabled { cursor: default; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#hlaska { text-align: center; color: #8c3b3b; margin-top: 14px; font-size: .95rem; }
+#vysledek {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 40px;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka, #vysledek { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro seniory z každého soudku: kdo zvládne 7/10, drží si velmi slušný přehled</h1>
+<p class="perex">Deset otázek pro seniory a každá z jiného oboru. Kuchyně, jazyky, sport, průmysl, starověk, móda, film, čeština, kláštery i druhá světová válka. Žádné počítání, jen přehled nasbíraný za celý život. Dáte sedm?</p>
+<div id="kviz"></div>
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p id="hlaska"></p>
+<div id="vysledek" hidden>
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var otazky = [
+  {
+    z: `1. Ze které španělské oblasti pochází původní paella?`,
+    v: [`Andalusie`, `Valencie`, `Katalánsko`, `Baskicko`],
+    s: 1
+  },
+  {
+    z: `2. Ve které evropské zemi patří rétorománština mezi národní jazyky?`,
+    v: [`Rakousko`, `Slovinsko`, `Švýcarsko`, `Belgie`],
+    s: 2
+  },
+  {
+    z: `3. Který stát zvítězil na fotbalovém mistrovství světa v roce 1974?`,
+    v: [`Nizozemsko`, `Brazílie`, `Západní Německo`, `Polsko`],
+    s: 2
+  },
+  {
+    z: `4. Ve které zemi byla založena automobilka Volvo?`,
+    v: [`Norsko`, `Dánsko`, `Nizozemsko`, `Švédsko`],
+    s: 3
+  },
+  {
+    z: `5. Které město bylo za vlády Kleopatry hlavním městem Egypta?`,
+    v: [`Memfis`, `Alexandrie`, `Théby`, `Gíza`],
+    s: 1
+  },
+  {
+    z: `6. Kdo přišel s modelem malých černých šatů?`,
+    v: [`Christian Dior`, `Elsa Schiaparelli`, `Coco Chanel`, `Yves Saint Laurent`],
+    s: 2
+  },
+  {
+    z: `7. Kdo hrál hlavní ženskou roli v komedii Někdo to rád horké?`,
+    v: [`Marilyn Monroe`, `Grace Kelly`, `Lauren Bacall`, `Kim Novak`],
+    s: 0
+  },
+  {
+    z: `8. Co znamená sloveso lelkovat?`,
+    v: [`zbytečně se rozčilovat pro každou maličkost`, `potají a zpovzdálí pozorovat cizí počínání`, `nemotorně se pohybovat po malém pokoji`, `nečinně postávat a bezcílně se rozhlížet`],
+    s: 3
+  },
+  {
+    z: `9. Která klášterní místnost sloužila jako společná jídelna?`,
+    v: [`dormitář`, `refektář`, `sakristie`, `kapitulní síň`],
+    s: 1
+  },
+  {
+    z: `10. Jaké krycí jméno nesla spojenecká operace, kterou v roce 1944 zahájilo vylodění v Normandii?`,
+    v: [`Dynamo`, `Barbarossa`, `Market Garden`, `Overlord`],
+    s: 3
+  }
+];
+
+var hodnoceni = [
+  { max: 3, text: `Zadrhlo se to hned v rozjezdu. Otázky na zemi za značkou Volvo, na návrhářku malých černých šatů, na hvězdu komedie Někdo to rád horké a na význam slovesa lelkovat stojí na věcech, které se člověku samy připomínají z televize i z běžné řeči, a právě ony rozhodly. K hranici sedmi bodů z titulku vám chybí čtyři body a víc, ale je to ta nejlépe dohonitelná ztráta ze všech.` },
+  { max: 6, text: `Slušný základ, který se láme uprostřed. Rozjezdové čtyři otázky jste nejspíš pobrali a ztráceli jste ve středním pásmu, kde rozhodovala domovská oblast paelly, fotbalový mistr světa z roku 1974, hlavní město Egypta za Kleopatry, evropská země, kde je rétorománština jedním z národních jazyků, a klášterní jídelna. Na velmi slušný přehled vám chybí jedna až tři odpovědi, tedy míň, než to vypadá.` },
+  { max: 9, text: `Hranici z titulku jste zvládli, a to znamená velmi slušný přehled. Prošli jste kuchyní, jazyky, sportem, průmyslem, starověkem, módou, filmem, češtinou i klášterem bez větších škobrtnutí a udrželi se i tam, kde rozhodovaly těsné dvojice jmen a pojmů. Takový rozhled se nedá načíst přes víkend, ten roste desítky let.` },
+  { max: 10, text: `Plný počet, a ten dá jen menšina. Neshodila vás ani nejtěžší otázka kvízu, tedy krycí jméno spojenecké operace v Normandii, kterou většina lidí zná jen jako Den D. Deset oborů, deset zásahů a přehled, který sahá výrazně nad hranici velmi slušného.` }
+];
+
+var pismena = [`a`, `b`, `c`, `d`];
+var odpovedi = new Array(otazky.length).fill(null);
+var hotovo = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var vyhodnotitEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function vykresli() {
+  kvizEl.textContent = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = o.z;
+    box.appendChild(zneni);
+    o.v.forEach(function (text, j) {
+      var btn = document.createElement(`button`);
+      btn.className = `varianta`;
+      btn.type = `button`;
+      btn.textContent = pismena[j] + `) ` + text;
+      btn.addEventListener(`click`, function () {
+        if (hotovo) return;
+        odpovedi[i] = j;
+        var vsechny = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < vsechny.length; k++) {
+          vsechny[k].classList.remove(`vybrana`);
+        }
+        btn.classList.add(`vybrana`);
+        hlaskaEl.textContent = ``;
+        zkontrolujPripravenost();
+      });
+      box.appendChild(btn);
+    });
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujPripravenost() {
+  var vsechnyZodpovezene = odpovedi.every(function (o) { return o !== null; });
+  vyhodnotitEl.disabled = !vsechnyZodpovezene;
+}
+
+vyhodnotitEl.addEventListener(`click`, function () {
+  if (vyhodnotitEl.disabled) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  hotovo = true;
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  for (var i = 0; i < otazky.length; i++) {
+    var varianty = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < varianty.length; j++) {
+      varianty[j].classList.remove(`vybrana`);
+      varianty[j].disabled = true;
+      if (j === otazky[i].s) {
+        varianty[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        varianty[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === otazky[i].s) body++;
+  }
+  vyhodnotitEl.disabled = true;
+  skoreEl.textContent = body + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+  vysledekEl.hidden = false;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+znovuEl.addEventListener(`click`, function () {
+  hotovo = false;
+  odpovedi = new Array(otazky.length).fill(null);
+  vysledekEl.hidden = true;
+  hlaskaEl.textContent = ``;
+  vyhodnotitEl.disabled = true;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+vykresli();
+</script>
+</body>
+</html>
