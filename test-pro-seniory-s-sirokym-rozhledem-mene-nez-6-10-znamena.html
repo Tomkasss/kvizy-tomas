@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test pro seniory s širokým rozhledem: méně než 6/10 znamená, že je čas oprášit znalosti</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 40px 20px;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #721c24; margin-top: 12px; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 24px;
+  border-top: 4px solid #5b7e5f;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#retry:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test pro seniory s širokým rozhledem: méně než 6/10 znamená, že je čas oprášit znalosti</h1>
+<p class="perex">Deset otázek pro seniory, kteří si celý život drží přehled napříč obory. Jeskyně, fyzika, počasí, příroda, víra, literatura, obloha, sport i železnice v jednom testu. Hranice je šest bodů. Kolik jich dáte vy?</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warn" hidden>Odpovězte prosím na všechny otázky</p>
+<div id="result" hidden>
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  { q: `Jak se nazývá krápník, který v jeskyni roste od stropu dolů?`,
+    o: [`stalaktit`, `stalagmit`, `stalagnát`, `sintr`], c: 0 },
+  { q: `Proč se bílé světlo při průchodu skleněným hranolem rozloží na barvy duhy?`,
+    o: [`protože se každá barva světla láme ve skle pod jiným úhlem`, `protože se světlo na stěnách hranolu úplně odráží`, `protože sklo pohltí část barev a zbytek propustí`, `protože se paprsky uvnitř hranolu navzájem zeslabují`], c: 0 },
+  { q: `Jak se nazývají tropické cyklóny, které vznikají v západní části Tichého oceánu u pobřeží Asie?`,
+    o: [`hurikány`, `tajfuny`, `tornáda`, `monzuny`], c: 1 },
+  { q: `Jak se nazývá bezlesý přírodní pás kolem severního polárního kruhu?`,
+    o: [`tajga`, `step`, `savana`, `tundra`], c: 3 },
+  { q: `Kolik povinných denních modliteb (salát) předepisuje islám dospělým věřícím?`,
+    o: [`tři`, `pět`, `šest`, `sedm`], c: 1 },
+  { q: `Kdo napsal román Jana Eyrová?`,
+    o: [`Jane Austenová`, `Elizabeth Gaskellová`, `Charlotte Brontëová`, `George Eliotová`], c: 2 },
+  { q: `Kterým dnes žijícím zvířatům jsou hroši nejbližšími příbuznými?`,
+    o: [`velrybám`, `prasatům`, `nosorožcům`, `slonům`], c: 0 },
+  { q: `Co je zdrojem částic, které v zemské atmosféře vyvolávají polární záři?`,
+    o: [`prach z komet`, `blesky v horních vrstvách atmosféry`, `záření ze středu Galaxie`, `sluneční vítr`], c: 3 },
+  { q: `Který plavecký způsob je jediný, u kterého závodníci startují už ve vodě?`,
+    o: [`kraul`, `znak`, `motýlek`, `prsa`], c: 1 },
+  { q: `Kolik milimetrů měří normální rozchod železničních kolejí v Česku?`,
+    o: [`1000`, `1120`, `1435`, `1520`], c: 2 }
+];
+
+var VERDICTS = [
+  { min: 0, max: 3, t: `Tady je čas oprášit znalosti opravdu na místě a titulek to říká rovnou. Se třemi a méně body vám nesedlo nejméně sedm otázek z deseti, takže nešlo o jednu slabší oblast, ale o většinu testu. Deset oborů za sebou je nápor a ztráta bývá rozprostřená po celém kvízu, od krápníku a přírodního pásu za polárním kruhem přes počet muslimských modliteb a zdroj polární záře až po ty nejnáročnější otázky na konci. Dobrá zpráva je, že rozjezdová čtveřice jsou věci ze školních lavic, které se dají srovnat během jediného odpoledne. Projděte si správné odpovědi a zkuste test s odstupem znovu.` },
+  { min: 4, max: 6, t: `Přesně tady se láme hranice z titulku. Se čtyřmi nebo pěti body jste pod ní a znalosti si zaslouží oprášit, se šesti jste ji naopak splnili. Rozjezdové otázky vám nejspíš vyšly a ztráceli jste ve středním pásmu, kde rozhodovalo, proč se bílé světlo v hranolu rozloží na barvy, jak se říká tropickým cyklónám u asijského pobřeží, kdo napsal Janu Eyrovou, komu jsou hroši nejblíž příbuzní a který plavecký způsob se startuje ve vodě. K sedmi bodům vám chybí jedna až tři otázky a jsou to všechno věci, na které člověk narazí při běžném čtení nebo sledování dokumentů.` },
+  { min: 7, max: 9, t: `Hranici z titulku jste překonali s rezervou a to je výsledek, který se tipováním netrefí. Zvládli jste přeskakovat mezi jeskyní, optikou, počasím, zeměpisem, vírou, literaturou, zvířaty, oblohou a sportem, aniž by vás rozhodilo, že se nabízené varianty lišily jen v detailu. Zastavila vás jedna až tři otázky, a klidně mohla být ta poslední, protože rozchod kolejnic je věc, kterou přesně na milimetr zná málokdo. Nic tu neukazuje, že by bylo co oprašovat.` },
+  { min: 10, max: 10, t: `Plný počet, a ten zvládne menšina. Kromě celého středního pásma jste trefili i nejtěžší otázku testu, tedy normální rozchod železničních kolejí, kde tři ze čtyř nabízených hodnot skutečně někde na světě jezdí. Nezaváhali jste ani u hrochů, jejichž nejbližší příbuzní vypadají úplně jinak než oni, ani u toho, proč hranol rozkládá bílé světlo. Takový rozhled nevznikne z jednoho zdroje, ale z desítek let čtení napříč obory, a oprašovat na něm není vůbec nic.` }
+];
+
+var LETTERS = [`a`, `b`, `c`, `d`];
+var answers = [];
+var locked = false;
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryEl = document.getElementById(`retry`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var title = document.createElement(`p`);
+    title.className = `qtext`;
+    title.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(title);
+    item.o.forEach(function (opt, oi) {
+      var btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.type = `button`;
+      btn.textContent = LETTERS[oi] + `) ` + opt;
+      btn.addEventListener(`click`, function () { pick(qi, oi); });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function pick(qi, oi) {
+  if (locked) { return; }
+  answers[qi] = oi;
+  var box = quizEl.children[qi];
+  var opts = box.querySelectorAll(`.opt`);
+  for (var i = 0; i < opts.length; i++) {
+    if (i === oi) { opts[i].classList.add(`sel`); } else { opts[i].classList.remove(`sel`); }
+  }
+  refresh();
+}
+
+function refresh() {
+  var done = 0;
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    if (typeof answers[i] === `number`) { done++; }
+  }
+  var all = done === QUESTIONS.length;
+  submitEl.disabled = !all;
+  warnEl.hidden = all;
+}
+
+function evaluate() {
+  locked = true;
+  var score = 0;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = quizEl.children[qi];
+    var opts = box.querySelectorAll(`.opt`);
+    for (var i = 0; i < opts.length; i++) {
+      opts[i].disabled = true;
+      opts[i].classList.remove(`sel`);
+      if (i === item.c) { opts[i].classList.add(`correct`); }
+      else if (i === answers[qi]) { opts[i].classList.add(`wrong`); }
+    }
+    if (answers[qi] === item.c) { score++; }
+  });
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score >= VERDICTS[v].min && score <= VERDICTS[v].max) {
+      verdictEl.textContent = VERDICTS[v].t;
+      break;
+    }
+  }
+  submitEl.disabled = true;
+  warnEl.hidden = true;
+  resultEl.hidden = false;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  locked = false;
+  answers = [];
+  resultEl.hidden = true;
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+retryEl.addEventListener(`click`, reset);
+build();
+refresh();
+</script>
+</body>
+</html>
