@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Náročný test pro důchodce: těchto 10 otázek oddělí znalce od těch, kteří jen tipují</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #8c5b5b; margin-top: 14px; font-size: .95rem; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 40px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+#again {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#again:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Náročný test pro důchodce: těchto 10 otázek oddělí znalce od těch, kteří jen tipují</h1>
+<p class="perex">Deset otázek pro seniory, kteří si přehled udrželi i v důchodu. Každá míří do jiné oblasti: zeměpis, kosmonautika, čeština, film, příroda, nápoje, hudba, chemie, literatura a malířství. Otázky na sebe nenavazují, rozhoduje jedině šíře přehledu.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warn"></p>
+<div id="result" style="display:none">
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="again">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  {
+    q: `1. Pod jakým názvem byl dříve znám stát Srí Lanka?`,
+    o: [`Siam`, `Cejlon`, `Formosa`, `Barma`],
+    a: 1
+  },
+  {
+    q: `2. Který člen posádky Apolla 11 zůstal v roce 1969 na oběžné dráze Měsíce a na jeho povrch nevstoupil?`,
+    o: [`Neil Armstrong`, `Buzz Aldrin`, `James Lovell`, `Michael Collins`],
+    a: 3
+  },
+  {
+    q: `3. Co znamená podstatné jméno kuratela?`,
+    o: [`opatrovnictví nad nezletilou nebo nesvéprávnou osobou`, `písemná záruka za cizí dluh složená u soudu`, `doživotní nájem půdy sjednaný s vrchností`, `církevní úřad spravující farní účty`],
+    a: 0
+  },
+  {
+    q: `4. Který herec ztvárnil hlavní roli v komedii Kristian z roku 1939?`,
+    o: [`Vlasta Burian`, `Hugo Haas`, `Oldřich Nový`, `Jaroslav Marvan`],
+    a: 2
+  },
+  {
+    q: `5. Který pták je nejtěžším zástupcem řádu hrabavých žijícím ve volné české přírodě?`,
+    o: [`koroptev polní`, `tetřev hlušec`, `bažant obecný`, `křepelka polní`],
+    a: 1
+  },
+  {
+    q: `6. Který nápoj vzniká kvašením kobylího mléka?`,
+    o: [`kumys`, `kefír`, `ajran`, `kvas`],
+    a: 0
+  },
+  {
+    q: `7. Ze které země pocházel skladatel Jean Sibelius?`,
+    o: [`z Norska`, `ze Švédska`, `z Finska`, `z Dánska`],
+    a: 2
+  },
+  {
+    q: `8. Která kyselina je elektrolytem v klasickém olověném autoakumulátoru?`,
+    o: [`kyselina octová`, `kyselina solná`, `kyselina dusičná`, `kyselina sírová`],
+    a: 3
+  },
+  {
+    q: `9. Kdo je autorem humoristické novely Rozmarné léto?`,
+    o: [`Ivan Olbracht`, `Vladislav Vančura`, `Jan Drda`, `Jaroslav Durych`],
+    a: 1
+  },
+  {
+    q: `10. Který český malíř je autorem obrazu Kleopatra?`,
+    o: [`Emil Filla`, `Josef Čapek`, `Jan Zrzavý`, `Bohumil Kubišta`],
+    a: 2
+  }
+];
+
+var VERDICTS = [
+  { max: 3, t: `Dnešní desítka prošla zeměpisem, kosmonautikou, češtinou, filmem, přírodou, nápoji, hudbou, chemií, literaturou a malířstvím. Výsledek do tří bodů řadí na stranu tipujících, přesně tak, jak dělicí čáru vede titulek. Není to soud o bystrosti, spíš zpráva o tom, že tahle témata leží stranou běžného dne. Odnést si z toho jde jedna konkrétní věc: vybrat si z dnešních deseti oborů ten, u kterého vás správná odpověď překvapila, a přečíst si o něm pár stránek navíc. Příště bude aspoň jedno pole jisté.` },
+  { max: 6, t: `Zhruba polovina oborů z dnešní desítky dopadla dobře, druhá polovina zůstala otevřená. Na škále mezi znalcem a tipujícím je tohle výsledek uprostřed, s jednou nohou na každé straně. Kde chybějící body hledat, ukazuje samotný seznam témat: školní chemie, zeměpis a film patří k tomu, co člověk potká i mimo kvíz, zatímco přesný význam právnického výrazu, jméno malíře nebo původ nápoje ze Střední Asie se samy nepřipomenou. Právě tam se dá přidat nejvíc.` },
+  { max: 9, t: `Výkon znalce, přesně jak titulek slibuje. Sedm a víc bodů z deseti různých oborů znamená rozhled, který sahá od mapy světa a kosmonautiky přes češtinu, film a přírodu až k hudbě, chemii, literatuře a malířství. Taková šíře se nasbírá jedině čtením, posloucháním a zájmem, který vydržel léta. Jedna až tři chyby na tom nic nemění, jsou to konkrétní jména nebo pojmy, které se doplní za jediný večer se slušnou encyklopedií. Na dělicí čáře z titulku stojí tenhle výsledek na straně znalců bez váhání.` },
+  { max: 10, t: `Plný počet, deset správných z deseti. Starý název ostrovního státu, slovo, které se dnes v novinách skoro neobjeví, země jednoho skladatele i jméno jednoho malíře, všechno sedělo. Takový výsledek se netipuje, ten se ví. Otázka z titulku je tím zodpovězená úplně jednoznačně: mezi znalce a tipující vás tenhle test zařadil na tu lepší stranu dělicí čáry.` }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var locked = false;
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var againEl = document.getElementById(`again`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var p = document.createElement(`p`);
+    p.className = `q-text`;
+    p.textContent = item.q;
+    box.appendChild(p);
+    item.o.forEach(function (opt, oi) {
+      var b = document.createElement(`button`);
+      b.className = `opt`;
+      b.type = `button`;
+      b.textContent = opt;
+      b.setAttribute(`data-q`, String(qi));
+      b.setAttribute(`data-o`, String(oi));
+      b.addEventListener(`click`, onPick);
+      box.appendChild(b);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function onPick(e) {
+  if (locked) { return; }
+  var qi = parseInt(e.currentTarget.getAttribute(`data-q`), 10);
+  var oi = parseInt(e.currentTarget.getAttribute(`data-o`), 10);
+  answers[qi] = oi;
+  var box = e.currentTarget.parentNode;
+  var btns = box.getElementsByClassName(`opt`);
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].classList.remove(`selected`);
+  }
+  e.currentTarget.classList.add(`selected`);
+  refresh();
+}
+
+function refresh() {
+  var done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+  warnEl.textContent = done ? `` : `Odpovězte prosím na všechny otázky`;
+}
+
+function evaluate() {
+  if (locked) { return; }
+  if (!answers.every(function (a) { return a !== null; })) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  var score = 0;
+  var boxes = quizEl.getElementsByClassName(`q`);
+  for (var qi = 0; qi < QUESTIONS.length; qi++) {
+    var btns = boxes[qi].getElementsByClassName(`opt`);
+    var right = QUESTIONS[qi].a;
+    if (answers[qi] === right) { score++; }
+    for (var oi = 0; oi < btns.length; oi++) {
+      btns[oi].disabled = true;
+      btns[oi].classList.remove(`selected`);
+      if (oi === right) {
+        btns[oi].classList.add(`correct`);
+      } else if (oi === answers[qi]) {
+        btns[oi].classList.add(`wrong`);
+      }
+    }
+  }
+  submitEl.disabled = true;
+  warnEl.textContent = ``;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score <= VERDICTS[v].max) { verdictEl.textContent = VERDICTS[v].t; break; }
+  }
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  locked = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.style.display = `none`;
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+againEl.addEventListener(`click`, reset);
+build();
+refresh();
+</script>
+</body>
+</html>
