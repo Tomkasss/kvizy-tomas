@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz československých herců: skuteční pamětníci poznají všech 10 legend</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.varianta:last-child { margin-bottom: 0; }
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.hlaska { text-align: center; color: #a04a4a; margin-top: 16px; min-height: 1.2em; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#vysledek {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 40px;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz československých herců: skuteční pamětníci poznají všech 10 legend</h1>
+<p class="perex">Tváře, které chodily z filmového plátna rovnou do obývacích pokojů, znal kdysi celý národ. Deset otázek z filmu, televize i dabingu prověří, kolik legend československého herectví po letech ještě bezpečně poznáte.</p>
+<div id="kviz"></div>
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p class="hlaska" id="hlaska"></p>
+<div id="vysledek" hidden>
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var otazky = [
+  { z: `1. Který herec ztvárnil titulní roli v komedii Anton Špelec, ostrostřelec?`,
+    v: [`Jindřich Plachta`, `Ferenc Futurista`, `Vlasta Burian`, `Oldřich Nový`], s: 2 },
+  { z: `2. Který herec ztvárnil polního kuráta Katze ve filmové adaptaci Dobrý voják Švejk z roku 1956?`,
+    v: [`Josef Kemr`, `Miloš Kopecký`, `Svatopluk Beneš`, `Josef Hlinomaz`], s: 1 },
+  { z: `3. Který herec ztvárnil Jana Žižku ve stejnojmenném filmu Otakara Vávry?`,
+    v: [`Jaroslav Průcha`, `Otomar Korbelář`, `Gustav Hilmar`, `Zdeněk Štěpánek`], s: 3 },
+  { z: `4. Která herečka ztvárnila Annu v psychologickém dramatu Ucho režiséra Karla Kachyni?`,
+    v: [`Jiřina Bohdalová`, `Stella Zázvorková`, `Iva Janžurová`, `Květa Fialová`], s: 0 },
+  { z: `5. Která herečka ztvárnila titulní hrdinku ve filmu Marketa Lazarová?`,
+    v: [`Jana Brejchová`, `Božidara Turzonovová`, `Magda Vášáryová`, `Daniela Kolářová`], s: 2 },
+  { z: `6. Po kterém herci nese jméno česká cena za nejlepší herecký výkon v dabingu?`,
+    v: [`Ladislav Pešek`, `František Filipovský`, `Stanislav Fišer`, `Vladimír Brabec`], s: 1 },
+  { z: `7. Který herec českého původu ztvárnil Dreyfuse v komediální sérii Růžový panter?`,
+    v: [`Jiří Voskovec`, `Hugo Haas`, `Francis Lederer`, `Herbert Lom`], s: 3 },
+  { z: `8. Který herec ztvárnil chemika Prokopa ve filmu Krakatit?`,
+    v: [`Karel Höger`, `Eduard Kohout`, `Ladislav Boháč`, `František Smolík`], s: 0 },
+  { z: `9. Který herec ztvárnil policejního radu Vacátka v seriálu Hříšní lidé města pražského?`,
+    v: [`Bohuš Záhorský`, `Rudolf Deyl mladší`, `Jaroslav Marvan`, `Josef Bek`], s: 2 },
+  { z: `10. Který herec ztvárnil strýce Pepina ve filmové adaptaci Hrabalových Postřižin?`,
+    v: [`Vladimír Menšík`, `Jaromír Hanzlík`, `Josef Somr`, `Jiří Sovák`], s: 1 }
+];
+
+var pismena = [`a) `, `b) `, `c) `, `d) `];
+
+var hodnoceni = [
+  { min: 0, max: 3, text: `Z deseti legend jste bezpečně poznali nanejvýš tři. Jména slavných herců vám zní povědomě, spojit je s konkrétní rolí se ale zatím nedaří. Za pamětníka se tenhle výsledek ještě nepočítá a máte se na co těšit, protože většina těchto filmů a seriálů se na obrazovky vrací dodnes.` },
+  { min: 4, max: 6, text: `Poznali jste zhruba polovinu legend, což je poctivý výsledek diváka, který velké role zná, ale u méně omílaných jmen zaváhá. Do pásma pamětníka to ještě nestačí, k němu vede cesta přes herce, které si člověk musí spojit s dobou i s celou jejich kariérou, ne jen s jedním filmem.` },
+  { min: 7, max: 9, text: `Sedm až devět poznaných legend napříč filmem, televizí i dabingem znamená, že jste od titulu pamětníka jen krok. Orientujete se nejen v nejslavnějších rolích, ale i v tom, co se odehrávalo mimo hlavní proud. K plnému počtu vám chybělo pár jmen, která si dnes vybaví opravdu málokdo.` },
+  { min: 10, max: 10, text: `Všech deset legend bez jediného zaváhání, přesně jak slibuje zadání, a na to dosáhne jen menšina. Herce spolehlivě spojujete s rolemi od meziválečných komedií přes poválečné velkofilmy až po televizní seriály a dabing. Tohle už není nostalgie, ale skutečně zažitá znalost československého herectví, a titul pravého pamětníka vám nikdo nevezme.` }
+];
+
+var odpovedi = new Array(otazky.length).fill(null);
+var vyhodnoceno = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var tlVyhodnotit = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var tlZnovu = document.getElementById(`znovu`);
+
+function postav() {
+  kvizEl.textContent = ``;
+  for (var i = 0; i < otazky.length; i++) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = otazky[i].z;
+    box.appendChild(zneni);
+    for (var j = 0; j < otazky[i].v.length; j++) {
+      var btn = document.createElement(`button`);
+      btn.className = `varianta`;
+      btn.type = `button`;
+      btn.textContent = pismena[j] + otazky[i].v[j];
+      btn.setAttribute(`data-otazka`, String(i));
+      btn.setAttribute(`data-varianta`, String(j));
+      btn.addEventListener(`click`, klik);
+      box.appendChild(btn);
+    }
+    kvizEl.appendChild(box);
+  }
+}
+
+function klik(e) {
+  if (vyhodnoceno) { return; }
+  var btn = e.currentTarget;
+  var oi = parseInt(btn.getAttribute(`data-otazka`), 10);
+  var vi = parseInt(btn.getAttribute(`data-varianta`), 10);
+  var sourozenci = btn.parentNode.querySelectorAll(`.varianta`);
+  for (var k = 0; k < sourozenci.length; k++) {
+    sourozenci[k].classList.remove(`vybrana`);
+  }
+  btn.classList.add(`vybrana`);
+  odpovedi[oi] = vi;
+  hlaskaEl.textContent = ``;
+  tlVyhodnotit.disabled = odpovedi.indexOf(null) !== -1;
+}
+
+function vyhodnot() {
+  if (odpovedi.indexOf(null) !== -1) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  vyhodnoceno = true;
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  for (var i = 0; i < otazky.length; i++) {
+    var tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].classList.remove(`vybrana`);
+      if (j === otazky[i].s) {
+        tlacitka[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === otazky[i].s) { body++; }
+  }
+  tlVyhodnotit.disabled = true;
+  skoreEl.textContent = body + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body >= hodnoceni[h].min && body <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+    }
+  }
+  vysledekEl.hidden = false;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function znovu() {
+  odpovedi = new Array(otazky.length).fill(null);
+  vyhodnoceno = false;
+  vysledekEl.hidden = true;
+  hlaskaEl.textContent = ``;
+  tlVyhodnotit.disabled = true;
+  postav();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+tlVyhodnotit.addEventListener(`click`, vyhodnot);
+tlZnovu.addEventListener(`click`, znovu);
+postav();
+</script>
+</body>
+</html>
