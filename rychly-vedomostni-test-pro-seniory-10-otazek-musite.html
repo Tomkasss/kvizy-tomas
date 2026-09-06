@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rychlý vědomostní test pro seniory: 10 otázek musíte zvládnout bez hledání na internetu</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 32px 16px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+    line-height: 1.4;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.right { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .locked .opt { cursor: default; }
+  #submit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #warn { text-align: center; color: #8a4b4b; margin-top: 14px; font-size: .95rem; }
+  #result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 32px;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+  #again {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #again:hover { background: #756658; }
+  [hidden] { display: none !important; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .q { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Rychlý vědomostní test pro seniory: 10 otázek musíte zvládnout bez hledání na internetu</h1>
+  <p class="perex">Deset otázek pro seniory z tradic, zeměpisu, zemědělství, pravěku, češtiny, dopravy, sportu, počasí i hudby. Odpovídejte zpaměti a bez vyhledávání, za pár minut uvidíte, kolik toho máte pevně v hlavě.</p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <p id="warn" hidden>Odpovězte prosím na všechny otázky</p>
+  <div id="result" hidden>
+    <p id="score"></p>
+    <p id="verdict"></p>
+    <button id="again">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var QUESTIONS = [
+  {
+    q: `1. Jakou barvu má podle tradice svíce, která se na adventním věnci zapaluje jako třetí?`,
+    o: [`a) bílou`, `b) zelenou`, `c) fialovou`, `d) růžovou`],
+    a: 3
+  },
+  {
+    q: `2. Které italské město leží na řece Pádu?`,
+    o: [`a) Turín`, `b) Milán`, `c) Benátky`, `d) Neapol`],
+    a: 0
+  },
+  {
+    q: `3. Které slovo patří na místo otazníku: SOUDCE je k SOUDU jako OPAT je k ?`,
+    o: [`a) faře`, `b) katedrále`, `c) klášteru`, `d) semináři`],
+    a: 2
+  },
+  {
+    q: `4. Ze které plodiny se v Česku vyrábí nejvíce rostlinného oleje?`,
+    o: [`a) ze lnu`, `b) z řepky`, `c) ze slunečnice`, `d) z máku`],
+    a: 1
+  },
+  {
+    q: `5. Z jakého materiálu je vyrobena Věstonická venuše?`,
+    o: [`a) z mamutoviny`, `b) z pálené hlíny`, `c) z vápence`, `d) ze sobího parohu`],
+    a: 1
+  },
+  {
+    q: `6. Ve kterém městě byla otevřena první podzemní dráha na světě?`,
+    o: [`a) v Paříži`, `b) v New Yorku`, `c) v Londýně`, `d) v Berlíně`],
+    a: 2
+  },
+  {
+    q: `7. Co znamená slovo letargický?`,
+    o: [`a) netečný a malátný`, `b) podrážděný a výbušný`, `c) upovídaný a hlučný`, `d) roztržitý a zapomnětlivý`],
+    a: 0
+  },
+  {
+    q: `8. Jak se jmenuje nejslavnější překážka Velké pardubické?`,
+    o: [`a) Hadí příkop`, `b) Irská lavice`, `c) Velký anglický skok`, `d) Taxisův příkop`],
+    a: 3
+  },
+  {
+    q: `9. Jak se nazývá vítr, který přináší jižní Asii období dešťů?`,
+    o: [`a) pasát`, `b) monzun`, `c) fén`, `d) bora`],
+    a: 1
+  },
+  {
+    q: `10. Kdo složil operetu Orfeus v podsvětí?`,
+    o: [`a) Johann Strauss mladší`, `b) Franz Lehár`, `c) Jacques Offenbach`, `d) Emmerich Kálmán`],
+    a: 2
+  }
+];
+
+var VERDICTS = [
+  { min: 0, max: 3, t: `Bez internetu to zatím drhne. Několik otázek jste nejspíš vyřešili odhadem a ten tentokrát nevyšel, protože varianty byly schválně blízko sebe. Projděte si správné odpovědi v klidu ještě jednou, většina z nich se v hlavě usadí napoprvé a příště je poznáte hned.` },
+  { min: 4, max: 6, t: `Slušná polovina. Českou olejninu, význam přejatého slova, dostihovou překážku a asijský vítr jste nejspíš dali z hlavy, ztráceli jste až tam, kde bylo potřeba rozlišit dvě podobné možnosti. K sedmičce vám chybí jedna až tři odpovědi a všechny leží ve středním pásmu, kde se rozhoduje mezi blízkými variantami.` },
+  { min: 7, max: 9, t: `Přesně to, co slibuje titulek. Zvládli jste bez jediného vyhledávání většinu otázek napříč obory a blízké varianty vás srazily nanejvýš v pár případech. Jedna až tři chyby na deset otázek znamenají, že máte přehled pevně uložený a nemusíte si ho ničím podpírat.` },
+  { min: 10, max: 10, t: `Plný počet, na který dosáhne jen menšina. Neshodila vás adventní svíce, italské město u velké řeky, slovní dvojice, česká olejnina, pravěká soška, nejstarší podzemní dráha, význam přejatého slova, dostihová překážka, asijský vítr ani autor slavné operety. Takový rozptyl znalostí zpaměti a bez internetu opravdu není běžný.` }
+];
+
+var picked = new Array(QUESTIONS.length).fill(null);
+var done = false;
+
+var quizEl = document.getElementById('quiz');
+var submitEl = document.getElementById('submit');
+var warnEl = document.getElementById('warn');
+var resultEl = document.getElementById('result');
+var scoreEl = document.getElementById('score');
+var verdictEl = document.getElementById('verdict');
+var againEl = document.getElementById('again');
+
+function build() {
+  quizEl.innerHTML = '';
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement('div');
+    box.className = 'q';
+    var p = document.createElement('p');
+    p.className = 'q-text';
+    p.textContent = item.q;
+    box.appendChild(p);
+    item.o.forEach(function (label, oi) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'opt';
+      b.textContent = label;
+      b.addEventListener('click', function () {
+        if (done) return;
+        picked[qi] = oi;
+        var sibs = box.querySelectorAll('.opt');
+        for (var i = 0; i < sibs.length; i++) sibs[i].classList.remove('sel');
+        b.classList.add('sel');
+        refresh();
+      });
+      box.appendChild(b);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function refresh() {
+  var all = picked.every(function (v) { return v !== null; });
+  submitEl.disabled = !all;
+  if (all) warnEl.hidden = true;
+}
+
+submitEl.addEventListener('click', function () {
+  if (done) return;
+  if (!picked.every(function (v) { return v !== null; })) {
+    warnEl.hidden = false;
+    return;
+  }
+  done = true;
+  var score = 0;
+  var boxes = quizEl.querySelectorAll('.q');
+  QUESTIONS.forEach(function (item, qi) {
+    var box = boxes[qi];
+    box.classList.add('locked');
+    var opts = box.querySelectorAll('.opt');
+    for (var i = 0; i < opts.length; i++) {
+      opts[i].classList.remove('sel');
+      if (i === item.a) opts[i].classList.add('right');
+      else if (i === picked[qi]) opts[i].classList.add('wrong');
+    }
+    if (picked[qi] === item.a) score++;
+  });
+  scoreEl.textContent = score + ' z ' + QUESTIONS.length;
+  var v = VERDICTS.find(function (r) { return score >= r.min && score <= r.max; });
+  verdictEl.textContent = v ? v.t : '';
+  submitEl.disabled = true;
+  resultEl.hidden = false;
+  resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+againEl.addEventListener('click', function () {
+  done = false;
+  picked = new Array(QUESTIONS.length).fill(null);
+  resultEl.hidden = true;
+  warnEl.hidden = true;
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+build();
+refresh();
+</script>
+</body>
+</html>
