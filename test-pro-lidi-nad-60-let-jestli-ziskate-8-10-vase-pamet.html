@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test pro lidi nad 60 let: jestli získáte 8/10, vaše paměť stále funguje na jedničku</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 32px 16px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+    line-height: 1.4;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .locked .opt { cursor: default; }
+  .locked .opt:hover { background: #f7f4f0; }
+  .locked .opt.sel:hover { background: #dcd3c7; }
+  .locked .opt.correct:hover { background: #d4edda; }
+  .locked .opt.wrong:hover { background: #f8d7da; }
+  #submit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #warn { text-align: center; color: #721c24; margin: 14px 0 0; font-size: .95rem; }
+  #result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+    border-top: 4px solid #5b7e5f;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+  #again {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #again:hover { background: #756658; }
+  .hidden { display: none; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .q, #result { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test pro lidi nad 60 let: jestli získáte 8/10, vaše paměť stále funguje na jedničku</h1>
+  <p class="perex">Deset otázek pro každého, komu je přes šedesát. Zamíchali jsme hudbu, sběratelství, mytologii, zeměpis, dějiny, češtinu, karty, koření i zdraví a přidali úlohu na logiku. Nic se nepočítá, jen se vzpomíná. Osm správných odpovědí zvládne jen menšina.</p>
+
+  <div id="quiz"></div>
+
+  <button id="submit" disabled>Vyhodnotit</button>
+  <p id="warn" class="hidden">Odpovězte prosím na všechny otázky</p>
+
+  <div id="result" class="hidden">
+    <p id="score"></p>
+    <p id="verdict"></p>
+    <button id="again">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var QUESTIONS = [
+  {
+    q: `1. Na který žesťový nástroj hrál Louis Armstrong na počátku své kariéry, než přešel na trubku?`,
+    opts: [`pozoun`, `křídlovka`, `kornet`, `lesní roh`],
+    correct: 2
+  },
+  {
+    q: `2. Sběratelem čeho je filumenista?`,
+    opts: [`poštovních známek`, `starých pohlednic`, `vojenských odznaků`, `zápalkových nálepek`],
+    correct: 3
+  },
+  {
+    q: `3. Která římská bohyně byla ochránkyní lovu a divoké přírody?`,
+    opts: [`Juno`, `Vesta`, `Diana`, `Minerva`],
+    correct: 2
+  },
+  {
+    q: `4. Kolik zemí tvoří Spojené království?`,
+    opts: [`dvě`, `tři`, `čtyři`, `pět`],
+    correct: 2
+  },
+  {
+    q: `5. Ve kterém století usedla na anglický trůn Alžběta I.?`,
+    opts: [`v 15. století`, `v 16. století`, `v 17. století`, `v 18. století`],
+    correct: 1
+  },
+  {
+    q: `6. Někteří návštěvníci této výstavy jsou malíři. Co z této jediné věty jistě vyplývá?`,
+    opts: [
+      `Někteří malíři jsou návštěvníky této výstavy.`,
+      `Všichni malíři jsou návštěvníky této výstavy.`,
+      `Někteří návštěvníci této výstavy nejsou malíři.`,
+      `Ze zadání to nelze jistě určit.`
+    ],
+    correct: 0
+  },
+  {
+    q: `7. Co znamená přídavné jméno sporadický?`,
+    opts: [`velmi hojný`, `náhlý a prudký`, `pravidelně se opakující`, `ojedinělý a roztroušený`],
+    correct: 3
+  },
+  {
+    q: `8. Které dvě karty jedné barvy tvoří v mariáši takzvaný hlášený mariáš?`,
+    opts: [`eso a desítka`, `král a svršek`, `král a spodek`, `svršek a spodek`],
+    correct: 1
+  },
+  {
+    q: `9. Kterou částí rostliny je koření hřebíček?`,
+    opts: [`nerozvitá květní poupata`, `kůra mladých větviček`, `semena zralých plodů`, `usušený kořen dřeviny`],
+    correct: 0
+  },
+  {
+    q: `10. Nedostatkem které látky ve stravě jsou způsobeny kurděje?`,
+    opts: [`vitaminu C`, `vitaminu D`, `železa`, `vápníku`],
+    correct: 0
+  }
+];
+
+var VERDICTS = [
+  {
+    max: 3,
+    text: `Tahle desítka vás zaskočila a není to žádná ostuda. Otázky schválně nemíří na to, co člověk potká každý den, ale na věci uložené hluboko, k nimž se paměť dostává jen občas. Zkuste si kvíz znovu za pár dní. Uvidíte, že se vám některá jména vybaví rychleji než napoprvé, a přesně tak se paměť rozehřívá.`
+  },
+  {
+    max: 6,
+    text: `Slušný výsledek, který ukazuje, že máte přehled hned v několika oborech najednou. Nejspíš jste uspěli u římské bohyně, u počtu zemí Spojeného království, u významu cizího slova a u nemoci z nedostatku a ztráceli jste tam, kde už nestačí odhad a je potřeba přesná znalost, tedy u žesťového nástroje z počátku slavné kariéry, u názvu sběratelského oboru, u století anglické královny, u karetní kombinace nebo u koření. K hranici osmi bodů ze slibu v titulku vám chybí dvě až čtyři odpovědi a právě tady se láme běžný přehled a opravdu pevná paměť.`
+  },
+  {
+    max: 9,
+    text: `Tady se láme slib z titulku. Se sedmi body jste od hranice na dosah a chybí vám jediná odpověď, s osmi jste přesně na ní a vaše paměť opravdu funguje na jedničku, protože si vybavuje nejen školní jádro, ale i věci mimo něj. Devět bodů znamená, že jste hranici překonali a nechali za sebou i otázku, kterou většina lidí míjí. Rozhoduje tu výhradně to, co máte v hlavě.`
+  },
+  {
+    max: 10,
+    text: `Plný počet, a to je výsledek pro menšinu. Překonali jste hranici osmi bodů ze slibu v titulku a k tomu jste dali i tu nejtěžší otázku, na které končí skoro každý. Vaše paměť nefunguje jen na jedničku, ale drží i drobnosti, které si většina lidí nikdy neuloží. Takový rozhled se nedá nabiflovat za týden, ten se skládá celý život.`
+  }
+];
+
+var answers = [];
+var evaluated = false;
+
+var quizEl = document.getElementById('quiz');
+var submitEl = document.getElementById('submit');
+var warnEl = document.getElementById('warn');
+var resultEl = document.getElementById('result');
+var scoreEl = document.getElementById('score');
+var verdictEl = document.getElementById('verdict');
+var againEl = document.getElementById('again');
+
+function build() {
+  quizEl.innerHTML = '';
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    var box = document.createElement('div');
+    box.className = 'q';
+    box.setAttribute('data-q', String(i));
+
+    var p = document.createElement('p');
+    p.className = 'qtext';
+    p.textContent = QUESTIONS[i].q;
+    box.appendChild(p);
+
+    for (var j = 0; j < QUESTIONS[i].opts.length; j++) {
+      var b = document.createElement('button');
+      b.className = 'opt';
+      b.type = 'button';
+      b.textContent = QUESTIONS[i].opts[j];
+      b.setAttribute('data-q', String(i));
+      b.setAttribute('data-o', String(j));
+      b.addEventListener('click', onPick);
+      box.appendChild(b);
+    }
+    quizEl.appendChild(box);
+  }
+}
+
+function onPick(e) {
+  if (evaluated) return;
+  var qi = parseInt(e.currentTarget.getAttribute('data-q'), 10);
+  var oi = parseInt(e.currentTarget.getAttribute('data-o'), 10);
+  answers[qi] = oi;
+
+  var box = quizEl.querySelector('.q[data-q="' + qi + '"]');
+  var opts = box.querySelectorAll('.opt');
+  for (var k = 0; k < opts.length; k++) {
+    opts[k].classList.remove('sel');
+  }
+  e.currentTarget.classList.add('sel');
+
+  refresh();
+}
+
+function allAnswered() {
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    if (typeof answers[i] !== 'number') return false;
+  }
+  return true;
+}
+
+function refresh() {
+  var ok = allAnswered();
+  submitEl.disabled = !ok;
+  if (ok) warnEl.classList.add('hidden');
+}
+
+function evaluate() {
+  if (!allAnswered()) {
+    warnEl.classList.remove('hidden');
+    return;
+  }
+  evaluated = true;
+  var score = 0;
+
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    var box = quizEl.querySelector('.q[data-q="' + i + '"]');
+    box.classList.add('locked');
+    var opts = box.querySelectorAll('.opt');
+    var corr = QUESTIONS[i].correct;
+    if (answers[i] === corr) score++;
+    for (var j = 0; j < opts.length; j++) {
+      opts[j].classList.remove('sel');
+      if (j === corr) {
+        opts[j].classList.add('correct');
+      } else if (j === answers[i]) {
+        opts[j].classList.add('wrong');
+      }
+    }
+  }
+
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ' z ' + QUESTIONS.length;
+
+  var text = VERDICTS[VERDICTS.length - 1].text;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score <= VERDICTS[v].max) { text = VERDICTS[v].text; break; }
+  }
+  verdictEl.textContent = text;
+  resultEl.classList.remove('hidden');
+  resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function reset() {
+  answers = [];
+  evaluated = false;
+  resultEl.classList.add('hidden');
+  warnEl.classList.add('hidden');
+  submitEl.disabled = true;
+  build();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+submitEl.addEventListener('click', evaluate);
+againEl.addEventListener('click', reset);
+build();
+</script>
+</body>
+</html>
