@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro chytré babičky a dědečky: kdo získá 9/10, strčí mladší generaci do kapsy</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.locked .opt { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #a04040; margin-top: 14px; font-size: .95rem; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#retry:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro chytré babičky a dědečky: kdo získá 9/10, strčí mladší generaci do kapsy</h1>
+<p class="perex">Deset otázek pro babičky a dědečky, kteří mají v hlavě víc než jen jména vnoučat. Mytologie, čeština, hudba, literatura, dějiny techniky i vědy, chemie, zeměpis, světová náboženství a kuchyně. Devět správných odpovědí je hranice, za kterou už mladší generace jen mlčí.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warn" hidden>Odpovězte prosím na všechny otázky</p>
+<div id="result" hidden>
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  { q: `1. Který řecký bůh byl uctíván jako bůh lékařství?`,
+    o: [`a) Hermés`, `b) Héfaistos`, `c) Asklépios`, `d) Dionýsos`], a: 2 },
+  { q: `2. Co znamená příslovce veskrze?`,
+    o: [`a) zcela, naprosto`, `b) občas, tu a tam`, `c) zdánlivě, jen na oko`, `d) zčásti, do jisté míry`], a: 0 },
+  { q: `3. Který skladatel je autorem písňového cyklu Zimní cesta?`,
+    o: [`a) Robert Schumann`, `b) Johannes Brahms`, `c) Gustav Mahler`, `d) Franz Schubert`], a: 3 },
+  { q: `4. Jak se jmenuje románová pentalogie, jejímž druhým dílem je Poslední Mohykán?`,
+    o: [`a) Příběhy Divokého západu`, `b) Příběhy Kožené punčochy`, `c) Příběhy Velkých jezer`, `d) Příběhy pohraničních hvozdů`], a: 1 },
+  { q: `5. Ve kterém roce spustil Ford ve své továrně v Highland Parku pohyblivou montážní linku na výrobu Modelu T?`,
+    o: [`a) 1903`, `b) 1908`, `c) 1913`, `d) 1927`], a: 2 },
+  { q: `6. Ve kterém roce oznámil Jean-François Champollion pařížské akademii, že rozluštil egyptské hieroglyfy?`,
+    o: [`a) 1799`, `b) 1822`, `c) 1832`, `d) 1922`], a: 1 },
+  { q: `7. Jak se nazývá postup, kterým se v rafinerii z ropy oddělují benzin, nafta a další složky podle teploty varu?`,
+    o: [`a) krakování`, `b) reformování`, `c) odsiřování`, `d) frakční destilace`], a: 3 },
+  { q: `8. Kterým světadílem prochází rovník i nultý poledník?`,
+    o: [`a) Asie`, `b) Jižní Amerika`, `c) Afrika`, `d) Evropa`], a: 2 },
+  { q: `9. Jak se nazývá soubor nejstarších posvátných textů hinduismu?`,
+    o: [`a) upanišady`, `b) védy`, `c) purány`, `d) tantry`], a: 1 },
+  { q: `10. Která ryba patří mezi ingredience pravé worcesterské omáčky?`,
+    o: [`a) ančovička`, `b) sleď`, `c) treska`, `d) losos`], a: 0 }
+];
+
+var VERDICTS = [
+  { min: 0, max: 3, t: `Tenhle výběr byl postavený tvrdě a tentokrát vás přemohl. Otázky nešly po tom, co se omílá v křížovkách, ale po letopočtech, názvech cyklů a přesných pojmech, které si člověk musí někde vysloužit. Body, které jste získali, přišly nejspíš tam, kde jste se s věcí potkali v běžném životě. Zbytek se dá dohnat, stačí si vybrat obor, který vás nejvíc zastavil, a začít u něj.` },
+  { min: 4, max: 6, t: `Pohybujete se přesně tam, kde tenhle kvíz čeká průměrného řešitele. Držel vám pevný základ, ale otázky, kde bylo potřeba trefit konkrétní rok nebo název místo obecné kategorie, si vzaly svou daň. Na mladší generaci to zatím nestačí do kapsy, na většinu jejích zástupců ale ano. Dva body navíc dělí slušný přehled od toho, kterým se lidé chlubí.` },
+  { min: 7, max: 9, t: `Tady už se ukazuje rozhled, který se za pár večerů nedá poskládat. Zvládli jste i otázky, kde se rozhodovalo mezi dvěma velmi blízkými letopočty nebo mezi názvy, které od sebe dělí jediné slovo, a to je ta nejtěžší část celého kvízu. Pokud jste skončili na devíti bodech, splnili jste přesně to, co slibuje titulek: v takové společnosti mladší generace mlčí a raději si nechá poradit. Osm nebo sedm bodů znamená totéž o kousek mírněji, chybějící body padly v tom nejužším pásmu.` },
+  { min: 10, max: 10, t: `Plný počet, a ten dá opravdu málokdo. Neshodil vás řecký bůh lékařství, ani rok, kdy se v továrně poprvé rozjel montážní pás, ani letopočet rozluštění hieroglyfů, ani ryba schovaná v lahvičce koření. Neztratili jste se ani v rafinerské koloně, ani na mapě mezi rovníkem a nultým poledníkem. Deset oborů, deset zásahů. Mladší generaci nestrčíte do kapsy, tu si na takovém výsledku pozvete rovnou k učení.` }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var locked = false;
+var quizEl = document.getElementById('quiz');
+var submitEl = document.getElementById('submit');
+var warnEl = document.getElementById('warn');
+var resultEl = document.getElementById('result');
+var scoreEl = document.getElementById('score');
+var verdictEl = document.getElementById('verdict');
+var retryEl = document.getElementById('retry');
+
+function build() {
+  quizEl.innerHTML = '';
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement('div');
+    box.className = 'q';
+    var p = document.createElement('p');
+    p.className = 'q-text';
+    p.textContent = item.q;
+    box.appendChild(p);
+    item.o.forEach(function (opt, oi) {
+      var b = document.createElement('button');
+      b.className = 'opt';
+      b.type = 'button';
+      b.textContent = opt;
+      b.addEventListener('click', function () { pick(qi, oi); });
+      box.appendChild(b);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function pick(qi, oi) {
+  if (locked) return;
+  answers[qi] = oi;
+  var box = quizEl.children[qi];
+  var opts = box.querySelectorAll('.opt');
+  for (var i = 0; i < opts.length; i++) {
+    opts[i].classList.toggle('selected', i === oi);
+  }
+  refresh();
+}
+
+function refresh() {
+  var done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+  if (done) warnEl.hidden = true;
+}
+
+submitEl.addEventListener('click', function () {
+  if (submitEl.disabled) { warnEl.hidden = false; return; }
+  locked = true;
+  var score = 0;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = quizEl.children[qi];
+    box.classList.add('locked');
+    var opts = box.querySelectorAll('.opt');
+    for (var i = 0; i < opts.length; i++) {
+      opts[i].classList.remove('selected');
+      if (i === item.a) opts[i].classList.add('correct');
+      else if (i === answers[qi]) opts[i].classList.add('wrong');
+    }
+    if (answers[qi] === item.a) score++;
+  });
+  scoreEl.textContent = score + ' z ' + QUESTIONS.length;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score >= VERDICTS[v].min && score <= VERDICTS[v].max) {
+      verdictEl.textContent = VERDICTS[v].t;
+      break;
+    }
+  }
+  submitEl.disabled = true;
+  resultEl.hidden = false;
+  resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+retryEl.addEventListener('click', function () {
+  locked = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.hidden = true;
+  warnEl.hidden = true;
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+build();
+refresh();
+</script>
+</body>
+</html>
