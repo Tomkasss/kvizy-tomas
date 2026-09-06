@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz z učiva 5. třídy: dospělí by měli dát 10/10, ale většinou udělají alespoň 2 chyby</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zadani { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.varianta:last-child { margin-bottom: 0; }
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta:disabled { cursor: default; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#hlaska { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+#vysledek {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz z učiva 5. třídy: dospělí by měli dát 10/10, ale většinou udělají alespoň 2 chyby</h1>
+<p class="perex">Deset otázek na to, co se probírá na prvním stupni, i na to, co k té látce těsně přiléhá: staré pověsti, četba, příroda, fyzika, čeština, dějepis i zeměpis. Vypadá to jako procházka, jenže právě u samozřejmostí ruka nejčastěji zaváhá.</p>
+
+<div id="kviz"></div>
+
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p id="hlaska"></p>
+
+<div id="vysledek" style="display:none">
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+
+<script>
+var otazky = [
+  {
+    z: `1. Která dívka podle Starých pověstí českých vedla dívčí vojsko ve válce proti mužům?`,
+    v: [`Vlasta`, `Šárka`, `Kazi`, `Teta`],
+    s: 0
+  },
+  {
+    z: `2. Které město je po Praze a Brně třetím nejlidnatějším městem Česka?`,
+    v: [`Plzeň`, `Olomouc`, `Ostrava`, `Liberec`],
+    s: 2
+  },
+  {
+    z: `3. Co se stane s objemem vody, když zmrzne?`,
+    v: [`nezmění se`, `zvětší se přibližně o desetinu`, `zmenší se přibližně o desetinu`, `zvětší se přibližně o polovinu`],
+    s: 1
+  },
+  {
+    z: `4. Čím se rozmnožují kapradiny?`,
+    v: [`semeny`, `pylem`, `hlízami`, `výtrusy`],
+    s: 3
+  },
+  {
+    z: `5. Kdo napsal knihu Honzíkova cesta?`,
+    v: [`Václav Čtvrtek`, `Eduard Petiška`, `Bohumil Říha`, `Ondřej Sekora`],
+    s: 2
+  },
+  {
+    z: `6. Ve kterém pravěkém období začali lidé pěstovat obilí a chovat domácí zvířata?`,
+    v: [`ve starší době kamenné`, `v mladší době kamenné`, `v době bronzové`, `v době železné`],
+    s: 1
+  },
+  {
+    z: `7. Kterému českému panovníkovi se říká Otec vlasti?`,
+    v: [`Karel IV.`, `Václav IV.`, `Přemysl Otakar II.`, `Rudolf II.`],
+    s: 0
+  },
+  {
+    z: `8. Který z těchto našich savců se ukládá k pravému zimnímu spánku?`,
+    v: [`veverka obecná`, `jezevec lesní`, `liška obecná`, `ježek západní`],
+    s: 3
+  },
+  {
+    z: `9. Kterým slovním druhem je slovo kéž?`,
+    v: [`spojkou`, `částicí`, `citoslovcem`, `příslovcem`],
+    s: 1
+  },
+  {
+    z: `10. Který pták je nejmenším ptákem hnízdícím v Česku?`,
+    v: [`králíček obecný`, `střízlík obecný`, `brhlík lesní`, `pěnkava obecná`],
+    s: 0
+  }
+];
+
+var pismena = [`a) `, `b) `, `c) `, `d) `];
+var odpovedi = new Array(otazky.length).fill(null);
+var hotovo = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function vykresli() {
+  kvizEl.innerHTML = ``;
+  for (var i = 0; i < otazky.length; i++) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var nadpis = document.createElement(`p`);
+    nadpis.className = `zadani`;
+    nadpis.textContent = otazky[i].z;
+    box.appendChild(nadpis);
+    for (var j = 0; j < otazky[i].v.length; j++) {
+      var btn = document.createElement(`button`);
+      btn.className = `varianta`;
+      btn.type = `button`;
+      btn.textContent = pismena[j] + otazky[i].v[j];
+      btn.setAttribute(`data-o`, String(i));
+      btn.setAttribute(`data-v`, String(j));
+      btn.addEventListener(`click`, klik);
+      box.appendChild(btn);
+    }
+    kvizEl.appendChild(box);
+  }
+}
+
+function klik(e) {
+  if (hotovo) { return; }
+  var o = parseInt(e.currentTarget.getAttribute(`data-o`), 10);
+  var v = parseInt(e.currentTarget.getAttribute(`data-v`), 10);
+  odpovedi[o] = v;
+  var sourozenci = e.currentTarget.parentNode.querySelectorAll(`.varianta`);
+  for (var k = 0; k < sourozenci.length; k++) {
+    sourozenci[k].classList.remove(`vybrana`);
+  }
+  e.currentTarget.classList.add(`vybrana`);
+  hlaskaEl.textContent = ``;
+  zkontrolujTlacitko();
+}
+
+function zkontrolujTlacitko() {
+  var vse = true;
+  for (var i = 0; i < odpovedi.length; i++) {
+    if (odpovedi[i] === null) { vse = false; break; }
+  }
+  tlacitkoEl.disabled = !vse;
+}
+
+tlacitkoEl.addEventListener(`click`, function () {
+  var vse = true;
+  for (var i = 0; i < odpovedi.length; i++) {
+    if (odpovedi[i] === null) { vse = false; break; }
+  }
+  if (!vse) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  hotovo = true;
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  for (var o = 0; o < otazky.length; o++) {
+    var varianty = boxy[o].querySelectorAll(`.varianta`);
+    for (var v = 0; v < varianty.length; v++) {
+      varianty[v].disabled = true;
+      varianty[v].classList.remove(`vybrana`);
+      if (v === otazky[o].s) {
+        varianty[v].classList.add(`spravna`);
+      } else if (v === odpovedi[o]) {
+        varianty[v].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[o] === otazky[o].s) { body++; }
+  }
+  skoreEl.textContent = body + ` z 10`;
+  hodnoceniEl.textContent = hodnoceniText(body);
+  tlacitkoEl.disabled = true;
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+function hodnoceniText(body) {
+  if (body <= 3) {
+    return `Tady se nepotvrdilo nic z toho, co titulek sliboval. Látka z prvního stupně leží v paměti tak hluboko, že se k ní ruka za pár vteřin nedostane, a pár otázek navíc míří kousek za ni. Není to o hlavě, je to o tom, že se těchhle věcí roky nikdo neptal. Projděte si správné odpovědi a většina z nich vám bude povědomá ve chvíli, kdy je uvidíte napsané.`;
+  }
+  if (body <= 6) {
+    return `Půlka sedí, půlka ne, a to je na kvíz ze základní školy víc chyb, než slibuje název. Ztráta se obvykle nakupí ve dvou třech oborech, které vám od školy nepřišly pod ruku. Podívejte se, ve kterých otázkách bod chybí, a nejspíš objevíte, že jde o jeden dva předměty, ne o celý výsledek.`;
+  }
+  if (body <= 9) {
+    return `Přesně sem míří slib z názvu a právě tady končí většina dospělých. Školní základ máte pokrytý skoro celý a ztráceli jste nejspíš dvakrát: jednou tam, kde se probraná látka v běžném životě nemá kde připomenout, podruhé u otázky, která už osnovy prvního stupně přesahuje. Pár chyb v tomhle pásmu není selhání, ale statistika.`;
+  }
+  return `Plný počet, který dá menšina. Prošli jste všemi obory kvízu bez jediného zaškobrtnutí, včetně těch dvou otázek, na kterých ostatní ztrácejí body slíbené v názvu. Základní škola ve vás zůstala celá a k tomu se přidalo něco navíc.`;
+}
+
+znovuEl.addEventListener(`click`, function () {
+  hotovo = false;
+  odpovedi = new Array(otazky.length).fill(null);
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  tlacitkoEl.disabled = true;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+vykresli();
+</script>
+</body>
+</html>
