@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz pro sečtělé lidi nad 70 let: výsledek 8/10 dnes není vůbec samozřejmostí</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 36px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zadani { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  #vyhodnotit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover:enabled { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.4em; }
+  #vysledek {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 40px;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #znovu {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #znovu:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka, #vysledek { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz pro sečtělé lidi nad 70 let: výsledek 8/10 dnes není vůbec samozřejmostí</h1>
+  <p class="perex">Deset otázek pro čtenáře, kteří mají za sebou knihovnu i desítky ročníků novin. Dějiny, literatura česká i světová, umění, zeměpis, obloha, příroda, čeština a film. Osm bodů z deseti dnes zdaleka není běžný výsledek.</p>
+
+  <div id="kviz"></div>
+
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+
+  <div id="vysledek" hidden>
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var otazky = [
+  {
+    zadani: `1. Ve kterém městě byla v červenci 1918 zavražděna rodina posledního ruského cara?`,
+    varianty: [`Petrohrad`, `Jekatěrinburg`, `Tobolsk`, `Kazaň`],
+    spravna: 1
+  },
+  {
+    zadani: `2. Jak se v astronomii nazývá bod na obloze přímo nad hlavou pozorovatele?`,
+    varianty: [`horizont`, `azimut`, `nadir`, `zenit`],
+    spravna: 3
+  },
+  {
+    zadani: `3. Kdo napsal román Ptáci v trní?`,
+    varianty: [`Colleen McCulloughová`, `Margaret Mitchellová`, `Pearl S. Bucková`, `Danielle Steelová`],
+    spravna: 0
+  },
+  {
+    zadani: `4. Které barvivo dodává listům rostlin zelenou barvu?`,
+    varianty: [`karoten`, `xantofyl`, `antokyan`, `chlorofyl`],
+    spravna: 3
+  },
+  {
+    zadani: `5. Která řeka je nejdelší v Asii?`,
+    varianty: [`Žlutá řeka`, `Mekong`, `Jang-c'-ťiang`, `Ob`],
+    spravna: 2
+  },
+  {
+    zadani: `6. Co znamená přídavné jméno prekérní?`,
+    varianty: [`tísnivý, choulostivý`, `okázalý, honosný`, `stručný a věcný`, `nestranný, nezaujatý`],
+    spravna: 0
+  },
+  {
+    zadani: `7. Kdo napsal román Kříž u potoka?`,
+    varianty: [`Božena Němcová`, `Karolina Světlá`, `Teréza Nováková`, `Gabriela Preissová`],
+    spravna: 1
+  },
+  {
+    zadani: `8. Kdo jako první přeletěl sám a bez mezipřistání Atlantský oceán?`,
+    varianty: [`Amelia Earhartová`, `John Alcock`, `Richard Byrd`, `Charles Lindbergh`],
+    spravna: 3
+  },
+  {
+    zadani: `9. Která herečka si ve filmové komedii Císařův pekař zahrála umělou ženu Sirael?`,
+    varianty: [`Marie Vášová`, `Nataša Gollová`, `Adina Mandlová`, `Jiřina Šejbalová`],
+    spravna: 1
+  },
+  {
+    zadani: `10. Kdo namaloval obraz Zvolení Jiřího z Poděbrad českým králem?`,
+    varianty: [`Josef Mánes`, `Jaroslav Čermák`, `Václav Brožík`, `Mikoláš Aleš`],
+    spravna: 2
+  }
+];
+
+var hodnoceni = [
+  { max: 3, text: `Kvíz vás zastihl mimo obory, ve kterých se pohybujete nejjistěji. Tři body a méně neznamenají mezeru ve vzdělání, spíš to, že se otázky trefily do koutů, kam vaše čtení dosud nevedlo. Nabídky odpovědí byly navíc postavené tak, aby vedle správné varianty vždy stálo něco, co zní stejně důvěryhodně.` },
+  { max: 6, text: `Půlka sedla, půlka těsně unikla. Rozjezdové otázky jste vzali s přehledem a zakopli až tam, kde bylo potřeba vylovit z paměti konkrétní jméno nebo dílo. K průměru řešitele vám podle výsledku chybí jedna až tři správné odpovědi, k hranici osmi bodů dvě až čtyři.` },
+  { max: 9, text: `Přesně sem míří titulek. Kvíz sahá do devíti různých oborů a v půlce z nich odpověď nestačí odhadnout podle nejznámějšího jména. Je potřeba si vybavit autorku světového románu, spisovatelku z Podještědí, herečku vedlejší role i malíře konkrétního historického plátna. Sedm až devět bodů vás řadí mezi čtenáře, kteří si za desítky let četby postavili rozhled širší, než jaký nabízí školní osnova.` },
+  { max: 10, text: `Plný počet, a ten dá jen menšina. Zvládli jste rozjezd, celé střední pásmo i otázku po herečce, jejíž jméno si vybaví jen znalci starého českého filmu. Deset z deseti tady znamená, že vaše všeobecné znalosti drží pohromadě napříč dějinami, literaturou, přírodními vědami i uměním.` }
+];
+
+var pismena = [`a) `, `b) `, `c) `, `d) `];
+var odpovedi = new Array(otazky.length).fill(null);
+var uzavreno = false;
+
+var kvizEl = document.getElementById('kviz');
+var vyhodnotitEl = document.getElementById('vyhodnotit');
+var hlaskaEl = document.getElementById('hlaska');
+var vysledekEl = document.getElementById('vysledek');
+var skoreEl = document.getElementById('skore');
+var hodnoceniEl = document.getElementById('hodnoceni');
+var znovuEl = document.getElementById('znovu');
+
+function vykresli() {
+  kvizEl.innerHTML = '';
+  otazky.forEach(function (o, i) {
+    var box = document.createElement('div');
+    box.className = 'otazka';
+
+    var z = document.createElement('p');
+    z.className = 'zadani';
+    z.textContent = o.zadani;
+    box.appendChild(z);
+
+    o.varianty.forEach(function (v, j) {
+      var b = document.createElement('button');
+      b.className = 'varianta';
+      b.type = 'button';
+      b.textContent = pismena[j] + v;
+      b.setAttribute('data-otazka', String(i));
+      b.setAttribute('data-varianta', String(j));
+      b.addEventListener('click', function () {
+        if (uzavreno) return;
+        odpovedi[i] = j;
+        var sourozenci = box.querySelectorAll('.varianta');
+        for (var k = 0; k < sourozenci.length; k++) {
+          sourozenci[k].classList.remove('vybrana');
+        }
+        b.classList.add('vybrana');
+        hlaskaEl.textContent = '';
+        aktualizujTlacitko();
+      });
+      box.appendChild(b);
+    });
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function aktualizujTlacitko() {
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  vyhodnotitEl.disabled = !hotovo;
+}
+
+vyhodnotitEl.addEventListener('click', function () {
+  if (vyhodnotitEl.disabled) {
+    hlaskaEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  uzavreno = true;
+  var body = 0;
+
+  var boxy = kvizEl.querySelectorAll('.otazka');
+  for (var i = 0; i < boxy.length; i++) {
+    var tlacitka = boxy[i].querySelectorAll('.varianta');
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove('vybrana');
+      if (j === otazky[i].spravna) {
+        tlacitka[j].classList.add('spravna');
+      } else if (odpovedi[i] === j) {
+        tlacitka[j].classList.add('spatna');
+      }
+    }
+    if (odpovedi[i] === otazky[i].spravna) body++;
+  }
+
+  vyhodnotitEl.disabled = true;
+  hlaskaEl.textContent = '';
+  skoreEl.textContent = body + ' z ' + otazky.length;
+
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+
+  vysledekEl.hidden = false;
+  vysledekEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+znovuEl.addEventListener('click', function () {
+  odpovedi = new Array(otazky.length).fill(null);
+  uzavreno = false;
+  vysledekEl.hidden = true;
+  hlaskaEl.textContent = '';
+  vykresli();
+  aktualizujTlacitko();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+vykresli();
+aktualizujTlacitko();
+</script>
+</body>
+</html>
