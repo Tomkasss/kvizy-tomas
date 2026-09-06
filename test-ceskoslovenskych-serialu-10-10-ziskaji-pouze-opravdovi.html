@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test československých seriálů: 10/10 získají pouze opravdoví televizní znalci</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .locked .opt { cursor: default; }
+  .locked .opt:hover { background: #f7f4f0; }
+  .locked .opt.sel:hover { background: #dcd3c7; }
+  .locked .opt.correct:hover { background: #d4edda; }
+  .locked .opt.wrong:hover { background: #f8d7da; }
+  #submit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #warn { text-align: center; color: #721c24; margin-top: 14px; }
+  #result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+    border-top: 4px solid #5b7e5f;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #retry {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #retry:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .q { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test československých seriálů: 10/10 získají pouze opravdoví televizní znalci</h1>
+  <p class="perex">Jeden program, jeden seriálový večer v týdnu a druhý den se o něm mluvilo v práci i na chodbě paneláku. Čeká vás deset otázek: kdo hrál hlavní roli, kdo psal scénář a kde se to všechno odehrávalo. Kolik jich dáte?</p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <p id="warn" hidden>Odpovězte prosím na všechny otázky</p>
+  <div id="result" hidden>
+    <p id="score"></p>
+    <p id="verdict"></p>
+    <button id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var QUESTIONS = [
+  {
+    q: `1. Který herec ztvárnil hlavní roli v seriálu Doktor z vejminku?`,
+    opts: [`a) Josef Kemr`, `b) Jiří Sovák`, `c) Ilja Prachař`, `d) Martin Růžek`],
+    correct: 3
+  },
+  {
+    q: `2. Z jaké planety pocházela Majka ze seriálu Spadla z oblakov?`,
+    opts: [`a) Gurun`, `b) Belor`, `c) Kandar`, `d) Trilon`],
+    correct: 0
+  },
+  {
+    q: `3. V jakém prostředí se odehrával seriál Chlapci a chlapi?`,
+    opts: [`a) v hasičském sboru`, `b) u vojáků základní vojenské služby`, `c) na hornickém učilišti`, `d) u Veřejné bezpečnosti`],
+    correct: 1
+  },
+  {
+    q: `4. Co dodávalo hlavnímu hrdinovi seriálu Létající Čestmír schopnost létat?`,
+    opts: [`a) plášť, který našel na půdě u babičky`, `b) vůně květiny, kterou si vypěstoval ze semínka`, `c) prsten, který dostal od mimozemšťanů`, `d) lektvar, který mu namíchal starý lékárník`],
+    correct: 1
+  },
+  {
+    q: `5. Kdo napsal scénář k seriálu My všichni školou povinní?`,
+    opts: [`a) Jaroslav Dietl`, `b) Božena Šimková`, `c) Markéta Zinnerová`, `d) Jiří Hubač`],
+    correct: 2
+  },
+  {
+    q: `6. Jakou profesi vykonávali hlavní hrdinové seriálu Plechová kavalerie?`,
+    opts: [`a) tankisté`, `b) kombajnéři`, `c) automobiloví závodníci`, `d) letečtí mechanici`],
+    correct: 1
+  },
+  {
+    q: `7. Který herec ztvárnil náčelníka Kubáta v seriálu Malý pitaval z velkého města?`,
+    opts: [`a) Ladislav Frej`, `b) Petr Kostka`, `c) Jaromír Hanzlík`, `d) Petr Haničinec`],
+    correct: 0
+  },
+  {
+    q: `8. Kterou herečku proslavila hlavní role prodavačky Anny Holubové v seriálu Žena za pultem?`,
+    opts: [`a) Jiřina Bohdalová`, `b) Jiřina Jirásková`, `c) Jaroslava Adamová`, `d) Jiřina Švorcová`],
+    correct: 3
+  },
+  {
+    q: `9. V jakém prostředí se odehrával seriál Dobrá Voda?`,
+    opts: [`a) v lázeňském městě`, `b) v pivovaru`, `c) v chovu dostihových koní`, `d) na vodní přehradě`],
+    correct: 2
+  },
+  {
+    q: `10. Podle příběhů kterého spisovatele vznikl seriál Panoptikum Města pražského?`,
+    opts: [`a) Jiří Marek`, `b) Eduard Fiker`, `c) Václav Erben`, `d) Josef Škvorecký`],
+    correct: 0
+  }
+];
+
+var VERDICTS = [
+  { min: 0, max: 3, text: `Tři body a méně znamenají, že se vám z televizních večerů vybavují spíš melodie znělek než konkrétní jména a děje. Seriály jste zřejmě vídali na půl oka nebo je znáte hlavně z vyprávění. Za televizního znalce se takový výsledek zatím nepočítá, ale většina těchhle titulů se na obrazovky pravidelně vrací.` },
+  { min: 4, max: 6, text: `Zůstali jste pod očekávanou hranicí, která u tohohle testu leží na sedmi bodech. Nejznámější tváře a prostředí trefíte, jenže tam, kde se nabízely dvě podobné možnosti ze stejné doby, jste začali ztrácet. Právě ve středním pásmu se rozhoduje, jestli se přes průměr dostanete.` },
+  { min: 7, max: 9, text: `Sedm bodů je přesně splněný průměr, osm a devět už je výsledek nad ním. Poradili jste si i s tituly, které se dnes připomínají jen občas, a nenachytala vás ani prostředí, jejichž název svádí k úplně jiné odpovědi. K plnému počtu vám chyběl krok, nejspíš u seriálu, který si vybaví jen ten, kdo ho opravdu viděl celý.` },
+  { min: 10, max: 10, text: `Plný počet, na který dosáhne jen menšina, a titul opravdového televizního znalce vám nikdo nevezme. Spolehlivě spojujete herce s rolemi, tvůrce se scénáři a seriály s prostředím, ve kterém se odehrávaly, od dětského sci-fi seriálu po detektivku z osmdesátých let. Tohle už není nostalgie, ale skutečně zažitá znalost československé televizní tvorby.` }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var evaluated = false;
+
+var quizEl = document.getElementById('quiz');
+var submitEl = document.getElementById('submit');
+var warnEl = document.getElementById('warn');
+var resultEl = document.getElementById('result');
+var scoreEl = document.getElementById('score');
+var verdictEl = document.getElementById('verdict');
+var retryEl = document.getElementById('retry');
+
+function build() {
+  quizEl.innerHTML = '';
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    var box = document.createElement('div');
+    box.className = 'q';
+    box.setAttribute('data-q', String(i));
+
+    var p = document.createElement('p');
+    p.className = 'q-text';
+    p.textContent = QUESTIONS[i].q;
+    box.appendChild(p);
+
+    for (var j = 0; j < QUESTIONS[i].opts.length; j++) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'opt';
+      btn.textContent = QUESTIONS[i].opts[j];
+      btn.setAttribute('data-q', String(i));
+      btn.setAttribute('data-o', String(j));
+      btn.addEventListener('click', onPick);
+      box.appendChild(btn);
+    }
+    quizEl.appendChild(box);
+  }
+}
+
+function onPick(e) {
+  if (evaluated) return;
+  var qi = parseInt(e.currentTarget.getAttribute('data-q'), 10);
+  var oi = parseInt(e.currentTarget.getAttribute('data-o'), 10);
+  answers[qi] = oi;
+
+  var box = quizEl.querySelector('.q[data-q="' + qi + '"]');
+  var btns = box.querySelectorAll('.opt');
+  for (var k = 0; k < btns.length; k++) {
+    btns[k].classList.remove('sel');
+  }
+  e.currentTarget.classList.add('sel');
+  refresh();
+}
+
+function refresh() {
+  var done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+  if (done) warnEl.hidden = true;
+}
+
+submitEl.addEventListener('click', function () {
+  if (evaluated) return;
+  var done = answers.every(function (a) { return a !== null; });
+  if (!done) {
+    warnEl.hidden = false;
+    return;
+  }
+  evaluated = true;
+  warnEl.hidden = true;
+
+  var score = 0;
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    var box = quizEl.querySelector('.q[data-q="' + i + '"]');
+    box.classList.add('locked');
+    var btns = box.querySelectorAll('.opt');
+    for (var j = 0; j < btns.length; j++) {
+      if (j === QUESTIONS[i].correct) {
+        btns[j].classList.add('correct');
+      } else if (j === answers[i]) {
+        btns[j].classList.add('wrong');
+      }
+    }
+    if (answers[i] === QUESTIONS[i].correct) score++;
+  }
+
+  scoreEl.textContent = score + ' z ' + QUESTIONS.length;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score >= VERDICTS[v].min && score <= VERDICTS[v].max) {
+      verdictEl.textContent = VERDICTS[v].text;
+      break;
+    }
+  }
+  submitEl.disabled = true;
+  resultEl.hidden = false;
+  resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+retryEl.addEventListener('click', function () {
+  evaluated = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.hidden = true;
+  warnEl.hidden = true;
+  submitEl.disabled = true;
+  build();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+build();
+</script>
+</body>
+</html>
