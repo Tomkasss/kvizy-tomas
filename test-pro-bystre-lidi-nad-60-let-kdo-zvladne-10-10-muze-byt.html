@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test pro bystré lidi nad 60 let: Kdo zvládne 10/10, může být na svou paměť právem pyšný</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qt { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.4; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.ok { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.bad { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt.done { cursor: default; }
+.opt.done:hover { background: #f7f4f0; }
+.opt.done.sel:hover { background: #dcd3c7; }
+.opt.done.ok:hover { background: #d4edda; }
+.opt.done.bad:hover { background: #f8d7da; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+#again {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#again:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test pro bystré lidi nad 60 let: Kdo zvládne 10/10, může být na svou paměť právem pyšný</h1>
+<p class="perex">Deset otázek napříč obory, od jídla a jazyků přes hudbu, techniku a přírodu až po dějiny dvacátého století. Žádné počítání, jen to, co vám za šedesát let života zůstalo v hlavě. Kdo projde bez zaváhání, ví, že mu paměť slouží dál.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<div id="warn" hidden>Odpovězte prosím na všechny otázky</div>
+<div id="result" hidden>
+  <div id="score"></div>
+  <p id="verdict"></p>
+  <button id="again">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  {
+    q: `1. Které ořechy patří do klasického receptu na italskou omáčku pesto?`,
+    o: [`vlašské ořechy`, `mandle`, `piniové oříšky`, `lískové ořechy`],
+    a: 2
+  },
+  {
+    q: `2. Ze kterého jazyka pochází slovo sauna?`,
+    o: [`z finštiny`, `ze švédštiny`, `z norštiny`, `z ruštiny`],
+    a: 0
+  },
+  {
+    q: `3. K čemu sloužilo logaritmické pravítko?`,
+    o: [`k rýsování rovnoběžek a úhlů na technických výkresech`, `k vyhledávání odmocnin v tištěných tabulkách`, `k přepočtu cizích měn podle denního kurzu`, `k rychlému násobení a dělení čísel`],
+    a: 3
+  },
+  {
+    q: `4. Co znamená přídavné jméno vrtošivý?`,
+    o: [`zbrklý a unáhlený v jednání`, `nedůvěřivý a podezíravý k lidem`, `náladový, rozmarný a nestálý`, `přehnaně pořádkumilovný a úzkostlivý`],
+    a: 2
+  },
+  {
+    q: `5. Kterou operou bylo v roce 1881 slavnostně otevřeno pražské Národní divadlo?`,
+    o: [`Prodanou nevěstou`, `Libuší`, `Rusalkou`, `Daliborem`],
+    a: 1
+  },
+  {
+    q: `6. Ke kterému státu patří souostroví Azory?`,
+    o: [`k Portugalsku`, `ke Španělsku`, `k Francii`, `k Maroku`],
+    a: 0
+  },
+  {
+    q: `7. Čím se břečťan popínavý přichycuje ke kmenům stromů a ke zdem?`,
+    o: [`ovíjením celého stonku kolem opory`, `úponky vyrůstajícími z konců listů`, `lepkavým výměškem na rubu listů`, `přísavnými kořínky vyrůstajícími po celé délce stonku`],
+    a: 3
+  },
+  {
+    q: `8. Kterou africkou zemi napadla Itálie v roce 1935?`,
+    o: [`Libyi`, `Habeš`, `Maroko`, `Súdán`],
+    a: 1
+  },
+  {
+    q: `9. Kdo byl ministrem zahraničí Československa v době únorového převratu v roce 1948?`,
+    o: [`Vladimír Clementis`, `Prokop Drtina`, `Jan Masaryk`, `Zdeněk Fierlinger`],
+    a: 2
+  },
+  {
+    q: `10. Co se v Československu označovalo výrazem řopík?`,
+    o: [`objekt lehkého pohraničního opevnění z třicátých let`, `polní telefonní přístroj používaný četnictvem`, `typ nákladního automobilu předválečné armády`, `odznak udělovaný příslušníkům Stráže obrany státu`],
+    a: 0
+  }
+];
+
+var LETTERS = [`a`, `b`, `c`, `d`];
+
+var VERDICTS = [
+  { max: 3, text: `Tenhle výsledek vás řadí pod hranici, kterou v deseti oborech obvykle překoná většina řešitelů. Body odešly už u lehčí poloviny, tedy tam, kde stačilo sáhnout do školní látky nebo do běžné zkušenosti. Není to nic ztraceného, jen paměť potřebuje častěji vytáhnout na světlo, co v ní leží. Zkuste kvíz s odstupem znovu, druhý pokus bývá výrazně lepší.` },
+  { max: 6, text: `Držíte se kolem poloviny a to znamená, že rozjezdové otázky vám sedly, ale střední pásmo, kde už nestačí obecná představa a je potřeba si vzpomenout na konkrétní jméno nebo souvislost, vás připravilo o body. Do plného počtu, který slibuje titulek, vám chybějí čtyři až šest odpovědí. Rozhled máte, jen se v něm hůř hledá.` },
+  { max: 9, text: `Tohle je výsledek, na kterém se pozná dlouhá léta poctivě sbíraného přehledu. Prošli jste rozjezdem i většinou středních otázek a zastavily vás nanejvýš tři, ať už na konkrétním jménu a souvislosti ze středního pásma, nebo na té jediné, kde už znalost sahá za školní osnovy. Vaše paměť pracuje spolehlivě a rychle, jen se do plného počtu nevešla o kousek. Mezi vrstevníky patříte jasně nad průměr.` },
+  { max: 10, text: `Plný počet, a to je mezi řešiteli menšina. Neshodilo vás jídlo ani jazyk, prošli jste technikou, hudbou, zeměpisem, přírodou i dějinami dvacátého století a nezastavila vás ani poslední otázka, kterou obvykle dá jen ten, kdo se historii věnuje nad rámec běžného zájmu. Na takovou paměť můžete být právem pyšní, protože nejde o štěstí, ale o šedesát let nasbíraných a stále dostupných znalostí.` }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var locked = false;
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var againEl = document.getElementById(`again`);
+
+function build() {
+  quizEl.textContent = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var title = document.createElement(`p`);
+    title.className = `qt`;
+    title.textContent = item.q;
+    box.appendChild(title);
+    item.o.forEach(function (opt, oi) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `opt`;
+      btn.textContent = LETTERS[oi] + `) ` + opt;
+      btn.addEventListener(`click`, function () { pick(qi, oi); });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function pick(qi, oi) {
+  if (locked) { return; }
+  answers[qi] = oi;
+  var box = quizEl.children[qi];
+  var buttons = box.querySelectorAll(`.opt`);
+  for (var i = 0; i < buttons.length; i++) {
+    buttons[i].classList.toggle(`sel`, i === oi);
+  }
+  refresh();
+}
+
+function refresh() {
+  var done = answers.every(function (v) { return v !== null; });
+  submitEl.disabled = !done;
+  if (done) { warnEl.hidden = true; }
+}
+
+function evaluate() {
+  if (answers.some(function (v) { return v === null; })) {
+    warnEl.hidden = false;
+    return;
+  }
+  locked = true;
+  var score = 0;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = quizEl.children[qi];
+    var buttons = box.querySelectorAll(`.opt`);
+    if (answers[qi] === item.a) { score++; }
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].classList.add(`done`);
+      if (i === item.a) {
+        buttons[i].classList.remove(`sel`);
+        buttons[i].classList.add(`ok`);
+      } else if (i === answers[qi]) {
+        buttons[i].classList.remove(`sel`);
+        buttons[i].classList.add(`bad`);
+      }
+    }
+  });
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score <= VERDICTS[v].max) { verdictEl.textContent = VERDICTS[v].text; break; }
+  }
+  resultEl.hidden = false;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  locked = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.hidden = true;
+  warnEl.hidden = true;
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+againEl.addEventListener(`click`, reset);
+build();
+refresh();
+</script>
+</body>
+</html>
