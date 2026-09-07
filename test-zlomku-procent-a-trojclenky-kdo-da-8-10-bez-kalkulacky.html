@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test zlomků, procent a trojčlenky: kdo dá 8/10 bez kalkulačky, ten matematiku nezapomněl</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.3;
+    color: #2c2c2c;
+    margin: 0 0 20px;
+  }
+  .perex {
+    font-size: 1.05rem;
+    color: #4a4a4a;
+    margin: 0 0 32px;
+  }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zadani {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin: 0 0 18px;
+  }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana {
+    background: #dcd3c7;
+    border: 1px solid #a89e92;
+    font-weight: bold;
+  }
+  .varianta.spravna {
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    color: #1e5631;
+  }
+  .varianta.spatna {
+    background: #f8d7da;
+    border: 1px solid #d4848a;
+    color: #721c24;
+  }
+  .varianta:disabled { cursor: default; }
+  .textpole {
+    display: block;
+    width: 100%;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+  }
+  .textpole:focus {
+    outline: none;
+    background: #ede8e1;
+    border: 1px solid #a89e92;
+  }
+  .textpole.spravna {
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    color: #1e5631;
+  }
+  .textpole.spatna {
+    background: #f8d7da;
+    border: 1px solid #d4848a;
+    color: #721c24;
+  }
+  .reseni {
+    margin-top: 14px;
+    font-size: .98rem;
+    color: #1e5631;
+  }
+  .reseni.chyba { color: #721c24; }
+  #vyhodnotit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    font-family: inherit;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #hlaska {
+    text-align: center;
+    color: #721c24;
+    margin-top: 14px;
+    font-size: .98rem;
+  }
+  #vysledek {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+    border-top: 4px solid #5b7e5f;
+  }
+  #skore {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    text-align: center;
+    margin: 0 0 16px;
+  }
+  #hodnoceni {
+    font-size: 1rem;
+    color: #4a4a4a;
+    text-align: center;
+    margin: 0;
+  }
+  #znovu {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    font-family: inherit;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+  }
+  #znovu:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka, #vysledek { padding: 20px; }
+    #vyhodnotit, #znovu { width: 100%; padding: 16px 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test zlomků, procent a trojčlenky: kdo dá 8/10 bez kalkulačky, ten matematiku nezapomněl</h1>
+  <p class="perex">Deset úloh na zlomky, procenta a trojčlenku, počítá se v hlavě nebo na papíře a kalkulačka zůstává zavřená. U šesti otázek se odpovídá číslem, u čtyř se vybírá ze čtyř možností. Osmibodová hranice z titulku je pro většinu meta.</p>
+
+  <div id="kviz"></div>
+
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+
+  <div id="vysledek" hidden>
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var otazky = [
+  {
+    text: `1. Na jaký zlomek v základním tvaru se zkrátí zlomek 91/117?`,
+    typ: `vyber`,
+    varianty: [`a) 9/13`, `b) 7/11`, `c) 7/9`, `d) 11/13`],
+    spravna: 2
+  },
+  {
+    text: `2. Kolik je pět dvanáctin z 456?`,
+    typ: `text`,
+    prijimane: [`190`],
+    zobrazit: `190`
+  },
+  {
+    text: `3. Kolik je 3/8 plus 5/12?`,
+    typ: `vyber`,
+    varianty: [`a) 19/24`, `b) 13/24`, `c) 23/24`, `d) 17/24`],
+    spravna: 0
+  },
+  {
+    text: `4. Kolik korun stojí 15 metrů kabelu, jestliže 9 metrů téhož kabelu stojí 621 korun?`,
+    typ: `text`,
+    prijimane: [`1035`],
+    zobrazit: `1035`
+  },
+  {
+    text: `5. Kolik lidí zaměstnává firma, ve které 63 zaměstnanců na zkrácený úvazek tvoří 14 procent všech?`,
+    typ: `text`,
+    prijimane: [`450`],
+    zobrazit: `450`
+  },
+  {
+    text: `6. Které z těchto čísel má nejmenší hodnotu?`,
+    typ: `vyber`,
+    varianty: [`a) 3/8`, `b) 0,38`, `c) 2/5`, `d) 37 %`],
+    spravna: 3
+  },
+  {
+    text: `7. Kolik korun stojí bez DPH zboží, jehož cena s DPH při sazbě 21 procent činí 3 025 korun?`,
+    typ: `text`,
+    prijimane: [`2500`],
+    zobrazit: `2500`
+  },
+  {
+    text: `8. Na kolik dní vystačí zásoba krmiva 28 koním, jestliže 24 koním by táž zásoba vystačila na 35 dní?`,
+    typ: `text`,
+    prijimane: [`30`],
+    zobrazit: `30`
+  },
+  {
+    text: `9. Kolik korun úroků přinese vklad 45 000 korun uložený na rok a půl při jednoduchém úročení sazbou 8 procent ročně, jestliže se z úroků neodvádí daň?`,
+    typ: `text`,
+    prijimane: [`5400`],
+    zobrazit: `5400`
+  },
+  {
+    text: `10. Jaká je konečná cena zboží proti původní, jestliže zboží nejdřív zdražilo o 30 procent a z nové ceny pak zlevnilo o 30 procent?`,
+    typ: `vyber`,
+    varianty: [`a) je stejná jako původní`, `b) je o 9 procent nižší`, `c) je o 9 procent vyšší`, `d) je o 10 procent nižší`],
+    spravna: 1
+  }
+];
+
+var hodnoceni = [
+  {
+    min: 0, max: 3,
+    text: `K osmi bodům z titulku vám dnes scházelo nejméně pět úloh, takže tvrdit, že vám počítání zůstalo v ruce, by bylo předčasné. Za takovým skóre přitom obvykle nestojí neznalost postupu, spíš to, že se první krok spočítá dobře, ale jeho výsledek se z hlavy ztratí dřív, než se použije ve druhém. Nejrychleji se to napravuje u zlomků: rozdělte si čitatele i jmenovatele na součin a hledejte, co se dá vykrátit, teprve pak počítejte. Až tohle půjde bez váhání, přiberte procenta počítaná přes jedno procento, protože z něj se dopočítá jak část, tak celek.`
+  },
+  {
+    min: 4, max: 6,
+    text: `Necelá polovina až šest bodů, tedy k osmičce z titulku scházely dva až čtyři body. Úlohy, kde se počítá dopředu a v jednom kroku, vám vyšly. Ztráty přišly tam, kde se zadání musí obrátit naruby a z hotového výsledku dopočítat základ, nebo kde víc čísel nejde vynásobit, ale musí se vydělit. To není otázka rychlosti, ale pořadí kroků. Vezměte si tři úlohy, které dnes nevyšly, a rozepište si je krok za krokem, dokud vám celý řetěz nezůstane v hlavě sám od sebe.`
+  },
+  {
+    min: 7, max: 9,
+    text: `Sedm bodů znamená, že na osmičku z titulku chyběla jediná úloha, osm laťku trefuje přesně a devět je o úlohu nad ní. V tomhle pásmu už platí, co titulek slibuje: zlomky, procenta ani trojčlenka pro vás nejsou cizí země a poradíte si s nimi i bez displeje. Bod nebo dva jste nechali nejspíš tam, kde intuitivní odpověď vypadala hotově a nikdo ji už neprověřil. Zvyk, který to spraví, je jednoduchý: než výsledek vyslovíte, řekněte si, mezi kterými dvěma kulatými čísly musí ležet.`
+  },
+  {
+    min: 10, max: 10,
+    text: `Plný počet, tedy dva body nad hranicí z titulku, a takhle čistý výsledek odevzdá z deseti řešitelů sotva jeden. Prošli jste krácením zlomku, sčítáním s nestejným jmenovatelem, zlomkem z nekulatého čísla, porovnáním zlomku, desetinného čísla a procenta, výpočtem celku z části, cenou bez daně, úroky za rok a půl, přímou i nepřímou úměrou a nakonec i tou úlohou, kde se zdražení a zlevnění o stejné procento zdánlivě vyruší, ale ve skutečnosti ne. Tady se nedá vysedět ani jediný bod navíc: stačí jedno přehozené číslo a desítka je pryč. Matematiku jste nezapomněli, jen jste ji přestali nosit v kalkulačce.`
+  }
+];
+
+var odpovedi = [];
+var hotovo = false;
+
+function normalizuj(s) {
+  return s.normalize(`NFD`).replace(/[̀-ͯ]/g, ``).toLowerCase().replace(/\s+/g, ``).replace(/ /g, ``).replace(/,/g, `.`);
+}
+
+function postav() {
+  var kviz = document.getElementById(`kviz`);
+  kviz.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    var zadani = document.createElement(`p`);
+    zadani.className = `zadani`;
+    zadani.textContent = o.text;
+    box.appendChild(zadani);
+
+    if (o.typ === `vyber`) {
+      o.varianty.forEach(function (v, j) {
+        var b = document.createElement(`button`);
+        b.className = `varianta`;
+        b.textContent = v;
+        b.setAttribute(`data-otazka`, String(i));
+        b.setAttribute(`data-varianta`, String(j));
+        b.addEventListener(`click`, function () {
+          if (hotovo) { return; }
+          odpovedi[i] = j;
+          var vsechny = box.querySelectorAll(`.varianta`);
+          for (var k = 0; k < vsechny.length; k++) {
+            vsechny[k].classList.remove(`vybrana`);
+          }
+          b.classList.add(`vybrana`);
+          zkontrolujHotovost();
+        });
+        box.appendChild(b);
+      });
+    } else {
+      var vstup = document.createElement(`input`);
+      vstup.className = `textpole`;
+      vstup.type = `text`;
+      vstup.setAttribute(`inputmode`, `decimal`);
+      vstup.setAttribute(`autocomplete`, `off`);
+      vstup.setAttribute(`data-otazka`, String(i));
+      vstup.addEventListener(`input`, function () {
+        if (hotovo) { return; }
+        odpovedi[i] = vstup.value;
+        zkontrolujHotovost();
+      });
+      box.appendChild(vstup);
+    }
+
+    var reseni = document.createElement(`p`);
+    reseni.className = `reseni`;
+    reseni.hidden = true;
+    box.appendChild(reseni);
+
+    kviz.appendChild(box);
+  });
+}
+
+function zodpovezeno(i) {
+  var o = otazky[i];
+  var a = odpovedi[i];
+  if (o.typ === `vyber`) { return typeof a === `number`; }
+  return typeof a === `string` && a.trim() !== ``;
+}
+
+function zkontrolujHotovost() {
+  var vse = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (!zodpovezeno(i)) { vse = false; break; }
+  }
+  document.getElementById(`vyhodnotit`).disabled = !vse;
+  if (vse) { document.getElementById(`hlaska`).textContent = ``; }
+}
+
+function vyhodnot() {
+  var vse = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (!zodpovezeno(i)) { vse = false; break; }
+  }
+  if (!vse) {
+    document.getElementById(`hlaska`).textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+
+  hotovo = true;
+  var skore = 0;
+  var boxy = document.querySelectorAll(`.otazka`);
+
+  otazky.forEach(function (o, i) {
+    var box = boxy[i];
+    var reseni = box.querySelector(`.reseni`);
+
+    if (o.typ === `vyber`) {
+      var tlacitka = box.querySelectorAll(`.varianta`);
+      for (var j = 0; j < tlacitka.length; j++) {
+        tlacitka[j].disabled = true;
+        tlacitka[j].classList.remove(`vybrana`);
+        if (j === o.spravna) {
+          tlacitka[j].classList.add(`spravna`);
+        } else if (j === odpovedi[i]) {
+          tlacitka[j].classList.add(`spatna`);
+        }
+      }
+      if (odpovedi[i] === o.spravna) {
+        skore = skore + 1;
+        reseni.textContent = `Správně.`;
+        reseni.classList.remove(`chyba`);
+      } else {
+        reseni.textContent = `Správná odpověď: ` + o.varianty[o.spravna];
+        reseni.classList.add(`chyba`);
+      }
+    } else {
+      var pole = box.querySelector(`.textpole`);
+      pole.disabled = true;
+      var zadano = normalizuj(String(odpovedi[i]));
+      var sedi = false;
+      for (var m = 0; m < o.prijimane.length; m++) {
+        if (normalizuj(o.prijimane[m]) === zadano) { sedi = true; break; }
+      }
+      if (sedi) {
+        skore = skore + 1;
+        pole.classList.add(`spravna`);
+        reseni.textContent = `Správně.`;
+        reseni.classList.remove(`chyba`);
+      } else {
+        pole.classList.add(`spatna`);
+        reseni.textContent = `Správná odpověď: ` + o.zobrazit;
+        reseni.classList.add(`chyba`);
+      }
+    }
+    reseni.hidden = false;
+  });
+
+  var text = ``;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore >= hodnoceni[h].min && skore <= hodnoceni[h].max) {
+      text = hodnoceni[h].text;
+      break;
+    }
+  }
+
+  document.getElementById(`skore`).textContent = skore + ` z ` + otazky.length;
+  document.getElementById(`hodnoceni`).textContent = text;
+  document.getElementById(`vysledek`).hidden = false;
+  document.getElementById(`vyhodnotit`).disabled = true;
+  document.getElementById(`hlaska`).textContent = ``;
+  document.getElementById(`vysledek`).scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function znovu() {
+  odpovedi = [];
+  hotovo = false;
+  document.getElementById(`vysledek`).hidden = true;
+  document.getElementById(`hlaska`).textContent = ``;
+  document.getElementById(`vyhodnotit`).disabled = true;
+  postav();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+document.getElementById(`vyhodnotit`).addEventListener(`click`, vyhodnot);
+document.getElementById(`znovu`).addEventListener(`click`, znovu);
+postav();
+</script>
+</body>
+</html>
