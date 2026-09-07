@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test ze základní školy pro dospělé: kdo nezvládne 7/10, měl by si zopakovat učivo</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 32px 16px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qt { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.good { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.bad { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.locked .opt { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#again {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#again:hover { background: #756658; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 24px;
+  border-top: 4px solid #5b7e5f;
+}
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+.verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+.warn { text-align: center; color: #8c4a4a; margin-top: 14px; font-size: .95rem; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test ze základní školy pro dospělé: kdo nezvládne 7/10, měl by si zopakovat učivo</h1>
+<p class="perex">Deset otázek z devíti školních předmětů, od češtiny a dějepisu po fyziku, chemii a hudební výchovu. Nic z toho se nepočítá, všechno se to kdysi bralo ve škole. Sedm bodů je laťka, pod kterou se vyplatí sáhnout po staré učebnici.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="warn" id="warn"></p>
+<div id="result" hidden></div>
+</div>
+<script>
+var QUESTIONS = [
+  { q: `1. Které z těchto podstatných jmen je pomnožné?`,
+    o: [`listí`, `mouka`, `kamna`, `dřevo`], a: 2 },
+  { q: `2. Který řecký dramatik napsal dochovanou tragédii Antigona?`,
+    o: [`Aischylos`, `Euripidés`, `Aristofanés`, `Sofoklés`], a: 3 },
+  { q: `3. Jak se nazýval americký program hospodářské pomoci, kterým se po druhé světové válce obnovovala západní Evropa?`,
+    o: [`Trumanova doktrína`, `Marshallův plán`, `Schumanův plán`, `Dawesův plán`], a: 1 },
+  { q: `4. Který ostrov je největší v Japonsku?`,
+    o: [`Hokkaidó`, `Kjúšú`, `Honšú`, `Šikoku`], a: 2 },
+  { q: `5. Který z těchto mořských savců patří mezi ploutvonožce, a nikoli mezi kytovce?`,
+    o: [`vorvaň`, `mrož`, `delfín`, `plejtvák`], a: 1 },
+  { q: `6. Který z těchto měřicích přístrojů se do elektrického obvodu zapojuje sériově?`,
+    o: [`voltmetr`, `ohmmetr`, `osciloskop`, `ampérmetr`], a: 3 },
+  { q: `7. Který plyn se v pevném skupenství prodává pod názvem suchý led?`,
+    o: [`oxid uhličitý`, `dusík`, `propan`, `kyslík`], a: 0 },
+  { q: `8. Který orgán v České republice schvaluje zákon o státním rozpočtu?`,
+    o: [`Poslanecká sněmovna`, `Senát`, `vláda`, `prezident republiky`], a: 0 },
+  { q: `9. Jak se nazývá interval mezi tónem a nejbližším vyšším tónem téhož jména?`,
+    o: [`septima`, `sexta`, `oktáva`, `kvinta`], a: 2 },
+  { q: `10. Jak se nazývá výtvarná technika, při níž vznikne obraz přejížděním tužky nebo voskovky po papíru položeném na reliéfní povrch?`,
+    o: [`frotáž`, `koláž`, `monotyp`, `linoryt`], a: 0 }
+];
+
+var VERDICTS = [
+  { max: 3, t: `Sedmibodová laťka zůstala hodně daleko. Ze základní školy vám zůstalo povědomí, že se něco takového probíralo, ale konkrétní pojem, jméno nebo zařazení už se nevybaví ani u předmětů, které jste kdysi měli rádi. Tohle je přesně ten výsledek, po kterém se vyplatí učivo si zopakovat, klidně jen listováním v učebnici deváté třídy.` },
+  { max: 6, t: `Těsně pod laťkou. Body jste posbírali tam, kde se školní látka připomíná i v běžném životě, a ztráceli tam, kde odpověď stojí na jediném odborném názvu. Na sedm bodů vám chybělo jedno až tři zaváhání, takže i vás se titulek týká, i když jen o vlásek. Stačí se vrátit k těm dvěma třem oborům, kde jste tipovali.` },
+  { max: 9, t: `Laťku jste překonali a zopakovat si nemusíte nic. Napříč devíti školními předměty jste zaváhali nanejvýš třikrát, a to i u nabídek, kde se varianty liší jen o kousek. Ze základní školy si nesete podstatně víc než jen vysvědčení.` },
+  { max: 10, t: `Plný počet bez jediného škrtu. Trefili jste i tu nejtěžší otázku a k tomu všechny těsné dvojice, u kterých se snadno sáhne vedle. Školní učivo vám po letech drží kompletní, od tvarosloví přes zařazení savců až po výtvarné techniky. Tady titulek neplatí ani náhodou.` }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var locked = false;
+var quizEl = document.getElementById('quiz');
+var submitEl = document.getElementById('submit');
+var warnEl = document.getElementById('warn');
+var resultEl = document.getElementById('result');
+
+function build() {
+  quizEl.innerHTML = '';
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement('div');
+    box.className = 'q';
+    var title = document.createElement('p');
+    title.className = 'qt';
+    title.textContent = item.q;
+    box.appendChild(title);
+    item.o.forEach(function (opt, oi) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'opt';
+      btn.textContent = String.fromCharCode(97 + oi) + ') ' + opt;
+      btn.addEventListener('click', function () {
+        if (locked) return;
+        answers[qi] = oi;
+        var sibs = box.querySelectorAll('.opt');
+        for (var i = 0; i < sibs.length; i++) sibs[i].classList.remove('sel');
+        btn.classList.add('sel');
+        refresh();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function refresh() {
+  var done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+  if (done) warnEl.textContent = '';
+}
+
+submitEl.addEventListener('click', function () {
+  if (answers.some(function (a) { return a === null; })) {
+    warnEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  locked = true;
+  warnEl.textContent = '';
+  var score = 0;
+  var boxes = quizEl.querySelectorAll('.q');
+  QUESTIONS.forEach(function (item, qi) {
+    var box = boxes[qi];
+    box.classList.add('locked');
+    var opts = box.querySelectorAll('.opt');
+    for (var i = 0; i < opts.length; i++) {
+      opts[i].classList.remove('sel');
+      if (i === item.a) opts[i].classList.add('good');
+      else if (i === answers[qi]) opts[i].classList.add('bad');
+    }
+    if (answers[qi] === item.a) score++;
+  });
+  var text = '';
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score <= VERDICTS[v].max) { text = VERDICTS[v].t; break; }
+  }
+  resultEl.innerHTML = '';
+  var sc = document.createElement('p');
+  sc.className = 'score';
+  sc.textContent = score + ' z ' + QUESTIONS.length;
+  var vd = document.createElement('p');
+  vd.className = 'verdict';
+  vd.textContent = text;
+  resultEl.appendChild(sc);
+  resultEl.appendChild(vd);
+  var again = document.createElement('button');
+  again.type = 'button';
+  again.id = 'again';
+  again.textContent = 'Zkusit znovu';
+  again.addEventListener('click', function () {
+    locked = false;
+    answers = new Array(QUESTIONS.length).fill(null);
+    resultEl.hidden = true;
+    resultEl.innerHTML = '';
+    submitEl.hidden = false;
+    submitEl.disabled = true;
+    build();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  resultEl.appendChild(again);
+  resultEl.hidden = false;
+  submitEl.hidden = true;
+  resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+build();
+</script>
+</body>
+</html>
