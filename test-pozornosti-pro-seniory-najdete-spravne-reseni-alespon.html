@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test pozornosti pro seniory: najdete správné řešení alespoň u 8 z 10 úloh?</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 32px 16px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.8rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 16px; }
+  .perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; line-height: 1.45; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+    line-height: 1.45;
+  }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  #vyhodnotit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover:not(:disabled) { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+  #vysledek {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; }
+  #znovu {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #znovu:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.45rem; }
+    .otazka { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test pozornosti pro seniory: najdete správné řešení alespoň u 8 z 10 úloh?</h1>
+  <p class="perex">Deset úloh ve dvou rolích. Část zkouší přehled napříč obory od zeměpisu po češtinu, u zbytku rozhoduje, jak pozorně čtete zadání i varianty, a nakonec čeká jedna úloha na čistý úsudek. Milí senioři, možnosti jsou čtyři a sedí jedna. Zvládnete osm?</p>
+  <div id="kviz"></div>
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+  <div id="vysledek" style="display:none">
+    <div id="skore"></div>
+    <div id="hodnoceni"></div>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var otazky = [
+  {
+    q: `1. Se kterým státem má Česká republika nejdelší společnou hranici?`,
+    o: [`se Slovenskem`, `s Polskem`, `s Německem`, `s Rakouskem`],
+    s: 2
+  },
+  {
+    q: `2. Který kov se ve starých domech používal na vodovodní rozvody a dnes se kvůli němu potrubí vyměňuje?`,
+    o: [`cín`, `zinek`, `měď`, `olovo`],
+    s: 3
+  },
+  {
+    q: `3. Ve kterém sportu se soutěží v disciplíně zvané krasojízda?`,
+    o: [`v sálové cyklistice`, `v krasobruslení`, `v moderní gymnastice`, `v akrobatickém lyžování`],
+    s: 0
+  },
+  {
+    q: `4. Které z uvedených slov neoznačuje pokrývku hlavy?`,
+    o: [`turban`, `škapulíř`, `čepec`, `baret`],
+    s: 1
+  },
+  {
+    q: `5. Ve které řadě jsou uvedená česká města seřazena od západu na východ?`,
+    o: [`Plzeň, Brno, Praha, Ostrava`, `Praha, Plzeň, Brno, Ostrava`, `Plzeň, Praha, Brno, Ostrava`, `Ostrava, Brno, Praha, Plzeň`],
+    s: 2
+  },
+  {
+    q: `6. Kde dozrávají arašídy?`,
+    o: [`pod zemí`, `na větvích stromu`, `na keři nad zemí`, `na popínavé rostlině`],
+    s: 0
+  },
+  {
+    q: `7. Čím je dáno, že ze Země vidíme stále tutéž stranu Měsíce?`,
+    o: [
+      `tím, že se Měsíc kolem své osy vůbec neotáčí, jen obíhá kolem Země`,
+      `tím, že Měsíc obíhá Zemi přesně nad rovníkem a nemůže se natočit jinak`,
+      `tím, že se Měsíc kolem své osy otočí jednou za jeden oběh kolem Země`,
+      `tím, že se Měsíc kolem své osy otočí jednou za 24 hodin stejně jako Země`
+    ],
+    s: 2
+  },
+  {
+    q: `8. Koho označuje slovo fanfarón?`,
+    o: [
+      `člověka, který se všeho bojí`,
+      `člověka, který si na všechno stěžuje`,
+      `člověka, který nikomu nevěří`,
+      `člověka, který se rád vychloubá`
+    ],
+    s: 3
+  },
+  {
+    q: `9. Proč led plave na hladině vody?`,
+    o: [
+      `protože má menší hustotu než voda`,
+      `protože obsahuje uzavřené bublinky vzduchu`,
+      `protože je chladnější než voda pod ním`,
+      `protože jej nadnáší proudění vody`
+    ],
+    s: 0
+  },
+  {
+    q: `10. Ve které dvojici je mezi slovy stejný vztah jako mezi slovy kapitán a loď?`,
+    o: [`cestující a autobus`, `strojvedoucí a vlak`, `plavčík a bazén`, `horník a šachta`],
+    s: 1
+  }
+];
+
+var hodnoceni = [
+  {
+    max: 3,
+    text: `K laťce osmi bodů, kterou slibuje titulek, je odsud ještě daleko. Za výsledkem obvykle nestojí jediná příčina. Část bodů padne na oborech, do kterých člověk od školy nezavadil, protože kvíz skáče od mapy k chemii, přírodě, astronomii i češtině a málokdo se pohybuje ve všech naráz. Druhá část se ale ztrácí úplně jinde, v úlohách, kde stačí přeběhnout zadání očima a přehlédnout jedno jediné slovo nebo rozdíl mezi dvěma podobnými variantami. Podívejte se, ve kterých otázkách jste minuli, a hned uvidíte, do které z těch dvou skupin vaše chyby patří. Zvednout se dá obojí, jen každé jinak.`
+  },
+  {
+    max: 6,
+    text: `Polovina úloh sedla, druhá ne. Většinou to vypadá tak, že obory, ke kterým máte blízko z práce nebo z koníčků, jste zvládli bez zaváhání, zatímco u ostatních jste tipovali. To není chyba úsudku, je to prostě mapa toho, co člověk používá a co ne. Stojí ale za to projít si znovu i ty otázky, kde jste odpověď vlastně věděli a přesto minuli, protože u úloh na všímavost rozhoduje tempo čtení, ne znalost. Na hranici osmi bodů to dnes nebylo, chybí vám k ní dva až čtyři body a najdete je v obou těch skupinách.`
+  },
+  {
+    max: 9,
+    text: `Sedm bodů je výsledek, na kterém se tady zastaví většina řešitelů, s osmi a devíti už jste laťku z titulku splnili. Rozdíl mezi sedmičkou a devítkou dělají obvykle dvě oblasti, do kterých jste nikdy nemuseli nahlédnout, nejčastěji sport nebo přírodopis. Umíte přeskakovat mezi obory, které spolu nesouvisejí, poradíte si s mapou i se slovem, které se dnes už moc neslyší, neuteče vám drobnost schovaná v zadání a nerozhodí vás ani závěrečná úloha, kde se odpověď musí odvodit ze vztahu mezi slovy.`
+  },
+  {
+    max: 10,
+    text: `Přesně to, co titulek slibuje, a ještě o dva body víc. Nezastavila vás mapa sousedních států, kov ze starých domovních rozvodů, sportovní disciplína, jejíž název svádí úplně jinam, výčet, ve kterém jedno slovo do řady nepatří, čtveřice měst seřazená napříč republikou, dozrávání jednoho známého plodu, otáčení Měsíce, staré slovo pro vychloubače, chování ledu na vodě ani závěrečná dvojice slov. Deset z deseti znamená, že vám vedle přehledu spolehlivě funguje i pozornost, protože část těch úloh se rychlým přečtením mine úplně snadno. To se povede jen menšině. Klobouk dolů.`
+  }
+];
+
+var pismena = [`a)`, `b)`, `c)`, `d)`];
+var odpovedi = new Array(otazky.length).fill(null);
+var uzamceno = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoVyhodnotit = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var tlacitkoZnovu = document.getElementById(`znovu`);
+
+function vykresli() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (ot, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    var zneni = document.createElement(`div`);
+    zneni.className = `zneni`;
+    zneni.textContent = ot.q;
+    box.appendChild(zneni);
+
+    ot.o.forEach(function (varianta, j) {
+      var btn = document.createElement(`button`);
+      btn.className = `varianta`;
+      btn.type = `button`;
+      btn.textContent = pismena[j] + ` ` + varianta;
+      btn.setAttribute(`data-o`, String(i));
+      btn.setAttribute(`data-v`, String(j));
+      btn.addEventListener(`click`, klik);
+      box.appendChild(btn);
+    });
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function klik(e) {
+  if (uzamceno) { return; }
+  var btn = e.currentTarget;
+  var i = parseInt(btn.getAttribute(`data-o`), 10);
+  var j = parseInt(btn.getAttribute(`data-v`), 10);
+  odpovedi[i] = j;
+
+  var box = btn.parentNode;
+  var vsechny = box.getElementsByClassName(`varianta`);
+  for (var k = 0; k < vsechny.length; k++) {
+    vsechny[k].classList.remove(`vybrana`);
+  }
+  btn.classList.add(`vybrana`);
+  hlaskaEl.textContent = ``;
+  aktualizujTlacitko();
+}
+
+function aktualizujTlacitko() {
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  tlacitkoVyhodnotit.disabled = !hotovo;
+}
+
+function vyhodnot() {
+  if (odpovedi.some(function (o) { return o === null; })) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  uzamceno = true;
+  var body = 0;
+  var boxy = kvizEl.getElementsByClassName(`otazka`);
+
+  for (var i = 0; i < otazky.length; i++) {
+    var varianty = boxy[i].getElementsByClassName(`varianta`);
+    for (var j = 0; j < varianty.length; j++) {
+      varianty[j].disabled = true;
+      varianty[j].classList.remove(`vybrana`);
+      if (j === otazky[i].s) {
+        varianty[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        varianty[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === otazky[i].s) { body++; }
+  }
+
+  skoreEl.textContent = body + ` z ` + otazky.length;
+  var text = hodnoceni[hodnoceni.length - 1].text;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body <= hodnoceni[h].max) { text = hodnoceni[h].text; break; }
+  }
+  hodnoceniEl.textContent = text;
+  vysledekEl.style.display = `block`;
+  tlacitkoVyhodnotit.disabled = true;
+  hlaskaEl.textContent = ``;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function znovu() {
+  odpovedi = new Array(otazky.length).fill(null);
+  uzamceno = false;
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  vykresli();
+  aktualizujTlacitko();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+tlacitkoVyhodnotit.addEventListener(`click`, vyhodnot);
+tlacitkoZnovu.addEventListener(`click`, znovu);
+vykresli();
+aktualizujTlacitko();
+</script>
+</body>
+</html>
