@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz, který prověří každého seniora: Dokážete projít všemi 10 otázkami bez nápovědy?</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 36px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+  line-height: 1.45;
+}
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta:disabled { cursor: default; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#hlaska { text-align: center; color: #8c5b5b; margin-top: 14px; font-size: .95rem; }
+#vysledek {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 640px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka, #vysledek { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz, který prověří každého seniora: Dokážete projít všemi 10 otázkami bez nápovědy?</h1>
+<p class="perex">Deset otázek z deseti různých oborů a k ruce nemáte nic než vlastní paměť. Některé vypadají nevinně, jenže mezi nimi čekají i takové, na kterých uspěje jen zlomek řešitelů. Projdete všemi deseti bez zaváhání?</p>
+<div id="kviz"></div>
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p id="hlaska"></p>
+<div id="vysledek" hidden>
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var OTAZKY = [
+  { z: `1. U kterého druhu zvěře označují myslivci období páření slovem chrutí?`,
+    v: [`jelen evropský`, `zajíc polní`, `prase divoké`, `liška obecná`], s: 2 },
+  { z: `2. Jak se odborně nazývá zánět pohrudnice?`,
+    v: [`peritonitida`, `pleuritida`, `meningitida`, `pankreatitida`], s: 1 },
+  { z: `3. Co je vltavín?`,
+    v: [`obsidián`, `achát`, `tektit`, `opál`], s: 2 },
+  { z: `4. Ve kterém pražském divadle měla premiéru Smetanova opera Prodaná nevěsta?`,
+    v: [`Stavovské divadlo`, `Prozatímní divadlo`, `Novoměstské divadlo`, `Národní divadlo`], s: 1 },
+  { z: `5. Co jistě plyne z toho, že každý včelař v obci pěstuje ovocné stromy a že nikdo, kdo pěstuje ovocné stromy, nechová ovce?`,
+    v: [`Žádný včelař v obci nechová ovce.`, `Každý, kdo v obci pěstuje ovocné stromy, je včelař.`, `Kdo v obci chová ovce, ten také včelaří.`, `Kdo v obci nechová ovce, pěstuje ovocné stromy.`], s: 0 },
+  { z: `6. Kdo je autorem spisu Utopie?`,
+    v: [`Erasmus Rotterdamský`, `Thomas More`, `Niccolò Machiavelli`, `Francis Bacon`], s: 1 },
+  { z: `7. Který železniční tunel je nejdelší v Česku?`,
+    v: [`Březenský tunel`, `Vinohradský tunel`, `Jablunkovský tunel`, `Ejpovický tunel`], s: 3 },
+  { z: `8. Kdo namaloval obraz Sběračky klasů?`,
+    v: [`Jean-François Millet`, `Gustave Courbet`, `Constant Troyon`, `Théodule Ribot`], s: 0 },
+  { z: `9. Kdo navrhl útulny Libušín a Maměnka na Pustevnách?`,
+    v: [`Josef Zítek`, `Josef Gočár`, `Dušan Jurkovič`, `Kamil Hilbert`], s: 2 },
+  { z: `10. Kdo je autorem nejstarší tištěné mapy Čech?`,
+    v: [`Jan Amos Komenský`, `Pavel Aretin`, `Jan Kryštof Müller`, `Mikuláš Klaudyán`], s: 3 }
+];
+
+var HODNOCENI = [
+  { min: 0, max: 3, text: `Kvíz míří do deseti různých oborů a v tomto pásmu jich zůstala větší část mimo dosah. Slib z titulku, tedy projít všemi deseti otázkami bez nápovědy, splněný není a schází k němu podstatný kus cesty. O celkovém rozhledu to samo o sobě nevypovídá nic, spíš se sešly obory, které se míjejí s tím, čemu se kdo věnoval. Nejlepší je projít si klidně správné odpovědi a vrátit se ke kvízu s odstupem.` },
+  { min: 4, max: 6, text: `Zhruba polovina otázek sedla a polovina ne, což u zadání rozkročeného přes deset oborů není nijak překvapivé. Slib z titulku ale zůstává nesplněný, protože je binární: buď projdete všemi deseti otázkami bez nápovědy, nebo ne, a mezistupeň neexistuje. V tomto pásmu rozhoduje hlavně to, kolik z deseti oborů někoho v životě zajímalo nad rámec školy. Rozdíl mezi spodní a horní hranicí pásma jsou přitom jen dvě odpovědi, takže i drobný posun v tom, který obor právě padne, výsledkem uvnitř pásma znatelně pohne.` },
+  { min: 7, max: 9, text: `Nadprůměrný výsledek, u kterého většina z deseti oborů potíže nedělá a ztráty se nasbíraly jen v menší části z nich. Titulek přesto splněný není, protože slibuje průchod všemi deseti otázkami bez jediné chyby, a k tomu v tomto pásmu vždycky ještě něco schází. Rozdíl mezi spodní a horní hranicí pásma bývá menší, než se zdá, a rozhoduje se v něm často jen o jednu nebo dvě odpovědi.` },
+  { min: 10, max: 10, text: `Plný počet je jediný výsledek, který slibu z titulku skutečně dostojí: všech deset otázek z deseti různých oborů, bez nápovědy a bez jediné chyby. Takové skóre se v tomto kvízu čeká jen u zlomku řešitelů, protože k němu nestačí jeden obor ani jeden typ paměti a každá jednotlivá otázka musí sednout. Napříč deseti obory to znamená opravdu široký rozhled.` }
+];
+
+var PISMENA = [`a) `, `b) `, `c) `, `d) `];
+var odpovedi = new Array(OTAZKY.length).fill(null);
+var hotovo = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function postav() {
+  kvizEl.innerHTML = ``;
+  OTAZKY.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = o.z;
+    box.appendChild(zneni);
+    o.v.forEach(function (text, j) {
+      var b = document.createElement(`button`);
+      b.className = `varianta`;
+      b.type = `button`;
+      b.textContent = PISMENA[j] + text;
+      b.setAttribute(`data-o`, String(i));
+      b.setAttribute(`data-v`, String(j));
+      b.addEventListener(`click`, klikVarianta);
+      box.appendChild(b);
+    });
+    kvizEl.appendChild(box);
+  });
+}
+
+function klikVarianta(e) {
+  if (hotovo) { return; }
+  var b = e.currentTarget;
+  var oi = parseInt(b.getAttribute(`data-o`), 10);
+  var vi = parseInt(b.getAttribute(`data-v`), 10);
+  odpovedi[oi] = vi;
+  var sourozenci = b.parentNode.querySelectorAll(`.varianta`);
+  for (var k = 0; k < sourozenci.length; k++) {
+    sourozenci[k].classList.remove(`vybrana`);
+  }
+  b.classList.add(`vybrana`);
+  aktualizuj();
+}
+
+function aktualizuj() {
+  var vse = odpovedi.every(function (x) { return x !== null; });
+  tlacitkoEl.disabled = !vse;
+  if (vse) { hlaskaEl.textContent = ``; }
+}
+
+function vyhodnot() {
+  if (hotovo) { return; }
+  if (!odpovedi.every(function (x) { return x !== null; })) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  hotovo = true;
+  hlaskaEl.textContent = ``;
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  OTAZKY.forEach(function (o, i) {
+    var tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove(`vybrana`);
+      if (j === o.s) { tlacitka[j].classList.add(`spravna`); }
+      else if (j === odpovedi[i]) { tlacitka[j].classList.add(`spatna`); }
+    }
+    if (odpovedi[i] === o.s) { body++; }
+  });
+  skoreEl.textContent = body + ` z ` + OTAZKY.length;
+  var text = ``;
+  for (var h = 0; h < HODNOCENI.length; h++) {
+    if (body >= HODNOCENI[h].min && body <= HODNOCENI[h].max) { text = HODNOCENI[h].text; }
+  }
+  hodnoceniEl.textContent = text;
+  vysledekEl.hidden = false;
+  tlacitkoEl.disabled = true;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function resetuj() {
+  hotovo = false;
+  odpovedi = new Array(OTAZKY.length).fill(null);
+  vysledekEl.hidden = true;
+  hlaskaEl.textContent = ``;
+  tlacitkoEl.disabled = true;
+  postav();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+tlacitkoEl.addEventListener(`click`, vyhodnot);
+znovuEl.addEventListener(`click`, resetuj);
+postav();
+</script>
+</body>
+</html>
