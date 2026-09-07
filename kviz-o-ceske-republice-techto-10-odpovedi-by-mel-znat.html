@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz o České republice: těchto 10 odpovědí by měl znát každý hrdý Čech</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qt { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#submit:hover:not(:disabled) { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 24px;
+  border-top: 4px solid #5b7e5f;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 14px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#retry:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz o České republice: těchto 10 odpovědí by měl znát každý hrdý Čech</h1>
+<p class="perex">Deset otázek o českých dějinách, krajině, literatuře, hudbě, sportu i filmu. Zkuste si, kolik toho o vlastní zemi opravdu víte.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warn" hidden>Odpovězte prosím na všechny otázky</p>
+<div id="result" hidden>
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  { q: `1. Kolik polí má velký státní znak České republiky?`, o: [`tři`, `čtyři`, `pět`, `šest`], a: 1 },
+  { q: `2. Který strom byl roku 1848 na Všeslovanském sjezdu v Praze zvolen národním stromem Slovanů?`, o: [`dub`, `buk`, `javor`, `lípa`], a: 3 },
+  { q: `3. Kdo je autorem písně Ta naše písnička česká?`, o: [`Karel Hašler`, `Jaroslav Ježek`, `Rudolf Friml`, `Karel Vacek`], a: 0 },
+  { q: `4. Který snímek získal roku 1997 Oscara za nejlepší cizojazyčný film?`, o: [`Obecná škola`, `Vesničko má středisková`, `Kolja`, `Ostře sledované vlaky`], a: 2 },
+  { q: `5. Jaký krycí název měla invaze vojsk Varšavské smlouvy do Československa v srpnu 1968?`, o: [`Visla`, `Dunaj`, `Volha`, `Něva`], a: 1 },
+  { q: `6. Ve kterém výběžku leží nejsevernější bod České republiky?`, o: [`ve Frýdlantském`, `v Broumovském`, `ve Šluknovském`, `v Ašském`], a: 2 },
+  { q: `7. Kdo je autorem románu Vlčí jáma?`, o: [`Marie Majerová`, `Marie Pujmanová`, `Božena Benešová`, `Jarmila Glazarová`], a: 3 },
+  { q: `8. Ve kterém městě stojí nejstarší dochovaný kamenný most v České republice?`, o: [`v Roudnici nad Labem`, `v Praze`, `v Písku`, `v Litoměřicích`], a: 2 },
+  { q: `9. Kdo vstřelil jediný gól finále olympijského hokejového turnaje v Naganu?`, o: [`Jaromír Jágr`, `Robert Reichel`, `Martin Procházka`, `Petr Svoboda`], a: 3 },
+  { q: `10. Ve kterém českém městě se poprvé na světě vyrobil kostkový cukr?`, o: [`v Dačicích`, `v Kolíně`, `v Přerově`, `v Hradci Králové`], a: 0 }
+];
+
+var VERDICTS = [
+  { min: 0, max: 3, t: `Na hrdého Čecha to zatím nevydá. Zastavily vás i věci, které se braly ve škole a čas od času se samy připomenou. Nic ztraceného se nestalo, jen se ukázalo, že se o vlastní zemi roky nikdo neptal. Projděte si odpovědi a příště vám bude povědomá většina z nich.` },
+  { min: 4, max: 6, t: `Slušný základ, ale ještě ne kompletní přehled. Tam, kde stačí obecné povědomí o zemi, si člověk poradí, jakmile ale přijde na konkrétní město, jméno autora nebo krycí název, jistota kolísá. Chybí málo, a rozhoduje se to tam, kde končí obecný přehled a začíná skutečný zájem o vlastní zemi.` },
+  { min: 7, max: 9, t: `Dějiny, krajní body republiky, literatura, mosty i hokej, v takovém rozptylu se udrží jen ten, kdo o zemi ví víc než obrysy, a k plnému počtu vám chybělo jen málo. Na titul hrdého Čecha to bohatě stačí.` },
+  { min: 10, max: 10, t: `Plný počet zvládne jen menšina a vy mezi ni patříte. Nezaváhali jste u polí státního znaku, u krycího názvu srpnové invaze roku 1968, u nejsevernějšího cípu republiky, u meziválečné prózy, u mostu staršího než ten Karlův, u nejslavnějšího gólu českého hokeje ani u města, které dalo světu kostku cukru. Takhle kompletní přehled o vlastní zemi je vzácný a hrdost na něj je zasloužená.` }
+];
+
+var LETTERS = [`a`, `b`, `c`, `d`];
+var picks = [];
+var locked = false;
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryEl = document.getElementById(`retry`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  picks = [];
+  locked = false;
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    picks.push(null);
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var title = document.createElement(`p`);
+    title.className = `qt`;
+    title.textContent = QUESTIONS[i].q;
+    box.appendChild(title);
+    for (var j = 0; j < QUESTIONS[i].o.length; j++) {
+      var btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.type = `button`;
+      btn.textContent = LETTERS[j] + `) ` + QUESTIONS[i].o[j];
+      btn.setAttribute(`data-q`, String(i));
+      btn.setAttribute(`data-o`, String(j));
+      btn.addEventListener(`click`, onPick);
+      box.appendChild(btn);
+    }
+    quizEl.appendChild(box);
+  }
+  resultEl.hidden = true;
+  warnEl.hidden = true;
+  submitEl.disabled = true;
+  submitEl.hidden = false;
+}
+
+function onPick(e) {
+  if (locked) { return; }
+  var qi = parseInt(e.currentTarget.getAttribute(`data-q`), 10);
+  var oi = parseInt(e.currentTarget.getAttribute(`data-o`), 10);
+  picks[qi] = oi;
+  var siblings = e.currentTarget.parentNode.querySelectorAll(`.opt`);
+  for (var k = 0; k < siblings.length; k++) { siblings[k].classList.remove(`sel`); }
+  e.currentTarget.classList.add(`sel`);
+  var done = true;
+  for (var m = 0; m < picks.length; m++) { if (picks[m] === null) { done = false; } }
+  submitEl.disabled = !done;
+  if (done) { warnEl.hidden = true; }
+}
+
+submitEl.addEventListener(`click`, function () {
+  var done = true;
+  for (var m = 0; m < picks.length; m++) { if (picks[m] === null) { done = false; } }
+  if (!done) { warnEl.hidden = false; return; }
+  locked = true;
+  var score = 0;
+  var boxes = quizEl.querySelectorAll(`.q`);
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    var opts = boxes[i].querySelectorAll(`.opt`);
+    for (var j = 0; j < opts.length; j++) {
+      opts[j].disabled = true;
+      opts[j].classList.remove(`sel`);
+      if (j === QUESTIONS[i].a) { opts[j].classList.add(`correct`); }
+      else if (j === picks[i]) { opts[j].classList.add(`wrong`); }
+    }
+    if (picks[i] === QUESTIONS[i].a) { score++; }
+  }
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score >= VERDICTS[v].min && score <= VERDICTS[v].max) { verdictEl.textContent = VERDICTS[v].t; }
+  }
+  submitEl.hidden = true;
+  warnEl.hidden = true;
+  resultEl.hidden = false;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+retryEl.addEventListener(`click`, function () {
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+</script>
+</body>
+</html>
