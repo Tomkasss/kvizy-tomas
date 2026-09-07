@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vědomostní výzva pro lidi 60+: 8 správných odpovědí znamená, že vám to stále skvěle myslí</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 32px 16px 60px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+  line-height: 1.45;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.locked .opt { cursor: default; }
+.locked .opt:hover { background: #f7f4f0; }
+.locked .opt.selected:hover { background: #dcd3c7; }
+.locked .opt.correct:hover { background: #d4edda; }
+.locked .opt.wrong:hover { background: #f8d7da; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+  border-top: 4px solid #5b7e5f;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#retry:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 20px 16px 40px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="title"></h1>
+  <p class="perex" id="perex"></p>
+  <div id="quiz"></div>
+  <button id="submit" disabled></button>
+  <p id="warn" hidden></p>
+  <div id="result" hidden>
+    <p id="score"></p>
+    <p id="verdict"></p>
+    <button id="retry"></button>
+  </div>
+</div>
+<script>
+var TITLE = `Vědomostní výzva pro lidi 60+: 8 správných odpovědí znamená, že vám to stále skvěle myslí`;
+var PEREX = `Deset otázek, deset různých oborů. Dobrodružná klasika, zeměpis, příroda, dějiny, vynálezy, film, čeština, architektura i úsudek bez počítání. Kdo má za sebou šedesátku a udržuje si přehled, ten se na osmi bodech udrží. Jak dopadnete vy?`;
+
+var QUESTIONS = [
+  {
+    q: `1. Jak se jmenuje ponorka kapitána Nema?`,
+    options: [`Argonaut`, `Nautilus`, `Triton`, `Poseidon`],
+    correct: 1
+  },
+  {
+    q: `2. Který stát dnes spravuje Falklandy?`,
+    options: [`Argentina`, `Francie`, `Velká Británie`, `Španělsko`],
+    correct: 2
+  },
+  {
+    q: `3. Co znamená sloveso kvaltovat?`,
+    options: [`spěchat`, `klamat`, `hlasitě naříkat`, `plýtvat penězi`],
+    correct: 0
+  },
+  {
+    q: `4. Jakým způsobem se vyživuje jmelí bílé?`,
+    options: [
+      `bere hostiteli vodu, minerály i hotové cukry a samo nefotosyntetizuje`,
+      `hostitele využívá jen jako oporu, vodu i živiny získává ze vzduchu a dešťové vody`,
+      `vodu a minerály bere hostiteli, cukry si tvoří samo`,
+      `rozkládá odumřelé dřevo hostitele a živiny přijímá z něj`
+    ],
+    correct: 2
+  },
+  {
+    q: `5. Kdo je zakladatelem mezinárodního hnutí Červeného kříže?`,
+    options: [`Frédéric Passy`, `Albert Schweitzer`, `Robert Koch`, `Henri Dunant`],
+    correct: 3
+  },
+  {
+    q: `6. Ve které francouzské komedii z roku 1966 provázejí Louis de Funès a Bourvil sestřelené britské letce okupovanou Francií?`,
+    options: [`Grand restaurant pana Septima`, `Fantomas se zlobí`, `Velký flám`, `Křidýlko nebo stehýnko`],
+    correct: 2
+  },
+  {
+    q: `7. Čím se inspiroval vynálezce suchého zipu?`,
+    options: [
+      `úbory lopuchu zachycenými v srsti jeho psa`,
+      `přísavkami na chapadlech chobotnice`,
+      `zahnutými trny na šlahounech ostružiníku`,
+      `vlákny, ze kterých pavouk splétá síť`
+    ],
+    correct: 0
+  },
+  {
+    q: `8. Z čeho se ve středověku vyráběl pergamen, na který se psaly knihy a listiny?`,
+    options: [
+      `z dřeně stonků rostliny papyrus`,
+      `ze speciálně upravené zvířecí kůže`,
+      `z lisované březové kůry`,
+      `z rozvlákněné rýžové slámy`
+    ],
+    correct: 1
+  },
+  {
+    q: `9. Kdo doběhl do cíle poslední, jestliže Pavel doběhl před Ivanem, Ivan před Martou a Olga za Martou?`,
+    options: [`Pavel`, `Ivan`, `Marta`, `Olga`],
+    correct: 3
+  },
+  {
+    q: `10. Kdo navrhl historickou budovu Národního muzea v Praze?`,
+    options: [`Josef Zítek`, `Josef Schulz`, `Antonín Wiehl`, `Ignác Vojtěch Ullmann`],
+    correct: 1
+  }
+];
+
+var VERDICTS = [
+  { min: 0, max: 3, text: `Ke slíbené osmičce vám chybí pět bodů a víc, takže rozhodly už otázky, které měly být rozehřátím: ponorka kapitána Nema, správa ostrovů v jižním Atlantiku, význam slovesa kvaltovat a seřazení čtyř běžců podle cíle. Ani jedna z nich nestojí na paměti na letopočty, stojí na věcech, které se člověku samy vracejí z knih, ze zpráv a z běžné řeči. Právě proto je to ta nejlépe dohonitelná ztráta ze všech.` },
+  { min: 4, max: 6, text: `Rozjezd jste zvládli, ztráceli jste ve středním pásmu, kde rozhodoval způsob obživy jmelí, zakladatel Červeného kříže, francouzská komedie z roku 1966 se dvěma slavnými komiky, nápad za suchým zipem a surovina, ze které se dělal pergamen. To je poctivý průměr, jen se zastavil pod laťkou z titulku. K osmi bodům vám chybějí dvě až čtyři odpovědi a všechny leží v oborech, kde stačí přehled udržovat, ne se ho učit znovu.` },
+  { min: 7, max: 9, text: `Tady se láme titulek. Se sedmi body jste o jediný krok pod hranicí, u které se dá říct, že vám to stále skvěle myslí, a scházela vám nejspíš jedna položka ze středního pásma, nejčastěji ta filmová nebo ta o jmelí. S osmi nebo devíti body jste laťku naopak přeskočili: udrželi jste celý rozjezd, prošli i středem a zaváhali jen tam, kde se zaváhat čeká, tedy u autora budovy Národního muzea, kterého si většina lidí plete se stavitelem Národního divadla. Osm bodů a víc znamená hlavu, která si drží tempo napříč deseti obory najednou.` },
+  { min: 10, max: 10, text: `Plný počet, a ten dá jen menšina. Neshodila vás ani ponorka z Verneova románu, ani ostrovy v jižním Atlantiku, ani zapomenuté sloveso, ani rostlina, která si bere vodu z cizího dřeva. K tomu jste trefili zakladatele humanitárního hnutí, komedii, ve které dva francouzští komici provádějí letce okupovanou zemí, nápad odkoukaný od lopuchu, psací látku vyrobenou ze zvířecí kůže, pořadí čtyř běžců i architekta, u kterého padá i dobře sečtělý řešitel. To už není jen splněná osmička z titulku, to je rozhled, který se nedá nasbírat za týden.` }
+];
+
+var LABEL_SUBMIT = `Vyhodnotit`;
+var LABEL_RETRY = `Zkusit znovu`;
+var LABEL_WARN = `Odpovězte prosím na všechny otázky`;
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var locked = false;
+
+var titleEl = document.getElementById(`title`);
+var perexEl = document.getElementById(`perex`);
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryEl = document.getElementById(`retry`);
+
+titleEl.textContent = TITLE;
+perexEl.textContent = PEREX;
+submitEl.textContent = LABEL_SUBMIT;
+retryEl.textContent = LABEL_RETRY;
+warnEl.textContent = LABEL_WARN;
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    box.setAttribute(`data-q`, String(qi));
+
+    var qt = document.createElement(`p`);
+    qt.className = `q-text`;
+    qt.textContent = item.q;
+    box.appendChild(qt);
+
+    item.options.forEach(function (opt, oi) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `opt`;
+      btn.textContent = opt;
+      btn.setAttribute(`data-q`, String(qi));
+      btn.setAttribute(`data-o`, String(oi));
+      btn.addEventListener(`click`, function () { pick(qi, oi); });
+      box.appendChild(btn);
+    });
+
+    quizEl.appendChild(box);
+  });
+}
+
+function pick(qi, oi) {
+  if (locked) { return; }
+  answers[qi] = oi;
+  var box = quizEl.querySelector(`[data-q="` + qi + `"]`);
+  var btns = box.querySelectorAll(`.opt`);
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].classList.remove(`selected`);
+  }
+  btns[oi].classList.add(`selected`);
+  refresh();
+}
+
+function allAnswered() {
+  for (var i = 0; i < answers.length; i++) {
+    if (answers[i] === null) { return false; }
+  }
+  return true;
+}
+
+function refresh() {
+  var ready = allAnswered();
+  submitEl.disabled = !ready;
+  if (ready) { warnEl.hidden = true; }
+}
+
+function evaluate() {
+  if (!allAnswered()) {
+    warnEl.hidden = false;
+    return;
+  }
+  locked = true;
+  var score = 0;
+
+  QUESTIONS.forEach(function (item, qi) {
+    var box = quizEl.querySelector(`[data-q="` + qi + `"]`);
+    box.classList.add(`locked`);
+    var btns = box.querySelectorAll(`.opt`);
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.remove(`selected`);
+    }
+    btns[item.correct].classList.add(`correct`);
+    if (answers[qi] === item.correct) {
+      score++;
+    } else {
+      btns[answers[qi]].classList.add(`wrong`);
+    }
+  });
+
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score >= VERDICTS[v].min && score <= VERDICTS[v].max) {
+      verdictEl.textContent = VERDICTS[v].text;
+      break;
+    }
+  }
+
+  submitEl.disabled = true;
+  warnEl.hidden = true;
+  resultEl.hidden = false;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  locked = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.hidden = true;
+  warnEl.hidden = true;
+  submitEl.disabled = true;
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+retryEl.addEventListener(`click`, reset);
+
+build();
+refresh();
+</script>
+</body>
+</html>
