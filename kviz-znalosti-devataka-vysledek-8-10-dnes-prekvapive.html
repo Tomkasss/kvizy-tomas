@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz znalostí deváťáka: výsledek 8/10 dnes překvapivě nezvládne každý maturant</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 32px 16px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qt { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.locked .opt { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #8c3b3b; margin: 14px 0 0; font-size: .95rem; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 40px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#retry:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz znalostí deváťáka: výsledek 8/10 dnes překvapivě nezvládne každý maturant</h1>
+<p class="perex">Deset otázek napříč obory, každá na jednu vědomost, kterou si člověk odnáší ze školy i z běžného života. Přírodopis, fyzika, chemie, zeměpis, hudba, film i dějiny. Osm správných odpovědí zní skromně, jenže nasbírá je jen menšina dospělých.</p>
+
+<div id="quiz"></div>
+
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warn" hidden>Odpovězte prosím na všechny otázky</p>
+
+<div id="result" hidden>
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+
+<script>
+const QUESTIONS = [
+  { q: `1. Z čeho vzniklo černé uhlí?`,
+    opts: [`z odumřelých rostlin pravěkých močálů`, `z odumřelých rostlin pravěkých pouští`, `ze zbytků pravěkého mořského planktonu`, `ze schránek pravěkých mořských živočichů`],
+    correct: 0 },
+  { q: `2. Jak se nazývá zádušní mše?`,
+    opts: [`chorál`, `rekviem`, `oratorium`, `kantáta`],
+    correct: 1 },
+  { q: `3. Která jednotka vyjadřuje frekvenci?`,
+    opts: [`decibel`, `watt`, `lumen`, `hertz`],
+    correct: 3 },
+  { q: `4. Jak se nazývá kamenná schránka, do níž staří Egypťané ukládali mumii?`,
+    opts: [`mastaba`, `sarkofág`, `kanopa`, `obelisk`],
+    correct: 1 },
+  { q: `5. Ke kterému státu patří Faerské ostrovy?`,
+    opts: [`k Dánsku`, `k Norsku`, `k Islandu`, `ke Spojenému království`],
+    correct: 0 },
+  { q: `6. Která sloučenina se běžně označuje jako jedlá soda?`,
+    opts: [`uhličitan sodný`, `hydrogenuhličitan hořečnatý`, `uhličitan hořečnatý`, `hydrogenuhličitan sodný`],
+    correct: 3 },
+  { q: `7. Ve kterém období japonských dějin vládl rod Tokugawa?`,
+    opts: [`v období Nara`, `v období Heian`, `v období Edo`, `v období Meidži`],
+    correct: 2 },
+  { q: `8. Ve které zemi se udělují filmové ceny César?`,
+    opts: [`v Itálii`, `ve Španělsku`, `ve Francii`, `v Belgii`],
+    correct: 2 },
+  { q: `9. Na kterém ostrově vznikl hudební styl reggae?`,
+    opts: [`na Jamajce`, `na Kubě`, `na Barbadosu`, `na Trinidadu`],
+    correct: 0 },
+  { q: `10. Jak se nazývá římská stavba, která přiváděla vodu do měst?`,
+    opts: [`viadukt`, `akvadukt`, `amfiteátr`, `bazilika`],
+    correct: 1 }
+];
+
+const LETTERS = [`a) `, `b) `, `c) `, `d) `];
+
+const BANDS = [
+  { min: 0, max: 3, text: `Trefily se jednotlivé otázky a u zbytku rozhodovala spíš náhoda než jistota. K laťce osmi bodů, kterou slibuje titulek, je odsud daleko a srovnání s čerstvým maturantem vychází jednoznačně v jeho prospěch. Dobrá zpráva je, že takhle dopadá i řada lidí, které by to o vlastním přehledu nenapadlo.` },
+  { min: 4, max: 7, text: `Nejobsazenější pásmo celého kvízu a zároveň pásmo těsně pod slibovanou metou. Snadnější otázky jste posbírali, dostaly vás ty, kde dvě možnosti ležely těsně vedle sebe. Na osm bodů, tedy na hranici, kterou podle titulku nepřekročí každý maturant, chybí jedna až čtyři odpovědi. Sedm bodů je předsíň té lepší skupiny, jediná otázka od ní.` },
+  { min: 8, max: 9, text: `Laťku z titulku jste splnili. Osm bodů a víc znamená, že v přímém srovnání obstojíte i vedle člověka, který má maturitu čerstvě za sebou, protože právě tuhle metu většina řešitelů nepřekročí. Rozhodly u vás otázky, kde nestačí tušit, ale je potřeba vědět, a k plnému počtu chyběla jedna nebo dvě.` },
+  { min: 10, max: 10, text: `Plný počet, a ten nasbírá jen menšina. Neshodil vás vznik černého uhlí, zádušní mše, jednotka frekvence, egyptská kamenná schránka, japonský vládnoucí rod ani římská vodní stavba na konci. Takový rozhled sahá daleko za to, co po deváté třídě obvykle zbude, a srovnání s maturantem byste vyhráli o několik délek.` }
+];
+
+const answers = new Array(QUESTIONS.length).fill(null);
+let evaluated = false;
+
+const quizEl = document.getElementById(`quiz`);
+const submitEl = document.getElementById(`submit`);
+const warnEl = document.getElementById(`warn`);
+const resultEl = document.getElementById(`result`);
+const scoreEl = document.getElementById(`score`);
+const verdictEl = document.getElementById(`verdict`);
+const retryEl = document.getElementById(`retry`);
+
+function build() {
+  quizEl.textContent = ``;
+  QUESTIONS.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    box.dataset.qi = String(qi);
+
+    const title = document.createElement(`p`);
+    title.className = `qt`;
+    title.textContent = item.q;
+    box.appendChild(title);
+
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `opt`;
+      btn.textContent = LETTERS[oi] + opt;
+      btn.dataset.qi = String(qi);
+      btn.dataset.oi = String(oi);
+      btn.addEventListener(`click`, onPick);
+      box.appendChild(btn);
+    });
+
+    quizEl.appendChild(box);
+  });
+}
+
+function onPick(ev) {
+  if (evaluated) return;
+  const qi = Number(ev.currentTarget.dataset.qi);
+  const oi = Number(ev.currentTarget.dataset.oi);
+  answers[qi] = oi;
+  const box = quizEl.querySelector(`.q[data-qi="` + qi + `"]`);
+  box.querySelectorAll(`.opt`).forEach(b => b.classList.remove(`sel`));
+  ev.currentTarget.classList.add(`sel`);
+  refresh();
+}
+
+function refresh() {
+  const done = answers.every(a => a !== null);
+  submitEl.disabled = !done;
+  if (done) warnEl.hidden = true;
+}
+
+submitEl.addEventListener(`click`, () => {
+  if (evaluated) return;
+  if (!answers.every(a => a !== null)) {
+    warnEl.hidden = false;
+    return;
+  }
+  evaluated = true;
+  let score = 0;
+
+  QUESTIONS.forEach((item, qi) => {
+    const box = quizEl.querySelector(`.q[data-qi="` + qi + `"]`);
+    box.classList.add(`locked`);
+    const btns = box.querySelectorAll(`.opt`);
+    btns.forEach((btn, oi) => {
+      btn.classList.remove(`sel`);
+      if (oi === item.correct) btn.classList.add(`correct`);
+      else if (oi === answers[qi]) btn.classList.add(`wrong`);
+    });
+    if (answers[qi] === item.correct) score++;
+  });
+
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  const band = BANDS.find(b => score >= b.min && score <= b.max);
+  verdictEl.textContent = band ? band.text : ``;
+  resultEl.hidden = false;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+retryEl.addEventListener(`click`, () => {
+  evaluated = false;
+  answers.fill(null);
+  resultEl.hidden = true;
+  warnEl.hidden = true;
+  submitEl.disabled = true;
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+refresh();
+</script>
+</body>
+</html>
