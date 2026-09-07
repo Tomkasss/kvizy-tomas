@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test rychlého uvažování: na 10 otázek máte jen 5 minut a průměr je 6/10</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta[disabled] { cursor: default; }
+  #vyhodnotit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; }
+  #vysledek {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 24px;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #znovu {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #znovu:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    .otazka { padding: 20px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test rychlého uvažování: na 10 otázek máte jen 5 minut a průměr je 6/10</h1>
+  <p class="perex">Pět minut, deset otázek a čtyři možnosti u každé. Střídá se zeměpis, sport, divadlo, jídlo i čistá logika, takže se nedá spolehnout na jediný obor. Průměr je šest bodů. Zjistěte, jestli na něj dosáhnete, nebo ho překonáte.</p>
+  <div id="kviz"></div>
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+  <div id="vysledek" style="display:none">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var otazky = [
+  {
+    zneni: `1. Ze které země pochází tanec čardáš?`,
+    varianty: [`Rumunsko`, `Maďarsko`, `Polsko`, `Chorvatsko`],
+    spravna: 1
+  },
+  {
+    zneni: `2. Jak se jmenovala měna Itálie před zavedením eura?`,
+    varianty: [`escudo`, `peseta`, `lira`, `drachma`],
+    spravna: 2
+  },
+  {
+    zneni: `3. Každý, kdo se přihlásí na výlet, odevzdá průkaz. Každý, kdo odevzdá průkaz, dostane jízdenku. Co z toho jistě plyne?`,
+    varianty: [
+      `Každý, kdo se přihlásí na výlet, dostane jízdenku.`,
+      `Kdo dostane jízdenku, přihlásil se na výlet.`,
+      `Kdo se na výlet nepřihlásí, jízdenku nedostane.`,
+      `Kdo odevzdá průkaz, přihlásil se na výlet.`
+    ],
+    spravna: 0
+  },
+  {
+    zneni: `4. Ze které země pochází gazpacho?`,
+    varianty: [`Itálie`, `Francie`, `Řecko`, `Španělsko`],
+    spravna: 3
+  },
+  {
+    zneni: `5. Jak se nazývá divadelní forma založená na improvizaci a ustálených maskovaných postavách, jako je Harlekýn nebo Pantalone?`,
+    varianty: [`commedia dell'arte`, `opera buffa`, `vaudeville`, `pantomima`],
+    spravna: 0
+  },
+  {
+    zneni: `6. Ve které zemi vznikl sport ragby?`,
+    varianty: [`v Irsku`, `v Anglii`, `ve Walesu`, `ve Francii`],
+    spravna: 1
+  },
+  {
+    zneni: `7. Který pár vyjadřuje stejný vztah jako dvojice recept a jídlo?`,
+    varianty: [`architekt a dům`, `mapa a krajina`, `nůž a krájení`, `plán a stavba`],
+    spravna: 3
+  },
+  {
+    zneni: `8. Petrova matka je jedináček a jeho otec má jednoho bratra. Kterého příbuzného Petr určitě nemá?`,
+    varianty: [
+      `bratrance z otcovy strany`,
+      `dědečka z matčiny strany`,
+      `tetu z matčiny strany`,
+      `strýce z otcovy strany`
+    ],
+    spravna: 2
+  },
+  {
+    zneni: `9. Ve které zemi vzniklo divadlo kabuki?`,
+    varianty: [`Japonsko`, `Čína`, `Korea`, `Vietnam`],
+    spravna: 0
+  },
+  {
+    zneni: `10. Z jaké rostliny vyráběli staří Egypťané psací materiál papyrus?`,
+    varianty: [`z rákosu`, `ze lnu`, `ze šáchoru`, `z palmových listů`],
+    spravna: 2
+  }
+];
+
+var hodnoceni = [
+  {
+    max: 3,
+    text: `Na slibovaný průměr šesti bodů to tentokrát nestačilo, do šestky vám chybí nejméně tři body. Zaváhali jste už u rozjezdu, tedy u maďarského tance, staré italské měny, řetězce dvou podmínek a japonského divadla, a právě tahle čtveřice má většinu řešitelů dovést k půlce výsledku ještě dřív, než přijde opravdová práce. Pět minut je krátká doba a kdo se zdrží hned na začátku, dojíždí zpoždění po zbytek desítky. Zkuste to znovu bez spěchu a uvidíte, že část otázek jste vlastně věděli, jen se k nim v limitu nedostala řada.`
+  },
+  {
+    max: 6,
+    text: `Tohle je pásmo, ve kterém skončí většina řešitelů. Šest bodů je přesně ten slibovaný průměr, čtyři a pět těsně pod ním. Rozjezdové otázky vám tedy sedly a rozdělilo vás až středně těžké pásmo, a to přesně v tom pořadí, v jakém přišlo: španělská studená polévka, divadlo s ustálenými maskami, původ ragby, vztah mezi dvojicí pojmů a příbuzenská úvaha o tom, koho Petr mít nemůže. Poslední otázka o papyru je jediná opravdu těžká a v tomhle pásmu padá skoro vždy, takže si ji na svůj vrub neberte. Široký rozhled máte, jen se v pětiminutovém limitu neprojevil naplno.`
+  },
+  {
+    max: 9,
+    text: `Průměr šesti bodů jste překonali, a to není samozřejmost. Sedm znamená, že jste kromě rozjezdu utáhli i většinu středního pásma, osm už dá menšina řešitelů a devět obvykle znamená, že vás zastavila jen poslední otázka o papyru, tedy jediná opravdu těžká položka celé desítky. Takový rozptyl témat se za pět minut netipuje, ten se musí mít v hlavě.`
+  },
+  {
+    max: 10,
+    text: `Plný počet, tedy výsledek výrazně nad slibovaným průměrem šesti bodů, na který dosáhne jen menšina. Neshodil vás maďarský tanec, stará italská měna, řetězec dvou podmínek, španělská studená polévka, divadlo s ustálenými maskami, anglický původ ragby, rozdíl mezi předpisem a hotovým dílem, příbuzenská úvaha o tom, koho Petr mít nemůže, japonské divadlo ani rostlina, ze které vznikal papyrus, a právě ta poslední je jediná otázka, na které se drtivá většina řešitelů zastaví. Hlava, která tohle dá napoprvé a do pěti minut, uvažuje opravdu rychle.`
+  }
+];
+
+var pismena = [`a)`, `b)`, `c)`, `d)`];
+var odpovedi = new Array(otazky.length).fill(null);
+var hotovo = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function vykresli() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var zn = document.createElement(`p`);
+    zn.className = `zneni`;
+    zn.textContent = o.zneni;
+    box.appendChild(zn);
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement(`button`);
+      btn.className = `varianta`;
+      btn.type = `button`;
+      btn.textContent = pismena[j] + ` ` + v;
+      btn.addEventListener(`click`, function () {
+        if (hotovo) return;
+        odpovedi[i] = j;
+        var vsechny = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < vsechny.length; k++) {
+          vsechny[k].classList.remove(`vybrana`);
+        }
+        btn.classList.add(`vybrana`);
+        hlaskaEl.textContent = ``;
+        zkontrolujHotovost();
+      });
+      box.appendChild(btn);
+    });
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujHotovost() {
+  var vse = odpovedi.every(function (o) { return o !== null; });
+  tlacitkoEl.disabled = !vse;
+}
+
+tlacitkoEl.addEventListener(`click`, function () {
+  if (tlacitkoEl.disabled) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  hotovo = true;
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  otazky.forEach(function (o, i) {
+    var tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].classList.remove(`vybrana`);
+      tlacitka[j].disabled = true;
+      if (j === o.spravna) {
+        tlacitka[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === o.spravna) body++;
+  });
+  tlacitkoEl.disabled = true;
+  skoreEl.textContent = body + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+znovuEl.addEventListener(`click`, function () {
+  hotovo = false;
+  odpovedi = new Array(otazky.length).fill(null);
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  tlacitkoEl.disabled = true;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+vykresli();
+</script>
+</body>
+</html>
