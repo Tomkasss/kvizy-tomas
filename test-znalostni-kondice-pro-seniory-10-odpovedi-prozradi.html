@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test znalostní kondice pro seniory: 10 odpovědí prozradí, jak dobře si vedete oproti dnešním mladým</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 40px 20px;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qt { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.locked .opt { cursor: default; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+#submit, #retry {
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit { background: #5b7e5f; }
+#submit:hover:enabled { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry { background: #8c7b6b; }
+#retry:hover { background: #756658; }
+#warn { text-align: center; color: #721c24; margin-top: 14px; font-size: 1rem; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+  border-top: 4px solid #5b7e5f;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test znalostní kondice pro seniory: 10 odpovědí prozradí, jak dobře si vedete oproti dnešním mladým</h1>
+<p class="perex">Deset otázek pro seniory napříč jazykem, zeměpisem, přírodou, dějinami, filozofií, literaturou, hudbou, uměním i bájemi, k tomu jedna úloha na logický úsudek. Žádné počítání. Podle skóre zjistíte, jak si vedete proti dnešním mladým.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warn" hidden>Odpovězte prosím na všechny otázky</p>
+<div id="result" hidden>
+  <p id="score"></p>
+  <p id="verdict"></p>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  { q: `Jakou povahu má člověk, kterého označíme za žoviálního?`,
+    o: [`uzavřenou, nemluvnou a stranící se společnosti`, `uštěpačnou, se sklonem k posměškům`, `přívětivou, družnou a dobromyslně veselou ve styku s lidmi`, `úzkostlivě svědomitou a puntičkářskou`], a: 2 },
+  { q: `Které jezero je největším sladkovodním jezerem Evropy?`,
+    o: [`Balaton`, `Vänern`, `Ladožské jezero`, `Oněžské jezero`], a: 2 },
+  { q: `Která z těchto ryb se tře až v Sargasovém moři?`,
+    o: [`úhoř říční`, `losos obecný`, `štika obecná`, `candát obecný`], a: 0 },
+  { q: `Který antický filozof je autorem výroku, že nelze dvakrát vstoupit do téže řeky?`,
+    o: [`Sókratés`, `Platón`, `Démokritos`, `Hérakleitos`], a: 3 },
+  { q: `Jaký úkol měly podle severských bájí valkýry?`,
+    o: [`předly nit osudu lidí i bohů`, `odnášely padlé bojovníky do Valhally`, `střežily duhový most vedoucí k sídlu bohů`, `opatrovaly jablka, jimiž si bohové udržovali mládí`], a: 1 },
+  { q: `Co jistě vyplývá z toho, že všechny knihy ve vitríně jsou vázané v kůži a školní atlas vázaný v kůži není?`,
+    o: [`Ve vitríně stojí i knihy vázané jinak než v kůži.`, `Zda školní atlas ve vitríně stojí, nelze určit.`, `Školní atlas ve vitríně stojí.`, `Školní atlas ve vitríně nestojí.`], a: 3 },
+  { q: `Ve kterém francouzském městě bylo roku 1940 podepsáno příměří v témže železničním vagonu jako roku 1918?`,
+    o: [`Sedan`, `Verdun`, `Compiègne`, `Amiens`], a: 2 },
+  { q: `Kdo složil operetu Veselá vdova?`,
+    o: [`Franz Lehár`, `Oskar Nedbal`, `Emmerich Kálmán`, `Johann Strauss mladší`], a: 0 },
+  { q: `Kdo je autorem knihy Vejce a já?`,
+    o: [`Pearl S. Bucková`, `Betty MacDonaldová`, `Daphne du Maurierová`, `Harper Leeová`], a: 1 },
+  { q: `Kdo je autorem panoramatického obrazu Bitva u Lipan?`,
+    o: [`Luděk Marold`, `Václav Brožík`, `Mikoláš Aleš`, `Alfons Mucha`], a: 0 }
+];
+
+var BANDS = [
+  { min: 0, max: 3, t: `Většina okruhů dnes zůstala stranou a o výsledku rozhodovaly spíš tipy. Body nejčastěji sebere město, ve kterém se roku 1940 podepisovalo příměří ve starém železničním vagonu, panoramatické plátno z husitských dějin a antický myslitel s větou o řece. Kolem tří bodů se přitom v podobných testech drží i dnešní dvacátníci, takže proti nim tu žádný odstup není. Projděte si správné odpovědi a zkuste kvíz s odstupem znovu, posun bývá znatelný.` },
+  { min: 4, max: 6, t: `Tady se pohybuje typický výsledek. Polovina otázek sedí, u zbytku stáhla pozornost těsná nabídka. Nejvíc bodů obvykle mizí u otázky po místu podpisu příměří v železničním voze, hned za ní u rozměrného historického plátna a u řeckého mudrce, kterému se připisuje úvaha o vstupu do řeky. Dnešní třicátníci se v takto širokém záběru obvykle zastaví na čtyřech bodech, šest jich tedy znamená náskok o dvě položky proti nim.` },
+  { min: 7, max: 9, t: `Výrazně nad průměrem. Mimo zůstala nanejvýš tři místa, zpravidla otázka na starý železniční vagon a město kolem něj, dále obří malované panoráma z husitské epochy a antický učenec proslulý myšlenkou o proudící vodě. Zbytek ale držíte pevně. Do tohoto pásma se z dnešních dvacátníků a třicátníků dostane zhruba jeden z deseti, protože k tomu nestačí jeden obor, ale záběr přes všechny.` },
+  { min: 10, max: 10, t: `Plný počet, na který dosáhne jen menšina. Neshodilo vás nic z toho: význam přejatého přídavného jména, největší sladkovodní jezero Evropy, ryba putující ke tření přes Atlantik, řecký myslitel s výrokem o řece, poslání bytostí ze severských bájí, úloha o vitríně, francouzské město spjaté s příměřím podepsaným ve starém železničním vagonu, vídeňská opereta, americká humoristická próza ani největší české historické plátno. Mezi dnešními dvacátníky a třicátníky nedá takový výsledek prakticky nikdo, jejich obvyklá hranice leží kolem tří až čtyř bodů.` }
+];
+
+var LETTERS = [`a`, `b`, `c`, `d`];
+var answers = new Array(QUESTIONS.length).fill(null);
+var locked = false;
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var title = document.createElement(`p`);
+    title.className = `qt`;
+    title.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(title);
+    item.o.forEach(function (text, oi) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `opt`;
+      btn.textContent = LETTERS[oi] + `) ` + text;
+      btn.addEventListener(`click`, function () { pick(qi, oi); });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function pick(qi, oi) {
+  if (locked) { return; }
+  answers[qi] = oi;
+  var box = quizEl.children[qi];
+  var opts = box.querySelectorAll(`.opt`);
+  for (var i = 0; i < opts.length; i++) {
+    if (i === oi) { opts[i].classList.add(`sel`); } else { opts[i].classList.remove(`sel`); }
+  }
+  refresh();
+}
+
+function refresh() {
+  var done = answers.every(function (v) { return v !== null; });
+  submitEl.disabled = !done;
+  if (done) { warnEl.hidden = true; }
+}
+
+function evaluate() {
+  if (answers.some(function (v) { return v === null; })) {
+    warnEl.hidden = false;
+    return;
+  }
+  locked = true;
+  var score = 0;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = quizEl.children[qi];
+    box.classList.add(`locked`);
+    var opts = box.querySelectorAll(`.opt`);
+    for (var i = 0; i < opts.length; i++) {
+      opts[i].classList.remove(`sel`);
+      if (i === item.a) { opts[i].classList.add(`correct`); }
+      else if (i === answers[qi]) { opts[i].classList.add(`wrong`); }
+    }
+    if (answers[qi] === item.a) { score++; }
+  });
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  var band = BANDS.filter(function (b) { return score >= b.min && score <= b.max; })[0];
+  verdictEl.textContent = band ? band.t : ``;
+  resultEl.hidden = false;
+  if (!document.getElementById(`retry`)) {
+    var r = document.createElement(`button`);
+    r.type = `button`;
+    r.id = `retry`;
+    r.textContent = `Zkusit znovu`;
+    r.addEventListener(`click`, reset);
+    resultEl.appendChild(r);
+  }
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  locked = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.hidden = true;
+  warnEl.hidden = true;
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+build();
+refresh();
+</script>
+</body>
+</html>
