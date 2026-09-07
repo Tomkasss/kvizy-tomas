@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz starých českých slov: kdo zná význam 8/10, má slovní zásobu jako zkušený češtinář</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 32px 16px;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    cursor: pointer;
+    line-height: 1.45;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  #vyhodnotit, #znovu {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; margin-top: 24px; }
+  #znovu:hover { background: #756658; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+  #vysledek {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 40px;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka, #vysledek { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz starých českých slov: kdo zná význam 8/10, má slovní zásobu jako zkušený češtinář</h1>
+  <p class="perex">Staré české výrazy se z běžné řeči vytratily, ale v knihách po babičkách jich najdete plno. Deset z nich tu má u sebe vždy čtyři vysvětlení a jen jedno sedí. Kdo pozná osm významů, má slovní zásobu na úrovni zkušeného češtináře.</p>
+
+  <div id="kviz"></div>
+
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+
+  <div id="vysledek" hidden>
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var otazky = [
+  {
+    zneni: `1. Co byly nešpory?`,
+    varianty: [`ranní mše sloužená ještě před východem slunce`, `modlitba, kterou kněz pronášel nad hrobem při pohřbu`, `odpolední nebo podvečerní pobožnost`, `půlnoční bohoslužba o největších svátcích`],
+    spravna: 2
+  },
+  {
+    zneni: `2. Co byly škorně?`,
+    varianty: [`vysoké kožené boty sahající ke kolenům`, `dřevěné pantofle nošené doma i na dvorku`, `plátěné návleky chránící nohavice před blátem`, `pletené punčochy nošené pod kalhotami`],
+    spravna: 0
+  },
+  {
+    zneni: `3. Kdo byl chasník?`,
+    varianty: [`mladík připravovaný v klášteře na kněze`, `vesnický chlapec pasoucí obecní stádo dobytka`, `mládenec doprovázející nevěstu ke svatebnímu obřadu`, `odrostlý venkovský hoch, svobodný mladý muž`],
+    spravna: 3
+  },
+  {
+    zneni: `4. Kdo byl písmák?`,
+    varianty: [`městský písař, který sepisoval smlouvy a listiny`, `sečtělý venkovan, který hloubal nad zbožnými knihami`, `venkovský učitel, který učil děti číst a psát`, `podomní prodavač, který roznášel knížky lidového čtení`],
+    spravna: 1
+  },
+  {
+    zneni: `5. Kdo byl domkář?`,
+    varianty: [`vesničan, který vlastnil jen domek a téměř žádnou půdu`, `zedník, který na vsi stavěl a opravoval malá stavení`, `nádeník bydlící v podnájmu v cizí chalupě`, `obecní úředník, který vedl soupis domů a chalup`],
+    spravna: 0
+  },
+  {
+    zneni: `6. Co bylo podloudnictví?`,
+    varianty: [`půjčování peněz chudým na lichvářský úrok`, `ražení falešných mincí v ukryté dílně`, `tajné přenášení zboží přes hranice bez cla`, `prodávání kradených věcí pod rukou na trhu`],
+    spravna: 2
+  },
+  {
+    zneni: `7. Co byla padoucnice?`,
+    varianty: [`prudké střevní onemocnění s krvavými průjmy`, `kloubní neduh provázený otoky a prudkou bolestí`, `horečnatá nemoc, při níž tělo pokryla vyrážka`, `nervová choroba se záchvaty křečí a bezvědomím`],
+    spravna: 3
+  },
+  {
+    zneni: `8. Co znamená přídavné jméno sličný?`,
+    varianty: [`krásný a půvabný na pohled`, `hbitý a mrštný v pohybu`, `tichý a nenápadný mezi lidmi`, `štědrý a pohostinný k návštěvám`],
+    spravna: 0
+  },
+  {
+    zneni: `9. Co znamená sloveso štkát?`,
+    varianty: [`namáhavě popadat dech po běhu`, `usedavě plakat s hlasitým vzlykotem`, `neovladatelně se smát až k slzám`, `chraptivě sípat při těžké nemoci`],
+    spravna: 1
+  },
+  {
+    zneni: `10. Kdo byl rejtar?`,
+    varianty: [`pěší voják vyzbrojený dlouhou halapartnou`, `šlechtic pasovaný do rytířského stavu`, `jízdní voják bojující v sedle s mečem a pistolemi`, `vozka, který s vojskem vezl náklad a proviant`],
+    spravna: 2
+  }
+];
+
+var hodnoceni = [
+  { max: 3, text: `Vaše slovní zásoba stojí pevně na dnešní češtině a starší vrstva jazyka vám zůstala stranou. Tenhle výsledek se pohybuje kolem toho, co by trefil i náhodný tip, takže tahle slova pro vás nejsou vybledlá vzpomínka, ale úplná novinka. Pár večerů se starší českou prózou s tím zamává víc, než čekáte.` },
+  { max: 6, text: `Kousek pod běžnou úrovní dospělého čtenáře. Několik výrazů máte usazených z pohádek a ze školní četby, u zbytku rozhodoval odhad podle toho, jak slovo zní, a právě tam vás nachytaly varianty, které zněly stejně rozumně. Pasivní slovní zásobu máte širší než aktivní, jen se k ní hůř dostáváte.` },
+  { max: 9, text: `Sedm bodů je zhruba to, co v tomhle kvízu trefí průměrný dospělý čtenář, a od osmi bodů výš už mluvíme o slovní zásobě na úrovni zkušeného češtináře. Rozlišujete i významy, které leží těsně vedle sebe, a nespletlo vás ani slovo, jehož dnešní zvuk slibuje docela jinou odpověď. To je porozumění starší češtině, které sahá hlouběji než jen ke slovům z pohádek.` },
+  { max: 10, text: `Plný počet, na který dosáhne jen menšina řešitelů. Poznáte i výrazy, u kterých se ostatní rozhodují mezi dvěma stejně věrohodnými vysvětleními, a udrželo se vám i to, co z běžné mluvy zmizelo před generacemi. Vaše slovní zásoba převyšuje i laťku, kterou slibuje titulek.` }
+];
+
+var pismena = [`a) `, `b) `, `c) `, `d) `];
+var odpovedi = new Array(otazky.length).fill(null);
+var vyhodnoceno = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function postav() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = o.zneni;
+    box.appendChild(zneni);
+
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `varianta`;
+      btn.textContent = pismena[j] + v;
+      btn.addEventListener(`click`, function () {
+        if (vyhodnoceno) { return; }
+        odpovedi[i] = j;
+        var sourozenci = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < sourozenci.length; k++) {
+          sourozenci[k].classList.remove(`vybrana`);
+        }
+        btn.classList.add(`vybrana`);
+        obnovTlacitko();
+      });
+      box.appendChild(btn);
+    });
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function obnovTlacitko() {
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  tlacitkoEl.disabled = !hotovo;
+  if (hotovo) { hlaskaEl.textContent = ``; }
+}
+
+function vyhodnot() {
+  if (odpovedi.some(function (o) { return o === null; })) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  vyhodnoceno = true;
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  otazky.forEach(function (o, i) {
+    var tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove(`vybrana`);
+      if (j === o.spravna) {
+        tlacitka[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === o.spravna) { body++; }
+  });
+
+  tlacitkoEl.disabled = true;
+  hlaskaEl.textContent = ``;
+  skoreEl.textContent = body + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body <= hodnoceni[h].max) { hodnoceniEl.textContent = hodnoceni[h].text; break; }
+  }
+  vysledekEl.hidden = false;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  odpovedi = new Array(otazky.length).fill(null);
+  vyhodnoceno = false;
+  vysledekEl.hidden = true;
+  hlaskaEl.textContent = ``;
+  tlacitkoEl.disabled = true;
+  postav();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+tlacitkoEl.addEventListener(`click`, vyhodnot);
+znovuEl.addEventListener(`click`, reset);
+postav();
+</script>
+</body>
+</html>
