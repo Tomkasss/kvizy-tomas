@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test učiva z dob Československa: tehdejší školáci by měli dát alespoň 7/10</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta:disabled { cursor: default; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hlaska { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+#vysledek {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test učiva z dob Československa: tehdejší školáci by měli dát alespoň 7/10</h1>
+<p class="perex">Čeština, matematika, fyzika, přírodopis, dějepis, chemie i hudební nauka, jak se braly v československé škole. Deset otázek napříč předměty ukáže, kolik vám po letech ze školních lavic doopravdy zůstalo. Laťka je sedm bodů.</p>
+<div id="kviz"></div>
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p class="hlaska" id="hlaska" style="display:none">Odpovězte prosím na všechny otázky</p>
+<div id="vysledek" style="display:none">
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var otazky = [
+  { z: `Jak se nazývá větný člen, který blíže určuje podstatné jméno?`,
+    v: [`předmět`, `přísudek`, `příslovečné určení`, `přívlastek`], s: 3 },
+  { z: `Který z těchto materiálů nevede elektrický proud?`,
+    v: [`měď`, `mořská voda`, `porcelán`, `grafit`], s: 2 },
+  { z: `Jak se v matematice nazývají čísla, která mezi sebou násobíme?`,
+    v: [`sčítanci`, `dělenci`, `menšenci`, `činitelé`], s: 3 },
+  { z: `Který starověký národ vytvořil klínové písmo?`,
+    v: [`Egypťané`, `Sumerové`, `Féničané`, `Řekové`], s: 1 },
+  { z: `Jak se odborně nazývá plod jabloně?`,
+    v: [`malvice`, `peckovice`, `bobule`, `nažka`], s: 0 },
+  { z: `Jak se nazývá způsob tvoření slov, při kterém nové slovo vzniká připojením předpony nebo přípony ke slovu základovému?`,
+    v: [`skládání`, `zkracování`, `odvozování`, `přejímání`], s: 2 },
+  { z: `Která látka se lidově nazývá modrá skalice?`,
+    v: [`síran zinečnatý`, `síran měďnatý`, `síran železnatý`, `síran hlinitý`], s: 1 },
+  { z: `V kterém Jiráskově historickém románu se odehrává vzpoura Chodů vedená Janem Sladkým Kozinou?`,
+    v: [`Temno`, `Psohlavci`, `Proti všem`, `F. L. Věk`], s: 1 },
+  { z: `Který dokument vyhlásil 18. října 1918 nezávislost Československa?`,
+    v: [`Washingtonská deklarace`, `Pittsburská dohoda`, `Martinská deklarace`, `Clevelandská dohoda`], s: 0 },
+  { z: `Kdo složil operu Dvě vdovy?`,
+    v: [`Antonín Dvořák`, `Zdeněk Fibich`, `Bedřich Smetana`, `Vilém Blodek`], s: 2 }
+];
+
+var pismena = [`a`, `b`, `c`, `d`];
+var odpovedi = [];
+var hotovo = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoVyhodnotit = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var tlacitkoZnovu = document.getElementById(`znovu`);
+
+function postav() {
+  kvizEl.innerHTML = ``;
+  for (var i = 0; i < otazky.length; i++) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var nadpis = document.createElement(`p`);
+    nadpis.className = `zneni`;
+    nadpis.textContent = (i + 1) + `. ` + otazky[i].z;
+    box.appendChild(nadpis);
+    for (var j = 0; j < otazky[i].v.length; j++) {
+      var btn = document.createElement(`button`);
+      btn.className = `varianta`;
+      btn.type = `button`;
+      btn.textContent = pismena[j] + `) ` + otazky[i].v[j];
+      btn.setAttribute(`data-o`, String(i));
+      btn.setAttribute(`data-v`, String(j));
+      btn.addEventListener(`click`, klik);
+      box.appendChild(btn);
+    }
+    kvizEl.appendChild(box);
+  }
+}
+
+function klik(e) {
+  if (hotovo) { return; }
+  var o = parseInt(e.currentTarget.getAttribute(`data-o`), 10);
+  var v = parseInt(e.currentTarget.getAttribute(`data-v`), 10);
+  odpovedi[o] = v;
+  var vsechny = kvizEl.querySelectorAll(`[data-o="` + o + `"]`);
+  for (var k = 0; k < vsechny.length; k++) {
+    vsechny[k].classList.remove(`vybrana`);
+  }
+  e.currentTarget.classList.add(`vybrana`);
+  zkontrolujStav();
+}
+
+function zkontrolujStav() {
+  var vse = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] !== `number`) { vse = false; }
+  }
+  tlacitkoVyhodnotit.disabled = !vse;
+  if (vse) { hlaskaEl.style.display = `none`; }
+}
+
+tlacitkoVyhodnotit.addEventListener(`click`, function () {
+  var vse = true;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] !== `number`) { vse = false; }
+  }
+  if (!vse) { hlaskaEl.style.display = `block`; return; }
+  hotovo = true;
+  var body = 0;
+  for (var o = 0; o < otazky.length; o++) {
+    var tlacitka = kvizEl.querySelectorAll(`[data-o="` + o + `"]`);
+    for (var t = 0; t < tlacitka.length; t++) {
+      var idx = parseInt(tlacitka[t].getAttribute(`data-v`), 10);
+      tlacitka[t].disabled = true;
+      tlacitka[t].classList.remove(`vybrana`);
+      if (idx === otazky[o].s) { tlacitka[t].classList.add(`spravna`); }
+      else if (idx === odpovedi[o]) { tlacitka[t].classList.add(`spatna`); }
+    }
+    if (odpovedi[o] === otazky[o].s) { body++; }
+  }
+  tlacitkoVyhodnotit.disabled = true;
+  skoreEl.textContent = body + ` z 10`;
+  hodnoceniEl.textContent = hodnot(body);
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+function hodnot(b) {
+  if (b <= 3) {
+    return `Na sedmičku, kterou slibuje titulek, to tentokrát nevyšlo, a chybělo dost. Od posledního vysvědčení uplynulo tolik let, že se z hlavy vytratila i látka, kterou jste kdysi uměli nazpaměť. Nejde o hlavu, jde o to, že názvy plodů, sloučenin a dokumentů člověk mimo školu nepotřebuje. Projděte si správné odpovědi po řadě a příště bude číslo výš.`;
+  }
+  if (b <= 6) {
+    return `Půl na půl, laťka sedmi bodů ale zůstala o kousek nad vámi. Předměty, ke kterým jste měli blízko, jste zvládli bez zaváhání, jinde rozhodlo váhání mezi dvěma variantami, které se lišily jediným slovem. Právě tam leží ten jeden až tři body, které vás od hranice dělí. Stačí si projít otázky, u nichž jste tápali.`;
+  }
+  if (b <= 9) {
+    return `Laťku sedmi bodů jste přeskočili, přesně jak titulek nabízel, a to se povede jen části řešitelů. Napříč všemi obory, kterými kvíz vede, jste se ztratili nanejvýš třikrát a školní učivo z československých let vám drží pohromadě i po desítkách let. Kdo dosáhl devíti, chyběl mu k plnému počtu jediný krůček.`;
+  }
+  return `Plný počet, výsledek, který v tomhle testu zvládne jen hrstka. Nezaskočila vás ani odborná botanika, ani chodská vzpoura v Jiráskově podání, ani opera, kterou zná jen ten, kdo se Smetanovi věnoval dál než po Prodanou nevěstu. Sedmibodovou laťku jste nejen překonali, vy jste ji smetli. Klobouk dolů.`;
+}
+
+tlacitkoZnovu.addEventListener(`click`, function () {
+  hotovo = false;
+  odpovedi = [];
+  vysledekEl.style.display = `none`;
+  hlaskaEl.style.display = `none`;
+  tlacitkoVyhodnotit.disabled = true;
+  postav();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+postav();
+</script>
+</body>
+</html>
