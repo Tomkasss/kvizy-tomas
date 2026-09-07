@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test pro lidi 70+, kteří se stále zajímají o svět: Kolik bodů si připíšete?</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qt { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.locked .opt { cursor: default; }
+.locked .opt:hover { background: #f7f4f0; }
+.locked .opt.sel:hover { background: #dcd3c7; }
+.opt.ok, .locked .opt.ok:hover { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.bad, .locked .opt.bad:hover { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+#go {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#go:hover { background: #4a6b4e; }
+#go:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+#res {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+  border-top: 4px solid #5b7e5f;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#again {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#again:hover { background: #756658; }
+[hidden] { display: none !important; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test pro lidi 70+, kteří se stále zajímají o svět: Kolik bodů si připíšete?</h1>
+<p class="perex">Deset otázek pro každého, kdo i po sedmdesátce čte, sleduje zprávy a zajímá se o svět kolem sebe. Dějiny, umění, jazyk, evropská politika, příroda, geologie i zeměpis. Žádné počítání, jen rozhled.</p>
+<div id="quiz"></div>
+<button id="go" disabled>Vyhodnotit</button>
+<p id="warn" hidden>Odpovězte prosím na všechny otázky</p>
+<div id="res" hidden>
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="again">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var DATA = [
+  { q: `Ve kterém městě stojí palácový komplex Alhambra?`, o: [`Granada`, `Sevilla`, `Córdoba`, `Toledo`], a: 0 },
+  { q: `Který umělecký směr vznikl v roce 1916 v neutrálním Švýcarsku jako protest proti první světové válce?`, o: [`futurismus`, `kubismus`, `surrealismus`, `dadaismus`], a: 3 },
+  { q: `Kterou smlouvou byla založena Evropská unie a schválen plán na zavedení společné měny?`, o: [`Římskou smlouvou`, `Maastrichtskou smlouvou`, `Amsterodamskou smlouvou`, `Lisabonskou smlouvou`], a: 1 },
+  { q: `Které moře leží mezi Austrálií a Novým Zélandem?`, o: [`Korálové moře`, `Arafurské moře`, `Timorské moře`, `Tasmanovo moře`], a: 3 },
+  { q: `Který britský panovník se v roce 1936 vzdal trůnu, aby si mohl vzít Wallis Simpsonovou?`, o: [`Jiří V.`, `Eduard VIII.`, `Jiří VI.`, `Vilém IV.`], a: 1 },
+  { q: `Ve kterém roce vyšla první učebnice umělého jazyka esperanto?`, o: [`1847`, `1867`, `1887`, `1907`], a: 2 },
+  { q: `Který pták podniká nejdelší tah ze všech živočichů a každoročně létá z Arktidy do Antarktidy a zpět?`, o: [`čáp bílý`, `rybák dlouhoocasý`, `vlaštovka obecná`, `albatros stěhovavý`], a: 1 },
+  { q: `Který vědní obor se zabývá vznikem, složením a přeměnami hornin?`, o: [`petrologie`, `mineralogie`, `geomorfologie`, `paleontologie`], a: 0 },
+  { q: `Kdo stál v čele ruské prozatímní vlády v době, kdy ji na podzim 1917 svrhli bolševici?`, o: [`Georgij Lvov`, `Pavel Miljukov`, `Lev Trockij`, `Alexandr Kerenskij`], a: 3 },
+  { q: `Ve kterém roce byla vyhlášena Turecká republika?`, o: [`1908`, `1918`, `1923`, `1934`], a: 2 }
+];
+
+var VERDICTS = [
+  { min: 0, max: 3, t: `Nejvýš tři body znamenají, že se kvíz teprve rozehrával. Otázky mířily do sedmi různých oborů a takhle rozestřený test dokáže potrápit i člověka, který se ve svém oboru vyzná dokonale. Berte výsledek jako pozvánku: většina zbylých odpovědí není nic exotického, jen věci, na které je potřeba znovu narazit.` },
+  { min: 4, max: 6, t: `Tohle je nejobsazenější pásmo, tady se sejde nejvíc řešitelů. Zhruba polovina otázek padla, u zbytku rozhodovalo, jestli se vybaví jeden konkrétní název, jméno nebo letopočet. Přesně o to tenhle kvíz šel. Čtyři až šest bodů znamená, že vám všeobecný přehled slouží dobře.` },
+  { min: 7, max: 9, t: `Sedm až devět bodů je pásmo, do kterého se dostane ten, kdo se o svět zajímá dlouhodobě. Nejméně polovina otázek je postavená tak, že všechny čtyři varianty znějí stejně důvěryhodně a rozhoduje skutečná znalost, ne odhad. Takové skóre znamená, že jste rozpletli i většinu těch nejtěsnějších dvojic.` },
+  { min: 10, max: 10, t: `Plný počet. Deset z deseti si v tomhle testu připíše jen menšina řešitelů, protože sesbírat všechny body vyžaduje projít bez zaváhání přírodou, dějinami, uměním, jazykem, evropskou politikou, geologií i mapou světa zároveň. To je vzácná kombinace a rozhled, který za takovým skóre stojí, je bez nadsázky výjimečný.` }
+];
+
+var LETTERS = [`a`, `b`, `c`, `d`];
+var picks = [];
+var done = false;
+var quizEl = document.getElementById(`quiz`);
+var goBtn = document.getElementById(`go`);
+var warnEl = document.getElementById(`warn`);
+var resEl = document.getElementById(`res`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var againBtn = document.getElementById(`again`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  picks = [];
+  done = false;
+  for (var i = 0; i < DATA.length; i++) {
+    picks.push(null);
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var title = document.createElement(`p`);
+    title.className = `qt`;
+    title.textContent = (i + 1) + `. ` + DATA[i].q;
+    box.appendChild(title);
+    for (var j = 0; j < DATA[i].o.length; j++) {
+      var b = document.createElement(`button`);
+      b.className = `opt`;
+      b.type = `button`;
+      b.textContent = LETTERS[j] + `) ` + DATA[i].o[j];
+      b.setAttribute(`data-q`, String(i));
+      b.setAttribute(`data-o`, String(j));
+      b.addEventListener(`click`, onPick);
+      box.appendChild(b);
+    }
+    quizEl.appendChild(box);
+  }
+  goBtn.disabled = true;
+  warnEl.hidden = true;
+  resEl.hidden = true;
+}
+
+function onPick(e) {
+  if (done) return;
+  var btn = e.currentTarget;
+  var qi = parseInt(btn.getAttribute(`data-q`), 10);
+  var oi = parseInt(btn.getAttribute(`data-o`), 10);
+  picks[qi] = oi;
+  var box = btn.parentNode;
+  var opts = box.getElementsByClassName(`opt`);
+  for (var k = 0; k < opts.length; k++) opts[k].classList.remove(`sel`);
+  btn.classList.add(`sel`);
+  var all = true;
+  for (var m = 0; m < picks.length; m++) if (picks[m] === null) all = false;
+  goBtn.disabled = !all;
+  if (all) warnEl.hidden = true;
+}
+
+goBtn.addEventListener(`click`, function () {
+  var all = true;
+  for (var m = 0; m < picks.length; m++) if (picks[m] === null) all = false;
+  if (!all) { warnEl.hidden = false; return; }
+  done = true;
+  warnEl.hidden = true;
+  var score = 0;
+  var boxes = quizEl.getElementsByClassName(`q`);
+  for (var i = 0; i < DATA.length; i++) {
+    var box = boxes[i];
+    box.classList.add(`locked`);
+    var opts = box.getElementsByClassName(`opt`);
+    for (var j = 0; j < opts.length; j++) {
+      if (j === DATA[i].a) opts[j].classList.add(`ok`);
+      else if (j === picks[i]) opts[j].classList.add(`bad`);
+    }
+    if (picks[i] === DATA[i].a) score++;
+  }
+  scoreEl.textContent = score + ` z ` + DATA.length;
+  var txt = ``;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score >= VERDICTS[v].min && score <= VERDICTS[v].max) txt = VERDICTS[v].t;
+  }
+  verdictEl.textContent = txt;
+  goBtn.disabled = true;
+  resEl.hidden = false;
+  resEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+againBtn.addEventListener(`click`, function () {
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+</script>
+</body>
+</html>
