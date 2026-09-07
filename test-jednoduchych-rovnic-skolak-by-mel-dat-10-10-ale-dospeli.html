@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test jednoduchých rovnic: školák by měl dát 10/10, ale dospělí často zaváhají (střední obtížnost)</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 20px;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.8rem; line-height: 1.35; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.5; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  input[type="text"] {
+    display: block;
+    width: 100%;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+  }
+  input[type="text"].spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  input[type="text"].spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .reseni { margin-top: 14px; font-size: 1rem; color: #1e5631; }
+  .reseni.chyba { color: #721c24; }
+  #vyhodnotit, #znovu {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; }
+  #znovu:hover { background: #756658; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; font-size: 1rem; min-height: 1.2em; }
+  #vysledek {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 24px;
+    border-top: 4px solid #5b7e5f;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    .otazka, #vysledek { padding: 20px; }
+    h1 { font-size: 1.45rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test jednoduchých rovnic: školák by měl dát 10/10, ale dospělí často zaváhají (střední obtížnost)</h1>
+  <p class="perex">Deset rovnic a úloh, které se na rovnici převádějí: závorky, zlomky, desetinná čísla, poměr, procenta, soustava i kvadratická rovnice. Deváťák je má v malíku, dospělý po letech bez matematiky u nich často zaváhá. Jak si povedete vy?</p>
+  <div id="kviz"></div>
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+  <div id="vysledek" hidden>
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+  </div>
+  <button id="znovu" hidden>Zkusit znovu</button>
+</div>
+<script>
+var otazky = [
+  { text: `1. Kolik je x v rovnici 6x − 11 = 2x + 37?`, typ: `open`, odpovedi: [`12`] },
+  { text: `2. Kolik je x v rovnici 2(3x − 4) = 4x + 6?`, typ: `open`, odpovedi: [`7`] },
+  { text: `3. Za pronájem lešení se platí 400 korun jednorázově a dále 100 korun za každý den. Na kolik dní bylo lešení pronajato, jestliže celý účet činil 1 700 korun?`, typ: `open`, odpovedi: [`13`] },
+  { text: `4. Kolik je x v rovnici 0,5x + 4 = 0,7x?`, typ: `open`, odpovedi: [`20`] },
+  { text: `5. Kolik je x v rovnici (x + 4)/3 = (x − 2)/2?`, typ: `open`, odpovedi: [`14`] },
+  { text: `6. Jak se ze vzorce pro obvod obdélníku o = 2(a + b) vyjádří strana b?`, typ: `choice`, varianty: [`b = o − 2a`, `b = (o − a)/2`, `b = o/2 − a`, `b = o/2 + a`], spravna: 2 },
+  { text: `7. Dva společníci si rozdělili zisk v poměru 3 : 5 a rozdíl mezi jejich podíly činil 1 240 korun. Kolik korun připadlo na menší podíl?`, typ: `open`, odpovedi: [`1 860`, `1860`] },
+  { text: `8. Jaké je číslo, jehož 30 procent je o 24 větší než jeho 20 procent?`, typ: `open`, odpovedi: [`240`] },
+  { text: `9. Která dvojice hodnot vyhovuje soustavě rovnic 3x + 2y = 31 a x − y = 2?`, typ: `choice`, varianty: [`x = 9, y = 2`, `x = 7, y = 5`, `x = 6, y = 4`, `x = 5, y = 8`], spravna: 1 },
+  { text: `10. Delší strana obdélníku je o 3 metry větší než kratší strana a obsah obdélníku je 28 metrů čtverečních. Kolik metrů měří kratší strana?`, typ: `open`, odpovedi: [`4`] }
+];
+
+var hodnoceni = [
+  { min: 0, max: 3, text: `Proti dnešnímu deváťákovi jste v tomhle testu jasně pod hranicí. Rovnice se nezapomínají proto, že by byly těžké, ale proto, že je člověk po škole nikdy znovu nepotřebuje, takže vypadl i ten nejzákladnější reflex: co udělám s jednou stranou, musím udělat i s druhou. Zastavilo vás pravděpodobně už roznásobení závorky nebo neznámá stojící na obou stranách. Škola by tenhle výsledek hodnotila jako nezvládnuté učivo osmého a devátého ročníku.` },
+  { min: 4, max: 6, text: `Přesně to, co titulek u dospělých čeká. Základní tvary rovnice vyšly, ale jakmile se v zadání objevily zlomky, desetinná čísla nebo se úloha musela nejdřív sestavit ze slov, přestala být cesta k výsledku samozřejmá. Školák na konci základní školy má v tuhle chvíli devět nebo deset bodů, protože tyhle typy počítá týden co týden. Kdo je naposledy řešil ve škole, obvykle nejdřív loví postup a teprve pak počítá, a polovina bodů je za takového stavu slušná bilance, jen jiná než u někoho, kdo je má čerstvě v hlavě.` },
+  { min: 7, max: 9, text: `Držíte krok se školním standardem a od dnešního deváťáka vás dělí jeden až tři body. Rovnice s neznámou na obou stranách, úpravy se zlomky i převod slovní úlohy na rovnici vám pořád fungují. Ztracené body padly nejspíš tam, kde nestačí počítat a je potřeba si nejdřív ujasnit, co je vlastně neznámá: rozdíl podílů místo jejich součtu, procentní základ místo procentní části, nebo kořen kvadratické rovnice. Čím blíž jste devítce, tím spíš šlo o jediné klopýtnutí; při sedmi bodech se zadrhly rovnou tři úlohy.` },
+  { min: 10, max: 10, text: `Plný počet, a ten mezi dospělými dá jen menšina, přesně ten rozdíl proti školákovi, o kterém mluví titulek. Prošli jste deseti různými typy: lineární rovnicí s neznámou na obou stranách, roznásobením závorky, lineární úlohou s pevnou a proměnnou složkou, desetinnými čísly, zlomky, vyjádřením neznámé ze vzorce, poměrem zadaným rozdílem, procenty zapsanými jako rovnice, soustavou dvou rovnic i kvadratickou rovnicí. Ani jeden z nastražených omylů u výběrových otázek, tedy nedokončená úprava vzorce ani dvojice, která vyhoví jen jedné z obou rovnic, vás nedostal. V tomhle testu jste vyrovnali výkon školáka, který podobné rovnice řeší ve škole každý týden.` }
+];
+
+var pismena = [`a)`, `b)`, `c)`, `d)`];
+var vybrano = new Array(otazky.length).fill(null);
+var uzamceno = false;
+
+var kviz = document.getElementById(`kviz`);
+var tlacitko = document.getElementById(`vyhodnotit`);
+var hlaska = document.getElementById(`hlaska`);
+var vysledek = document.getElementById(`vysledek`);
+var skore = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovu = document.getElementById(`znovu`);
+
+function normalizuj(s) {
+  return s.toString().toLowerCase()
+    .normalize(`NFD`).replace(/[\u0300-\u036f]/g, ``)
+    .replace(/\s+/g, ``)
+    .replace(/[.,]$/, ``);
+}
+
+function postavKviz() {
+  kviz.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = o.text;
+    box.appendChild(zneni);
+
+    if (o.typ === `choice`) {
+      o.varianty.forEach(function (v, j) {
+        var b = document.createElement(`button`);
+        b.className = `varianta`;
+        b.type = `button`;
+        b.textContent = pismena[j] + ` ` + v;
+        b.addEventListener(`click`, function () {
+          if (uzamceno) return;
+          vybrano[i] = j;
+          Array.prototype.forEach.call(box.querySelectorAll(`.varianta`), function (el) {
+            el.classList.remove(`vybrana`);
+          });
+          b.classList.add(`vybrana`);
+          zkontrolujStav();
+        });
+        box.appendChild(b);
+      });
+    } else {
+      var vstup = document.createElement(`input`);
+      vstup.type = `text`;
+      vstup.setAttribute(`inputmode`, `numeric`);
+      vstup.placeholder = `Napište odpověď`;
+      vstup.addEventListener(`input`, function () {
+        if (uzamceno) return;
+        vybrano[i] = vstup.value.trim() === `` ? null : vstup.value;
+        zkontrolujStav();
+      });
+      box.appendChild(vstup);
+    }
+
+    var reseni = document.createElement(`p`);
+    reseni.className = `reseni`;
+    reseni.hidden = true;
+    box.appendChild(reseni);
+
+    kviz.appendChild(box);
+  });
+}
+
+function zkontrolujStav() {
+  var hotovo = vybrano.every(function (v) { return v !== null; });
+  var zacato = vybrano.some(function (v) { return v !== null; });
+  tlacitko.disabled = !hotovo;
+  hlaska.textContent = (!hotovo && zacato) ? `Odpovězte prosím na všechny otázky` : ``;
+}
+
+function jeSpravne(i) {
+  var o = otazky[i];
+  if (o.typ === `choice`) return vybrano[i] === o.spravna;
+  var zapis = normalizuj(vybrano[i] === null ? `` : vybrano[i]);
+  return o.odpovedi.some(function (spr) { return normalizuj(spr) === zapis; });
+}
+
+function vyhodnot() {
+  if (!vybrano.every(function (v) { return v !== null; })) {
+    hlaska.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  uzamceno = true;
+  var body = 0;
+  var boxy = kviz.querySelectorAll(`.otazka`);
+  otazky.forEach(function (o, i) {
+    var box = boxy[i];
+    var ok = jeSpravne(i);
+    if (ok) body++;
+    var reseni = box.querySelector(`.reseni`);
+    if (o.typ === `choice`) {
+      var tlacitka = box.querySelectorAll(`.varianta`);
+      Array.prototype.forEach.call(tlacitka, function (b, j) {
+        b.classList.remove(`vybrana`);
+        b.disabled = true;
+        if (j === o.spravna) b.classList.add(`spravna`);
+        else if (j === vybrano[i]) b.classList.add(`spatna`);
+      });
+      if (!ok) {
+        reseni.textContent = `Správně: ` + pismena[o.spravna] + ` ` + o.varianty[o.spravna];
+        reseni.classList.add(`chyba`);
+        reseni.hidden = false;
+      }
+    } else {
+      var vstup = box.querySelector(`input`);
+      vstup.disabled = true;
+      vstup.classList.add(ok ? `spravna` : `spatna`);
+      if (!ok) {
+        reseni.textContent = `Správně: ` + o.odpovedi[0];
+        reseni.classList.add(`chyba`);
+        reseni.hidden = false;
+      }
+    }
+  });
+
+  skore.textContent = body + ` z ` + otazky.length;
+  var pasmo = hodnoceni.find(function (h) { return body >= h.min && body <= h.max; });
+  hodnoceniEl.textContent = pasmo ? pasmo.text : ``;
+  vysledek.hidden = false;
+  tlacitko.disabled = true;
+  znovu.hidden = false;
+  hlaska.textContent = ``;
+  vysledek.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function restart() {
+  uzamceno = false;
+  vybrano = new Array(otazky.length).fill(null);
+  vysledek.hidden = true;
+  znovu.hidden = true;
+  tlacitko.disabled = true;
+  hlaska.textContent = ``;
+  postavKviz();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+tlacitko.addEventListener(`click`, vyhodnot);
+znovu.addEventListener(`click`, restart);
+postavKviz();
+</script>
+</body>
+</html>
