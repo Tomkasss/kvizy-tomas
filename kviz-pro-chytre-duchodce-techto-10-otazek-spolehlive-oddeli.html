@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro chytré důchodce: Těchto 10 otázek spolehlivě oddělí znalce od tipujících</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zadani { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+.varianta:last-child { margin-bottom: 0; }
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta:disabled { cursor: default; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.4em; }
+#vysledek {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 32px;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro chytré důchodce: Těchto 10 otázek spolehlivě oddělí znalce od tipujících</h1>
+<p class="perex">Deset otázek pro důchodce, kteří si přehled hlídají dál. Zeměpis, sport, technika, čeština, příroda, literatura, dějiny, jídlo i film. U každé čtyři možnosti, které se drží těsně u sebe, takže náhoda tady moc nepomůže.</p>
+
+<div id="kviz"></div>
+
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<div id="hlaska"></div>
+
+<div id="vysledek" style="display:none">
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+
+<script>
+var otazky = [
+  { q: `U kterého moře leží bulharská letoviska Zlaté písky a Slunečné pobřeží?`,
+    o: [`u Jaderského moře`, `u Egejského moře`, `u Černého moře`, `u Středozemního moře`], s: 2 },
+  { q: `Který český desetibojař zvítězil na olympijských hrách v Athénách?`,
+    o: [`Tomáš Dvořák`, `Robert Změlík`, `Roman Šebrle`, `Jiří Ryba`], s: 2 },
+  { q: `Kdo vynalezl fonograf?`,
+    o: [`Alexander Graham Bell`, `Nikola Tesla`, `Guglielmo Marconi`, `Thomas Alva Edison`], s: 3 },
+  { q: `Co znamená sloveso želet?`,
+    o: [`toužit po něčem`, `závidět někomu`, `pohrdat něčím`, `litovat něčeho`], s: 3 },
+  { q: `Čím sděluje včela medonosná ostatním včelám v úlu směr ke zdroji potravy?`,
+    o: [`zvukovým signálem`, `pachovou stopou`, `tancem na plástu`, `dotykem tykadel`], s: 2 },
+  { q: `Kdo je autorem románu Otcové a děti?`,
+    o: [`Ivan Sergejevič Turgeněv`, `Nikolaj Vasiljevič Gogol`, `Fjodor Michajlovič Dostojevskij`, `Anton Pavlovič Čechov`], s: 0 },
+  { q: `Který francouzský politik byl zvolen prezidentem republiky bezprostředně po Charlesi de Gaullovi?`,
+    o: [`Georges Pompidou`, `Valéry Giscard d'Estaing`, `François Mitterrand`, `Jacques Chirac`], s: 0 },
+  { q: `Která sušená bylinka patří do tradiční české bramborové polévky?`,
+    o: [`kopr`, `majoránka`, `šalvěj`, `estragon`], s: 1 },
+  { q: `Který panovník pozval na Velkou Moravu byzantskou misi Konstantina a Metoděje?`,
+    o: [`Mojmír I.`, `Svatopluk I.`, `Kocel`, `Rastislav`], s: 3 },
+  { q: `Kdo složil hudbu k westernu Tenkrát na Západě?`,
+    o: [`Nino Rota`, `Ennio Morricone`, `Henry Mancini`, `John Barry`], s: 1 }
+];
+
+var hodnoceni = [
+  { max: 3, text: `Dělicí čára, o které mluví titulek, vede přesně tady, a tenhle výsledek zůstal na straně tipujících. Se třemi a méně body se u sedmi otázek rozhodovalo mezi čtyřmi možnostmi bez opory ve znalosti, a to je přesně situace, ve které náhoda nikoho nezachrání. Nic ztraceného ale není. Vezměte si správné odpovědi a všimněte si, kolik z nich je věcí, kterou jste kdysi věděli a jen se dlouho nepřipomněla. Vyberte si jeden obor z dnešní desítky a příště už bude jistý.` },
+  { max: 6, text: `Přesně půl na půl, tedy stav, kdy jedna část odpovědí stála na znalosti a druhá na odhadu. Titulek slibuje zařazení a tohle skóre zatím žádnou stranu nevybralo. Pomůže podívat se, kde body chyběly. Pokud padly otázky ze začátku, jde o obecný přehled, který se doplňuje snadno. Pokud vás dostal střed kvízu, znamená to, že se odpovědi daly tušit, ale ne vědět, a mezi znalcem a tipujícím rozhoduje právě tenhle rozdíl.` },
+  { max: 9, text: `Výsledek znalce, a to bez diskuse. Sedm a víc bodů z deseti otázek, kde byly všechny čtyři možnosti postavené tak, aby zněly věrohodně, se odhadem posbírat nedá. Musela za tím být skutečná znalost napříč obory, které spolu nesouvisejí, od mapy Balkánu přes staré české sloveso a chování včel až k ruské literatuře a francouzské politice. Jedna až tři chyby na tom nic nemění, jsou to konkrétní jména a údaje, ne mezera v rozhledu. Titulek vás zařadil mezi znalce.` },
+  { max: 10, text: `Plný počet, na který podle titulku dosáhne jen menšina. Nesrazily vás čtyři možnosti u moře, k němuž patří bulharská letoviska, jméno olympijského vítěze v desetiboji, autor přístroje, který jako první dokázal zaznamenaný zvuk i přehrát, staré české sloveso, způsob dorozumívání včel, ruský romanopisec, francouzský prezident, bylinka do bramborové polévky, kníže z devátého století ani skladatel hudby ke slavnému westernu. Deset z deseti v kvízu, kde byl každý distraktor postavený tak, aby tipujícího dostal, se netipuje. Tohle je čistá znalost a na dělicí čáře z titulku stojíte na její špičce.` }
+];
+
+var pismena = [`a)`, `b)`, `c)`, `d)`];
+var odpovedi = new Array(otazky.length).fill(null);
+var hotovo = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function vykresli() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (ot, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    var zadani = document.createElement(`p`);
+    zadani.className = `zadani`;
+    zadani.textContent = (i + 1) + `. ` + ot.q;
+    box.appendChild(zadani);
+
+    ot.o.forEach(function (varianta, j) {
+      var btn = document.createElement(`button`);
+      btn.className = `varianta`;
+      btn.type = `button`;
+      btn.textContent = pismena[j] + ` ` + varianta;
+      btn.addEventListener(`click`, function () {
+        if (hotovo) return;
+        odpovedi[i] = j;
+        var sourozenci = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < sourozenci.length; k++) {
+          sourozenci[k].classList.remove(`vybrana`);
+        }
+        btn.classList.add(`vybrana`);
+        zkontrolujHotovost();
+      });
+      box.appendChild(btn);
+    });
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujHotovost() {
+  var vse = odpovedi.every(function (o) { return o !== null; });
+  tlacitkoEl.disabled = !vse;
+  if (vse) hlaskaEl.textContent = ``;
+}
+
+tlacitkoEl.addEventListener(`click`, function () {
+  if (odpovedi.some(function (o) { return o === null; })) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  hotovo = true;
+  hlaskaEl.textContent = ``;
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  otazky.forEach(function (ot, i) {
+    var tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove(`vybrana`);
+      if (j === ot.s) tlacitka[j].classList.add(`spravna`);
+      else if (j === odpovedi[i]) tlacitka[j].classList.add(`spatna`);
+    }
+    if (odpovedi[i] === ot.s) body++;
+  });
+
+  tlacitkoEl.disabled = true;
+  skoreEl.textContent = body + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body <= hodnoceni[h].max) { hodnoceniEl.textContent = hodnoceni[h].text; break; }
+  }
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+znovuEl.addEventListener(`click`, function () {
+  odpovedi = new Array(otazky.length).fill(null);
+  hotovo = false;
+  vysledekEl.style.display = `none`;
+  tlacitkoEl.disabled = true;
+  hlaskaEl.textContent = ``;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+vykresli();
+</script>
+</body>
+</html>
