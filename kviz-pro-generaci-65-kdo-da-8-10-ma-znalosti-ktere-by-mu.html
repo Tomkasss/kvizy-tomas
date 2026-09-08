@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro generaci 65+: kdo dá 8/10, má znalosti, které by mu mohli mladí závidět</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  line-height: 1.5;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.locked .opt { cursor: default; }
+.locked .opt:hover { background: #f7f4f0; }
+.locked .opt.selected:hover { background: #dcd3c7; }
+.locked .opt.correct:hover { background: #d4edda; }
+.locked .opt.wrong:hover { background: #f8d7da; }
+#submit, #retry {
+  display: block;
+  margin: 40px auto 0;
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover:not(:disabled) { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry { background: #8c7b6b; }
+#retry:hover { background: #756658; }
+.warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 14px; }
+.verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+[hidden] { display: none !important; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q, #result { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro generaci 65+: kdo dá 8/10, má znalosti, které by mu mohli mladí závidět</h1>
+<p class="perex">Balet, noční obloha, stará rozhlasová technika i jihočeské rybníky. Otázky míří tam, kde se znalosti neberou z učebnice, ale z desítek let čtení, poslouchání a všímání si. Váš ročník tenhle záběr má, ten dnešní ho nemá kde nasbírat.</p>
+
+<div id="quiz"></div>
+
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="warn" id="warn"></p>
+
+<div id="result" hidden>
+  <p class="score" id="score"></p>
+  <p class="verdict" id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+
+<script>
+var QUESTIONS = [
+  {
+    q: `1. Který skladatel je autorem Šavlového tance z baletu Gajané?`,
+    opts: [`Sergej Prokofjev`, `Aram Chačaturjan`, `Dmitrij Šostakovič`, `Nikolaj Rimskij-Korsakov`],
+    correct: 1
+  },
+  {
+    q: `2. Do kterého souhvězdí patří sedm hvězd, které na naší obloze tvoří nejnápadnější obrazec vozu?`,
+    opts: [`Malá medvědice`, `Kasiopeja`, `Velká medvědice`, `Orion`],
+    correct: 2
+  },
+  {
+    q: `3. Kdo vedl největší povstání otroků proti starověkému Římu?`,
+    opts: [`Spartakus`, `Vercingetorix`, `Arminius`, `Boudicca`],
+    correct: 0
+  },
+  {
+    q: `4. Která rostlina dává ginu jeho charakteristickou chuť?`,
+    opts: [`anýz`, `jalovec`, `pelyněk`, `kmín`],
+    correct: 1
+  },
+  {
+    q: `5. Které město je pro islám třetím nejposvátnějším místem po Mekce a Medíně?`,
+    opts: [`Damašek`, `Jeruzalém`, `Káhira`, `Istanbul`],
+    correct: 1
+  },
+  {
+    q: `6. K čemu sloužila krystalka?`,
+    opts: [`k poslechu rozhlasu bez zdroje elektrického proudu`, `k zesílení slabého rozhlasového signálu z dálky`, `k záznamu rozhlasového pořadu na magnetický pásek`, `k rušení nepovoleného zahraničního vysílání`],
+    correct: 0
+  },
+  {
+    q: `7. Z čeho se vyrábí asfalt, kterým se pojí povrch silnic?`,
+    opts: [`z drcené břidlice pojené vápnem`, `z pryskyřice jehličnatých stromů`, `z rozehřáté strusky z vysokých pecí`, `ze zbytku po destilaci ropy`],
+    correct: 3
+  },
+  {
+    q: `8. Ve kterém sportu se závodí na lodi zvané skif?`,
+    opts: [`ve veslování`, `v kanoistice`, `v jachtingu`, `ve vodním slalomu`],
+    correct: 0
+  },
+  {
+    q: `9. Kdo postavil rybník Rožmberk?`,
+    opts: [`Štěpánek Netolický`, `Josef Šusta`, `Jakub Krčín z Jelčan`, `Mikuláš Ruthard z Malešova`],
+    correct: 2
+  },
+  {
+    q: `10. Jak se jmenuje nejvyšší hora Českomoravské vrchoviny?`,
+    opts: [`Devět skal`, `Křemešník`, `Žákova hora`, `Javořice`],
+    correct: 3
+  }
+];
+
+var LETTERS = [`a`, `b`, `c`, `d`];
+
+var VERDICTS = [
+  { min: 0, max: 3, text: `Tenhle výsledek říká hlavně to, že otázky mířily do oborů, které vám leží dál od ruky. Deset oborů je široký záběr a nikdo je nemá všechny stejně nablízku. Projděte si správné odpovědi a uvidíte, že velká část z nich stojí na jediném jménu nebo názvu, tedy na informaci, která se doplní jedním přečtením. K hranici z titulku je odsud daleko, ale tu vzdálenost tvoří chybějící údaje, ne chybějící hlava.` },
+  { min: 4, max: 6, text: `Poctivý střed, ve kterém končí velká část řešitelů. Takové skóre vzniká tam, kde obecné povědomí na část otázek stačilo, ale u zbytku bylo potřeba vybavit si konkrétní jméno, název nebo souvislost. Přesně na téhle hranici se osm bodů získává i ztrácí. Do osmičky z titulku vám chybějí dvě až čtyři odpovědi, což je rozdíl několika faktů, ne rozdíl rozhledu.` },
+  { min: 7, max: 9, text: `Tady začíná pásmo, kvůli kterému kvíz vznikl. Sedm bodů znamená pevný všeobecný rozhled. Osm a devět už znamenají, že jste uspěli i tam, kde se nabízené možnosti liší jediným detailem a pouhý odhad nestačí. Takhle poskládané znalosti nevznikají v jednom předmětu ani za jeden semestr a dnešní mladší ročníky je nemají kde nasbírat, protože je nedává škola, ale desítky let čtení, poslouchání a všímání si. Tohle je přesně ta výbava, o které mluví titulek.` },
+  { min: 10, max: 10, text: `Plný počet, na který dosáhne opravdu jen menšina. Deset z deseti napříč baletem, noční oblohou, starověkým Římem, jalovcovou chutí ginu, náboženskou geografií, starou rozhlasovou technikou, průmyslovými surovinami, sportem, jihočeským rybníkářstvím i nenápadným vrchem na Vysočině není otázka jednoho oboru. Je to rozhled skládaný celý život a takový výsledek se závidět dá právem.` }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var evaluated = false;
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryEl = document.getElementById(`retry`);
+
+function build() {
+  quizEl.textContent = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var title = document.createElement(`p`);
+    title.className = `q-text`;
+    title.textContent = item.q;
+    box.appendChild(title);
+    item.opts.forEach(function (opt, oi) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `opt`;
+      btn.textContent = LETTERS[oi] + `) ` + opt;
+      btn.addEventListener(`click`, function () { pick(qi, oi); });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function pick(qi, oi) {
+  if (evaluated) { return; }
+  answers[qi] = oi;
+  var box = quizEl.children[qi];
+  var btns = box.querySelectorAll(`.opt`);
+  for (var i = 0; i < btns.length; i++) {
+    if (i === oi) { btns[i].classList.add(`selected`); }
+    else { btns[i].classList.remove(`selected`); }
+  }
+  refresh();
+}
+
+function refresh() {
+  var done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+  if (done) { warnEl.textContent = ``; }
+}
+
+function evaluate() {
+  if (answers.some(function (a) { return a === null; })) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  evaluated = true;
+  var score = 0;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = quizEl.children[qi];
+    box.classList.add(`locked`);
+    var btns = box.querySelectorAll(`.opt`);
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.remove(`selected`);
+      if (i === item.correct) { btns[i].classList.add(`correct`); }
+      else if (i === answers[qi]) { btns[i].classList.add(`wrong`); }
+    }
+    if (answers[qi] === item.correct) { score++; }
+  });
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score >= VERDICTS[v].min && score <= VERDICTS[v].max) {
+      verdictEl.textContent = VERDICTS[v].text;
+      break;
+    }
+  }
+  submitEl.disabled = true;
+  resultEl.hidden = false;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  answers = new Array(QUESTIONS.length).fill(null);
+  evaluated = false;
+  resultEl.hidden = true;
+  warnEl.textContent = ``;
+  submitEl.disabled = true;
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+retryEl.addEventListener(`click`, reset);
+build();
+</script>
+</body>
+</html>
