@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz: 10 otázek pro seniory s přehledem: Plný počet zvládne jen málokdo bez jediného zaváhání</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  #vyhodnotit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover:enabled { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.4em; }
+  #vysledek {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 14px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #znovu {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #znovu:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka, #vysledek { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz: 10 otázek pro seniory s přehledem: Plný počet zvládne jen málokdo bez jediného zaváhání</h1>
+  <p class="perex">Deset otázek z deseti různých oborů a u každé čtyři možnosti, mezi nimiž se dá snadno zabloudit. Senior s poctivým přehledem si tu přijde na své. Plný počet ale sebere jen ten, kdo ani jednou nezaváhá.</p>
+  <div id="kviz"></div>
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+  <div id="vysledek" hidden>
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var otazky = [
+  {
+    q: `1. Kdo velel rakouské armádě v bitvě u Hradce Králové?`,
+    a: [`Alfred Windischgrätz`, `arcivévoda Albrecht`, `Ludwig von Benedek`, `Eduard Clam-Gallas`],
+    s: 2
+  },
+  {
+    q: `2. Ve kterém pohoří leží hora K2?`,
+    a: [`Himálaj`, `Karákóram`, `Hindúkuš`, `Pamír`],
+    s: 1
+  },
+  {
+    q: `3. Kdo namaloval obraz Vražda v domě?`,
+    a: [`Jakub Schikaneder`, `Luděk Marold`, `Antonín Slavíček`, `Max Švabinský`],
+    s: 0
+  },
+  {
+    q: `4. Kdo napsal román Golem?`,
+    a: [`Franz Kafka`, `Egon Erwin Kisch`, `Paul Leppin`, `Gustav Meyrink`],
+    s: 3
+  },
+  {
+    q: `5. Kdo složil hudbu k písni Zvonky štěstí?`,
+    a: [`Karel Svoboda`, `Jiří Zmožek`, `Ladislav Štaidl`, `Jindřich Brabec`],
+    s: 1
+  },
+  {
+    q: `6. Kdo ztvárnil titulní postavu ve filmové komedii Bílá paní?`,
+    a: [`Irena Kačírková`, `Jiřina Bohdalová`, `Květa Fialová`, `Jana Brejchová`],
+    s: 0
+  },
+  {
+    q: `7. Který strom má plod zvaný dvounažka?`,
+    a: [`jasan`, `lípa`, `javor`, `bříza`],
+    s: 2
+  },
+  {
+    q: `8. Ve které vrstvě zemského tělesa vzniká magnetické pole Země?`,
+    a: [`v zemské kůře`, `v zemském plášti`, `ve vnitřním jádru`, `ve vnějším jádru`],
+    s: 3
+  },
+  {
+    q: `9. Co označuje pojem synekdocha?`,
+    a: [`zveličení skutečnosti pro zdůraznění`, `spojení dvou protikladných pojmů`, `označení celku podle jeho části`, `opakování slova na začátku veršů`],
+    s: 2
+  },
+  {
+    q: `10. Kdo je nejlepším střelcem v historii československé fotbalové ligy?`,
+    a: [`Antonín Puč`, `Josef Bican`, `Oldřich Nejedlý`, `Jiří Pešek`],
+    s: 1
+  }
+];
+
+var hodnoceni = [
+  { max: 3, text: `Deset oborů za sebou je nemilosrdné síto a stačí, aby vás minuly tři čtyři z nich, a skóre spadne rychle. Odpovědi jste nejspíš hledali spíš citem než jistotou. Dobrá zpráva je, že vás zastavily hlavně otázky, kde rozhodoval jeden konkrétní detail, a ten se doplňuje snadno.` },
+  { max: 6, text: `Solidní střed. Několik otázek jste vzali s jistotou a ztráceli jste tam, kde nestačilo poznat obor, ale bylo potřeba trefit konkrétní jméno. Výsledek, na kterém se dá stavět.` },
+  { max: 9, text: `Jasně nad průměrem. Prošli jste i otázkami, u kterých se většina rozhodovala mezi dvěma velmi podobnými odpověďmi, a to už není náhoda, ale letitá čtenářská a divácká zásoba. K plnému počtu vám chybělo jediné zaváhání.` },
+  { max: 10, text: `Přesně ten výsledek, který slibuje titulek jako vzácný. Deset oborů, deset správných odpovědí a ani jedno zaváhání u těsných variant. Takový přehled se nedá nastudovat přes víkend, ten se skládá celý život.` }
+];
+
+var vybrano = [];
+var hotovo = false;
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function postav() {
+  kvizEl.innerHTML = ``;
+  vybrano = [];
+  hotovo = false;
+  for (var i = 0; i < otazky.length; i++) {
+    vybrano.push(null);
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = otazky[i].q;
+    box.appendChild(zneni);
+    for (var j = 0; j < otazky[i].a.length; j++) {
+      var btn = document.createElement(`button`);
+      btn.className = `varianta`;
+      btn.type = `button`;
+      btn.textContent = otazky[i].a[j];
+      btn.setAttribute(`data-o`, String(i));
+      btn.setAttribute(`data-v`, String(j));
+      btn.addEventListener(`click`, klik);
+      box.appendChild(btn);
+    }
+    kvizEl.appendChild(box);
+  }
+  tlacitkoEl.disabled = true;
+  hlaskaEl.textContent = ``;
+  vysledekEl.hidden = true;
+}
+
+function klik(e) {
+  if (hotovo) { return; }
+  var btn = e.currentTarget;
+  var oi = parseInt(btn.getAttribute(`data-o`), 10);
+  var vi = parseInt(btn.getAttribute(`data-v`), 10);
+  var sourozenci = btn.parentNode.querySelectorAll(`.varianta`);
+  for (var k = 0; k < sourozenci.length; k++) {
+    sourozenci[k].classList.remove(`vybrana`);
+  }
+  btn.classList.add(`vybrana`);
+  vybrano[oi] = vi;
+  zkontrolujHotovost();
+}
+
+function zkontrolujHotovost() {
+  var vse = true;
+  for (var i = 0; i < vybrano.length; i++) {
+    if (vybrano[i] === null) { vse = false; }
+  }
+  tlacitkoEl.disabled = !vse;
+  if (vse) { hlaskaEl.textContent = ``; }
+}
+
+tlacitkoEl.addEventListener(`click`, function () {
+  if (tlacitkoEl.disabled) { return; }
+  hotovo = true;
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  for (var i = 0; i < boxy.length; i++) {
+    var tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove(`vybrana`);
+      if (j === otazky[i].s) {
+        tlacitka[j].classList.add(`spravna`);
+      } else if (j === vybrano[i]) {
+        tlacitka[j].classList.add(`spatna`);
+      }
+    }
+    if (vybrano[i] === otazky[i].s) { body++; }
+  }
+  tlacitkoEl.disabled = true;
+  skoreEl.textContent = body + ` z 10`;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+  vysledekEl.hidden = false;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+znovuEl.addEventListener(`click`, function () {
+  postav();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+postav();
+</script>
+</body>
+</html>
