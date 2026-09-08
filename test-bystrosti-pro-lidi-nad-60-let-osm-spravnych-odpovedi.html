@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test bystrosti pro lidi nad 60 let: Osm správných odpovědí je známkou skvělé kondice mozku</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 32px; }
+.question {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #721c24; margin-top: 14px; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 24px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#retry:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .question { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test bystrosti pro lidi nad 60 let: Osm správných odpovědí je známkou skvělé kondice mozku</h1>
+<p class="perex">Deset otázek pro každého, komu je přes šedesát. Zahrada, hudba, nápoje, mapa, čeština, sport, kniha i kus staré monarchie, k tomu dvě úlohy na čistou úvahu. Osm správných odpovědí je laťka, na kterou dosáhne menšina.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warn" hidden>Odpovězte prosím na všechny otázky</p>
+<div id="result" hidden>
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  {
+    q: `1. Proč u některých hortenzií zmodrají původně růžové květy?`,
+    opts: [`protože je půda vápenatá`, `protože je půda kyselá`, `protože je půda chudá na dusík`, `protože je půda těžká a jílovitá`],
+    correct: 1
+  },
+  {
+    q: `2. Jak se nazývá mužský pěvecký hlas, který zpěvák tvoří falzetem a který v barokní opeře přebírá role původně psané pro kastráty?`,
+    opts: [`baryton`, `kontratenor`, `bas`, `tenor`],
+    correct: 1
+  },
+  {
+    q: `3. Který nápoj dostává svou charakteristicky hořkou chuť z chininu?`,
+    opts: [`ležák`, `černá káva`, `zelený čaj`, `tonik`],
+    correct: 3
+  },
+  {
+    q: `4. Které slovo patří na místo otazníku: OSTROV je k MOŘI jako OÁZA je k ?`,
+    opts: [`palmě`, `prameni`, `velbloudovi`, `poušti`],
+    correct: 3
+  },
+  {
+    q: `5. Které město je podle ústavy hlavním městem Nizozemska?`,
+    opts: [`Haag`, `Rotterdam`, `Amsterdam`, `Eindhoven`],
+    correct: 2
+  },
+  {
+    q: `6. Co znamená přídavné jméno všetečný?`,
+    opts: [`nepatřičně zvědavý a dotěrný`, `přehnaně opatrný`, `často roztržitý`, `nadmíru upovídaný`],
+    correct: 0
+  },
+  {
+    q: `7. Jak se ve volejbalu nazývá hráč, který nastupuje v odlišně barevném dresu a smí hrát jen v zadní řadě?`,
+    opts: [`smečař`, `libero`, `nahrávač`, `univerzál`],
+    correct: 1
+  },
+  {
+    q: `8. Ve vitríně stojí v jedné řadě tři poháry: zlatý, stříbrný a bronzový. Zlatý nestojí vedle stříbrného a bronzový stojí vlevo od stříbrného. Který pohár stojí uprostřed?`,
+    opts: [`zlatý`, `stříbrný`, `bronzový`, `z uvedených vět to nelze určit`],
+    correct: 2
+  },
+  {
+    q: `9. Kdo je autorem novely O myších a lidech?`,
+    opts: [`Ernest Hemingway`, `William Faulkner`, `Francis Scott Fitzgerald`, `John Steinbeck`],
+    correct: 3
+  },
+  {
+    q: `10. Kdo byl manželem Marie Terezie?`,
+    opts: [`František Štěpán Lotrinský`, `Karel Albrecht Bavorský`, `Evžen Savojský`, `Fridrich August Saský`],
+    correct: 0
+  }
+];
+
+var LETTERS = [`a`, `b`, `c`, `d`];
+
+var VERDICTS = [
+  { min: 0, max: 3, text: `Dnes to drhlo. Otázky skákaly od kvetoucího keře na zahradě na notovou osnovu, odtud na mapu Evropy a nakonec do osmnáctého století, a takový skok mezi obory sráží spoustu lidí. Znalosti nikam nezmizely, jen se hůř vybavovaly. Přečtěte si zítra kousek textu, který vás donutí zastavit se a přemýšlet, a příště bude číslo jiné.` },
+  { min: 4, max: 6, text: `Polovina sedla, druhá utekla u těsných nabídek, kde se dvě varianty lišily jen odstínem. Na průměr, který tenhle test od svých řešitelů čeká, to ještě není, pořád je to ale základ, na kterém se dá stavět. K laťce, kterou slibuje titulek, chybí ještě dva až čtyři body, a nejrychleji je najdete tam, kde jste odpověď spíš tipovali než věděli.` },
+  { min: 7, max: 9, text: `Sedm bodů je přesně ten průměr, který tenhle test od svých řešitelů čeká, a k laťce z titulku chybí jediný krok. Od osmi bodů výš platí přesně to, co slibuje titulek: tohle je známka skvělé kondice mozku. Udržet přehled přes botaniku, hudbu, jazyk, sport i logickou úlohu a přitom nesednout na těsné varianty zvládne jen menšina lidí po šedesátce.` },
+  { min: 10, max: 10, text: `Plný počet, a ten dá málokdo. Neshodil vás keř, kterému barvu květů určuje půda, hlas, který se tvoří falzetem, nápoj hořknoucí po chininu, ostrov s mořem a oáza s pouští, město, jež je hlavní jen na papíře, staré české přídavné jméno, volejbalista v odlišném dresu, tři poháry ve vitríně, americká novela o dvou nádenících ani jméno muže po boku panovnice, kterou zná každý. Deset z deseti napříč deseti obory je skvělá kondice mozku ve své nejlepší podobě.` }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var evaluated = false;
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryEl = document.getElementById(`retry`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `question`;
+
+    var title = document.createElement(`p`);
+    title.className = `qtext`;
+    title.textContent = item.q;
+    box.appendChild(title);
+
+    item.opts.forEach(function (optText, oi) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `opt`;
+      btn.textContent = LETTERS[oi] + `) ` + optText;
+      btn.setAttribute(`data-q`, String(qi));
+      btn.setAttribute(`data-o`, String(oi));
+      btn.addEventListener(`click`, onPick);
+      box.appendChild(btn);
+    });
+
+    quizEl.appendChild(box);
+  });
+}
+
+function onPick(ev) {
+  if (evaluated) { return; }
+  var btn = ev.currentTarget;
+  var qi = parseInt(btn.getAttribute(`data-q`), 10);
+  var oi = parseInt(btn.getAttribute(`data-o`), 10);
+  answers[qi] = oi;
+
+  var siblings = btn.parentNode.querySelectorAll(`.opt`);
+  for (var i = 0; i < siblings.length; i++) {
+    siblings[i].classList.remove(`selected`);
+  }
+  btn.classList.add(`selected`);
+  refreshSubmit();
+}
+
+function refreshSubmit() {
+  var done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+  if (done) { warnEl.hidden = true; }
+}
+
+function verdictFor(score) {
+  for (var i = 0; i < VERDICTS.length; i++) {
+    if (score >= VERDICTS[i].min && score <= VERDICTS[i].max) { return VERDICTS[i].text; }
+  }
+  return ``;
+}
+
+function evaluate() {
+  if (answers.some(function (a) { return a === null; })) {
+    warnEl.hidden = false;
+    return;
+  }
+  evaluated = true;
+  warnEl.hidden = true;
+
+  var score = 0;
+  var boxes = quizEl.querySelectorAll(`.question`);
+  for (var qi = 0; qi < QUESTIONS.length; qi++) {
+    var opts = boxes[qi].querySelectorAll(`.opt`);
+    var correct = QUESTIONS[qi].correct;
+    if (answers[qi] === correct) { score++; }
+    for (var oi = 0; oi < opts.length; oi++) {
+      opts[oi].disabled = true;
+      opts[oi].classList.remove(`selected`);
+      if (oi === correct) {
+        opts[oi].classList.add(`correct`);
+      } else if (oi === answers[qi]) {
+        opts[oi].classList.add(`wrong`);
+      }
+    }
+  }
+
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  verdictEl.textContent = verdictFor(score);
+  resultEl.hidden = false;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  evaluated = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.hidden = true;
+  warnEl.hidden = true;
+  submitEl.disabled = true;
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+retryEl.addEventListener(`click`, reset);
+build();
+</script>
+</body>
+</html>
