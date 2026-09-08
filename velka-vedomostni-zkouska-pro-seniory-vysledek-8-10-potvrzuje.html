@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Velká vědomostní zkouška pro seniory: Výsledek 8/10 potvrzuje, že máte stále výborný přehled</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta:disabled { cursor: default; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#hlaska { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+#vysledek {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Velká vědomostní zkouška pro seniory: Výsledek 8/10 potvrzuje, že máte stále výborný přehled</h1>
+<p class="perex">Deset otázek napříč obory pro seniory, kteří se celý život zajímali o svět kolem sebe. Zemědělství, sport, stavitelství, jídlo, příroda, zdraví, zeměpis, čeština, dějiny i počasí. Osm bodů znamená přehled, na který můžete být hrdí.</p>
+
+<div id="kviz"></div>
+
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p id="hlaska"></p>
+
+<div id="vysledek" style="display:none">
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+
+<script>
+const otazky = [
+  {
+    q: `1. Jak se v zemědělství souhrnně označuje obilí, které se vysévá už v září a říjnu a sklízí se až následující léto?`,
+    a: [`jařina`, `meziplodina`, `ozim`, `směska`],
+    spravna: 2
+  },
+  {
+    q: `2. Jak se v ledním hokeji nazývá přestupek, kdy hráč odpálí kotouč z vlastní poloviny hřiště přes brankovou čáru soupeře mimo branku, aniž se ho po cestě kdokoli dotkne?`,
+    a: [`zakázané uvolnění`, `postavení mimo hru`, `bránění v pohybu`, `hra vysokou holí`],
+    spravna: 0
+  },
+  {
+    q: `3. Jak se nazývá svislé okno vystupující z roviny šikmé střechy?`,
+    a: [`vikýř`, `arkýř`, `markýza`, `atika`],
+    spravna: 0
+  },
+  {
+    q: `4. Které koření dodává kari jeho charakteristickou žlutou barvu?`,
+    a: [`šafrán`, `kurkuma`, `mletá sladká paprika`, `hořčičné semínko`],
+    spravna: 1
+  },
+  {
+    q: `5. Která z těchto rostlin našich rašelinišť si doplňuje živiny lovem drobného hmyzu?`,
+    a: [`klikva bahenní`, `suchopýr úzkolistý`, `vřes obecný`, `rosnatka okrouhlolistá`],
+    spravna: 3
+  },
+  {
+    q: `6. Který lékařský obor se zabývá cukrovkou a onemocněními štítné žlázy?`,
+    a: [`nefrologie`, `endokrinologie`, `hematologie`, `revmatologie`],
+    spravna: 1
+  },
+  {
+    q: `7. Které město je hlavním městem Keni?`,
+    a: [`Nairobi`, `Kampala`, `Addis Abeba`, `Chartúm`],
+    spravna: 0
+  },
+  {
+    q: `8. Co znamená přídavné jméno úzkoprsý?`,
+    a: [`tělesně slabý a hubený`, `upovídaný a neschopný udržet tajemství`, `netrpělivý a snadno podrážděný`, `nesnášenlivý a s omezeným rozhledem`],
+    spravna: 3
+  },
+  {
+    q: `9. Které státy tvořily před první světovou válkou Trojdohodu?`,
+    a: [`Německo, Rakousko-Uhersko a Itálie`, `Francie, Velká Británie a Rusko`, `Francie, Itálie a Rusko`, `Velká Británie, Rusko a Rakousko-Uhersko`],
+    spravna: 1
+  },
+  {
+    q: `10. Co udává Fujitova stupnice?`,
+    a: [`míru sucha v krajině`, `výšku vln na otevřeném moři`, `intenzitu tornád`, `množství srážek při přívalovém dešti`],
+    spravna: 2
+  }
+];
+
+const hodnoceni = [
+  { min: 0, max: 3, text: `Otázky mířily do deseti různých oborů a tentokrát vás většina z nich minula. Není to důvod k mrzutosti, spíš pozvánka: vezměte si tři odpovědi, které vás překvapily nejvíc, a nechte si je v hlavě do příště. Rozhled se nedědí, ten se sbírá.` },
+  { min: 4, max: 6, text: `Slušný základ, který vás bezpečně provede běžným rozhovorem. Poznali jste, co se vám za život samo připomínalo, ale u otázek z okrajovějších koutů jste zaváhali. Stačí málo a posunete se přes hranici sedmi bodů.` },
+  { min: 7, max: 9, text: `Přesně tohle měl název na mysli. Osm správných odpovědí z deseti různých oborů není náhoda ani štěstí, to je doklad opravdu výborného přehledu. Poradili jste si i tam, kde vedle správné odpovědi stály další skutečné pojmy z téhož oboru a pouhé vyloučení nesmyslu nestačilo. Rozdíl mezi sedmi a devíti body dělaly nanejvýš dvě položky z okrajovějších koutů, a to je odchylka, kterou u takového záběru nikdo počítat nebude. Rozhled přes všech deset oborů máte teď černé na bílém potvrzený.` },
+  { min: 10, max: 10, text: `Plný počet, na který dosáhne jen menšina. Neshodilo vás podzimní obilí, hokejový odpal přes celé kluziště, střešní okno, žluté koření v kari, rašelinná masožravka, obor o hormonech, hlavní město ve východní Africe, staré české přídavné jméno, předválečné spojenectví ani meteorologická stupnice. Takový rozptyl znalostí v jednom člověku je obdivuhodný.` }
+];
+
+const pismena = [`a) `, `b) `, `c) `, `d) `];
+let odpovedi = new Array(otazky.length).fill(null);
+let hotovo = false;
+
+const kvizEl = document.getElementById(`kviz`);
+const tlacitkoVyhodnotit = document.getElementById(`vyhodnotit`);
+const hlaskaEl = document.getElementById(`hlaska`);
+const vysledekEl = document.getElementById(`vysledek`);
+const skoreEl = document.getElementById(`skore`);
+const hodnoceniEl = document.getElementById(`hodnoceni`);
+const tlacitkoZnovu = document.getElementById(`znovu`);
+
+function vykresli() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    const box = document.createElement(`div`);
+    box.className = `otazka`;
+    const zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = o.q;
+    box.appendChild(zneni);
+    o.a.forEach(function (text, j) {
+      const btn = document.createElement(`button`);
+      btn.className = `varianta`;
+      btn.type = `button`;
+      btn.textContent = pismena[j] + text;
+      btn.addEventListener(`click`, function () {
+        if (hotovo) return;
+        odpovedi[i] = j;
+        const vsechny = box.querySelectorAll(`.varianta`);
+        vsechny.forEach(function (b) { b.classList.remove(`vybrana`); });
+        btn.classList.add(`vybrana`);
+        hlaskaEl.textContent = ``;
+        zkontrolujHotovost();
+      });
+      box.appendChild(btn);
+    });
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujHotovost() {
+  const vse = odpovedi.every(function (o) { return o !== null; });
+  tlacitkoVyhodnotit.disabled = !vse;
+}
+
+tlacitkoVyhodnotit.addEventListener(`click`, function () {
+  if (tlacitkoVyhodnotit.disabled) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  const nezodpovezene = odpovedi.some(function (o) { return o === null; });
+  if (nezodpovezene) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  hotovo = true;
+  let skore = 0;
+  const boxy = kvizEl.querySelectorAll(`.otazka`);
+  otazky.forEach(function (o, i) {
+    const tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    tlacitka.forEach(function (btn, j) {
+      btn.disabled = true;
+      btn.classList.remove(`vybrana`);
+      if (j === o.spravna) {
+        btn.classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        btn.classList.add(`spatna`);
+      }
+    });
+    if (odpovedi[i] === o.spravna) skore++;
+  });
+  tlacitkoVyhodnotit.disabled = true;
+  hlaskaEl.textContent = ``;
+  skoreEl.textContent = skore + ` z ` + otazky.length;
+  const pasmo = hodnoceni.find(function (h) { return skore >= h.min && skore <= h.max; });
+  hodnoceniEl.textContent = pasmo ? pasmo.text : ``;
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+tlacitkoZnovu.addEventListener(`click`, function () {
+  odpovedi = new Array(otazky.length).fill(null);
+  hotovo = false;
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  tlacitkoVyhodnotit.disabled = true;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+vykresli();
+</script>
+</body>
+</html>
