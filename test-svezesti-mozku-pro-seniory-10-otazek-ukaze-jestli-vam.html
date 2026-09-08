@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test svěžesti mozku pro seniory: 10 otázek ukáže, jestli vám to myslí jako před třiceti lety</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    margin: 0;
+    padding: 40px 20px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zadani { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta.zamceno { cursor: default; }
+  .varianta.zamceno:hover { background: #f7f4f0; }
+  .varianta.zamceno.vybrana:hover { background: #dcd3c7; }
+  .varianta.zamceno.spravna:hover { background: #d4edda; }
+  .varianta.zamceno.spatna:hover { background: #f8d7da; }
+  #vyhodnotit, #znovu {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; }
+  #znovu:hover { background: #756658; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.4em; }
+  #vysledek {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 40px;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test svěžesti mozku pro seniory: 10 otázek ukáže, jestli vám to myslí jako před třiceti lety</h1>
+  <p class="perex">Deset otázek pro seniory, kteří chtějí vědět, kolik jim v hlavě opravdu zůstalo. Zeměpis, literatura, hudba, výtvarné umění, technika, film i logický úsudek. Průměrný řešitel se dostane na sedm bodů, plný počet dá jen menšina.</p>
+
+  <div id="kviz"></div>
+
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+
+  <div id="vysledek" hidden>
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var otazky = [
+  {
+    zadani: `1. Které město je hlavním městem spolkové země Bádensko-Württembersko?`,
+    varianty: [`Karlsruhe`, `Mannheim`, `Stuttgart`, `Freiburg`],
+    spravna: 2
+  },
+  {
+    zadani: `2. Ke kterému indiánskému kmeni patřil náčelník Vinnetou?`,
+    varianty: [`ke Komančům`, `k Siouxům`, `k Čejenům`, `k Apačům`],
+    spravna: 3
+  },
+  {
+    zadani: `3. Kdo namaloval obraz Dáma s hranostajem?`,
+    varianty: [`Tizian`, `Leonardo da Vinci`, `Albrecht Dürer`, `Diego Velázquez`],
+    spravna: 1
+  },
+  {
+    zadani: `4. Kdo je autorem oratoria Stvoření?`,
+    varianty: [`Georg Friedrich Händel`, `Wolfgang Amadeus Mozart`, `Johann Sebastian Bach`, `Joseph Haydn`],
+    spravna: 3
+  },
+  {
+    zadani: `5. Co zkoumá vědní obor ichtyologie?`,
+    varianty: [`mořské savce`, `korýše a měkkýše`, `ryby a paryby`, `vodní rostliny`],
+    spravna: 2
+  },
+  {
+    zadani: `6. Co je u klasické termosky mezi dvojitými stěnami vnitřní nádoby?`,
+    varianty: [`vrstva izolační pěny`, `vakuum`, `obyčejný vzduch`, `stlačený dusík`],
+    spravna: 1
+  },
+  {
+    zadani: `7. Kdo hrál titulní roli ve filmu Limonádový Joe?`,
+    varianty: [`Karel Fiala`, `Miloš Kopecký`, `Josef Bek`, `Vladimír Menšík`],
+    spravna: 0
+  },
+  {
+    zadani: `8. Co znamená přídavné jméno ambivalentní?`,
+    varianty: [
+      `rozporuplný, s dvojí protichůdnou povahou zároveň`,
+      `obojetný a vypočítavý v jednání s druhými lidmi`,
+      `nejasný kvůli nedbale a nepřesně zvolené formulaci`,
+      `lhostejný, bez sebemenšího zájmu o okolní dění`
+    ],
+    spravna: 0
+  },
+  {
+    zadani: `9. Který africký stát založili v 19. století osvobození otroci ze Spojených států?`,
+    varianty: [`Sierra Leone`, `Libérie`, `Ghana`, `Senegal`],
+    spravna: 1
+  },
+  {
+    zadani: `10. Mapa je ke krajině jako portrét k čemu?`,
+    varianty: [`k malíři`, `k plátnu`, `k člověku`, `ke galerii`],
+    spravna: 2
+  }
+];
+
+var hodnoceni = [
+  {
+    max: 3,
+    text: `Vybavování vám dnes vázne. Většina otázek stála na tom, co se člověk kdysi naučil a co si od té doby jen občas připomněl, a právě tenhle most mezi tehdejším a dnešním věděním se vám při čtení nabídek nedařilo přejít. Se svěžestí, kterou jste měli před třiceti lety, se tenhle výsledek neshoduje. Dobrá zpráva je, že tohle není otázka paměti jako takové, ale trénovanosti: pár týdnů pravidelného čtení, křížovek nebo rozhovorů nad mapou dokáže výsledek posunout o celá pásma.`
+  },
+  {
+    max: 6,
+    text: `Polovina otázek vám sedla, u druhé půlky jste zaváhali nebo se nechali strhnout blízkou variantou. To je typický obrázek hlavy, která má znalosti pořád uložené, ale hůř je vytahuje pod tlakem čtyř možností. Před třiceti lety byste z týchž vědomostí vytěžili víc, protože byste je měli po ruce rychleji. Rozdíl tedy není ve fondu, ale v rychlosti přístupu k němu, a ta se cvičí snadněji, než se čeká.`
+  },
+  {
+    max: 9,
+    text: `Tohle je výsledek, který drží krok. Trefili jste otázky napříč obory, které spolu nemají nic společného, a takovou sérii vám sotva přihrála náhoda: tipnout se dá jedna otázka, ne osm. Za tímhle skóre stojí pohotové vybavování a schopnost porovnat čtyři podobné varianty a tři z nich vyloučit. Přesně tak pracuje mozek, kterému nic neubylo. Rozdíl proti stavu před třiceti lety je nanejvýš jedna otázka, u které jste dnes potřebovali chvilku navíc, a to je ztráta, kterou zvenčí nikdo nepozná.`
+  },
+  {
+    max: 10,
+    text: `Plný počet, kterého dosáhne menšina řešitelů. Zvládli jste deset otázek z deseti různých oborů, od hlavních měst přes malířství a vážnou hudbu až po význam cizího slova, včetně jedné, na které se láme i sečtělý člověk, a k tomu úlohu na slovní úsudek, kde se nabízená varianta tvářila správně a bylo potřeba ji odmítnout. Nic z toho nejde uhodnout desetkrát za sebou a nic z toho nezvládne hlava, která by byla jen o krok pomalejší. Váš výkon se od toho, co byste předvedli před třiceti lety, neliší ani o bod. Klobouk dolů.`
+  }
+];
+
+var odpovedi = new Array(otazky.length).fill(null);
+var zamceno = false;
+
+var kvizEl = document.getElementById('kviz');
+var vyhodnotitEl = document.getElementById('vyhodnotit');
+var hlaskaEl = document.getElementById('hlaska');
+var vysledekEl = document.getElementById('vysledek');
+var skoreEl = document.getElementById('skore');
+var hodnoceniEl = document.getElementById('hodnoceni');
+var znovuEl = document.getElementById('znovu');
+
+function vykresli() {
+  kvizEl.textContent = '';
+  otazky.forEach(function (o, i) {
+    var box = document.createElement('div');
+    box.className = 'otazka';
+
+    var zadani = document.createElement('p');
+    zadani.className = 'zadani';
+    zadani.textContent = o.zadani;
+    box.appendChild(zadani);
+
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'varianta';
+      btn.textContent = v;
+      btn.addEventListener('click', function () {
+        if (zamceno) { return; }
+        odpovedi[i] = j;
+        vykresli();
+        aktualizujTlacitko();
+      });
+      if (odpovedi[i] === j) { btn.classList.add('vybrana'); }
+      box.appendChild(btn);
+    });
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function aktualizujTlacitko() {
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  vyhodnotitEl.disabled = !hotovo;
+  if (hotovo) { hlaskaEl.textContent = ''; }
+}
+
+vyhodnotitEl.addEventListener('click', function () {
+  if (!odpovedi.every(function (o) { return o !== null; })) {
+    hlaskaEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  zamceno = true;
+  hlaskaEl.textContent = '';
+
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll('.otazka');
+  otazky.forEach(function (o, i) {
+    var tlacitka = boxy[i].querySelectorAll('.varianta');
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].classList.add('zamceno');
+      if (j === o.spravna) {
+        tlacitka[j].classList.remove('vybrana');
+        tlacitka[j].classList.add('spravna');
+      } else if (odpovedi[i] === j) {
+        tlacitka[j].classList.remove('vybrana');
+        tlacitka[j].classList.add('spatna');
+      }
+    }
+    if (odpovedi[i] === o.spravna) { body++; }
+  });
+
+  vyhodnotitEl.disabled = true;
+  skoreEl.textContent = body + ' z ' + otazky.length;
+  for (var k = 0; k < hodnoceni.length; k++) {
+    if (body <= hodnoceni[k].max) { hodnoceniEl.textContent = hodnoceni[k].text; break; }
+  }
+  vysledekEl.hidden = false;
+  vysledekEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+znovuEl.addEventListener('click', function () {
+  odpovedi = new Array(otazky.length).fill(null);
+  zamceno = false;
+  vysledekEl.hidden = true;
+  hlaskaEl.textContent = '';
+  vykresli();
+  aktualizujTlacitko();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+vykresli();
+aktualizujTlacitko();
+</script>
+</body>
+</html>
