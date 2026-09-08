@@ -1,0 +1,235 @@
+<title>Mix otázek pro chytré seniory: Deset otázek, u kterých samotné tipování stačit nebude</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.65; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.5; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: Georgia, "Times New Roman", serif;
+  margin-bottom: 10px;
+  cursor: pointer;
+  line-height: 1.45;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt.locked { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: Georgia, "Times New Roman", serif;
+}
+#submit:hover:not(:disabled) { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: Georgia, "Times New Roman", serif;
+}
+#retry:hover { background: #756658; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 24px;
+}
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+.verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+#warn { text-align: center; color: #a1453f; margin-top: 14px; font-size: .95rem; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+
+<div class="wrap">
+<h1>Mix otázek pro chytré seniory: Deset otázek, u kterých samotné tipování stačit nebude</h1>
+<p class="perex">Chytrý senior se tady nespokojí s tipováním. Deset otázek napříč obory je postaveno tak, že náhoda vynese dva nebo tři body a dál rozhoduje jen skutečný rozhled. Zkuste si odpověď nejdřív vybavit, teprve pak čtěte varianty.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<div id="warn" hidden>Odpovězte prosím na všechny otázky</div>
+<div id="result" hidden>
+  <p class="score" id="score"></p>
+  <p class="verdict" id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+
+<script>
+var QUESTIONS = [
+  { q: `1. Co označuje slovo renegát?`,
+    o: [`a) člověk, který se veřejně hlásí ke dvěma národnostem zároveň`,
+        `b) člověk, který zradil svou dosavadní víru či stranu a přešel k protivníkům`,
+        `c) člověk, který natrvalo odešel žít mimo svou rodnou zemi`,
+        `d) člověk, který se z přesvědčení odmítá podřídit jakékoli autoritě`], a: 1 },
+  { q: `2. Jak se nazývá trojúhelníková plocha ve štítu antického chrámu?`,
+    o: [`a) portikus`, `b) rizalit`, `c) tympanon`, `d) apsida`], a: 2 },
+  { q: `3. Kdo napsal básnickou skladbu Dvanáct z roku 1918?`,
+    o: [`a) Alexandr Blok`, `b) Sergej Jesenin`, `c) Vladimir Majakovskij`, `d) Anna Achmatovová`], a: 0 },
+  { q: `4. Jak se v hudbě označuje ucelená část symfonie nebo sonáty?`,
+    o: [`a) takt`, `b) motiv`, `c) téma`, `d) věta`], a: 3 },
+  { q: `5. Který závěr nutně platí, jestliže ze tří svědků lhali aspoň dva?`,
+    o: [`a) všichni tři svědci lhali`,
+        `b) nejvýše jeden svědek mluvil pravdu`,
+        `c) právě dva svědci lhali`,
+        `d) o pravdivosti výpovědí nelze nic určit`], a: 1 },
+  { q: `6. Do kterého řádu savců patří ježura?`,
+    o: [`a) hmyzožravci`, `b) vačnatci`, `c) ptakořitní`, `d) hlodavci`], a: 2 },
+  { q: `7. Kdo velel pruskému vojsku v bitvě u Waterloo?`,
+    o: [`a) Gebhard Leberecht von Blücher`,
+        `b) August Neidhardt von Gneisenau`,
+        `c) Friedrich Wilhelm von Bülow`,
+        `d) Hans Ernst Karl von Zieten`], a: 0 },
+  { q: `8. Která výlevná hornina odpovídá svým složením hlubinné žule?`,
+    o: [`a) čedič`, `b) andezit`, `c) znělec`, `d) ryolit`], a: 3 },
+  { q: `9. Kdo dokončil Mozartovo Requiem?`,
+    o: [`a) Antonio Salieri`, `b) Franz Xaver Süssmayr`, `c) Joseph Eybler`, `d) Johann Nepomuk Hummel`], a: 1 },
+  { q: `10. Který papež uzavřel Druhý vatikánský koncil?`,
+    o: [`a) Pavel VI.`, `b) Jan XXIII.`, `c) Pius XII.`, `d) Jan Pavel I.`], a: 0 }
+];
+
+var BANDS = [
+  { min: 0, max: 3, t: `Titulek nelhal, tipování vás nikam nedovezlo. Náhodné zaškrtávání přinese v deseti otázkách se čtyřmi možnostmi průměrně dva až tři body a váš výsledek tuhle hranici nepřekročil. Znalostní podklad se zatím neprojevil, zkuste kvíz projít znovu a u každé otázky si nejdřív odpověď vybavit, než začnete číst varianty.` },
+  { min: 4, max: 6, t: `Slušný výsledek, který jasně přesahuje samotnou náhodu. Kvíz míchá otázky na úrovni běžného středoškolského přehledu s položkami, které míří za školní učivo, a právě ty druhé rozhodují o postupu výš. Do horní kategorie vám chybí jedna až tři odpovědi.` },
+  { min: 7, max: 9, t: `Tohle je pásmo chytrého seniora z titulku. Prošli jste i otázkami, které patří v kvízu k nejobtížnějším, a chybovali nejvýše třikrát. Takový výsledek je dokladem opravdu širokého záběru, samotné tipování by na něj dosáhlo jen výjimečně.` },
+  { min: 10, max: 10, t: `Vzácnost, na kterou by čirým tipováním nedosáhl prakticky nikdo. Plný počet znamená, že vás neshodilo ani zrádné cizí slovo, ani plocha ve štítu antického chrámu, ruská poéma z roku 1918, výlevný dvojník žuly, dokončovatel slavného Requiem ani papež, který uzavřel koncil. V tomto kvízu jste vytáhli maximum.` }
+];
+
+var picks = new Array(QUESTIONS.length).fill(-1);
+var done = false;
+var quizEl = document.getElementById('quiz');
+var submitEl = document.getElementById('submit');
+var warnEl = document.getElementById('warn');
+var resultEl = document.getElementById('result');
+var scoreEl = document.getElementById('score');
+var verdictEl = document.getElementById('verdict');
+var retryEl = document.getElementById('retry');
+
+function build() {
+  quizEl.textContent = '';
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement('div');
+    box.className = 'q';
+    var t = document.createElement('p');
+    t.className = 'qtext';
+    t.textContent = item.q;
+    box.appendChild(t);
+    item.o.forEach(function (opt, oi) {
+      var b = document.createElement('button');
+      b.className = 'opt';
+      b.type = 'button';
+      b.textContent = opt;
+      b.addEventListener('click', function () { choose(qi, oi); });
+      box.appendChild(b);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function optButtons(qi) {
+  return quizEl.children[qi].querySelectorAll('.opt');
+}
+
+function choose(qi, oi) {
+  if (done) { return; }
+  picks[qi] = oi;
+  var btns = optButtons(qi);
+  for (var i = 0; i < btns.length; i++) {
+    if (i === oi) { btns[i].classList.add('sel'); } else { btns[i].classList.remove('sel'); }
+  }
+  refresh();
+}
+
+function refresh() {
+  var all = picks.every(function (p) { return p >= 0; });
+  submitEl.disabled = !all;
+  if (all) { warnEl.hidden = true; }
+}
+
+function evaluate() {
+  if (picks.some(function (p) { return p < 0; })) {
+    warnEl.hidden = false;
+    return;
+  }
+  done = true;
+  var score = 0;
+  QUESTIONS.forEach(function (item, qi) {
+    var btns = optButtons(qi);
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.add('locked');
+      btns[i].classList.remove('sel');
+      if (i === item.a) { btns[i].classList.add('correct'); }
+      else if (i === picks[qi]) { btns[i].classList.add('wrong'); }
+    }
+    if (picks[qi] === item.a) { score++; }
+  });
+  scoreEl.textContent = score + ' z ' + QUESTIONS.length;
+  var band = BANDS.filter(function (b) { return score >= b.min && score <= b.max; })[0];
+  verdictEl.textContent = band ? band.t : '';
+  submitEl.disabled = true;
+  submitEl.hidden = true;
+  warnEl.hidden = true;
+  resultEl.hidden = false;
+  resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function reset() {
+  done = false;
+  picks = new Array(QUESTIONS.length).fill(-1);
+  build();
+  resultEl.hidden = true;
+  submitEl.hidden = false;
+  submitEl.disabled = true;
+  warnEl.hidden = true;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+submitEl.addEventListener('click', evaluate);
+retryEl.addEventListener('click', reset);
+build();
+</script>
