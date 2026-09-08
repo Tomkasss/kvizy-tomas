@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro mimořádně chytré seniory: kdo zvládne 10 otázek bez chyby, předčí většinu mladších</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.5; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+  line-height: 1.45;
+}
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta:disabled { cursor: default; }
+#vyhodnotit, #znovu {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#znovu { background: #8c7b6b; }
+#znovu:hover { background: #756658; }
+.hlaska { text-align: center; color: #8c5b5b; margin-top: 14px; font-size: .95rem; min-height: 1.2em; }
+#vysledek {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 32px;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka, #vysledek { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro mimořádně chytré seniory: kdo zvládne 10 otázek bez chyby, předčí většinu mladších</h1>
+<p class="perex">Znalost a jistota nejsou totéž. Věc, kolem které člověk chodí desítky let, popíše přesně; věc, o které jen slyšel, popíše sebejistě a špatně. Za dlouhý život se v hlavě nasbírá obojí a teď se pozná, čeho je víc.</p>
+
+<div id="kviz"></div>
+
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p class="hlaska" id="hlaska"></p>
+
+<div id="vysledek" style="display:none;">
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+
+<script>
+var otazky = [
+  {
+    q: `1. Které dva státy sousedí s ruskou Kaliningradskou oblastí?`,
+    a: [`Polsko a Bělorusko`, `Polsko a Litva`, `Litva a Lotyšsko`, `Bělorusko a Ukrajina`],
+    s: 1
+  },
+  {
+    q: `2. Koho v dědickém řízení označuje slovo zůstavitel?`,
+    a: [`dědice, který se svého podílu vzdal ve prospěch ostatních`, `notáře, kterého soud pověřil vypořádáním pozůstalosti`, `věřitele, jehož pohledávka se z pozůstalosti hradí`, `toho, po jehož smrti se majetek dělí mezi dědice`],
+    s: 3
+  },
+  {
+    q: `3. Z které části zvířete se připravují dršťky?`,
+    a: [`z jater`, `z plic`, `ze žaludku`, `ze střev`],
+    s: 2
+  },
+  {
+    q: `4. Které z těchto příjmení má u ženy stejný tvar jako u muže?`,
+    a: [`Kolář`, `Novotný`, `Hájek`, `Janů`],
+    s: 3
+  },
+  {
+    q: `5. Podle kterého nástroje si symfonický orchestr obvykle sjednocuje ladění před vystoupením?`,
+    a: [`podle prvních houslí`, `podle violoncella`, `podle hoboje`, `podle klarinetu`],
+    s: 2
+  },
+  {
+    q: `6. Co se v autě s manuální převodovkou stane v okamžiku, kdy řidič sešlápne pedál spojky?`,
+    a: [`přeruší se přenos síly mezi motorem a převodovkou`, `automaticky se zařadí nižší převodový stupeň`, `stoupne tlak v brzdovém okruhu`, `motor se odpojí od palivového čerpadla`],
+    s: 0
+  },
+  {
+    q: `7. Ve kterém sportu závodnice cvičí sestavy s obručí, míčem, kužely a stuhou?`,
+    a: [`v aerobiku`, `ve sportovní gymnastice`, `v moderní gymnastice`, `v akrobatickém rokenrolu`],
+    s: 2
+  },
+  {
+    q: `8. Do kterých válek patří bitva u Sudoměře?`,
+    a: [`do třicetileté války`, `do husitských válek`, `do bojů mezi Přemyslovci a Habsburky o český trůn`, `do česko-uherských válek Jiřího z Poděbrad a Matyáše Korvína`],
+    s: 1
+  },
+  {
+    q: `9. U dobrovolných hasičů platí, že každý, kdo vyjíždí k zásahům, je zapsán v jednotce a zároveň má platnou zdravotní prohlídku. Pan Vaněk je v jednotce zapsán, k zásahům ale nevyjíždí. Co z toho jistě vyplývá?`,
+    a: [`Pan Vaněk nemá platnou zdravotní prohlídku.`, `O platné zdravotní prohlídce pana Vaňka nelze z uvedeného nic určit.`, `Pan Vaněk má platnou zdravotní prohlídku.`, `Každý, kdo má platnou zdravotní prohlídku, vyjíždí k zásahům.`],
+    s: 1
+  },
+  {
+    q: `10. Ke které soustavě lidského těla patří brzlík?`,
+    a: [`k imunitní`, `k trávicí`, `k dýchací`, `k vylučovací`],
+    s: 0
+  }
+];
+
+var hodnoceni = [
+  { max: 3, text: `Obory se tu střídají bez varování a tenhle výsledek říká, že se dařilo hlavně tam, kde pomohl odhad. Nic ztraceného, protože většina otázek stojí na věcech, které se dají zpátky získat jedním pozorným odpolednem s mapou a encyklopedií. K hranici, o které mluví titulek, je ale odsud ještě kus cesty.` },
+  { max: 6, text: `Polovina sedí a to je slušný základ. Ztráty přišly nejspíš ve středním pásmu, kde nabídnuté možnosti leží těsně vedle sebe a pouhý dojem nestačí. Tenhle výsledek znamená solidní všeobecný přehled, na srovnání s mladšími ročníky ale zatím nesahá.` },
+  { max: 9, text: `Sedm až devět bodů znamená, že jste zvládli nejen snadnější začátek, ale i otázky, kde rozhoduje přesná znalost, a ne tip. Jedna nebo dvě ztráty v téhle výšce padnou obvykle na oboru, který vás nikdy nezajímal, a na výsledku to nic nemění: takhle rovnoměrně rozložený rozhled se nedá vytipovat, ten se musí mít.` },
+  { max: 10, text: `Plný počet, a ten zvládne jen menšina. Obor za oborem bez zaváhání, a to včetně otázky o ladění orchestru, kde se samy nabízejí první housle, i logické úlohy, kde pravidlo klade dvě podmínky naráz a chybí důvod rozhodnout o jedné z nich. Takhle rovnoměrný přehled napříč přírodou, technikou, zeměpisem, dějinami, sportem, uměním, češtinou i právem má málokdo a mezi mladšími ročníky ještě míň. Slib z titulku je tímhle výsledkem naplněný beze zbytku.` }
+];
+
+var odpovedi = new Array(otazky.length).fill(null);
+var vyhodnoceno = false;
+
+var kvizEl = document.getElementById('kviz');
+var tlacitkoEl = document.getElementById('vyhodnotit');
+var hlaskaEl = document.getElementById('hlaska');
+var vysledekEl = document.getElementById('vysledek');
+var skoreEl = document.getElementById('skore');
+var hodnoceniEl = document.getElementById('hodnoceni');
+var znovuEl = document.getElementById('znovu');
+
+function vykresli() {
+  kvizEl.innerHTML = '';
+  otazky.forEach(function (o, i) {
+    var box = document.createElement('div');
+    box.className = 'otazka';
+
+    var zneni = document.createElement('p');
+    zneni.className = 'zneni';
+    zneni.textContent = o.q;
+    box.appendChild(zneni);
+
+    o.a.forEach(function (text, j) {
+      var btn = document.createElement('button');
+      btn.className = 'varianta';
+      btn.type = 'button';
+      btn.textContent = text;
+      btn.addEventListener('click', function () {
+        if (vyhodnoceno) return;
+        odpovedi[i] = j;
+        var vsechny = box.querySelectorAll('.varianta');
+        for (var k = 0; k < vsechny.length; k++) {
+          vsechny[k].classList.remove('vybrana');
+        }
+        btn.classList.add('vybrana');
+        zkontrolujHotovo();
+      });
+      box.appendChild(btn);
+    });
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujHotovo() {
+  var hotovo = odpovedi.every(function (x) { return x !== null; });
+  tlacitkoEl.disabled = !hotovo;
+  if (hotovo) hlaskaEl.textContent = '';
+}
+
+tlacitkoEl.addEventListener('click', function () {
+  if (!odpovedi.every(function (x) { return x !== null; })) {
+    hlaskaEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  vyhodnoceno = true;
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll('.otazka');
+  otazky.forEach(function (o, i) {
+    var vsechny = boxy[i].querySelectorAll('.varianta');
+    for (var j = 0; j < vsechny.length; j++) {
+      vsechny[j].classList.remove('vybrana');
+      vsechny[j].disabled = true;
+      if (j === o.s) vsechny[j].classList.add('spravna');
+      else if (j === odpovedi[i]) vsechny[j].classList.add('spatna');
+    }
+    if (odpovedi[i] === o.s) body++;
+  });
+
+  skoreEl.textContent = body + ' z ' + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body <= hodnoceni[h].max) { hodnoceniEl.textContent = hodnoceni[h].text; break; }
+  }
+  tlacitkoEl.disabled = true;
+  hlaskaEl.textContent = '';
+  vysledekEl.style.display = 'block';
+  vysledekEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+znovuEl.addEventListener('click', function () {
+  odpovedi = new Array(otazky.length).fill(null);
+  vyhodnoceno = false;
+  vysledekEl.style.display = 'none';
+  tlacitkoEl.disabled = true;
+  hlaskaEl.textContent = '';
+  vykresli();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+vykresli();
+</script>
+</body>
+</html>
