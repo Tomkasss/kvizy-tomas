@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro seniory, kteří se nebojí výzvy: Zvládnete všech 10 otázek?</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zadani { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta:disabled { cursor: default; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.4em; }
+#vysledek {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 40px;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka, #vysledek { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro seniory, kteří se nebojí výzvy: Zvládnete všech 10 otázek?</h1>
+<p class="perex">Deset otázek z deseti různých oborů a nic zadarmo. Kdo se po šedesátce nebojí pořádné výzvy, má teď šanci si změřit síly. Průměrný výsledek se drží kolem šesti bodů, všech deset dá jen málokdo. Zvládnete to lépe?</p>
+<div id="kviz"></div>
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p id="hlaska"></p>
+<div id="vysledek" hidden>
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var otazky = [
+  {
+    zadani: `1. Do které řeky se vlévá Svratka?`,
+    varianty: [`Morava`, `Jihlava`, `Dyje`, `Svitava`],
+    spravna: 2
+  },
+  {
+    zadani: `2. Ze sušených listů které jedovaté rostliny se odedávna připravovaly léky na srdeční slabost?`,
+    varianty: [`blín černý`, `náprstník červený`, `oměj šalamounek`, `durman obecný`],
+    spravna: 1
+  },
+  {
+    zadani: `3. Která bílá odrůda révy vinné vznikla křížením Tramínu červeného a Müller Thurgau?`,
+    varianty: [`Muškát moravský`, `Neuburské`, `Veltlínské zelené`, `Pálava`],
+    spravna: 3
+  },
+  {
+    zadani: `4. Která zpěvačka nazpívala do filmu Noc na Karlštejně píseň Lásko má, já stůňu?`,
+    varianty: [`Eva Pilarová`, `Marta Kubišová`, `Naďa Urbánková`, `Helena Vondráčková`],
+    spravna: 3
+  },
+  {
+    zadani: `5. Který český běžec na lyžích se stal mistrem světa v závodě na 50 kilometrů?`,
+    varianty: [`Lukáš Bauer`, `Martin Koukal`, `Jiří Magál`, `Stanislav Řezáč`],
+    spravna: 1
+  },
+  {
+    zadani: `6. Co znamená slovo jinotaj?`,
+    varianty: [`ustálené slovní spojení s přeneseným významem`, `nářeční výraz srozumitelný jen v jednom kraji`, `skrytý druhý smysl sdělení`, `slovo, které zní stejně jako jiné, ale znamená něco jiného`],
+    spravna: 2
+  },
+  {
+    zadani: `7. Který motýl dosahuje v Evropě největšího rozpětí křídel?`,
+    varianty: [`otakárek fenyklový`, `martináč hrušňový`, `lišaj smrtihlav`, `babočka paví oko`],
+    spravna: 1
+  },
+  {
+    zadani: `8. Jakou součástí dámského oděvu byla turnýra?`,
+    varianty: [`vycpávka podpírající zadní část sukně`, `krajkový čepec vázaný stuhou pod bradou`, `dlouhá rukavice sahající nad loket`, `šněrovací pás nošený přes šaty`],
+    spravna: 0
+  },
+  {
+    zadani: `9. Jak se jmenovala první poštovní známka na světě?`,
+    varianty: [`Penny Black`, `Penny Red`, `Modrý Mauritius`, `Bazilejská holubice`],
+    spravna: 0
+  },
+  {
+    zadani: `10. Za kterého panovníka byl pražský groš vyražen vůbec poprvé?`,
+    varianty: [`Přemysl Otakar II.`, `Jan Lucemburský`, `Václav II.`, `Karel IV.`],
+    spravna: 2
+  }
+];
+
+var hodnoceni = [
+  { max: 3, text: `Většina otázek tentokrát skončila mimo terč a to není příjemné zjištění. Deset oborů vedle sebe je ale nemilosrdné spojení, protože stačí, aby se sešly tři oblasti, ke kterým člověk nikdy neměl blízko, a body se rozplynou. Dobrá zpráva je, že tady se nedá nic naučit nazpaměť během jednoho odpoledne, zato se dá začít u jediné oblasti, která vás na seznamu zaujala nejvíc, a projít si ji pořádně.` },
+  { max: 6, text: `Solidní výsledek, na kterém není nic k omlouvání. Znamená, že máte pevný základ v několika oborech a jinde se spoléháte na odhad, což je poctivý stav rozhledu u naprosté většiny lidí. Jsou tu ale místa, kde se odpověď opírá o detail mimo školní osnovy, ať už jde o vinařství, o historickou módu nebo o přírodovědné podrobnosti. Kdo si chce polepšit, má nejrychlejší cestu právě tudy.` },
+  { max: 9, text: `Tohle je výsledek, kterým se dá klidně chlubit. Ukazuje, že vaše znalosti nekončí u toho, co se běžně omílá, a že si dokážete poradit i tam, kde se nabízené možnosti tváří všechny stejně přijatelně. Bod nebo dva obvykle uteče u nejužších specializací, kde už rozhoduje spíš osobní záliba než všeobecný rozhled. Málo lidí se dostane tak vysoko.` },
+  { max: 10, text: `Plný počet, a to není v téhle společnosti otázek běžné. Sladká voda, léčivé rostliny, Morava plná vinic, česká hudba, běžky, jazyk, hmyz, dobové oblečení, známky i mince, a vy jste prošli všude. Takový rozhled se nedá získat jinak než dlouhým a upřímným zájmem o svět kolem sebe. Klobouk dolů.` }
+];
+
+var odpovedi = new Array(otazky.length).fill(null);
+var hotovo = false;
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoVyhodnotit = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var tlacitkoZnovu = document.getElementById(`znovu`);
+var pismena = [`a`, `b`, `c`, `d`];
+
+function vykresli() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var zadani = document.createElement(`p`);
+    zadani.className = `zadani`;
+    zadani.textContent = o.zadani;
+    box.appendChild(zadani);
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `varianta`;
+      btn.textContent = pismena[j] + `) ` + v;
+      btn.addEventListener(`click`, function () {
+        if (hotovo) { return; }
+        odpovedi[i] = j;
+        var sourozenci = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < sourozenci.length; k++) {
+          sourozenci[k].classList.remove(`vybrana`);
+        }
+        btn.classList.add(`vybrana`);
+        hlaskaEl.textContent = ``;
+        zkontrolujStav();
+      });
+      box.appendChild(btn);
+    });
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujStav() {
+  var vse = odpovedi.every(function (o) { return o !== null; });
+  tlacitkoVyhodnotit.disabled = !vse;
+}
+
+tlacitkoVyhodnotit.addEventListener(`click`, function () {
+  if (tlacitkoVyhodnotit.disabled) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  hotovo = true;
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  otazky.forEach(function (o, i) {
+    var tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove(`vybrana`);
+      if (j === o.spravna) {
+        tlacitka[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === o.spravna) { body++; }
+  });
+  skoreEl.textContent = body + ` z ` + otazky.length;
+  var text = hodnoceni[hodnoceni.length - 1].text;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body <= hodnoceni[h].max) { text = hodnoceni[h].text; break; }
+  }
+  hodnoceniEl.textContent = text;
+  vysledekEl.hidden = false;
+  tlacitkoVyhodnotit.disabled = true;
+  hlaskaEl.textContent = ``;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+tlacitkoZnovu.addEventListener(`click`, function () {
+  odpovedi = new Array(otazky.length).fill(null);
+  hotovo = false;
+  vysledekEl.hidden = true;
+  hlaskaEl.textContent = ``;
+  vykresli();
+  tlacitkoVyhodnotit.disabled = true;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+vykresli();
+</script>
+</body>
+</html>
