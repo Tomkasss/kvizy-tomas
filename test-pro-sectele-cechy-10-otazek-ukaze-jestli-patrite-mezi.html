@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test pro sečtělé Čechy: 10 otázek ukáže, jestli patříte mezi vědomostní elitu</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.ok { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.bad { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .opt:disabled { cursor: default; }
+  #submit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #submit:hover:not(:disabled) { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+  #result {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+    border-top: 4px solid #5b7e5f;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+  #again {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #again:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    .q { padding: 20px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test pro sečtělé Čechy: 10 otázek ukáže, jestli patříte mezi vědomostní elitu</h1>
+  <p class="perex">Sečtělost se nepozná na jednom oboru, ale na tom, jak rychle mezi nimi přeskočíte. Následujících deset otázek proto míchá dějiny, zeměpis, film, hudbu, techniku i sport a ukáže, jestli váš přehled opravdu sahá nad běžný průměr.</p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <p id="warn" hidden>Odpovězte prosím na všechny otázky</p>
+  <div id="result" hidden>
+    <p id="score"></p>
+    <p id="verdict"></p>
+    <button id="again">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var QUESTIONS = [
+  { q: `Které pohoří odděluje evropskou část Ruska od Sibiře?`,
+    o: [`Kavkaz`, `Karpaty`, `Altaj`, `Ural`], a: 3 },
+  { q: `Co znamená přídavné jméno afektovaný?`,
+    o: [`strojený a nepřirozeně přehnaný`, `citově rozrušený a rozčilený`, `věcný a nezaujatý`, `srdečný a bezprostřední`], a: 0 },
+  { q: `Co je pemza?`,
+    o: [`pórovitá sopečná hornina`, `usazenina ze schránek mořských živočichů`, `zkamenělé dřevo pravěkých stromů`, `lisovaný mořský písek`], a: 0 },
+  { q: `Kolik linek má notová osnova?`,
+    o: [`čtyři`, `pět`, `šest`, `sedm`], a: 1 },
+  { q: `Z jakého masa se připravuje klasické carpaccio podle původního benátského receptu z roku 1950?`,
+    o: [`z telecího`, `z jehněčího`, `z hovězího`, `z vepřového`], a: 2 },
+  { q: `Kdo režíroval němý film Metropolis?`,
+    o: [`Fritz Lang`, `Friedrich Wilhelm Murnau`, `Robert Wiene`, `Georg Wilhelm Pabst`], a: 0 },
+  { q: `Čím je poháněno turbodmychadlo?`,
+    o: [`klínovým řemenem od klikového hřídele`, `elektromotorem`, `výfukovými plyny`, `podtlakem v sacím potrubí`], a: 2 },
+  { q: `Kterým plaveckým způsobem začíná polohový závod jednotlivců?`,
+    o: [`znakem`, `prsy`, `volným způsobem`, `motýlkem`], a: 3 },
+  { q: `Ve kterém století se křesťanská církev rozdělila na západní a východní?`,
+    o: [`v 9. století`, `v 10. století`, `v 11. století`, `ve 12. století`], a: 2 },
+  { q: `Ve které bitvě padl švédský král Gustav II. Adolf?`,
+    o: [`u Breitenfeldu`, `u Lützenu`, `u Wittstocku`, `u Nördlingenu`], a: 1 }
+];
+
+var LETTERS = [`a)`, `b)`, `c)`, `d)`];
+
+var VERDICTS = [
+  { max: 3, text: `Do vědomostní elity to zatím nevede a tenhle test to říká rovnou. Ztráta nebyla v jedné oblasti, ale rozprostřená přes celý kvíz, takže nešlo o smůlu na jeden obor. Dobrá zpráva je, že první čtyři otázky stojí na učivu, které se dá srovnat za jediné odpoledne. Projděte si správné odpovědi a zkuste test znovu s odstupem.` },
+  { max: 6, text: `Slušný běžný přehled, ale k elitě to ještě není. Snadnější otázky jste posbírali, ztráceli jste ve středním pásmu, kde se nabízené varianty liší jen v detailu. Přesně tady se láme rozdíl mezi člověkem, který si čte, a člověkem, kterému čtení zůstalo v hlavě. Chybí vám jedna až tři otázky, ne přestavba celého rozhledu.` },
+  { max: 9, text: `Nadprůměr, na který dosáhne menšina. Zvládli jste nejen rozjezd, ale i většinu otázek, kde rozhodovala přesná znalost, a to už je výsledek, který nevznikne z jednoho zdroje. Do vědomostní elity vás tenhle výkon řadí, plný počet vám ale unikl o vlásek. Podívejte se, kde přesně, a příště bude deset.` },
+  { max: 10, text: `Vědomostní elita bez debat. Devět různých oborů za sebou, od pohoří na hranici Evropy a Asie přes hudební nauku a techniku motoru až po dvě kapitoly evropských dějin, a ani jedno zaváhání. Takový výsledek dá jen zlomek lidí a vy jste jedním z nich. Přesně to, co slibuje titulek.` }
+];
+
+var answers = [];
+var locked = false;
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var againEl = document.getElementById(`again`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var title = document.createElement(`p`);
+    title.className = `q-text`;
+    title.textContent = (i + 1) + `. ` + QUESTIONS[i].q;
+    box.appendChild(title);
+    for (var j = 0; j < QUESTIONS[i].o.length; j++) {
+      var btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.type = `button`;
+      btn.textContent = LETTERS[j] + ` ` + QUESTIONS[i].o[j];
+      btn.setAttribute(`data-q`, i);
+      btn.setAttribute(`data-o`, j);
+      btn.addEventListener(`click`, pick);
+      box.appendChild(btn);
+    }
+    quizEl.appendChild(box);
+  }
+}
+
+function pick(ev) {
+  if (locked) { return; }
+  var qi = parseInt(ev.currentTarget.getAttribute(`data-q`), 10);
+  var oi = parseInt(ev.currentTarget.getAttribute(`data-o`), 10);
+  answers[qi] = oi;
+  var group = quizEl.children[qi].querySelectorAll(`.opt`);
+  for (var k = 0; k < group.length; k++) {
+    group[k].classList.remove(`sel`);
+  }
+  ev.currentTarget.classList.add(`sel`);
+  refresh();
+}
+
+function complete() {
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    if (typeof answers[i] !== `number`) { return false; }
+  }
+  return true;
+}
+
+function refresh() {
+  var done = complete();
+  submitEl.disabled = !done;
+  warnEl.hidden = done;
+}
+
+function evaluate() {
+  if (!complete()) { warnEl.hidden = false; return; }
+  locked = true;
+  var score = 0;
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    var group = quizEl.children[i].querySelectorAll(`.opt`);
+    for (var j = 0; j < group.length; j++) {
+      group[j].disabled = true;
+      group[j].classList.remove(`sel`);
+      if (j === QUESTIONS[i].a) {
+        group[j].classList.add(`ok`);
+      } else if (j === answers[i]) {
+        group[j].classList.add(`bad`);
+      }
+    }
+    if (answers[i] === QUESTIONS[i].a) { score++; }
+  }
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score <= VERDICTS[v].max) { verdictEl.textContent = VERDICTS[v].text; break; }
+  }
+  submitEl.disabled = true;
+  warnEl.hidden = true;
+  resultEl.hidden = false;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  answers = [];
+  locked = false;
+  resultEl.hidden = true;
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+againEl.addEventListener(`click`, reset);
+
+build();
+refresh();
+</script>
+</body>
+</html>
