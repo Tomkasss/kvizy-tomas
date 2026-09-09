@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test 10 otázek ze všeho možného: plný počet získají pouze lidé s výjimečným rozhledem</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 32px 16px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta:disabled { cursor: default; }
+#vyhodnotit, #znovu {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#znovu { background: #8c7b6b; }
+#znovu:hover { background: #756658; }
+#hlaska { text-align: center; color: #8c3a3a; margin-top: 14px; font-size: .95rem; min-height: 1.2em; }
+#vysledek {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test 10 otázek ze všeho možného: plný počet získají pouze lidé s výjimečným rozhledem</h1>
+<p class="perex">Deset otázek z deseti oborů: sport, zeměpis, historie, hudba, film, literatura, příroda, jídlo, památky i čeština. Vždy čtyři možnosti a jedna správná. Plný počet dá jen ten, komu nechybí přehled ani v jednom z nich.</p>
+<div id="kviz"></div>
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p id="hlaska"></p>
+<div id="vysledek" hidden>
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var otazky = [
+  {
+    z: `U kterého z těchto atletických náčiní se odborně mluví o vrhu, a ne o hodu?`,
+    v: [`disk`, `oštěp`, `koule`, `kladivo`],
+    s: 2
+  },
+  {
+    z: `Ve které zemi leží Údolí králů?`,
+    v: [`Egypt`, `Irák`, `Írán`, `Turecko`],
+    s: 0
+  },
+  {
+    z: `Která zelenina tvoří základ nejběžnějšího korejského kimchi?`,
+    v: [`lilek`, `pekingské zelí`, `bílá ředkev`, `okurka`],
+    s: 1
+  },
+  {
+    z: `Ze kterého čínského města vycházela hlavní větev Hedvábné stezky?`,
+    v: [`Kanton`, `Šanghaj`, `Peking`, `Si-an`],
+    s: 3
+  },
+  {
+    z: `Do které čeledi savců patří kosatka dravá?`,
+    v: [`plejtvákovití`, `delfínovití`, `sviňuchovití`, `narvalovití`],
+    s: 1
+  },
+  {
+    z: `Kdo složil hudbu k rockové opeře Jesus Christ Superstar?`,
+    v: [`Tim Rice`, `Elton John`, `Andrew Lloyd Webber`, `Leonard Bernstein`],
+    s: 2
+  },
+  {
+    z: `Podle novely kterého spisovatele vznikl film Vykoupení z věznice Shawshank?`,
+    v: [`John Grisham`, `Michael Crichton`, `Dean Koontz`, `Stephen King`],
+    s: 3
+  },
+  {
+    z: `Ve kterém pražském areálu stojí společná hrobka Slavín?`,
+    v: [`Pražský hrad`, `Petřín`, `Vyšehrad`, `Vítkov`],
+    s: 2
+  },
+  {
+    z: `Co znamená slovo verva?`,
+    v: [`elán a nadšení`, `tvrdohlavá vytrvalost`, `okázalá sebejistota`, `prudká zlost`],
+    s: 0
+  },
+  {
+    z: `Kdo napsal knihu Hrdý Budžes?`,
+    v: [`Petra Soukupová`, `Irena Dousková`, `Halina Pawlowská`, `Michal Viewegh`],
+    s: 1
+  }
+];
+
+var hodnoceni = [
+  { min: 0, max: 3, text: `Deset oborů za sebou je nemilosrdná zkouška a tentokrát vás pustily dál nanejvýš tři z nich. Zakopli jste už u otázek, které měly být rozjezdem, tedy u atletického názvosloví, u Údolí králů, u pražské hrobky nebo u významu slova verva, takže vaše znalosti mají pevné jádro jen v několika oblastech a mezi nimi zůstávají široké mezery. K polovině bodů vám schází nejméně dva zásahy a ty se dají posbírat pár odpoledni s atlasem a encyklopedií.` },
+  { min: 4, max: 6, text: `Rozjezd jste zvládli, ale střední pásmo vás zastavilo. Právě tam, kde nestačí letmá vzpomínka a fakt je potřeba opravdu znát, tedy u zeleniny v základu kimchi, u zařazení kosatky, u autorství hudby ke slavné rockové opeře, u literární předlohy vězeňského dramatu a u autorství Hrdého Budžese, jste ztráceli nejvíc. Základní rozhled tedy máte, ale k výjimečnosti slíbené v názvu je odsud ještě kus cesty.` },
+  { min: 7, max: 9, text: `Silný výsledek. Rozjezdové otázky jste vzali bez zaváhání a poradili jste si i s většinou středního pásma, kde vedle sebe stály dvě podobně věrohodné varianty. Na plný počet vám chybí jedna až tři odpovědi a nejspíš mezi nimi je ta nejtěžší otázka celého testu, tedy východisko hlavní větve Hedvábné stezky. Váš rozhled je široký, jen ještě ne úplně bez slepého místa.` },
+  { min: 10, max: 10, text: `Plný počet, kterého dosáhne jen menšina. Nesestřelil vás sport, zeměpis, jídlo, příroda, hudba, film, památky, čeština, literatura ani nejtěžší otázka celého testu, ve které proti sobě stála čtyři velká čínská města. Takový rozptyl znalostí se netipuje, ten se musí opravdu mít, a přesně o něm mluví název tohoto testu.` }
+];
+
+var pismena = [`a)`, `b)`, `c)`, `d)`];
+var odpovedi = new Array(otazky.length).fill(null);
+var vyhodnoceno = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var vyhodnotitEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function postav() {
+  kvizEl.textContent = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = (i + 1) + `. ` + o.z;
+    box.appendChild(zneni);
+
+    o.v.forEach(function (text, j) {
+      var btn = document.createElement(`button`);
+      btn.className = `varianta`;
+      btn.type = `button`;
+      btn.textContent = pismena[j] + ` ` + text;
+      btn.dataset.otazka = String(i);
+      btn.dataset.varianta = String(j);
+      btn.addEventListener(`click`, function () {
+        if (vyhodnoceno) { return; }
+        odpovedi[i] = j;
+        var sourozenci = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < sourozenci.length; k++) {
+          sourozenci[k].classList.remove(`vybrana`);
+        }
+        btn.classList.add(`vybrana`);
+        hlaskaEl.textContent = ``;
+        obnovTlacitko();
+      });
+      box.appendChild(btn);
+    });
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function obnovTlacitko() {
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  vyhodnotitEl.disabled = !hotovo;
+}
+
+function vyhodnot() {
+  if (!odpovedi.every(function (o) { return o !== null; })) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  vyhodnoceno = true;
+  var skore = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  otazky.forEach(function (o, i) {
+    var tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove(`vybrana`);
+      if (j === o.s) {
+        tlacitka[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === o.s) { skore++; }
+  });
+
+  skoreEl.textContent = skore + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore >= hodnoceni[h].min && skore <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+  vyhodnotitEl.disabled = true;
+  hlaskaEl.textContent = ``;
+  vysledekEl.hidden = false;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  vyhodnoceno = false;
+  odpovedi = new Array(otazky.length).fill(null);
+  vysledekEl.hidden = true;
+  hlaskaEl.textContent = ``;
+  postav();
+  obnovTlacitko();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+vyhodnotitEl.addEventListener(`click`, vyhodnot);
+znovuEl.addEventListener(`click`, reset);
+postav();
+obnovTlacitko();
+</script>
+</body>
+</html>
