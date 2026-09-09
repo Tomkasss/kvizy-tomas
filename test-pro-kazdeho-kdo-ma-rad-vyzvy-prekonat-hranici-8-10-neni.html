@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test pro každého, kdo má rád výzvy: překonat hranici 8/10 není snadné</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .varianta:disabled { cursor: default; }
+  #vyhodnotit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+  #vysledek {
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 40px;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+  #znovu {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #znovu:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .otazka, #vysledek { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test pro každého, kdo má rád výzvy: překonat hranici 8/10 není snadné</h1>
+  <p class="perex">Otázky z přírody, náboženství, hudby, astronomie, jídla, státních symbolů, dějin, počasí i sportu. Nic se nepočítá, všechno se jen vybavuje. U každé otázky jsou čtyři možnosti a správná je právě jedna.</p>
+  <div id="kviz"></div>
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+  <div id="vysledek" style="display:none">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var otazky = [
+  { z: `Jak se nazývá jev, kdy neškodný živočich napodobuje výstražné zbarvení jedovatého druhu?`,
+    v: [`kamufláž`, `mimikry`, `symbióza`, `aposematismus`], s: 1 },
+  { z: `Jak se nazývá muslimská pouť do Mekky, kterou má každý věřící vykonat alespoň jednou za život?`,
+    v: [`ramadán`, `džihád`, `hadždž`, `šaría`], s: 2 },
+  { z: `Který hudební nástroj bývá označován za krále nástrojů?`,
+    v: [`klavír`, `housle`, `varhany`, `harfa`], s: 2 },
+  { z: `Na které planetě se nachází Velká rudá skvrna?`,
+    v: [`na Marsu`, `na Saturnu`, `na Venuši`, `na Jupiteru`], s: 3 },
+  { z: `Jak se nazývá látka, která způsobuje pálivost chilli papriček?`,
+    v: [`kapsaicin`, `kurkumin`, `mentol`, `kofein`], s: 0 },
+  { z: `Na státní vlajce které země je vyobrazen samopal Kalašnikov?`,
+    v: [`Angoly`, `Zimbabwe`, `Namibie`, `Mosambiku`], s: 3 },
+  { z: `Která země jako první na světě přiznala ženám právo volit v parlamentních volbách?`,
+    v: [`Finsko`, `Nový Zéland`, `Norsko`, `Austrálie`], s: 1 },
+  { z: `Jak se nazývá vrstva pod kůrou stromu, díky které kmen roste do tloušťky?`,
+    v: [`lýko`, `letokruh`, `dřeň`, `kambium`], s: 3 },
+  { z: `Jak se nazývá jev, při kterém se v rovníkovém Tichém oceánu periodicky oteplují povrchové vody a mění se počasí po celém světě?`,
+    v: [`monzun`, `El Niño`, `Golfský proud`, `tryskové proudění`], s: 1 },
+  { z: `Ve které zemi je hurling národním sportem?`,
+    v: [`v Irsku`, `ve Skotsku`, `ve Walesu`, `na Islandu`], s: 0 }
+];
+
+var pismena = [`a)`, `b)`, `c)`, `d)`];
+
+var hodnoceni = [
+  { max: 3, text: `Tři body a méně znamenají, že vás nezastavila jedna slabá oblast, ale většina testu. Deset různých oborů hned za sebou je nápor, při kterém vám uteklo sedm a více otázek, a to už není věc jednoho dvou zaváhání, ale chybějícího rozhledu napříč obory. Ke slibované hranici osmi bodů je odsud daleko, projděte si ale správné odpovědi a příští pokus vypadá úplně jinak.` },
+  { max: 6, text: `Rozjezdové otázky jste zvládli a rozdělilo vás až prostřední pásmo, tedy muslimská pouť do Mekky, samopal na státní vlajce, prvenství ve volebním právu, vrstva pod kůrou stromu a oteplování vod v Tichém oceánu. Rozhled máte solidní, jen se u dvou tří otázek rozhodla těsná varianta proti vám. K osmi bodům, o kterých mluví název testu, vám chybí kousek.` },
+  { max: 9, text: `Sedm bodů znamená, že jste laťku minuli o vlásek. Osmi a devíti body už jste ji překonali, a přesně o tomhle výsledku mluví název testu, protože na něj dosáhne menšina řešitelů. Neshodily vás těsné varianty a poznali jste i to, co se ve škole neprobírá. Pokud vám ubral bod irský sport na konci, nic si z toho nedělejte, ten se v Česku potká málokdo.` },
+  { max: 10, text: `Plný počet, tedy výrazně nad slibovanou hranicí, a bez jediného zaváhání. Poradili jste si s napodobováním nebezpečného druhu, s poutí, kterou má vykonat každý muslim, s nástrojem, kterému se říká král, s planetou nesoucí obří vír, s látkou, po které pálí chilli, s vlajkou se samopalem, s prvenstvím na druhém konci světa, s pletivem pod kůrou stromu, s jevem, který ohřívá vody v Tichém oceánu, i s národním sportem, o kterém většina lidí nikdy neslyšela. Takový výsledek se povede jen zlomku řešitelů.` }
+];
+
+var odpovedi = [];
+var hotovo = false;
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+
+function postav() {
+  kvizEl.innerHTML = ``;
+  odpovedi = [];
+  hotovo = false;
+  for (var i = 0; i < otazky.length; i++) {
+    odpovedi.push(null);
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = (i + 1) + `. ` + otazky[i].z;
+    box.appendChild(zneni);
+    for (var j = 0; j < otazky[i].v.length; j++) {
+      var b = document.createElement(`button`);
+      b.className = `varianta`;
+      b.type = `button`;
+      b.textContent = pismena[j] + ` ` + otazky[i].v[j];
+      b.setAttribute(`data-o`, i);
+      b.setAttribute(`data-v`, j);
+      b.addEventListener(`click`, klik);
+      box.appendChild(b);
+    }
+    kvizEl.appendChild(box);
+  }
+  tlacitkoEl.disabled = true;
+  hlaskaEl.textContent = ``;
+  vysledekEl.style.display = `none`;
+}
+
+function klik(e) {
+  if (hotovo) { return; }
+  var o = parseInt(e.currentTarget.getAttribute(`data-o`), 10);
+  var v = parseInt(e.currentTarget.getAttribute(`data-v`), 10);
+  odpovedi[o] = v;
+  var sourozenci = e.currentTarget.parentNode.querySelectorAll(`.varianta`);
+  for (var i = 0; i < sourozenci.length; i++) {
+    sourozenci[i].classList.remove(`vybrana`);
+  }
+  e.currentTarget.classList.add(`vybrana`);
+  var vse = true;
+  for (var k = 0; k < odpovedi.length; k++) {
+    if (odpovedi[k] === null) { vse = false; }
+  }
+  tlacitkoEl.disabled = !vse;
+  if (vse) { hlaskaEl.textContent = ``; }
+}
+
+tlacitkoEl.addEventListener(`click`, function () {
+  var vse = true;
+  for (var k = 0; k < odpovedi.length; k++) {
+    if (odpovedi[k] === null) { vse = false; }
+  }
+  if (!vse) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  hotovo = true;
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  for (var i = 0; i < otazky.length; i++) {
+    var tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove(`vybrana`);
+      if (j === otazky[i].s) {
+        tlacitka[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === otazky[i].s) { body++; }
+  }
+  document.getElementById(`skore`).textContent = body + ` z ` + otazky.length;
+  var text = ``;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body <= hodnoceni[h].max) { text = hodnoceni[h].text; break; }
+  }
+  document.getElementById(`hodnoceni`).textContent = text;
+  tlacitkoEl.disabled = true;
+  hlaskaEl.textContent = ``;
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+document.getElementById(`znovu`).addEventListener(`click`, function () {
+  postav();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+postav();
+</script>
+</body>
+</html>
