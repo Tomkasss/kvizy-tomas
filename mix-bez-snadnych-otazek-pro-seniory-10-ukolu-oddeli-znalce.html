@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mix bez snadných otázek pro seniory: 10 úkolů oddělí znalce od těch, kteří pouze hádají</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.question {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; line-height: 1.5; margin-bottom: 18px; }
+.option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.option:hover { background: #ede8e1; }
+.option.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.option.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.option.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.option:disabled { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warning { text-align: center; color: #721c24; margin-top: 14px; font-size: 1rem; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 40px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 16px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.7; }
+#again {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+#again:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .question { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Mix bez snadných otázek pro seniory: 10 úkolů oddělí znalce od těch, kteří pouze hádají</h1>
+<p class="perex">Dějiny, čeština, česká kuchyně, příroda, těžký průmysl, literatura, divadlo, zeměpis, astronomie i vážná hudba. Vědomosti z různých koutů školního učiva i z toho, co člověk pochytí až za život.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warning"></p>
+<div id="result" hidden>
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="again">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var questions = [
+  {
+    q: `1. Kterou zemskou hranici měli za úkol střežit Chodové?`,
+    options: [`se Saskem`, `s Bavorskem`, `s Rakouskem`, `se Slezskem`],
+    correct: 1
+  },
+  {
+    q: `2. Co znamená slovo škarpa?`,
+    options: [`příkop podél silnice`, `kamenný patník u kraje cesty`, `klenutý propustek pod silnicí`, `zpevněná krajnice vozovky`],
+    correct: 0
+  },
+  {
+    q: `3. Která tradiční jihočeská polévka se vaří z brambor a hub, dochucuje se koprem, zjemňuje smetanou a podává se se zastřeným vejcem?`,
+    options: [`bramboračka`, `česnečka`, `kulajda`, `zelňačka`],
+    correct: 2
+  },
+  {
+    q: `4. Jak se nazývá bobří stavba, ve které zvíře bydlí?`,
+    options: [`brloh`, `nora`, `hráz`, `hrad`],
+    correct: 3
+  },
+  {
+    q: `5. Se kterým mořem je spojeno Azovské moře?`,
+    options: [`s Kaspickým`, `s Černým`, `s Egejským`, `s Marmarským`],
+    correct: 1
+  },
+  {
+    q: `6. Která americká spisovatelka je autorkou románu Jih proti Severu?`,
+    options: [`Harper Leeová`, `Louisa May Alcottová`, `Edith Whartonová`, `Margaret Mitchellová`],
+    correct: 3
+  },
+  {
+    q: `7. Jaká surovina se v koksovně zpracovává na koks?`,
+    options: [`rašelina`, `dřevo`, `černé uhlí`, `hnědé uhlí`],
+    correct: 2
+  },
+  {
+    q: `8. Ve které divadelní hře ztvárnil Jan Werich vodníka Čochtana?`,
+    options: [`Divotvorný hrnec`, `Caesar`, `Balada z hadrů`, `Těžká Barbora`],
+    correct: 0
+  },
+  {
+    q: `9. Které souhvězdí je vyobrazeno na vlajce Nového Zélandu?`,
+    options: [`Jižní koruna`, `Jižní kříž`, `Jižní ryba`, `Jižní trojúhelník`],
+    correct: 1
+  },
+  {
+    q: `10. Který český skladatel je autorem symfonie Asrael, napsané po smrti dvou blízkých lidí?`,
+    options: [`Otakar Ostrčil`, `Leoš Janáček`, `Josef Suk`, `Josef Bohuslav Foerster`],
+    correct: 2
+  }
+];
+
+var verdicts = [
+  { min: 0, max: 3, text: `Tady rozhodovalo hádání, ne znalost. Většinu otázek jste vyřešili tipem mezi dvěma variantami, které vypadaly stejně přijatelně, a tip vyšel jen výjimečně. Znalec se v takovém kvízu pozná právě podle toho, že u podobných dvojic nezaváhá. Rozdíl mezi vámi a průměrným výsledkem jsou čtyři body a víc, a dohnat se dá čtením, ne pozorností k tomu, která odpověď zní hezčeji.` },
+  { min: 4, max: 6, text: `Půlka sedla, půlka ne, a to je přesně profil člověka, který pár oborů zná dobře a ve zbytku spoléhá na náhodu. Body jste posbírali tam, kde vám téma leželo, a ztráceli u otázek, kde se správná odpověď lišila od té vedlejší jediným detailem. K hranici, kterou drží běžný řešitel, vám chybí jeden až tři body. Do skupiny znalců to ještě není, ale máte k ní blíž než k tipujícím.` },
+  { min: 7, max: 9, text: `Tohle už je výsledek znalce. Prošli jste kvízem, který byl schválně postavený tak, aby v něm nebyla ani jedna otázka zadarmo, a ustáli jste i místa, kde dvě varianty stály těsně vedle sebe. Jedna až tři chyby v takové sestavě nejsou slabina, jen připomínka, že úplně každý obor nemá nikdo. Přesně tady leží hranice, za kterou se hádáním dostat nedá.` },
+  { min: 10, max: 10, text: `Plný počet, a ten zvládne jen menšina. Neshodila vás hranice, kterou po staletí střežili Chodové, slovo pro příkop u cesty, jihočeská polévka s koprem a zastřeným vejcem, název bobřího obydlí, moře na jihu Ukrajiny, autorka románu o americké občanské válce, surovina pro výrobu koksu, Werichova vodnická role, souhvězdí z novozélandské vlajky ani smuteční symfonie českého skladatele. Deset z deseti tady znamená doopravdy široký rozhled, ne šťastnou ruku.` }
+];
+
+var answers = new Array(questions.length).fill(null);
+var evaluated = false;
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warningEl = document.getElementById(`warning`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var againEl = document.getElementById(`again`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  questions.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `question`;
+    var text = document.createElement(`div`);
+    text.className = `qtext`;
+    text.textContent = item.q;
+    box.appendChild(text);
+    item.options.forEach(function (opt, oi) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `option`;
+      btn.textContent = opt;
+      btn.addEventListener(`click`, function () {
+        if (evaluated) { return; }
+        answers[qi] = oi;
+        var siblings = box.querySelectorAll(`.option`);
+        for (var i = 0; i < siblings.length; i++) {
+          siblings[i].classList.remove(`selected`);
+        }
+        btn.classList.add(`selected`);
+        refresh();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function refresh() {
+  var done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+  if (done) { warningEl.textContent = ``; }
+}
+
+submitEl.addEventListener(`click`, function () {
+  if (submitEl.disabled) {
+    warningEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  evaluated = true;
+  var score = 0;
+  var boxes = quizEl.querySelectorAll(`.question`);
+  for (var qi = 0; qi < questions.length; qi++) {
+    var opts = boxes[qi].querySelectorAll(`.option`);
+    for (var oi = 0; oi < opts.length; oi++) {
+      opts[oi].classList.remove(`selected`);
+      opts[oi].disabled = true;
+      if (oi === questions[qi].correct) {
+        opts[oi].classList.add(`correct`);
+      } else if (oi === answers[qi]) {
+        opts[oi].classList.add(`wrong`);
+      }
+    }
+    if (answers[qi] === questions[qi].correct) { score++; }
+  }
+  scoreEl.textContent = score + ` z ` + questions.length;
+  for (var v = 0; v < verdicts.length; v++) {
+    if (score >= verdicts[v].min && score <= verdicts[v].max) {
+      verdictEl.textContent = verdicts[v].text;
+      break;
+    }
+  }
+  submitEl.disabled = true;
+  warningEl.textContent = ``;
+  resultEl.hidden = false;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+againEl.addEventListener(`click`, function () {
+  evaluated = false;
+  answers = new Array(questions.length).fill(null);
+  resultEl.hidden = true;
+  warningEl.textContent = ``;
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+refresh();
+</script>
+</body>
+</html>
