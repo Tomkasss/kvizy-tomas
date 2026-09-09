@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test znalostí a zdravého úsudku: kdo zvládne 8 z 10 otázek, má obojí ve výborné formě</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt.locked { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 24px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#retry:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  .q, #result { padding: 20px; }
+  h1 { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test znalostí a zdravého úsudku: kdo zvládne 8 z 10 otázek, má obojí ve výborné formě</h1>
+<p class="perex">Deset otázek prochází literaturou, jazykem, přírodou, řemeslem, značkami u cest i mapou světa a dvě z nich nestojí na žádném faktu, jen na tom, jestli udržíte myšlenku pohromadě do konce věty. Osm bodů nedá ani sečtělý člověk bez chladné hlavy.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<div id="warn"></div>
+<div id="result" hidden>
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  {
+    q: `1. Kdo v Shakespearově Hamletovi otráví hlavnímu hrdinovi otce a usedne na dánský trůn?`,
+    options: [`Polonius`, `Claudius`, `Laertes`, `Horacio`],
+    correct: 1
+  },
+  {
+    q: `2. Jak se odborně nazývá chorobný strach z výšek?`,
+    options: [`klaustrofobie`, `agorafobie`, `akrofobie`, `nyktofobie`],
+    correct: 2
+  },
+  {
+    q: `3. Který z těchto jazyků patří spolu s češtinou mezi západoslovanské?`,
+    options: [`slovinština`, `běloruština`, `polština`, `bulharština`],
+    correct: 2
+  },
+  {
+    q: `4. Do které skupiny organismů patří kvasinky, ze kterých se vyrábí pekařské droždí?`,
+    options: [`mezi bakterie`, `mezi houby`, `mezi řasy`, `mezi prvoky`],
+    correct: 1
+  },
+  {
+    q: `5. Která tkalcovská vazba dává džínovině její typické šikmé řádkování?`,
+    options: [`plátnová`, `atlasová`, `rypsová`, `keprová`],
+    correct: 3
+  },
+  {
+    q: `6. Jak se ve stavebnictví nazývá nosný prvek uložený nad okenním otvorem?`,
+    options: [`překlad`, `parapet`, `ostění`, `krov`],
+    correct: 0
+  },
+  {
+    q: `7. Která z těchto dopravních značek patří v Česku mezi příkazové?`,
+    options: [`Nejvyšší dovolená rychlost`, `Hlavní pozemní komunikace`, `Práce na silnici`, `Stezka pro chodce`],
+    correct: 3
+  },
+  {
+    q: `8. Které tvrzení je přesným popřením věty, že aspoň jeden dnešní vlak nabral zpoždění?`,
+    options: [
+      `Většina dnešních vlaků zpoždění nenabrala.`,
+      `Žádný dnešní vlak zpoždění nenabral.`,
+      `Nanejvýš jeden dnešní vlak nabral zpoždění.`,
+      `Právě jeden dnešní vlak zpoždění nenabral.`
+    ],
+    correct: 1
+  },
+  {
+    q: `9. Které tvrzení nutně platí, jestliže o Karlovi neplatí, že umí plavat a zároveň jezdit na kole?`,
+    options: [
+      `Aspoň jednu z těch dvou věcí Karel neumí.`,
+      `Karel neumí ani plavat, ani jezdit na kole.`,
+      `Karel umí právě jednu z těch dvou věcí.`,
+      `Karel umí plavat, ale na kole nejezdí.`
+    ],
+    correct: 0
+  },
+  {
+    q: `10. Jak se v letech 1971 až 1997 jmenovala Demokratická republika Kongo?`,
+    options: [`Tanganika`, `Rhodesie`, `Zair`, `Horní Volta`],
+    correct: 2
+  }
+];
+
+var VERDICTS = [
+  {
+    max: 3,
+    text: `Znalostní část vás zastavila dřív, než mohl přijít ke slovu úsudek. Tři body a méně odpovídají zhruba tomu, co vynese samotné tipování ze čtyř nabídek, takže se zatím nechytila ani jedna ze dvou složek z titulku. Obojí se přitom dá probudit: obecný přehled čtením napříč obory, uvažování tím, že si u každé věty ověříte, co přesně tvrdí a co už ne.`
+  },
+  {
+    max: 6,
+    text: `Tohle pásmo leží kousek pod tím, kam se běžný dospělý řešitel obvykle dostane. Zhruba polovina odpovědí sedí a k hranici z titulku chybí dva až čtyři body. Kde přesně se ztratily, prozradí až srovnání se správnými odpověďmi, u vědomostních otázek se vyplatí projít je po řadě, u obou úloh bez faktu si znovu přečíst zadání a určit, co přesně tvrdí a co už ne.`
+  },
+  {
+    max: 9,
+    text: `Velmi dobrý výsledek, který se drží na obvyklém průměru a nad ním. Sedm bodů se dá utáhnout i samotným přehledem, ale osmý a devátý bod už obvykle přijde až s citem pro to, co věta přesně tvrdí a co ne. Kdo skončil na osmi a výš, splnil metu z titulku a má znalosti i úsudek prokazatelně ve výborné formě. K plnému počtu chybí jedna až tři odpovědi.`
+  },
+  {
+    max: 10,
+    text: `Plný počet, na který v tomhle kvízu dosáhne jen menšina. Neztratili jste bod ani na okrajové otázce mimo běžnou školní látku, ani na dvou úlohách, kde stačí drobná nepozornost ve formulaci a odpověď se překlopí. Znalosti i zdravý úsudek vám fungují naráz a to je kombinace, která se potkává vzácně.`
+  }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var evaluated = false;
+
+var quizEl = document.getElementById('quiz');
+var submitEl = document.getElementById('submit');
+var warnEl = document.getElementById('warn');
+var resultEl = document.getElementById('result');
+var scoreEl = document.getElementById('score');
+var verdictEl = document.getElementById('verdict');
+var retryEl = document.getElementById('retry');
+
+function buildQuiz() {
+  quizEl.textContent = '';
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement('div');
+    box.className = 'q';
+
+    var text = document.createElement('p');
+    text.className = 'q-text';
+    text.textContent = item.q;
+    box.appendChild(text);
+
+    item.options.forEach(function (opt, oi) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'opt';
+      btn.textContent = opt;
+      btn.setAttribute('data-q', String(qi));
+      btn.setAttribute('data-o', String(oi));
+      btn.addEventListener('click', function () {
+        if (evaluated) { return; }
+        answers[qi] = oi;
+        var siblings = box.querySelectorAll('.opt');
+        for (var i = 0; i < siblings.length; i++) {
+          siblings[i].classList.remove('selected');
+        }
+        btn.classList.add('selected');
+        refreshSubmit();
+      });
+      box.appendChild(btn);
+    });
+
+    quizEl.appendChild(box);
+  });
+}
+
+function refreshSubmit() {
+  var done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+  if (done) { warnEl.textContent = ''; }
+}
+
+function evaluate() {
+  if (answers.some(function (a) { return a === null; })) {
+    warnEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  evaluated = true;
+  var score = 0;
+  var boxes = quizEl.querySelectorAll('.q');
+  QUESTIONS.forEach(function (item, qi) {
+    var opts = boxes[qi].querySelectorAll('.opt');
+    for (var i = 0; i < opts.length; i++) {
+      opts[i].classList.remove('selected');
+      opts[i].classList.add('locked');
+      if (i === item.correct) {
+        opts[i].classList.add('correct');
+      } else if (i === answers[qi]) {
+        opts[i].classList.add('wrong');
+      }
+    }
+    if (answers[qi] === item.correct) { score++; }
+  });
+
+  scoreEl.textContent = score + ' z ' + QUESTIONS.length;
+  var chosen = VERDICTS[VERDICTS.length - 1];
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score <= VERDICTS[v].max) { chosen = VERDICTS[v]; break; }
+  }
+  verdictEl.textContent = chosen.text;
+  resultEl.hidden = false;
+  submitEl.disabled = true;
+  warnEl.textContent = '';
+  resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function reset() {
+  evaluated = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.hidden = true;
+  warnEl.textContent = '';
+  buildQuiz();
+  refreshSubmit();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+submitEl.addEventListener('click', evaluate);
+retryEl.addEventListener('click', reset);
+
+buildQuiz();
+refreshSubmit();
+</script>
+</body>
+</html>
