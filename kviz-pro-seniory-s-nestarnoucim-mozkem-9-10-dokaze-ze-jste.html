@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz pro seniory s nestárnoucím mozkem: 9/10 dokáže, že jste stále ve skvělé formě</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 {
+  font-size: 1.9rem;
+  line-height: 1.3;
+  color: #2c2c2c;
+  margin: 0 0 20px;
+}
+.perex {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #4a4a4a;
+  margin: 0 0 32px;
+}
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zadani {
+  font-weight: bold;
+  font-size: 1.15rem;
+  color: #2c2c2c;
+  line-height: 1.5;
+  margin: 0 0 18px;
+}
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  line-height: 1.45;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.varianta:last-child { margin-bottom: 0; }
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana {
+  background: #dcd3c7;
+  border: 1px solid #a89e92;
+  font-weight: bold;
+}
+.varianta.spravna {
+  background: #d4edda;
+  border: 1px solid #7cb987;
+  color: #1e5631;
+}
+.varianta.spatna {
+  background: #f8d7da;
+  border: 1px solid #d4848a;
+  color: #721c24;
+}
+.hotovo .varianta { cursor: default; }
+.hotovo .varianta:hover { background: #f7f4f0; }
+.hotovo .varianta.vybrana:hover { background: #dcd3c7; }
+.hotovo .varianta.spravna:hover { background: #d4edda; }
+.hotovo .varianta.spatna:hover { background: #f8d7da; }
+#vyhodnotit, #znovu {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#znovu { background: #8c7b6b; }
+#znovu:hover { background: #756658; }
+#hlaska {
+  text-align: center;
+  color: #721c24;
+  margin-top: 14px;
+  font-size: 1rem;
+  min-height: 1.2em;
+}
+#vysledek {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+  border-top: 4px solid #5b7e5f;
+}
+#skore {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #5b7e5f;
+  text-align: center;
+  margin: 0 0 16px;
+}
+#hodnoceni {
+  font-size: 1rem;
+  color: #4a4a4a;
+  text-align: center;
+  line-height: 1.65;
+  margin: 0;
+}
+@media (max-width: 767px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka, #vysledek { padding: 20px; }
+  #vyhodnotit, #znovu { width: 100%; padding: 16px 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro seniory s nestárnoucím mozkem: 9/10 dokáže, že jste stále ve skvělé formě</h1>
+<p class="perex">Milí senioři, deset otázek z deseti oborů: zeměpis, příroda, literatura, technika, jazyk, víra, dějiny, film, umění a jedna úloha na logiku. Devět bodů z deseti je hranice, která potvrdí, že vám to myslí pořád skvěle.</p>
+
+<div id="kviz"></div>
+
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p id="hlaska"></p>
+
+<div id="vysledek" hidden>
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+</div>
+
+<button id="znovu" hidden>Zkusit znovu</button>
+</div>
+
+<script>
+var otazky = [
+  {
+    zadani: `U břehů kterých dvou zemí leží Biskajský záliv?`,
+    varianty: [`u Portugalska a Španělska`, `u Francie a Španělska`, `u Francie a Velké Británie`, `u Irska a Francie`],
+    spravna: 1
+  },
+  {
+    zadani: `Na které části se dělí tělo dospělého hmyzu?`,
+    varianty: [`na hlavohruď a zadeček`, `na hlavu, hruď a zadeček`, `na hlavu, trup a ocas`, `na hlavu, krovky a zadeček`],
+    spravna: 1
+  },
+  {
+    zadani: `Kdo je zbrojnošem dona Quijota?`,
+    varianty: [`Sancho Panza`, `Figaro`, `Leporello`, `Pátek`],
+    spravna: 0
+  },
+  {
+    zadani: `Která strojní součást slouží především ke zmenšení tření mezi otáčející se hřídelí a jejím uložením?`,
+    varianty: [`ucpávka`, `pero v drážce`, `rozpěrný kroužek`, `valivé ložisko`],
+    spravna: 3
+  },
+  {
+    zadani: `Co znamená slovo invektiva?`,
+    varianty: [`slavnostní řeč na počest někoho`, `věcná námitka při jednání`, `urážlivý slovní útok`, `písemné odvolání proti rozhodnutí`],
+    spravna: 2
+  },
+  {
+    zadani: `Jakým titulem se označuje hlava ruské pravoslavné církve?`,
+    varianty: [`metropolita`, `exarcha`, `arcibiskup`, `patriarcha`],
+    spravna: 3
+  },
+  {
+    zadani: `Průvodkyně na zámku prohlásila: „Všechna okna v tomto sále jsou původní." Které jediné zjištění její tvrzení bezpečně vyvrátí?`,
+    varianty: [`V sále je okno vsazené až při opravě po požáru.`, `Původní okna má i sousední sál.`, `V sále je okno, které bylo nedávno natřeno.`, `U jednoho okna v sále se nedochoval žádný záznam o stáří.`],
+    spravna: 0
+  },
+  {
+    zadani: `Který ostrov připadl Velké Británii po první opiové válce?`,
+    varianty: [`Macao`, `Singapur`, `Hongkong`, `Tchaj-wan`],
+    spravna: 2
+  },
+  {
+    zadani: `Kdo režíroval film 2001: Vesmírná odysea?`,
+    varianty: [`Ridley Scott`, `Andrej Tarkovskij`, `Stanley Kubrick`, `Steven Spielberg`],
+    spravna: 2
+  },
+  {
+    zadani: `Kdo navrhl kolonádu kolem Svatopetrského náměstí ve Vatikánu?`,
+    varianty: [`Gian Lorenzo Bernini`, `Francesco Borromini`, `Carlo Maderno`, `Michelangelo Buonarroti`],
+    spravna: 0
+  }
+];
+
+var hodnoceni = [
+  {
+    min: 0, max: 3,
+    text: `Deset oborů za sebou je nápor, který srazí spoustu řešitelů hned v první polovině. Nejspíš vás dostaly otázky z oblastí, kterým jste se roky nevěnovali, a stačilo, aby se dvě varianty postavily těsně vedle sebe. Zkuste projít otázky ještě jednou a všimněte si, které obory vás stáhly nejvíc. Právě u nich se dá skóre posunout nejrychleji.`
+  },
+  {
+    min: 4, max: 6,
+    text: `Solidní polovina, na které se dá stavět. Základ máte, jenže tam, kde bylo potřeba rozlišit dvě velmi podobné možnosti, jazykový výraz od jeho protikladu nebo jednoho barokního tvůrce od druhého, vám kousek chyběl. K devítce, kterou slibuje titulek, vám scházejí tři až pět odpovědí. To není propast, to je pár pozorných odpolední.`
+  },
+  {
+    min: 7, max: 9,
+    text: `Přesně to pásmo, o kterém mluví titulek. Sedm i osm bodů znamená, že jste udrželi pozornost napříč deseti obory, které spolu nemají nic společného, a že vám chybí jedna až tři odpovědi, obvykle z oborů, ke kterým jste se roky nedostali. Devět bodů je pak přesně ten výsledek, který titulek slibuje, tedy černé na bílém, že jste ve skvělé formě. Ať jste skončili kdekoli v tomto pásmu, od plného počtu vás dělí jen otázky, u kterých ležely dvě varianty těsně vedle sebe.`
+  },
+  {
+    min: 10, max: 10,
+    text: `Naprostá špička. Plný počet tady dá jen menšina a vy jste mezi nimi. Neshodil vás záliv na mapě, stavba hmyzího těla, Cervantesova dvojice, strojní součástka, ostré slovo, církevní titul, pedantická logická úloha, ostrov z 19. století, filmová klasika ani ten, kdo dal Svatopetrskému náměstí jeho podobu. Takový rozptyl se tipováním netrefí. Vaše forma je skvělá a máte to černé na bílém.`
+  }
+];
+
+var pismena = [`a)`, `b)`, `c)`, `d)`];
+var odpovedi = new Array(otazky.length).fill(null);
+var uzavreno = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var vyhodnotitEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function postav() {
+  kvizEl.innerHTML = ``;
+  for (var i = 0; i < otazky.length; i++) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    var zadaniEl = document.createElement(`p`);
+    zadaniEl.className = `zadani`;
+    zadaniEl.textContent = (i + 1) + `. ` + otazky[i].zadani;
+    box.appendChild(zadaniEl);
+
+    for (var j = 0; j < otazky[i].varianty.length; j++) {
+      var tlacitko = document.createElement(`button`);
+      tlacitko.type = `button`;
+      tlacitko.className = `varianta`;
+      tlacitko.textContent = pismena[j] + ` ` + otazky[i].varianty[j];
+      tlacitko.setAttribute(`data-otazka`, String(i));
+      tlacitko.setAttribute(`data-varianta`, String(j));
+      tlacitko.addEventListener(`click`, klikVarianta);
+      box.appendChild(tlacitko);
+    }
+    kvizEl.appendChild(box);
+  }
+}
+
+function klikVarianta(udalost) {
+  if (uzavreno) { return; }
+  var tlacitko = udalost.currentTarget;
+  var iOtazka = parseInt(tlacitko.getAttribute(`data-otazka`), 10);
+  var iVarianta = parseInt(tlacitko.getAttribute(`data-varianta`), 10);
+  odpovedi[iOtazka] = iVarianta;
+
+  var box = tlacitko.parentNode;
+  var tlacitka = box.getElementsByClassName(`varianta`);
+  for (var k = 0; k < tlacitka.length; k++) {
+    tlacitka[k].classList.remove(`vybrana`);
+  }
+  tlacitko.classList.add(`vybrana`);
+
+  hlaskaEl.textContent = ``;
+  obnovTlacitko();
+}
+
+function obnovTlacitko() {
+  var hotovo = true;
+  for (var i = 0; i < odpovedi.length; i++) {
+    if (odpovedi[i] === null) { hotovo = false; }
+  }
+  vyhodnotitEl.disabled = !hotovo;
+}
+
+function vyhodnot() {
+  var hotovo = true;
+  for (var i = 0; i < odpovedi.length; i++) {
+    if (odpovedi[i] === null) { hotovo = false; }
+  }
+  if (!hotovo) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+
+  uzavreno = true;
+  var skore = 0;
+  var boxy = kvizEl.getElementsByClassName(`otazka`);
+
+  for (var q = 0; q < otazky.length; q++) {
+    var box = boxy[q];
+    box.classList.add(`hotovo`);
+    var tlacitka = box.getElementsByClassName(`varianta`);
+    var spravna = otazky[q].spravna;
+    var zvolena = odpovedi[q];
+
+    if (zvolena === spravna) { skore++; }
+
+    for (var v = 0; v < tlacitka.length; v++) {
+      tlacitka[v].classList.remove(`vybrana`);
+      if (v === spravna) {
+        tlacitka[v].classList.add(`spravna`);
+      } else if (v === zvolena) {
+        tlacitka[v].classList.add(`spatna`);
+      }
+    }
+  }
+
+  skoreEl.textContent = skore + ` z ` + otazky.length;
+  var text = ``;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore >= hodnoceni[h].min && skore <= hodnoceni[h].max) {
+      text = hodnoceni[h].text;
+    }
+  }
+  hodnoceniEl.textContent = text;
+
+  vyhodnotitEl.hidden = true;
+  hlaskaEl.textContent = ``;
+  vysledekEl.hidden = false;
+  znovuEl.hidden = false;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function zkusitZnovu() {
+  odpovedi = new Array(otazky.length).fill(null);
+  uzavreno = false;
+  postav();
+  vysledekEl.hidden = true;
+  znovuEl.hidden = true;
+  vyhodnotitEl.hidden = false;
+  vyhodnotitEl.disabled = true;
+  hlaskaEl.textContent = ``;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+vyhodnotitEl.addEventListener(`click`, vyhodnot);
+znovuEl.addEventListener(`click`, zkusitZnovu);
+postav();
+</script>
+</body>
+</html>
