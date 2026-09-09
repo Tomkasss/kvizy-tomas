@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mix školních i životních vědomostí: dokážete projít všemi 10 otázkami bez zaváhání?</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zadani { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+.varianta:last-child { margin-bottom: 0; }
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta:disabled { cursor: default; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#hlaska { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+#vysledek {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 24px;
+  border-top: 4px solid #5b7e5f;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 14px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Mix školních i životních vědomostí: dokážete projít všemi 10 otázkami bez zaváhání?</h1>
+<p class="perex">Deset otázek napříč obory: hudba, literatura, počasí, domácnost, doprava, pojištění, požární bezpečnost, první pomoc i právo. Žádné počítání, jen vědomosti ze školy a z běžného života. Projdete všemi deseti bez zaváhání?</p>
+<div id="kviz"></div>
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p id="hlaska"></p>
+<div id="vysledek" hidden>
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var otazky = [
+  {
+    text: `1. Do kolika dnů po svém jmenování musí vláda ČR předstoupit před Poslaneckou sněmovnu a požádat ji o vyslovení důvěry?`,
+    varianty: [`do 15 dnů`, `do 30 dnů`, `do 60 dnů`, `do 90 dnů`],
+    spravna: 1
+  },
+  {
+    text: `2. Po které straně silnice jde chodec mimo obec tam, kde není chodník?`,
+    varianty: [`po pravé krajnici ve směru jízdy vozidel`, `po levé krajnici proti směru jízdy vozidel`, `po pravé krajnici ve dne a po levé za snížené viditelnosti`, `po levé krajnici ve dne a po pravé za snížené viditelnosti`],
+    spravna: 1
+  },
+  {
+    text: `3. Pod kolik stupňů Celsia neklesne teplota během tropické noci?`,
+    varianty: [`pod 20`, `pod 18`, `pod 22`, `pod 25`],
+    spravna: 0
+  },
+  {
+    text: `4. Vysoký obsah kterých dvou prvků dělá z vody takzvanou tvrdou vodu?`,
+    varianty: [`vápníku a hořčíku`, `sodíku a draslíku`, `železa a manganu`, `mědi a zinku`],
+    spravna: 0
+  },
+  {
+    text: `5. Kdo složil operu Jakobín?`,
+    varianty: [`Bedřich Smetana`, `Antonín Dvořák`, `Leoš Janáček`, `Zdeněk Fibich`],
+    spravna: 1
+  },
+  {
+    text: `6. Kdo napsal komedii Revizor?`,
+    varianty: [`Anton Pavlovič Čechov`, `Ivan Sergejevič Turgeněv`, `Nikolaj Vasiljevič Gogol`, `Alexandr Sergejevič Puškin`],
+    spravna: 2
+  },
+  {
+    text: `7. Kterým písmenem se na hasicím přístroji označuje třída požáru hořlavých kovů, jako je sodík nebo lithium?`,
+    varianty: [`A`, `B`, `C`, `D`],
+    spravna: 3
+  },
+  {
+    text: `8. Kdo v ČR uhradí poškozenému škodu, kterou způsobí řidič vozidla bez sjednaného povinného ručení?`,
+    varianty: [`poškozený si ji hradí sám`, `Ministerstvo dopravy ze státního rozpočtu`, `Česká kancelář pojistitelů z garančního fondu`, `pojišťovna poškozeného z jeho havarijního pojištění`],
+    spravna: 2
+  },
+  {
+    text: `9. Kolik stlačení hrudníku připadá při resuscitaci dospělého na dva záchranné vdechy?`,
+    varianty: [`15`, `20`, `30`, `50`],
+    spravna: 2
+  },
+  {
+    text: `10. Kolik týdnů dovolené za kalendářní rok zaručuje zákoník práce zaměstnancům státu a územních samosprávných celků?`,
+    varianty: [`tři`, `čtyři`, `pět`, `šest`],
+    spravna: 2
+  }
+];
+
+var hodnoceni = [
+  { max: 3, text: `Do cíle, který slibuje titulek, je odsud daleko. Deset otázek napříč obory znamená, že se nedá spoléhat na jednu silnou oblast, a právě tohle rozpětí vás zastavilo. Zaváhání bylo nejméně sedm. Projděte si správné odpovědi, většina z nich je z věcí, které člověk potká v běžném týdnu, a při druhém pokusu se posunete rychle.` },
+  { max: 6, text: `Polovina sedí, polovina utekla. Zvládli jste zřejmě to, co se připomíná samo, a ztráceli jste tam, kde se dvě nabízené odpovědi lišily jen v detailu, tedy u přesné hranice, písmene, čísla nebo rozsahu. Bez zaváhání to nebylo, chybí vám čtyři až šest bodů do plného počtu, ale jste přesně v pásmu, kde se láme běžný přehled.` },
+  { max: 9, text: `Silný výsledek a plný počet na dosah. Sedm znamená, že vedle jednodušších otázek utáhnete i většinu středního pásma. Osm a devět ukazují, že vás neshodily ani otázky, kde správnou odpověď od nejbližší varianty dělí jediné číslo nebo jediné slovo. K průchodu bez zaváhání vám chyběla jedna až tři odpovědi a nejspíš víte přesně které.` },
+  { max: 10, text: `Plný počet, přesně to, na co se titulek ptá, a zvládne ho jen menšina. Prošli jste bez jediného zaváhání lhůtou pro vyslovení důvěry vládě, chůzí mimo obec, hranicí tropické noci, tvrdostí vody, dvěma operními a dramatickými jmény, písmenem třídy požáru, úhradou škody od nepojištěného řidiče, poměrem při resuscitaci i dovolenou zaměstnanců státu. Takový rozptyl se netipuje, ten se musí vědět.` }
+];
+
+var odpovedi = new Array(otazky.length).fill(null);
+var vyhodnoceno = false;
+
+var kvizEl = document.getElementById('kviz');
+var tlacitkoVyhodnotit = document.getElementById('vyhodnotit');
+var hlaskaEl = document.getElementById('hlaska');
+var vysledekEl = document.getElementById('vysledek');
+var skoreEl = document.getElementById('skore');
+var hodnoceniEl = document.getElementById('hodnoceni');
+var tlacitkoZnovu = document.getElementById('znovu');
+
+function vykresli() {
+  kvizEl.innerHTML = '';
+  otazky.forEach(function (o, i) {
+    var box = document.createElement('div');
+    box.className = 'otazka';
+    var zadani = document.createElement('p');
+    zadani.className = 'zadani';
+    zadani.textContent = o.text;
+    box.appendChild(zadani);
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement('button');
+      btn.className = 'varianta';
+      btn.type = 'button';
+      btn.textContent = v;
+      btn.addEventListener('click', function () {
+        if (vyhodnoceno) return;
+        odpovedi[i] = j;
+        var vsechny = box.querySelectorAll('.varianta');
+        for (var k = 0; k < vsechny.length; k++) {
+          vsechny[k].classList.remove('vybrana');
+        }
+        btn.classList.add('vybrana');
+        hlaskaEl.textContent = '';
+        obnovTlacitko();
+      });
+      box.appendChild(btn);
+    });
+    kvizEl.appendChild(box);
+  });
+}
+
+function obnovTlacitko() {
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  tlacitkoVyhodnotit.disabled = !hotovo;
+}
+
+tlacitkoVyhodnotit.addEventListener('click', function () {
+  if (tlacitkoVyhodnotit.disabled) {
+    hlaskaEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  vyhodnoceno = true;
+  var skore = 0;
+  var boxy = kvizEl.querySelectorAll('.otazka');
+  otazky.forEach(function (o, i) {
+    var tlacitka = boxy[i].querySelectorAll('.varianta');
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove('vybrana');
+      if (j === o.spravna) {
+        tlacitka[j].classList.add('spravna');
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add('spatna');
+      }
+    }
+    if (odpovedi[i] === o.spravna) skore++;
+  });
+  skoreEl.textContent = skore + ' z ' + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+  tlacitkoVyhodnotit.disabled = true;
+  vysledekEl.hidden = false;
+  vysledekEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+tlacitkoZnovu.addEventListener('click', function () {
+  odpovedi = new Array(otazky.length).fill(null);
+  vyhodnoceno = false;
+  vysledekEl.hidden = true;
+  hlaskaEl.textContent = '';
+  tlacitkoVyhodnotit.disabled = true;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+vykresli();
+</script>
+</body>
+</html>
