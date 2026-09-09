@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test vědomostní kondice: kdo zvládne 8 z 10 otázek, má stále hlavu ve skvělé formě</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover:enabled { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #721c24; margin-top: 14px; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+  border-top: 4px solid #5b7e5f;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#retry {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#retry:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  .q { padding: 20px; }
+  h1 { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test vědomostní kondice: kdo zvládne 8 z 10 otázek, má stále hlavu ve skvělé formě</h1>
+<p class="perex">Deset otázek z deseti různých oborů: vojenské hodnosti, zoologie, dopravní značky, divadelní zákulisí, čeští panovníci, česká slovní zásoba, destiláty, veslování, textilní vlákna a malířství. Osm bodů dá jen menšina.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warn" hidden>Odpovězte prosím na všechny otázky</p>
+<div id="result" hidden>
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const QUESTIONS = [
+  { q: `Která z těchto hodností je v Armádě České republiky nejvyšší?`,
+    o: [`kapitán`, `plukovník`, `poručík`, `major`], a: 1 },
+  { q: `Kterým ústním orgánem saje motýl nektar z květů?`,
+    o: [`tykadly`, `kusadly`, `sosákem`, `makadly`], a: 2 },
+  { q: `Co v Česku oznamuje řidiči žlutá dopravní značka ve tvaru čtverce postaveného na roh?`,
+    o: [`že vjíždí do obytné zóny`, `že jede po hlavní silnici`, `že se blíží k železničnímu přejezdu`, `že za ní končí obec`], a: 1 },
+  { q: `Jak se v divadle nazývá pracovník, který po premiéře za jevištěm řídí průběh představení, volá herce na scénu a hlídá nástupy?`,
+    o: [`dramaturg`, `nápověda`, `rekvizitář`, `inspicient`], a: 3 },
+  { q: `Kterého českého knížete pokřtil na Velké Moravě arcibiskup Metoděj?`,
+    o: [`Bořivoj I.`, `Spytihněv I.`, `Vratislav I.`, `Boleslav I.`], a: 0 },
+  { q: `Co znamená sloveso kanout?`,
+    o: [`stékat po kapkách`, `hlasitě naříkat`, `zvolna uvadat`, `tiše doufat`], a: 0 },
+  { q: `Která obilnina musí tvořit nadpoloviční podíl zápary, ze které se vyrábí americký bourbon?`,
+    o: [`žito`, `ječmen`, `pšenice`, `kukuřice`], a: 3 },
+  { q: `Kolik osob sedí při závodě v lodi zvané veslařská osma?`,
+    o: [`osm`, `devět`, `deset`, `jedenáct`], a: 1 },
+  { q: `Chemickým zpracováním které přírodní suroviny vzniká textilní vlákno viskóza?`,
+    o: [`dřevné celulózy`, `ropy`, `bavlněných vláken`, `mléčné bílkoviny`], a: 0 },
+  { q: `Kdo namaloval obraz Americká gotika?`,
+    o: [`Edward Hopper`, `Norman Rockwell`, `Grant Wood`, `Andrew Wyeth`], a: 2 }
+];
+
+const LETTERS = [`a`, `b`, `c`, `d`];
+
+const VERDICTS = [
+  { min: 0, max: 3, text: `Zastavil vás už rozjezd, tedy pořadí vojenských hodností, ústrojí motýla, nejstarší Přemyslovci a knižní sloveso. Tři body a méně přitom odpovídají zhruba tomu, co vynese pouhé tipování ze čtyř nabídek, takže se zatím neprojevila skoro žádná znalost navíc. K hranici osmi bodů z titulku vám chybí pět odpovědí a víc, je to ale ta nejlépe dohonitelná ztráta ze všech, protože stojí na věcech, které se běžně připomínají.` },
+  { min: 4, max: 6, text: `Tady skončí největší část řešitelů. Snadnější polovinu jste zvládli a rozdělilo vás až střední pásmo, tedy žlutá značka na hlavní silnici, divadelní profese za jevištěm, obilí v zápaře na bourbon, počet lidí v závodní lodi a původ textilního vlákna. K metě z titulku chybí dva až čtyři body a přesně v tomhle rozmezí se láme běžný přehled a opravdu široká hlava. Kondici máte slušnou, jen se v deseti otázkách nestihla ukázat naplno.` },
+  { min: 7, max: 9, text: `Velmi dobrý výsledek nad obvyklým průměrem. Sedm bodů se dá utáhnout školními znalostmi, osmý a devátý bod už obvykle přijde jen tomu, kdo si k nim přidal i něco mimo osnovy. Kdo skončil na osmi a výš, splnil metu z titulku a má vědomostní kondici prokazatelně ve skvělé formě. K plnému počtu chyběla jedna až tři odpovědi, nejčastěji ta o autorovi slavného amerického plátna.` },
+  { min: 10, max: 10, text: `Plný počet, na který v tomhle testu dosáhne jen menšina. Neztratili jste bod ani v rozjezdu, ani v pěti otázkách středního pásma, kde stačí sáhnout o jednu variantu vedle, ani u nejtěžší otázky kvízu, která leží mimo běžnou školní látku. Deset oborů a deset zásahů znamená, že vaše hlava drží formu, jakou se pochlubí opravdu málokdo.` }
+];
+
+const picks = new Array(QUESTIONS.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const submitEl = document.getElementById(`submit`);
+const warnEl = document.getElementById(`warn`);
+const resultEl = document.getElementById(`result`);
+const scoreEl = document.getElementById(`score`);
+const verdictEl = document.getElementById(`verdict`);
+const retryEl = document.getElementById(`retry`);
+
+function build() {
+  quizEl.textContent = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const title = document.createElement(`p`);
+    title.className = `q-text`;
+    title.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(title);
+    item.o.forEach(function (opt, oi) {
+      const btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.type = `button`;
+      btn.textContent = LETTERS[oi] + `) ` + opt;
+      btn.dataset.q = String(qi);
+      btn.dataset.o = String(oi);
+      btn.addEventListener(`click`, onPick);
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function onPick(ev) {
+  if (locked) return;
+  const btn = ev.currentTarget;
+  const qi = Number(btn.dataset.q);
+  const oi = Number(btn.dataset.o);
+  picks[qi] = oi;
+  const siblings = btn.parentElement.querySelectorAll(`.opt`);
+  siblings.forEach(function (el) { el.classList.remove(`sel`); });
+  btn.classList.add(`sel`);
+  warnEl.hidden = true;
+  refresh();
+}
+
+function refresh() {
+  const done = picks.every(function (p) { return p !== null; });
+  submitEl.disabled = !done;
+}
+
+function evaluate() {
+  if (locked) return;
+  if (!picks.every(function (p) { return p !== null; })) {
+    warnEl.hidden = false;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  QUESTIONS.forEach(function (item, qi) {
+    const opts = boxes[qi].querySelectorAll(`.opt`);
+    opts.forEach(function (el, oi) {
+      el.disabled = true;
+      el.classList.remove(`sel`);
+      if (oi === item.a) el.classList.add(`correct`);
+      else if (oi === picks[qi]) el.classList.add(`wrong`);
+    });
+    if (picks[qi] === item.a) score++;
+  });
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  const band = VERDICTS.find(function (v) { return score >= v.min && score <= v.max; });
+  verdictEl.textContent = band ? band.text : ``;
+  submitEl.disabled = true;
+  resultEl.hidden = false;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  locked = false;
+  picks.fill(null);
+  resultEl.hidden = true;
+  warnEl.hidden = true;
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+retryEl.addEventListener(`click`, reset);
+
+build();
+refresh();
+</script>
+</body>
+</html>
