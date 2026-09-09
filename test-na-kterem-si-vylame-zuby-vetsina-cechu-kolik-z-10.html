@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test, na kterém si vyláme zuby většina Čechů: kolik z 10 otázek zvládnete vy?</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; line-height: 1.45; margin: 0 0 18px; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  cursor: pointer;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+.varianta:last-child { margin-bottom: 0; }
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta:disabled { cursor: default; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#hlaska { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+#vysledek {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test, na kterém si vyláme zuby většina Čechů: kolik z 10 otázek zvládnete vy?</h1>
+<p class="perex">Deset otázek z různých oborů a u každé čtyři možnosti, z nichž jedna leží těsně vedle té správné. Většina si aspoň na jedné vyláme zuby, průměr se drží kolem sedmi bodů a plný počet dá jen menšina. Kolik jich dáte vy?</p>
+<div id="kviz"></div>
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p id="hlaska"></p>
+<div id="vysledek" hidden>
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var otazky = [
+  {
+    zneni: `1. Z jaké mouky se tradičně vyrábějí japonské nudle soba?`,
+    varianty: [`a) z rýžové`, `b) z kukuřičné`, `c) z pšeničné`, `d) z pohankové`],
+    spravna: 3
+  },
+  {
+    zneni: `2. Co udává u praček v obchodní nabídce údaj, který u jednotlivých modelů nabývá hodnot 1000, 1200 nebo 1400?`,
+    varianty: [`a) maximální počet otáček bubnu za minutu při odstřeďování`, `b) příkon pračky ve wattech`, `c) roční spotřebu vody v litrech`, `d) roční spotřebu elektřiny v kilowatthodinách`],
+    spravna: 0
+  },
+  {
+    zneni: `3. Kterou z těchto zelenin jíme jako nerozvinutá květní poupata?`,
+    varianty: [`a) chřest`, `b) pórek`, `c) brokolici`, `d) řapíkatý celer`],
+    spravna: 2
+  },
+  {
+    zneni: `4. Jak se nazývá komorní soubor pěti hráčů?`,
+    varianty: [`a) kvartet`, `b) kvintet`, `c) sextet`, `d) septet`],
+    spravna: 1
+  },
+  {
+    zneni: `5. Kdo napsal Knihu džunglí?`,
+    varianty: [`a) Jack London`, `b) Mark Twain`, `c) Rudyard Kipling`, `d) Robert Louis Stevenson`],
+    spravna: 2
+  },
+  {
+    zneni: `6. Kolik hráčů jednoho týmu je při americkém fotbalu současně na hřišti?`,
+    varianty: [`a) devět`, `b) jedenáct`, `c) dvanáct`, `d) třináct`],
+    spravna: 1
+  },
+  {
+    zneni: `7. Který živočich je největším žijícím obojživelníkem?`,
+    varianty: [`a) velemlok`, `b) veleskokan goliáší`, `c) mlok skvrnitý`, `d) čolek velký`],
+    spravna: 0
+  },
+  {
+    zneni: `8. Kdo složil hudbu k filmu Hvězdné války?`,
+    varianty: [`a) Ennio Morricone`, `b) Hans Zimmer`, `c) Howard Shore`, `d) John Williams`],
+    spravna: 3
+  },
+  {
+    zneni: `9. Ke kterému státu patří ostrov Mallorca?`,
+    varianty: [`a) k Itálii`, `b) k Francii`, `c) ke Španělsku`, `d) k Řecku`],
+    spravna: 2
+  },
+  {
+    zneni: `10. Kdo napsal divadelní hru Cyrano z Bergeracu?`,
+    varianty: [`a) Edmond Rostand`, `b) Victor Hugo`, `c) Alexandre Dumas mladší`, `d) Molière`],
+    spravna: 0
+  }
+];
+
+var hodnoceni = [
+  { max: 3, text: `Tady se ztratil i ten snadnější začátek. Zelenina, u které jíme nerozvinutá poupata, název pětičlenného souboru, autor příběhu o chlapci vychovaném vlky a ostrov v západním Středomoří jsou přesně ty otázky, na kterých se dá stavět, a právě ony rozhodly. K průměru, který se v tomhle testu drží kolem sedmi bodů, chybí ještě pořádný kus cesty. Zkuste kvíz s odstupem znovu, čtyři body a víc jsou blíž, než to teď vypadá.` },
+  { max: 6, text: `Rozjezd vám z větší části sedl a zastavilo vás až střední pásmo, tedy mouka na japonské nudle, údaj, kterým se od sebe liší jednotlivé modely praček, počet hráčů na hřišti, největší obojživelník a skladatel filmové hudby. K sedmi bodům, kolem kterých se drží průměr, vám chybí jedna až tři odpovědi. Rozhled máte, jen se v téhle sestavě neprojevil naplno.` },
+  { max: 9, text: `Sedm bodů je přesně ta hranice, kolem které se drží průměrný řešitel, a každý další bod už leží nad ní. Prošli jste přírodou, technikou, hudbou i sportem a nenechali jste se svést variantami, které ležely těsně vedle. Na plný počet chyběla poslední otázka mimo běžnou školní látku, tedy jméno autora hry o muži s velkým nosem. To je přesně to místo, kde se láme rozdíl mezi velmi dobrým a výjimečným.` },
+  { max: 10, text: `Plný počet, na který dosáhne jen menšina řešitelů. Neshodila vás pohanka v japonských nudlích, číslo odlišující modely praček, brokolice, pětičlenný soubor, autor Knihy džunglí, jedenáctka na hřišti, velemlok, John Williams, španělská Mallorca ani Edmond Rostand. Deset otázek za sebou bez jediného zaváhání se netipuje, takový přehled se musí opravdu mít.` }
+];
+
+var odpovedi = new Array(otazky.length).fill(null);
+var hotovo = false;
+var kvizEl = document.getElementById('kviz');
+var vyhodnotitEl = document.getElementById('vyhodnotit');
+var hlaskaEl = document.getElementById('hlaska');
+var vysledekEl = document.getElementById('vysledek');
+var skoreEl = document.getElementById('skore');
+var hodnoceniEl = document.getElementById('hodnoceni');
+var znovuEl = document.getElementById('znovu');
+
+function vykresli() {
+  kvizEl.textContent = '';
+  otazky.forEach(function (o, i) {
+    var box = document.createElement('div');
+    box.className = 'otazka';
+    var z = document.createElement('p');
+    z.className = 'zneni';
+    z.textContent = o.zneni;
+    box.appendChild(z);
+    o.varianty.forEach(function (v, j) {
+      var b = document.createElement('button');
+      b.className = 'varianta';
+      b.type = 'button';
+      b.textContent = v;
+      b.addEventListener('click', function () {
+        if (hotovo) { return; }
+        odpovedi[i] = j;
+        var vsechny = box.querySelectorAll('.varianta');
+        for (var k = 0; k < vsechny.length; k++) {
+          vsechny[k].classList.remove('vybrana');
+        }
+        b.classList.add('vybrana');
+        zkontrolujStav();
+      });
+      box.appendChild(b);
+    });
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujStav() {
+  var vse = odpovedi.every(function (o) { return o !== null; });
+  vyhodnotitEl.disabled = !vse;
+  if (vse) { hlaskaEl.textContent = ''; }
+}
+
+vyhodnotitEl.addEventListener('click', function () {
+  if (vyhodnotitEl.disabled) {
+    hlaskaEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  hotovo = true;
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll('.otazka');
+  otazky.forEach(function (o, i) {
+    var tlacitka = boxy[i].querySelectorAll('.varianta');
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].classList.remove('vybrana');
+      tlacitka[j].disabled = true;
+      if (j === o.spravna) { tlacitka[j].classList.add('spravna'); }
+      else if (j === odpovedi[i]) { tlacitka[j].classList.add('spatna'); }
+    }
+    if (odpovedi[i] === o.spravna) { body++; }
+  });
+  vyhodnotitEl.disabled = true;
+  skoreEl.textContent = body + ' z ' + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (body <= hodnoceni[h].max) { hodnoceniEl.textContent = hodnoceni[h].text; break; }
+  }
+  vysledekEl.hidden = false;
+  vysledekEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+znovuEl.addEventListener('click', function () {
+  odpovedi = new Array(otazky.length).fill(null);
+  hotovo = false;
+  vysledekEl.hidden = true;
+  hlaskaEl.textContent = '';
+  vyhodnotitEl.disabled = true;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+vykresli();
+</script>
+</body>
+</html>
