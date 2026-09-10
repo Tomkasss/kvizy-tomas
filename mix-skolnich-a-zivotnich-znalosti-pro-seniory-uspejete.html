@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mix školních a životních znalostí pro seniory: uspějete ve všech 10 otázkách?</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 32px 16px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qt { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  line-height: 1.5;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.ok { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.bad { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.locked .opt { cursor: default; }
+.locked .opt:hover { background: #f7f4f0; }
+.locked .opt.sel:hover { background: #dcd3c7; }
+.locked .opt.ok:hover { background: #d4edda; }
+.locked .opt.bad:hover { background: #f8d7da; }
+#submit, #retry {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  color: #fff;
+  cursor: pointer;
+}
+#submit { background: #5b7e5f; }
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry { background: #8c7b6b; }
+#retry:hover { background: #756658; }
+#warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+[hidden] { display: none !important; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q, #result { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Mix školních a životních znalostí pro seniory: uspějete ve všech 10 otázkách?</h1>
+<p class="perex">Deset otázek pro seniory, které míchají školní lavici s běžným životem: od zamlženého zrcadla a dějin přes hudební nástroj a zimní chodník až po etiketu na svetru, odpad pod umyvadlem a keř na zahradě. Projdete všemi deseti?</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warn" hidden>Odpovězte prosím na všechny otázky</p>
+<div id="result" hidden>
+  <p id="score"></p>
+  <p id="verdict"></p>
+</div>
+<button id="retry" hidden>Zkusit znovu</button>
+</div>
+<script>
+var QUESTIONS = [
+  { q: `Odkud se bere vlhkost, která po horké sprše pokryje zrcadlo v koupelně?`,
+    o: [`kapky vody rozstříknuté ze sprchy, které dolétnou až na zrcadlo`,
+        `vlhkost nasáklá ve zdi za zrcadlem, kterou teplo ze sprchy vytáhne ven`,
+        `vodní pára ze vzduchu, která se sráží na skle chladnějším než vzduch`,
+        `vlhkost, kterou na sklo přitáhne statická elektřina zahřátého vzduchu`], a: 2 },
+  { q: `Kterou barvu izolace má v dnešní domovní elektroinstalaci nulový vodič?`,
+    o: [`hnědou`, `modrou`, `černou`, `červenou`], a: 1 },
+  { q: `Proč začne po několika týdnech bez používání zapáchat odpad u umyvadla?`,
+    o: [`v suchém potrubí se usadí vzdušná vlhkost, která začne zapáchat`,
+        `guma v hrdle sifonu bez vody ztvrdne a přestane těsnit`,
+        `voda v sifonu se odpaří a otevře cestu plynům z kanalizace`,
+        `v nepoužívaném odpadu klesne tlak a potrubí nasaje vzduch z místnosti`], a: 2 },
+  { q: `Kdy během srdečního cyklu vzniká vyšší z obou naměřených hodnot krevního tlaku?`,
+    o: [`když krev protéká plícemi a okysličuje se před návratem do srdce`,
+        `když se srdeční komory stáhnou a vypudí krev do tepen`,
+        `když je srdce mezi dvěma stahy uvolněné a znovu se plní krví`,
+        `když se odkysličená krev vrací žilami zpět do pravé srdeční síně`], a: 1 },
+  { q: `Co znamená přeškrtnutý trojúhelník na etiketě oblečení?`,
+    o: [`zákaz sušení v sušičce`, `zákaz bělení`, `zákaz žehlení`, `zákaz chemického čištění`], a: 1 },
+  { q: `Za jakého počasí vzniká ledovka?`,
+    o: [`když v mrazu vodní pára přimrzá přímo na chladné předměty`,
+        `když přes den roztátý sníh v noci znovu zmrzne`,
+        `když vítr žene proti předmětům kapičky podchlazené mlhy`,
+        `když déšť dopadá na promrzlý povrch a okamžitě na něm tuhne`], a: 3 },
+  { q: `Jak vzniká tón v harmoniu?`,
+    o: [`rozechvěním kovových jazýčků vzduchem, který nástrojem prohánějí měchy`,
+        `rozezvučením dřevěných a kovových píšťal vzduchem hnaným z měchů`,
+        `údery plstěných kladívek na napjaté kovové struny uvnitř skříně`,
+        `drnkáním brků o napjaté kovové struny při stisku klávesy`], a: 0 },
+  { q: `Proti kterému státu měla chránit pevnost Terezín?`,
+    o: [`proti Sasku`, `proti Bavorsku`, `proti Prusku`, `proti Polsku`], a: 2 },
+  { q: `K čemu se hodí brusný papír s označením P240?`,
+    o: [`k hrubému strhání staré vrstvy barvy`,
+        `k zarovnání nerovností po řezu pilou`,
+        `k rychlému obroušení rzi z kovu`,
+        `k jemnému přebroušení dřeva před nátěrem`], a: 3 },
+  { q: `Kdy se má stříhat šeřík, aby příští rok bohatě kvetl?`,
+    o: [`hned po odkvětu`, `na podzim po opadu listí`, `v zimě za mrazu`, `brzy na jaře před rašením`], a: 0 }
+];
+
+var VERDICTS = [
+  { max: 3, t: `Do cíle, který slibuje titulek, je odsud pořádný kus cesty. Kvíz střídá školní látku s věcmi z domácnosti a dílny a takhle nízké skóre obvykle znamená, že vás minula obojí strana toho mixu naráz. Nic ztraceného: většina správných odpovědí je z věcí, které máte doma na dosah ruky, od etikety na svetru přes odpad pod umyvadlem až po namrzlý chodník před domem. Projděte si je a napodruhé se posunete rychle.` },
+  { max: 6, t: `Polovina sedí, polovina utekla, a to je typický profil člověka, který má jednu stranu mixu silnější než druhou. Body jste posbírali buď na školní látce, nebo naopak na praktických věcech, a ztráceli tam, kde bylo potřeba vědět, jak přesně to funguje, ne jen tušit, o čem řeč: u okamžiku, kdy vzniká vyšší hodnota krevního tlaku, u barevného značení vodičů nebo u označení na brusném papíru. Do horního pásma vám chybí jedna až tři odpovědi.` },
+  { max: 9, t: `Silný výsledek a plný počet na dosah. Sedm bodů znamená, že vedle snazších otázek utáhnete i střední pásmo, osm a devět ukazují, že vás nesvedly z cesty ani varianty, které znějí na první poslech všechny rozumně. Uspět úplně ve všech deseti se vám tentokrát nepodařilo, chyběla jedna až tři odpovědi, a nejspíš tušíte které. Poslední překážkou bývá otázka na hudební nástroj.` },
+  { max: 10, t: `Plný počet, přesně to, na co se titulek ptá, a zvládne ho jen menšina. Prošli jste bez zaváhání vlhkostí na zrcadle po sprše, značením vodičů, zápachem z nepoužívaného odpadu, okamžikem vyšší hodnoty tlaku, symbolem na etiketě, vznikem ledovky, vznikem tónu v harmoniu, nepřítelem, proti kterému rostla terezínská pevnost, označením brusného papíru i termínem řezu šeříku. Takový rozptyl mezi školou a běžným životem se netipuje, ten se musí vědět.` }
+];
+
+var LETTERS = [`a) `, `b) `, `c) `, `d) `];
+var answers = [];
+var locked = false;
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryEl = document.getElementById(`retry`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var title = document.createElement(`p`);
+    title.className = `qt`;
+    title.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(title);
+    item.o.forEach(function (text, oi) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `opt`;
+      btn.textContent = LETTERS[oi] + text;
+      btn.addEventListener(`click`, function () { pick(qi, oi); });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function pick(qi, oi) {
+  if (locked) return;
+  answers[qi] = oi;
+  var box = quizEl.children[qi];
+  var opts = box.querySelectorAll(`.opt`);
+  for (var i = 0; i < opts.length; i++) {
+    if (i === oi) { opts[i].classList.add(`sel`); } else { opts[i].classList.remove(`sel`); }
+  }
+  refresh();
+}
+
+function allAnswered() {
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    if (typeof answers[i] !== `number`) return false;
+  }
+  return true;
+}
+
+function refresh() {
+  var ready = allAnswered();
+  submitEl.disabled = !ready;
+  if (ready) warnEl.hidden = true;
+}
+
+function evaluate() {
+  if (!allAnswered()) { warnEl.hidden = false; return; }
+  locked = true;
+  var score = 0;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = quizEl.children[qi];
+    box.classList.add(`locked`);
+    var opts = box.querySelectorAll(`.opt`);
+    if (answers[qi] === item.a) score++;
+    for (var i = 0; i < opts.length; i++) {
+      opts[i].classList.remove(`sel`);
+      if (i === item.a) {
+        opts[i].classList.add(`ok`);
+      } else if (i === answers[qi]) {
+        opts[i].classList.add(`bad`);
+      }
+    }
+  });
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score <= VERDICTS[v].max) { verdictEl.textContent = VERDICTS[v].t; break; }
+  }
+  submitEl.hidden = true;
+  warnEl.hidden = true;
+  resultEl.hidden = false;
+  retryEl.hidden = false;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  answers = [];
+  locked = false;
+  build();
+  resultEl.hidden = true;
+  retryEl.hidden = true;
+  submitEl.hidden = false;
+  submitEl.disabled = true;
+  warnEl.hidden = true;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+retryEl.addEventListener(`click`, reset);
+build();
+</script>
+</body>
+</html>
