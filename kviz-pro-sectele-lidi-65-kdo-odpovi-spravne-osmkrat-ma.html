@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz pro sečtělé lidi 65+: kdo odpoví správně osmkrát, má opravdu výjimečný rozhled</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 32px 16px 64px;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.locked .opt { cursor: default; }
+.locked .opt:hover { background: #f7f4f0; }
+.locked .opt.selected:hover { background: #dcd3c7; }
+.locked .opt.correct:hover { background: #d4edda; }
+.locked .opt.wrong:hover { background: #f8d7da; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+.warn { text-align: center; color: #721c24; margin: 16px 0 0; font-size: .95rem; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+.verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+#again {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#again:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1 id="title"></h1>
+<p class="perex" id="perex"></p>
+<div id="quiz"></div>
+<button id="submit" type="button" disabled></button>
+<p class="warn" id="warn" hidden></p>
+<div id="result" hidden>
+  <p class="score" id="score"></p>
+  <p class="verdict" id="verdict"></p>
+  <button id="again" type="button"></button>
+</div>
+</div>
+<script>
+var TITLE = `Kvíz pro sečtělé lidi 65+: kdo odpoví správně osmkrát, má opravdu výjimečný rozhled`;
+var PEREX = `Literatura, evropské dějiny, nerosty, orientace v terénu, pražské památky, antická filozofie, typografie, hudební nauka i botanika. Osmi správných odpovědí dosáhne jen ten, kdo se za život načetl napříč obory, ne do hloubky jednoho.`;
+var SUBMIT_LABEL = `Vyhodnotit`;
+var AGAIN_LABEL = `Zkusit znovu`;
+var WARN_TEXT = `Odpovězte prosím na všechny otázky`;
+
+var QUESTIONS = [
+  {
+    q: `Jak se nazývá stručný popis obsahu knihy, který má čtenáře nalákat k jejímu přečtení?`,
+    opts: [`tiráž`, `předmluva`, `recenze`, `anotace`],
+    correct: 3
+  },
+  {
+    q: `Které německé město se v letech 1953 až 1990 jmenovalo Karl-Marx-Stadt?`,
+    opts: [`Lipsko`, `Erfurt`, `Halle`, `Chemnitz`],
+    correct: 3
+  },
+  {
+    q: `Z jakého nerostu je převážně složena hornina vápenec?`,
+    opts: [`z kalcitu`, `z dolomitu`, `z magnezitu`, `ze sideritu`],
+    correct: 0
+  },
+  {
+    q: `Co vyjadřuje azimut při orientaci v terénu?`,
+    opts: [`vodorovný úhel od severu ke směru na cíl`, `odchylku magnetického severu od zeměpisného`, `rozdíl výšek mezi stanovištěm a cílem`, `vzdálenost mezi stanovištěm a cílem`],
+    correct: 0
+  },
+  {
+    q: `Který pražský klášter nechal Karel IV. založit pro mnichy slovanského obřadu?`,
+    opts: [`Anežský klášter`, `Břevnovský klášter`, `Emauzský klášter`, `Strahovský klášter`],
+    correct: 2
+  },
+  {
+    q: `Jakou formu vlády uplatňoval ve Francii Ludvík XIV.?`,
+    opts: [`absolutní monarchii`, `stavovskou monarchii`, `konstituční monarchii`, `parlamentní monarchii`],
+    correct: 0
+  },
+  {
+    q: `Jak se nazývá antická filozofická škola, jejíž příslušníci se zásadně zříkali majetku a záměrně žili v chudobě?`,
+    opts: [`epikureismus`, `kynismus`, `skepticismus`, `stoicismus`],
+    correct: 1
+  },
+  {
+    q: `Jaká písmena označuje v sazbě pojem verzálky?`,
+    opts: [`písmena tvaru velkých písmen ve výšce malých`, `velká písmena sázená v celé výšce písma`, `dvě písmena spojená do jediného znaku`, `ozdobná zvětšená písmena na začátku odstavců`],
+    correct: 1
+  },
+  {
+    q: `Kolik půltónů obsahuje oktáva?`,
+    opts: [`sedm`, `osm`, `dvanáct`, `třináct`],
+    correct: 2
+  },
+  {
+    q: `Ze semen které průmyslové plodiny se získává ricinový olej?`,
+    opts: [`bavlník pravý`, `skočec obecný`, `světlice barvířská`, `tabák virginský`],
+    correct: 1
+  }
+];
+
+var VERDICTS = [
+  {
+    max: 3,
+    text: `Tři body a méně znamenají, že se deset otázek rozeběhlo do deseti různých koutů a většina z nich minula to, co jste za život čítali nejčastěji. Není to mezera ve vzdělání, spíš rozptyl: každý obor dostal jedinou otázku a není kde se rozehřát. Nabídky navíc stály tak, že vedle správné varianty čekala jiná, která zní stejně důvěryhodně. K hranici osmi bodů, o které mluví titulek, je odsud daleko, ale ty snazší otázky se dají dohnat jediným odpolednem u encyklopedie.`
+  },
+  {
+    max: 6,
+    text: `Solidní běžný přehled. Snazší polovinu jste posbírali a ztráceli jste tam, kde nabídka nedovolí uhodnout podle nejznámějšího jména a rozhoduje jeden detail místo celkového dojmu. Čtyři až šest bodů je poctivý průměr, jen se zastavil pod laťkou z titulku: k osmi správným odpovědím vám chybí dvě až čtyři. Právě v tomhle rozmezí se láme rozdíl mezi člověkem, který si čte, a člověkem, kterému čtení zůstalo v hlavě.`
+  },
+  {
+    max: 9,
+    text: `Přesně sem míří titulek. Sedm bodů znamená, že jste vedle snazších otázek utáhli i většinu středního pásma a k slíbené hranici vám chyběl jediný bod. Osm a devět už tu hranici splňují a takový výsledek nevzniká z jednoho zdroje, ale z desítek let čtení napříč obory, protože každá otázka míří do jiné oblasti a v polovině z nich rozhoduje detail, ne dojem. Osmkrát správně tady opravdu znamená výjimečný rozhled.`
+  },
+  {
+    max: 10,
+    text: `Plný počet, a ten dá jen menšina. Zvládli jste celé střední pásmo a k tomu i nejtěžší otázku kvízu, u které vedle správné odpovědi stál pojem z téhož oboru, jenž se s ní běžně plete. Deset z deseti napříč deseti oblastmi se netipuje, na to je rozptyl otázek příliš velký. Vaše všeobecné znalosti drží pohromadě od literatury a dějin přes nerosty a památky až po typografii, hudební nauku i botaniku, a to je víc, než slibuje i titulek.`
+  }
+];
+
+var LETTERS = [`a`, `b`, `c`, `d`];
+var answers = new Array(QUESTIONS.length).fill(null);
+var evaluated = false;
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var againEl = document.getElementById(`again`);
+
+document.getElementById(`title`).textContent = TITLE;
+document.getElementById(`perex`).textContent = PEREX;
+submitEl.textContent = SUBMIT_LABEL;
+againEl.textContent = AGAIN_LABEL;
+warnEl.textContent = WARN_TEXT;
+
+function build() {
+  quizEl.textContent = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    box.id = `q` + qi;
+
+    var text = document.createElement(`p`);
+    text.className = `q-text`;
+    text.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(text);
+
+    item.opts.forEach(function (opt, oi) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `opt`;
+      btn.textContent = LETTERS[oi] + `) ` + opt;
+      btn.addEventListener(`click`, function () {
+        if (evaluated) { return; }
+        answers[qi] = oi;
+        var siblings = box.querySelectorAll(`.opt`);
+        for (var i = 0; i < siblings.length; i++) {
+          siblings[i].classList.remove(`selected`);
+        }
+        btn.classList.add(`selected`);
+        refresh();
+      });
+      box.appendChild(btn);
+    });
+
+    quizEl.appendChild(box);
+  });
+}
+
+function refresh() {
+  var done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+  if (done) { warnEl.hidden = true; }
+}
+
+submitEl.addEventListener(`click`, function () {
+  if (submitEl.disabled) {
+    warnEl.hidden = false;
+    return;
+  }
+  evaluate();
+});
+
+function evaluate() {
+  evaluated = true;
+  var score = 0;
+
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.getElementById(`q` + qi);
+    box.classList.add(`locked`);
+    var opts = box.querySelectorAll(`.opt`);
+    var chosen = answers[qi];
+    if (chosen === item.correct) { score++; }
+    for (var oi = 0; oi < opts.length; oi++) {
+      opts[oi].classList.remove(`selected`);
+      if (oi === item.correct) {
+        opts[oi].classList.add(`correct`);
+      } else if (oi === chosen) {
+        opts[oi].classList.add(`wrong`);
+      }
+    }
+  });
+
+  submitEl.disabled = true;
+  warnEl.hidden = true;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  verdictEl.textContent = verdictFor(score);
+  resultEl.hidden = false;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function verdictFor(score) {
+  for (var i = 0; i < VERDICTS.length; i++) {
+    if (score <= VERDICTS[i].max) { return VERDICTS[i].text; }
+  }
+  return VERDICTS[VERDICTS.length - 1].text;
+}
+
+againEl.addEventListener(`click`, function () {
+  evaluated = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.hidden = true;
+  warnEl.hidden = true;
+  build();
+  refresh();
+  document.getElementById(`title`).scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+build();
+refresh();
+</script>
+</body>
+</html>
