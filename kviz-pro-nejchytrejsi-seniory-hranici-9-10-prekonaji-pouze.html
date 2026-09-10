@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro nejchytřejší seniory: hranici 9/10 překonají pouze lidé s mimořádnými znalostmi</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta:disabled { cursor: default; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hlaska { text-align: center; color: #8c4a4a; margin-top: 14px; font-size: .95rem; }
+#vysledek {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka, #vysledek { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro nejchytřejší seniory: hranici 9/10 překonají pouze lidé s mimořádnými znalostmi</h1>
+<p class="perex">Milí senioři, tenhle výběr míří napříč obory: od hudebních nástrojů a lidových tanců přes dějiny, textil a knižní řemeslo až po architekturu. Devět bodů tu znamená opravdu široký rozhled, deset zvládne jen hrstka.</p>
+<div id="kviz"></div>
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p class="hlaska" id="hlaska" style="display:none;">Odpovězte prosím na všechny otázky</p>
+<div id="vysledek" style="display:none;">
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var otazky = [
+  { zneni: `Který z těchto dřevěných dechových nástrojů zní ze všech nejhlouběji?`,
+    varianty: [`hoboj`, `fagot`, `klarinet`, `příčná flétna`], spravna: 1 },
+  { zneni: `Který z těchto lidových tanců se tančí v třídobém taktu?`,
+    varianty: [`čardáš`, `tarantella`, `mazurka`, `polka`], spravna: 2 },
+  { zneni: `Kdo je vyobrazen na české bankovce v hodnotě dvou tisíc korun?`,
+    varianty: [`Ema Destinnová`, `Karel IV.`, `Jan Amos Komenský`, `Božena Němcová`], spravna: 0 },
+  { zneni: `Mezi kterými dvěma anglickými rody probíhaly války růží?`,
+    varianty: [`mezi Yorky a Lancastery`, `mezi Tudorovci a Stuartovci`, `mezi Normany a Plantagenety`, `mezi Hannoverskými a Windsory`], spravna: 0 },
+  { zneni: `Které textilní vlákno pochází ze srsti angorské kozy?`,
+    varianty: [`kašmír`, `mohér`, `alpaka`, `angora`], spravna: 1 },
+  { zneni: `Jak se nazývá řada oblouků nesených sloupy nebo pilíři, jaká lemuje nádvoří renesančních zámků?`,
+    varianty: [`empora`, `kolonáda`, `arkáda`, `lodžie`], spravna: 2 },
+  { zneni: `Jak se nazývá závěrečná poznámka ve starých tiscích, v níž tiskař uvedl místo a rok dokončení knihy?`,
+    varianty: [`exlibris`, `kolofon`, `signet`, `viněta`], spravna: 1 },
+  { zneni: `Který stát má nejdelší pobřeží u Jaderského moře?`,
+    varianty: [`Itálie`, `Albánie`, `Černá Hora`, `Chorvatsko`], spravna: 3 },
+  { zneni: `Jak se nazývá povětrnostní stav, kvůli kterému se v zimě drží v kotlinách celé dny mlha a znečištěné ovzduší?`,
+    varianty: [`studená fronta`, `tlaková níže`, `teplotní inverze`, `srážkový stín`], spravna: 2 },
+  { zneni: `Jak se nazývá lidová technika zdobení plátna, při níž se na látku dřevěnou formou nanese krycí kaše a plátno se pak obarví?`,
+    varianty: [`gobelín`, `batika`, `kanafas`, `modrotisk`], spravna: 3 }
+];
+
+var hodnoceni = [
+  { min: 0, max: 3, text: `Otázky mířily do deseti různých oborů a hned několik nabídek stavělo dvě velmi podobné možnosti vedle sebe. Na hranici devíti bodů to dnes nebylo, ale právě takové rozpětí témat srazí i řešitele, kteří si na všeobecný přehled potrpí. Projděte si správná řešení, příští výsledek bude o poznání vyšší.` },
+  { min: 4, max: 6, text: `Část otázek jste vzali bez zaváhání a rozhodly až ty, kde se správná odpověď lišila od té vedlejší jen v detailu, ať už šlo o takt tance, původ vlákna, nebo o pojem z knižního řemesla. Čtyři až šest bodů znamená, že základ držíte, jen se u několika nabídek přiklonila váha na opačnou stranu. K devítce z titulku vede ještě kus cesty, opřít se ale máte o co.` },
+  { min: 7, max: 9, text: `Sedm bodů je tady průměr a devět už nasbírá v deseti nesouvisejících oborech jen menšina řešitelů. Ať už vás zastavila jediná otázka, nebo tři, v hudbě, dějinách, počasí i zeměpisu se orientujete líp než většina lidí. Právě tady ovšem vede ta hranice, o které mluví název kvízu: devítka je meta sama o sobě a posunout se přes ni na plný počet se povede opravdu málokomu.` },
+  { min: 10, max: 10, text: `Naprostá špička. Překonat devítku dokáže málokdo a vy jste šli ještě o bod dál, bez jediného zaváhání napříč deseti obory. Takový rozhled, od dechových nástrojů přes textilní suroviny a knižní pojmy až po oblouky renesančních nádvoří, je vzácnost, na kterou máte plné právo být hrdí.` }
+];
+
+var pismena = [`a) `, `b) `, `c) `, `d) `];
+var odpovedi = [];
+var uzamceno = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoVyhodnotit = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var tlacitkoZnovu = document.getElementById(`znovu`);
+
+function vykresli() {
+  kvizEl.innerHTML = ``;
+  for (var i = 0; i < otazky.length; i++) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var p = document.createElement(`p`);
+    p.className = `zneni`;
+    p.textContent = (i + 1) + `. ` + otazky[i].zneni;
+    box.appendChild(p);
+    for (var j = 0; j < otazky[i].varianty.length; j++) {
+      var btn = document.createElement(`button`);
+      btn.className = `varianta`;
+      btn.type = `button`;
+      btn.textContent = pismena[j] + otazky[i].varianty[j];
+      btn.setAttribute(`data-otazka`, i);
+      btn.setAttribute(`data-varianta`, j);
+      btn.addEventListener(`click`, vyber);
+      box.appendChild(btn);
+    }
+    kvizEl.appendChild(box);
+  }
+}
+
+function vyber(e) {
+  if (uzamceno) return;
+  var o = parseInt(e.currentTarget.getAttribute(`data-otazka`), 10);
+  var v = parseInt(e.currentTarget.getAttribute(`data-varianta`), 10);
+  odpovedi[o] = v;
+  var boxy = kvizEl.getElementsByClassName(`otazka`);
+  var tlacitka = boxy[o].getElementsByClassName(`varianta`);
+  for (var k = 0; k < tlacitka.length; k++) {
+    tlacitka[k].classList.remove(`vybrana`);
+  }
+  e.currentTarget.classList.add(`vybrana`);
+  zkontrolujPripravenost();
+}
+
+function zkontrolujPripravenost() {
+  var hotovo = 0;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] === `number`) hotovo++;
+  }
+  if (hotovo === otazky.length) {
+    tlacitkoVyhodnotit.disabled = false;
+    hlaskaEl.style.display = `none`;
+  } else {
+    tlacitkoVyhodnotit.disabled = true;
+  }
+}
+
+tlacitkoVyhodnotit.addEventListener(`click`, function () {
+  var hotovo = 0;
+  for (var i = 0; i < otazky.length; i++) {
+    if (typeof odpovedi[i] === `number`) hotovo++;
+  }
+  if (hotovo < otazky.length) {
+    hlaskaEl.style.display = `block`;
+    return;
+  }
+  uzamceno = true;
+  var skore = 0;
+  var boxy = kvizEl.getElementsByClassName(`otazka`);
+  for (var o = 0; o < otazky.length; o++) {
+    var tlacitka = boxy[o].getElementsByClassName(`varianta`);
+    var spravna = otazky[o].spravna;
+    if (odpovedi[o] === spravna) skore++;
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove(`vybrana`);
+      if (j === spravna) {
+        tlacitka[j].classList.add(`spravna`);
+      } else if (j === odpovedi[o]) {
+        tlacitka[j].classList.add(`spatna`);
+      }
+    }
+  }
+  tlacitkoVyhodnotit.disabled = true;
+  skoreEl.textContent = skore + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore >= hodnoceni[h].min && skore <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+tlacitkoZnovu.addEventListener(`click`, function () {
+  odpovedi = [];
+  uzamceno = false;
+  vysledekEl.style.display = `none`;
+  hlaskaEl.style.display = `none`;
+  tlacitkoVyhodnotit.disabled = true;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+vykresli();
+</script>
+</body>
+</html>
