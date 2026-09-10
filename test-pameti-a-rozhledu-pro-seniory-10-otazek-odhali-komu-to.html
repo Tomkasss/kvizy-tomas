@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test paměti a rozhledu pro seniory: 10 otázek odhalí, komu to stále pálí na jedničku</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 2rem; line-height: 1.25; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.varianta:last-child { margin-bottom: 0; }
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta:disabled { cursor: default; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#hlaska { text-align: center; color: #721c24; margin-top: 14px; }
+#vysledek {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test paměti a rozhledu pro seniory: 10 otázek odhalí, komu to stále pálí na jedničku</h1>
+<p class="perex">Milí senioři, tenhle test skáče z pohádky ke staré pranostice, od lodní paluby k pultu s uzeninami a končí u českých dějin a evropských jazyků. Nic se tu nepočítá, rozhoduje jen to, co vám za život zůstalo v hlavě.</p>
+
+<div id="kviz"></div>
+
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p id="hlaska"></p>
+
+<div id="vysledek" style="display:none;">
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+
+<script>
+var otazky = [
+  {
+    zneni: `1. Kdo v pohádce Mrazík promění Ivanovi hlavu v medvědí?`,
+    varianty: [`Baba Jaga`, `Dědeček Hříbeček`, `Mrazík`, `macecha`],
+    spravna: 1
+  },
+  {
+    zneni: `2. Kdo podle české pranostiky přijíždí na bílém koni?`,
+    varianty: [`svatý Mikuláš`, `svatá Barbora`, `svatý Martin`, `svatý Václav`],
+    spravna: 2
+  },
+  {
+    zneni: `3. Který z těchto údajů o lodi se běžně uvádí v uzlech?`,
+    varianty: [`rychlost plavby`, `hloubka pod kýlem`, `hmotnost nákladu`, `délka kotevního lana`],
+    spravna: 0
+  },
+  {
+    zneni: `4. Kdo v Česku rozhoduje o udělení milosti odsouzenému?`,
+    varianty: [`prezident republiky`, `ministr spravedlnosti`, `Nejvyšší soud`, `Poslanecká sněmovna`],
+    spravna: 0
+  },
+  {
+    zneni: `5. Co tvoří bílý povlak na povrchu pravého uherského salámu?`,
+    varianty: [`vrstva soli, která vystoupila z masa`, `mouka, kterou se salám při sušení obaluje`, `ušlechtilá plíseň`, `usazenina z kouře při uzení`],
+    spravna: 2
+  },
+  {
+    zneni: `6. Kterou nemoc přenáší klíště a ohlašuje ji zvětšující se červená skvrna kolem místa přisátí?`,
+    varianty: [`klíšťovou encefalitidu`, `lymeskou boreliózu`, `tetanus`, `žloutenku typu A`],
+    spravna: 1
+  },
+  {
+    zneni: `7. Kdo z čmeláčí kolonie přečká zimu?`,
+    varianty: [`celé hnízdo pohromadě`, `jen dělnice`, `jen samci`, `jen mladé oplozené matky`],
+    spravna: 3
+  },
+  {
+    zneni: `8. Sňatkem s kterou princeznou získal Ferdinand I. Habsburský nárok na český trůn?`,
+    varianty: [`s Annou Jagellonskou`, `s Eliškou Přemyslovnou`, `s Barborou Celjskou`, `s Eliškou Rejčkou`],
+    spravna: 0
+  },
+  {
+    zneni: `9. Který z těchto evropských jazyků nemá prokázanou příbuznost s žádným jiným jazykem?`,
+    varianty: [`albánština`, `estonština`, `baskičtina`, `maltština`],
+    spravna: 2
+  },
+  {
+    zneni: `10. Na kterou neděli připadá Boží hod velikonoční?`,
+    varianty: [`na první neděli po prvním jarním novoluní`, `na první neděli po druhém jarním úplňku`, `na první neděli po posledním zimním úplňku`, `na první neděli po prvním jarním úplňku`],
+    spravna: 3
+  }
+];
+
+var hodnoceni = [
+  { max: 3, text: `Deset oborů za sebou je nápor a tentokrát vás pustily dál sotva dvě tři otázky. Většinou za to nemůže paměť, ale to, že se šest sedm oblastí z vašeho života dávno vytratilo a nikdo vám je celé roky nepřipomněl. Projděte si otázky ještě jednou od konce a všimněte si, kde jste byli blízko. Právě tam se rozhled obnovuje nejrychleji.` },
+  { max: 6, text: `Zhruba polovina sedla, druhá uhnula o jedinou variantu vedle. Tohle je pásmo, ve kterém skončí největší část řešitelů, a rozhoduje v něm hlavně to, kolik oborů člověk potkává i mimo vlastní zájmy. Základ máte pevný, chybí jen poslední krok tam, kde se dvě odpovědi tisknou těsně k sobě.` },
+  { max: 9, text: `Přesně sem míří titulek. Přeskočit z pohádky ke staré pranostice, odtud na lodní palubu a k tomu, kdo u nás uděluje milost, pak k pultu s uzeninami a nakonec k českým královnám dokáže jen zlomek lidí, a vás u toho nerozhodila ani jedna zrádná dvojice odpovědí. Zastavila vás jedna nebo dvě otázky ze zadní části, kde už školní látka nestačí a rozhoduje hlavně to, co jste kdy zachytili mimo lavici. Takhle široký rozhled si po letech udrží málokdo.` },
+  { max: 10, text: `Plný počet, a tady se rozhoduje o tom, komu to opravdu pálí na jedničku. Nesestřelil vás bílý povlak na uzenině, u kterého většina lidí tipuje mouku nebo vystoupenou sůl, ani nemoc, kterou po přisátí klíštěte ohlašuje zvětšující se červená skvrna, ani čmeláci, poradili jste si s cestou Habsburků na český trůn, s jazykem, který nemá jediného příbuzného, a nakonec i s pravidlem, podle kterého se každý rok posouvají Velikonoce. Takový výsledek se tipováním netrefí, ten je poskládaný z desítek let čtení, poslouchání a dívání se kolem sebe. Klobouk dolů.` }
+];
+
+var pismena = [`a) `, `b) `, `c) `, `d) `];
+var odpovedi = new Array(otazky.length).fill(null);
+var hotovo = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var vyhodnotitEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function postav() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var zn = document.createElement(`p`);
+    zn.className = `zneni`;
+    zn.textContent = o.zneni;
+    box.appendChild(zn);
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement(`button`);
+      btn.className = `varianta`;
+      btn.type = `button`;
+      btn.textContent = pismena[j] + v;
+      btn.addEventListener(`click`, function () { vyber(i, j); });
+      box.appendChild(btn);
+    });
+    kvizEl.appendChild(box);
+  });
+}
+
+function vyber(i, j) {
+  if (hotovo) { return; }
+  odpovedi[i] = j;
+  var box = kvizEl.children[i];
+  var tlacitka = box.querySelectorAll(`.varianta`);
+  for (var k = 0; k < tlacitka.length; k++) {
+    tlacitka[k].classList.toggle(`vybrana`, k === j);
+  }
+  hlaskaEl.textContent = ``;
+  vyhodnotitEl.disabled = odpovedi.indexOf(null) !== -1;
+}
+
+vyhodnotitEl.addEventListener(`click`, function () {
+  if (hotovo) { return; }
+  if (odpovedi.indexOf(null) !== -1) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  hotovo = true;
+  var skore = 0;
+  otazky.forEach(function (o, i) {
+    var box = kvizEl.children[i];
+    var tlacitka = box.querySelectorAll(`.varianta`);
+    for (var k = 0; k < tlacitka.length; k++) {
+      tlacitka[k].disabled = true;
+      tlacitka[k].classList.remove(`vybrana`);
+      if (k === o.spravna) {
+        tlacitka[k].classList.add(`spravna`);
+      } else if (k === odpovedi[i]) {
+        tlacitka[k].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === o.spravna) { skore++; }
+  });
+  vyhodnotitEl.disabled = true;
+  skoreEl.textContent = skore + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore <= hodnoceni[h].max) { hodnoceniEl.textContent = hodnoceni[h].text; break; }
+  }
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+znovuEl.addEventListener(`click`, function () {
+  hotovo = false;
+  odpovedi = new Array(otazky.length).fill(null);
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  vyhodnotitEl.disabled = true;
+  postav();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+postav();
+</script>
+</body>
+</html>
