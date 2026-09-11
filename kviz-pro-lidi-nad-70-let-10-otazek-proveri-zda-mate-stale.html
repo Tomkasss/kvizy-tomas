@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz pro lidi nad 70 let: 10 otázek prověří, zda máte stále hlavu plnou vědomostí</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .locked .opt { cursor: default; }
+  .locked .opt:hover { background: #f7f4f0; }
+  .locked .opt.sel:hover { background: #dcd3c7; }
+  .opt.good, .locked .opt.good:hover { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.bad, .locked .opt.bad:hover { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  #submit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #submit:hover { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+  #again {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #again:hover { background: #756658; }
+  [hidden] { display: none !important; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+    .q, #result { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz pro lidi nad 70 let: 10 otázek prověří, zda máte stále hlavu plnou vědomostí</h1>
+  <p class="perex">Po sedmdesátce rozhoduje, co vás pořád zajímá. Velikonoční tradice, život v půdě, hudba šedesátých let, folklor, divadlo, stavební slohy, dějiny říší, filmové směry, naši hadi i poválečné Německo. Sedm bodů je dobrých.</p>
+
+  <div id="quiz"></div>
+
+  <button id="submit" type="button" disabled>Vyhodnotit</button>
+  <p id="warn" hidden>Odpovězte prosím na všechny otázky</p>
+
+  <div id="result" hidden>
+    <p id="score"></p>
+    <p id="verdict"></p>
+    <button id="again" type="button">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var QUESTIONS = [
+  {
+    q: `Čím se podle tradice potírají velikonoční jidáše po vytažení z pece?`,
+    opts: [`rozpuštěným máslem`, `medem`, `povidly`, `vaječným bílkem`],
+    correct: 1
+  },
+  {
+    q: `Kterou tmavou složku zemědělské půdy vytvářejí půdní organismy rozkladem odumřelých rostlin a živočichů?`,
+    opts: [`spraš`, `rašelina`, `humus`, `jíl`],
+    correct: 2
+  },
+  {
+    q: `Která britská skupina nahrála píseň (I Can't Get No) Satisfaction?`,
+    opts: [`The Beatles`, `The Rolling Stones`, `The Kinks`, `The Who`],
+    correct: 1
+  },
+  {
+    q: `Ve které moravské oblasti je doma tanec verbuňk?`,
+    opts: [`Valašsko`, `Haná`, `Lašsko`, `Slovácko`],
+    correct: 3
+  },
+  {
+    q: `Podle které divadelní hry vznikl muzikál My Fair Lady?`,
+    opts: [`Pygmalion`, `Ideální manžel`, `Cyrano de Bergerac`, `Heda Gablerová`],
+    correct: 0
+  },
+  {
+    q: `Který pražský kostel patří k vrcholně barokním stavbám?`,
+    opts: [`Týnský chrám`, `kostel svatého Mikuláše na Malé Straně`, `katedrála svatého Víta`, `kostel Panny Marie Sněžné`],
+    correct: 1
+  },
+  {
+    q: `Která říše byla v 19. století označována jako nemocný muž Evropy?`,
+    opts: [`Britské impérium`, `Ruské impérium`, `Osmanská říše`, `Francouzské císařství`],
+    correct: 2
+  },
+  {
+    q: `Který filmový směr se zrodil v Itálii na konci druhé světové války?`,
+    opts: [`surrealismus`, `expresionismus`, `nová vlna`, `neorealismus`],
+    correct: 3
+  },
+  {
+    q: `Který had dorůstá v Česku největší délky?`,
+    opts: [`užovka stromová`, `zmije obecná`, `užovka obojková`, `užovka hladká`],
+    correct: 0
+  },
+  {
+    q: `Odkud řídila svá ministerstva vláda Západního Německa, než se po znovusjednocení přesunula do Berlína?`,
+    opts: [`Frankfurt nad Mohanem`, `Hamburk`, `Bonn`, `Stuttgart`],
+    correct: 2
+  }
+];
+
+var BANDS = [
+  {
+    min: 0, max: 3,
+    text: `Kvíz se trefil mimo obory, ve kterých se pohybujete nejjistěji. Tři body a méně neznamenají prázdnou hlavu, spíš to, že deset otázek zamířilo do deseti různých koutů a vaše čtení a vzpomínky vedly jinam. U několika otázek navíc stála vedle správné odpovědi varianta, která zní stejně důvěryhodně.`
+  },
+  {
+    min: 4, max: 6,
+    text: `Polovina otázek sedla. Zvládli jste to, co se opakovaně připomíná, a zakopli tam, kde bylo potřeba vylovit konkrétní název nebo jméno, které se v běžném hovoru neobjeví. Vědomosti v hlavě máte, jen se v některých oborech usadily hlouběji, než kam kvíz dosáhl. K sedmičce vám chybí jedna až tři odpovědi.`
+  },
+  {
+    min: 7, max: 9,
+    text: `Tohle je pásmo, na které titulek míří. Sedm až devět bodů z deseti různých oborů znamená, že vaše vědomosti drží pohromadě napříč lidovými tradicemi, přírodou, hudbou, divadlem i dějinami a že si vybavíte i to, co se mimo školu běžně nepřipomíná. Plný počet vám vzala nejspíš otázka, kde rozdíl mezi dvěma variantami rozhodovala jediná znalost.`
+  },
+  {
+    min: 10, max: 10,
+    text: `Plný počet, a ten dá jen menšina. Neshodilo vás sváteční pečivo, stavební slohy, filmové směry, nejdelší z našich hadů ani to, odkud se kdysi vládlo Západnímu Německu. Deset z deseti tady znamená přesně to, co slibuje titulek: hlavu plnou vědomostí, poskládanou z desítek let čtení, poslouchání a zájmu o svět.`
+  }
+];
+
+var LETTERS = [`a`, `b`, `c`, `d`];
+
+var answers = [];
+var locked = false;
+
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var againEl = document.getElementById(`again`);
+
+function build() {
+  quizEl.textContent = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+
+    var head = document.createElement(`p`);
+    head.className = `q-text`;
+    head.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(head);
+
+    item.opts.forEach(function (text, oi) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `opt`;
+      btn.textContent = LETTERS[oi] + `) ` + text;
+      btn.addEventListener(`click`, function () {
+        if (locked) { return; }
+        answers[qi] = oi;
+        var siblings = box.querySelectorAll(`.opt`);
+        for (var i = 0; i < siblings.length; i++) {
+          siblings[i].classList.remove(`sel`);
+        }
+        btn.classList.add(`sel`);
+        refresh();
+      });
+      box.appendChild(btn);
+    });
+
+    quizEl.appendChild(box);
+  });
+}
+
+function answeredAll() {
+  if (answers.length < QUESTIONS.length) { return false; }
+  for (var i = 0; i < QUESTIONS.length; i++) {
+    if (typeof answers[i] !== `number`) { return false; }
+  }
+  return true;
+}
+
+function refresh() {
+  var ready = answeredAll();
+  submitEl.disabled = !ready;
+  if (ready) { warnEl.hidden = true; }
+}
+
+function verdictFor(score) {
+  for (var i = 0; i < BANDS.length; i++) {
+    if (score >= BANDS[i].min && score <= BANDS[i].max) { return BANDS[i].text; }
+  }
+  return ``;
+}
+
+submitEl.addEventListener(`click`, function () {
+  if (!answeredAll()) {
+    warnEl.hidden = false;
+    return;
+  }
+  locked = true;
+  warnEl.hidden = true;
+
+  var score = 0;
+  var boxes = quizEl.querySelectorAll(`.q`);
+  for (var qi = 0; qi < QUESTIONS.length; qi++) {
+    var box = boxes[qi];
+    box.classList.add(`locked`);
+    var opts = box.querySelectorAll(`.opt`);
+    var correct = QUESTIONS[qi].correct;
+    var chosen = answers[qi];
+    if (chosen === correct) { score++; }
+    for (var oi = 0; oi < opts.length; oi++) {
+      if (oi === correct) {
+        opts[oi].classList.add(`good`);
+      } else if (oi === chosen) {
+        opts[oi].classList.add(`bad`);
+      }
+    }
+  }
+
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  verdictEl.textContent = verdictFor(score);
+  resultEl.hidden = false;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+againEl.addEventListener(`click`, function () {
+  answers = [];
+  locked = false;
+  resultEl.hidden = true;
+  warnEl.hidden = true;
+  submitEl.disabled = true;
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+</script>
+</body>
+</html>
