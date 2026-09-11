@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mix pro seniory: 10 otázek ze všeho možného, ve kterých rozhodne přehled i zkušenost</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 32px 16px 64px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  cursor: pointer;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.locked .opt { cursor: default; }
+.locked .opt:hover { background: #f7f4f0; }
+.locked .opt.sel:hover { background: #dcd3c7; }
+.locked .opt.correct:hover { background: #d4edda; }
+.locked .opt.wrong:hover { background: #f8d7da; }
+#submit, #retry {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry { background: #8c7b6b; }
+#retry:hover { background: #756658; }
+.msg { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+.verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+@media (max-width: 600px) {
+  body { padding: 20px 16px 48px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Mix pro seniory: 10 otázek ze všeho možného, ve kterých rozhodne přehled i zkušenost</h1>
+<p class="perex">Deset otázek z deseti oborů: ruské dějiny, ptáci našich lesů, mapa světa, pražská architektura, kovy, slovní zásoba, česká kuchyně, fotbalová pravidla, film i značky v notách. Nic se nepočítá, rozhoduje přehled nasbíraný za léta.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p class="msg" id="msg"></p>
+<div id="result" style="display:none">
+  <p class="score" id="score"></p>
+  <p class="verdict" id="verdict"></p>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var questions = [
+  {
+    q: `1. Který ruský car zrušil nevolnictví?`,
+    o: [`Petr I. Veliký`, `Alexandr II.`, `Pavel I.`, `Alexandr I.`],
+    c: 1
+  },
+  {
+    q: `2. Kterému z našich ptáků se pro hlasitý varovný křik říká strážce lesa?`,
+    o: [`žluně zelené`, `ťuhýkovi obecnému`, `sojce obecné`, `konipasovi bílému`],
+    c: 2
+  },
+  {
+    q: `3. Se kterým státem má Rusko nejdelší pozemní hranici?`,
+    o: [`s Čínou`, `s Mongolskem`, `s Ukrajinou`, `s Kazachstánem`],
+    c: 3
+  },
+  {
+    q: `4. Ke kterému architektonickému slohu se řadí Fantova budova pražského hlavního nádraží?`,
+    o: [`k novorenesanci`, `k secesi`, `k funkcionalismu`, `ke kubismu`],
+    c: 1
+  },
+  {
+    q: `5. Který kov se na vzduchu časem pokryje zelenou vrstvou?`,
+    o: [`hliník`, `cín`, `nikl`, `měď`],
+    c: 3
+  },
+  {
+    q: `6. Co znamená slovo mázdra?`,
+    o: [`hrubé plátno, ze kterého se šily pytle`, `dřevěná naběračka na vodu`, `tenká blanka na mase nebo na vnitřním orgánu`, `mělká prohlubeň v poli, kde stojí voda`],
+    c: 2
+  },
+  {
+    q: `7. Které jídlo se v české kuchyni připravuje z vepřového masa, kysaného zelí a zakysané smetany?`,
+    o: [`segedínský guláš`, `moravský vrabec`, `znojemská pečeně`, `španělský ptáček`],
+    c: 0
+  },
+  {
+    q: `8. Jaká je výška fotbalové branky?`,
+    o: [`2,28 metru`, `2,36 metru`, `2,44 metru`, `2,52 metru`],
+    c: 2
+  },
+  {
+    q: `9. Kdo režíroval film Božská Ema?`,
+    o: [`Jiří Krejčík`, `Otakar Vávra`, `Karel Kachyňa`, `Jiří Menzel`],
+    c: 0
+  },
+  {
+    q: `10. Co v notovém zápisu znamená pokyn da capo?`,
+    o: [`hrát postupně tišeji`, `hrát o oktávu výš`, `hrát volněji`, `hrát znovu od začátku`],
+    c: 3
+  }
+];
+
+var verdicts = [
+  { max: 3, text: `Otázky mířily do deseti různých oborů a ani jeden z nich vám tentokrát nevyšel vstříc. Náhodné zaškrtnutí přinese v deseti otázkách se čtyřmi možnostmi zhruba dva až tři body, takže se váš výsledek zatím drží u této hranice. Zkuste kvíz projít znovu a u každé otázky si odpověď nejdřív vybavit, než začnete číst varianty.` },
+  { max: 6, text: `Polovina oborů vám sedla, druhá polovina ne. To je výsledek člověka, který má základ ze školy pořád zažitý, ale u otázek mimo něj už chybí ta druhá opora, kterou slibuje titulek: zkušenost a to, co člověk pochytí za život mimo učebnice. Do vyššího pásma vám chybí jedna až tři odpovědi.` },
+  { max: 9, text: `Přesně pásmo, na které kvíz mířil. Prošli jste otázkami z oborů, které spolu nemají nic společného, a chybovali nejvýše třikrát. Takový výsledek nesvede ani samotná školní paměť, ani samotná zkušenost. Musí se sejít obojí, a u vás se to sešlo.` },
+  { max: 10, text: `Plný počet, na který v tomhle mixu dosáhne jen menšina. Neshodil vás ruský panovník, kterého si lidé pletou s jeho jmenovcem, ani přezdívka hlučného lesního ptáka, nejdelší ruská hranice, sloh nádražní budovy, kov, který na vzduchu zezelená, méně známé české slovo, jídlo z vepřového a kysaného zelí, přesný rozměr branky, režisér filmu o slavné pěvkyni ani pokyn k opakování v notách. Přehled i zkušenost vám fungují naplno.` }
+];
+
+var letters = [`a) `, `b) `, `c) `, `d) `];
+var answers = [];
+var evaluated = false;
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var msgEl = document.getElementById(`msg`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  answers = [];
+  evaluated = false;
+  msgEl.textContent = ``;
+  resultEl.style.display = `none`;
+  submitEl.style.display = `block`;
+  submitEl.disabled = true;
+  for (var i = 0; i < questions.length; i++) {
+    answers.push(null);
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var p = document.createElement(`p`);
+    p.className = `q-text`;
+    p.textContent = questions[i].q;
+    box.appendChild(p);
+    for (var j = 0; j < questions[i].o.length; j++) {
+      var b = document.createElement(`button`);
+      b.className = `opt`;
+      b.type = `button`;
+      b.textContent = letters[j] + questions[i].o[j];
+      b.setAttribute(`data-q`, i);
+      b.setAttribute(`data-o`, j);
+      b.addEventListener(`click`, pick);
+      box.appendChild(b);
+    }
+    quizEl.appendChild(box);
+  }
+}
+
+function pick(e) {
+  if (evaluated) { return; }
+  var qi = parseInt(e.currentTarget.getAttribute(`data-q`), 10);
+  var oi = parseInt(e.currentTarget.getAttribute(`data-o`), 10);
+  answers[qi] = oi;
+  var box = e.currentTarget.parentNode;
+  var opts = box.getElementsByClassName(`opt`);
+  for (var k = 0; k < opts.length; k++) { opts[k].classList.remove(`sel`); }
+  e.currentTarget.classList.add(`sel`);
+  msgEl.textContent = ``;
+  var done = true;
+  for (var m = 0; m < answers.length; m++) { if (answers[m] === null) { done = false; } }
+  submitEl.disabled = !done;
+}
+
+submitEl.addEventListener(`click`, function () {
+  var done = true;
+  for (var m = 0; m < answers.length; m++) { if (answers[m] === null) { done = false; } }
+  if (!done) { msgEl.textContent = `Odpovězte prosím na všechny otázky`; return; }
+  evaluated = true;
+  var score = 0;
+  var boxes = quizEl.getElementsByClassName(`q`);
+  for (var i = 0; i < questions.length; i++) {
+    var opts = boxes[i].getElementsByClassName(`opt`);
+    boxes[i].classList.add(`locked`);
+    if (answers[i] === questions[i].c) { score++; }
+    for (var j = 0; j < opts.length; j++) {
+      opts[j].classList.remove(`sel`);
+      if (j === questions[i].c) { opts[j].classList.add(`correct`); }
+      else if (j === answers[i]) { opts[j].classList.add(`wrong`); }
+    }
+  }
+  scoreEl.textContent = score + ` z ` + questions.length;
+  for (var v = 0; v < verdicts.length; v++) {
+    if (score <= verdicts[v].max) { verdictEl.textContent = verdicts[v].text; break; }
+  }
+  submitEl.style.display = `none`;
+  msgEl.textContent = ``;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+document.getElementById(`retry`).addEventListener(`click`, function () {
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+</script>
+</body>
+</html>
