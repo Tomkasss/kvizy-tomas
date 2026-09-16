@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Těžký test ze slovenštiny: kdo nedá aspoň 7/10, dnes už by se na Slovensku nedomluvil</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 36px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; line-height: 1.45; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.locked .opt { cursor: default; }
+#submit, #retry {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #fff;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit { background: #5b7e5f; }
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry { background: #8c7b6b; }
+#retry:hover { background: #756658; }
+#warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 14px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; }
+.hidden { display: none; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Těžký test ze slovenštiny: kdo nedá aspoň 7/10, dnes už by se na Slovensku nedomluvil</h1>
+<p class="perex">Slovenština patřila ke společnému státu tak samozřejmě, že si jí skoro nikdo nevšímal. Dnes je z ní jazyk za hranicí a past číhá tam, kde slovo zní skoro česky, ale míří k docela jinému významu.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warn" class="hidden">Odpovězte prosím na všechny otázky</p>
+<div id="result" class="hidden">
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  { q: `1. Které maso koupíte na Slovensku v pultu označeném „hydina"?`,
+    o: [`hovězí`, `vepřové`, `drůbeží`, `skopové`], a: 2 },
+  { q: `2. Kde na košili najde Slovák golier?`,
+    o: [`na konci rukávu u zápěstí`, `uprostřed hrudi pod knoflíky`, `na spodním okraji u pasu`, `kolem krku nad rameny`], a: 3 },
+  { q: `3. Co dostanete na slovenském úřadě, když vás pošlou pro tlačivo?`,
+    o: [`formulář k vyplnění`, `razítko do žádosti`, `potvrzení o zaplacení`, `ověřenou kopii dokladu`], a: 0 },
+  { q: `4. Čeho se dopustil Slovák, který přiznává, že zabudol vypnúť plyn?`,
+    o: [`zapomněl ho vypnout`, `nedokázal ho vypnout`, `odmítl ho vypnout`, `nestihl ho vypnout`], a: 0 },
+  { q: `5. Kterou zeleninu vám na Slovensku prodají, když si řeknete o karfiol?`,
+    o: [`brokolici`, `kedluben`, `květák`, `ředkvičku`], a: 2 },
+  { q: `6. Který orgán se ve slovenštině označuje slovem „obličky"?`,
+    o: [`plíce`, `slinivka`, `slezina`, `ledviny`], a: 3 },
+  { q: `7. Kdo je pro Slováka svokra?`,
+    o: [`kmotra`, `tchyně`, `švagrová`, `snacha`], a: 1 },
+  { q: `8. Co dělá Slovák, který doma upratuje?`,
+    o: [`uklízí byt`, `pere prádlo`, `žehlí košile`, `vaří oběd`], a: 0 },
+  { q: `9. Co Slovákovi doma nefunguje, když si stěžuje na pokazenú kľučku na dverách?`,
+    o: [`klíč, kterým se dveře zamykají`, `klika, kterou se dveře otevírají`, `pant, na kterém jsou dveře zavěšené`, `zástrčka, kterou se dveře zajišťují`], a: 1 },
+  { q: `10. Co vám soused na Slovensku podá, když ho poprosíte o fúrik?`,
+    o: [`žebřík na česání ovoce`, `kolečko na vožení hlíny`, `hrábě na shrabování listí`, `konev na zalévání záhonů`], a: 1 }
+];
+
+var VERDICTS = [
+  { max: 3, t: `K laťce sedmi bodů, o které mluví titulek, je odsud pořádný kus a takhle nízko skončí jen málokdo. Slovenština vám drží, dokud se slovo podobá češtině; jakmile se podobá a znamená něco jiného, opora mizí. V obchodě nebo u lékaře byste se dnes na Slovensku bez doptávání neobešli.` },
+  { max: 6, t: `Těsně pod laťkou sedmi bodů, kterou většina řešitelů přeskočí. Nejběžnější slova máte jistá, ale tam, kde česká podoba slibuje jiný význam, rozhodl odhad a ten vedl vedle. Na jídelním lístku a na nádraží byste si poradili, u delšího hovoru byste se museli ptát, co to znamená. Chybělo vám jen pár otázek.` },
+  { max: 9, t: `Laťku sedmi bodů z titulku jste přeskočili, stejně jako většina těch, kdo slovenštinu znají ze společného státu. Nachytala vás jen hrstka slov mimo běžný pasivní slovník. Na Slovensku byste se domluvili bez zadrhnutí, včetně situací, kde nestačí kývnout a tvářit se, že rozumíte.` },
+  { max: 10, t: `Plný počet, a ten se povede jen menšině. Trefili jste i slovo, které dnes zná skoro výhradně ten, kdo slovenštinu opravdu používá, ne jen slýchá. Tohle už není porozumění z doslechu, ale skutečná znalost jazyka.` }
+];
+
+var LETTERS = [`a) `, `b) `, `c) `, `d) `];
+var answers = [];
+var done = false;
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var retryEl = document.getElementById(`retry`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var t = document.createElement(`div`);
+    t.className = `qtext`;
+    t.textContent = item.q;
+    box.appendChild(t);
+    item.o.forEach(function (opt, oi) {
+      var b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = LETTERS[oi] + opt;
+      b.addEventListener(`click`, function () { pick(qi, oi); });
+      box.appendChild(b);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function pick(qi, oi) {
+  if (done) return;
+  answers[qi] = oi;
+  var box = quizEl.children[qi];
+  var opts = box.querySelectorAll(`.opt`);
+  for (var i = 0; i < opts.length; i++) {
+    if (i === oi) { opts[i].classList.add(`sel`); } else { opts[i].classList.remove(`sel`); }
+  }
+  var filled = 0;
+  for (var j = 0; j < QUESTIONS.length; j++) { if (answers[j] !== undefined) filled++; }
+  if (filled === QUESTIONS.length) {
+    submitEl.disabled = false;
+    warnEl.classList.add(`hidden`);
+  }
+}
+
+submitEl.addEventListener(`click`, function () {
+  var filled = 0;
+  for (var j = 0; j < QUESTIONS.length; j++) { if (answers[j] !== undefined) filled++; }
+  if (filled < QUESTIONS.length) { warnEl.classList.remove(`hidden`); return; }
+  done = true;
+  var score = 0;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = quizEl.children[qi];
+    box.classList.add(`locked`);
+    var opts = box.querySelectorAll(`.opt`);
+    for (var i = 0; i < opts.length; i++) {
+      opts[i].classList.remove(`sel`);
+      if (i === item.a) { opts[i].classList.add(`correct`); }
+      else if (i === answers[qi]) { opts[i].classList.add(`wrong`); }
+    }
+    if (answers[qi] === item.a) score++;
+  });
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  for (var k = 0; k < VERDICTS.length; k++) {
+    if (score <= VERDICTS[k].max) { verdictEl.textContent = VERDICTS[k].t; break; }
+  }
+  resultEl.classList.remove(`hidden`);
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+retryEl.addEventListener(`click`, function () {
+  answers = [];
+  done = false;
+  submitEl.disabled = true;
+  resultEl.classList.add(`hidden`);
+  warnEl.classList.add(`hidden`);
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+</script>
+</body>
+</html>
