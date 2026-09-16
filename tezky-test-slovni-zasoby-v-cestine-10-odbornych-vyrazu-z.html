@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Těžký test slovní zásoby v češtině: 10 odborných výrazů z novin, které mnoho Čechů nezná</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  line-height: 1.5;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.locked .opt { cursor: default; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 24px;
+  border-top: 4px solid #5b7e5f;
+  display: none;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#again {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#again:hover { background: #756658; }
+@media (max-width: 767px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Těžký test slovní zásoby v češtině: 10 odborných výrazů z novin, které mnoho Čechů nezná</h1>
+<p class="perex">Ve zprávách se běžně objevují výrazy, které čtenář přejde a smysl si domyslí z okolní věty. Vybrali jsme jich deset přímo z novinových článků. Jde o to, jestli jejich význam znáte, nebo ho jen tušíte.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<p id="warn"></p>
+<div id="result">
+  <p id="score"></p>
+  <p id="verdict"></p>
+  <button id="again">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  {
+    q: `1. Co je rekognice, o které policie mluví v tiskové zprávě?`,
+    opts: [
+      `opakované provedení děje na místě činu, aby se prověřila výpověď`,
+      `předvedení několika osob či věcí, aby svědek poznal tu pravou`,
+      `porovnání otisků a DNA ze stopy se vzorky v policejní evidenci`,
+      `postavení dvou lidí s rozpornou výpovědí proti sobě tváří v tvář`
+    ],
+    correct: 1
+  },
+  {
+    q: `2. Co čeká vysokoškolského učitele, který úspěšně projde habilitací?`,
+    opts: [
+      `získá od ministerstva souhlas, aby jeho obor směla škola učit`,
+      `je jmenován profesorem, což na návrh vědecké rady stvrdí prezident`,
+      `získá titul docent po obhajobě práce a přednášce před komisí`,
+      `získá titul Ph.D. poté, co obhájí disertační práci před komisí`
+    ],
+    correct: 2
+  },
+  {
+    q: `3. Který dálniční objekt označují noviny slovem estakáda?`,
+    opts: [
+      `sjezd, kterým se z dálnice odbočuje na silnici nižší třídy`,
+      `dlouhý most na pilířích, po němž vozovka míří nad terénem`,
+      `zpevněný pruh u krajnice pro nouzové odstavení vozidla`,
+      `souvislá stěna, která od dálnice odcloňuje obytnou zástavbu`
+    ],
+    correct: 1
+  },
+  {
+    q: `4. Kterou složku inscenace kritik ocení, když v recenzi pochválí scénografii?`,
+    opts: [
+      `rozmístění a pohyb herců po jevišti v jednotlivých výstupech`,
+      `způsob, jakým režisér vede herce k vnitřnímu prožitku jejich rolí`,
+      `hudební složku představení, tedy skladby i jejich živý doprovod`,
+      `podobu jeviště, tedy dekorace, výpravu i uspořádání prostoru`
+    ],
+    correct: 3
+  },
+  {
+    q: `5. Čeho se týká demarše, o které noviny píší v souvislosti se zahraniční politikou?`,
+    opts: [
+      `odvolání vlastního velvyslance z ciziny na konzultace domů`,
+      `prohlášení, jímž se několik států zavazuje ke stejnému postupu`,
+      `zákazu vstupu konkrétních cizích představitelů na území státu`,
+      `oficiálního kroku, jímž jeden stát tlumočí druhému námitku`
+    ],
+    correct: 3
+  },
+  {
+    q: `6. K čemu dochází při arbitráži, o které noviny píší ve sporu státu se zahraničním investorem?`,
+    opts: [
+      `spor mimo soud rozsoudí osoba, kterou si obě strany zvolily`,
+      `strany se za pomoci nestranného prostředníka snaží dohodnout`,
+      `nadřízený soud přezkoumá a zruší rozhodnutí nižšího soudu`,
+      `z majetku dlužníka se vymáhá už dříve přiznaná pohledávka`
+    ],
+    correct: 0
+  },
+  {
+    q: `7. V jakém stavu je ekonomika, o které noviny napíšou, že jí hrozí stagflace?`,
+    opts: [
+      `ceny dál rostou, ale hospodářství nepřidává na výkonu`,
+      `hospodářství stojí na místě a ceny přitom klesají`,
+      `hospodářství roste rychleji, než stačí růst mezd lidí`,
+      `stát utrácí víc, než vybere na daních, a zadlužuje se`
+    ],
+    correct: 0
+  },
+  {
+    q: `8. Co o nemoci vypovídá údaj, kterému se říká prevalence?`,
+    opts: [
+      `kolik nových případů se objevilo za sledované období`,
+      `jak dlouho nemoc u průměrného pacienta obvykle trvá`,
+      `kolik lidí tou nemocí v dané chvíli zrovna stůně`,
+      `jak velká část nemocných na tu nemoc nakonec zemře`
+    ],
+    correct: 2
+  },
+  {
+    q: `9. Čeho se týká sukcese, o níž noviny píší v článcích o obnově lesa po kůrovcové kalamitě?`,
+    opts: [
+      `hromadného odumírání stromů, které brouk napadl`,
+      `postupného střídání druhů, jimiž plocha sama zarůstá`,
+      `odtěžení napadených stromů, aby se brouk dál nešířil`,
+      `výsadby sazenic v pravidelném sponu podle plánu`
+    ],
+    correct: 1
+  },
+  {
+    q: `10. Co má na mysli novinář, když napíše, že teplárna staví nový zdroj na kogeneraci?`,
+    opts: [
+      `že zařízení bude z jednoho paliva vyrábět elektřinu a zároveň dodávat teplo`,
+      `že zařízení bude spalovat dvě různá paliva podle toho, které je zrovna levnější`,
+      `že vedle sebe poběží starý a nový kotel, aby se dodávky nepřerušily`,
+      `že přebytečné teplo se bude ukládat do zásobníku a využívat později`
+    ],
+    correct: 0
+  }
+];
+
+var LETTERS = [`a)`, `b)`, `c)`, `d)`];
+var BANDS = [
+  { max: 3, text: `Tyhle výrazy jste v novinách nejspíš míjeli a zpráva dávala smysl i bez nich. Zkuste si u příštího článku jedno neznámé slovo vyhledat, jde to rychleji, než se zdá.` },
+  { max: 6, text: `Zhruba polovina sedí. Rozumíte rubrikám, které čtete pravidelně, a v ostatních tápete. Přesně tak novinová slovní zásoba u většiny čtenářů vypadá.` },
+  { max: 9, text: `Odborné výrazy z novin čtete s porozuměním a málokteré slovo vás v textu zastaví. Zaváhali jste nejspíš nad rubrikou, kterou běžně přeskakujete. Vyhledejte si takové slovo hned při čtení, a je vaše.` },
+  { max: 10, text: `Zvládli jste i výrazy, které čtenář v novinách potká zřídka a většinou je přejde. Taková slovní zásoba se sbírá po jednom slově při čtení a vydrží dlouho. Rozumíte novinovému textu i tam, kde autor sáhl po tom nejmíň běžném slově.` }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var evaluated = false;
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var againEl = document.getElementById(`again`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var title = document.createElement(`p`);
+    title.className = `q-text`;
+    title.textContent = item.q;
+    box.appendChild(title);
+    item.opts.forEach(function (opt, oi) {
+      var btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.type = `button`;
+      btn.textContent = LETTERS[oi] + ` ` + opt;
+      btn.addEventListener(`click`, function () { pick(qi, oi); });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function pick(qi, oi) {
+  if (evaluated) { return; }
+  answers[qi] = oi;
+  var box = quizEl.children[qi];
+  var btns = box.querySelectorAll(`.opt`);
+  for (var i = 0; i < btns.length; i++) {
+    if (i === oi) { btns[i].classList.add(`sel`); } else { btns[i].classList.remove(`sel`); }
+  }
+  refresh();
+}
+
+function refresh() {
+  var done = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !done;
+  if (done) { warnEl.textContent = ``; }
+}
+
+submitEl.addEventListener(`click`, function () {
+  if (submitEl.disabled) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  evaluate();
+});
+
+function evaluate() {
+  evaluated = true;
+  var score = 0;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = quizEl.children[qi];
+    box.classList.add(`locked`);
+    var btns = box.querySelectorAll(`.opt`);
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.remove(`sel`);
+      if (i === item.correct) { btns[i].classList.add(`correct`); }
+      else if (i === answers[qi]) { btns[i].classList.add(`wrong`); }
+    }
+    if (answers[qi] === item.correct) { score++; }
+  });
+  submitEl.disabled = true;
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  for (var b = 0; b < BANDS.length; b++) {
+    if (score <= BANDS[b].max) { verdictEl.textContent = BANDS[b].text; break; }
+  }
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+againEl.addEventListener(`click`, function () {
+  evaluated = false;
+  answers = new Array(QUESTIONS.length).fill(null);
+  resultEl.style.display = `none`;
+  warnEl.textContent = ``;
+  build();
+  refresh();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+build();
+refresh();
+</script>
+</body>
+</html>
