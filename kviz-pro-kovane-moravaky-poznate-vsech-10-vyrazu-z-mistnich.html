@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro kované Moraváky: poznáte všech 10 výrazů z místních nářečí? Lidé z Čech se často nechytají</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 32px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.qt { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.ok { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.bad { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+#submit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#warn { text-align: center; color: #721c24; margin-top: 14px; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+  display: none;
+}
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 14px; }
+.verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#again {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#again:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .q { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro kované Moraváky: poznáte všech 10 výrazů z místních nářečí? Lidé z Čech se často nechytají</h1>
+<p class="perex">Moravská nářečí si drží slova, která se do spisovné češtiny nikdy neprosadila. Moraváci je používají docela běžně, mluví se jimi o práci, o počasí i o sousedech. Řada z nich se navíc mění od dědiny k dědině.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<div id="warn"></div>
+<div id="result">
+  <p class="score" id="score"></p>
+  <p class="verdict" id="verdict"></p>
+  <button id="again">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var QUESTIONS = [
+  { q: `1. Čemu na Valašsku říkají „kvaka“?`,
+    o: [`celeru`, `tuřínu`, `křenu`, `pastináku`], a: 1 },
+  { q: `2. Čemu na Valašsku říkají „krpce“?`,
+    o: [`kožené obuvi vázané řemínky`, `okovaným botám s dřevěnou podrážkou`, `dřevákům vydlabaným z jednoho kusu`, `plstěným papučím nošeným po chalupě`], a: 0 },
+  { q: `3. Čemu na Slovácku říkají „fašank“?`,
+    o: [`dožínkovým slavnostem po sklizni obilí`, `vesnickým slavnostem na svátek kostelního patrona`, `velikonoční obchůzce s pomlázkou`, `masopustním obchůzkám maskovaných postav`], a: 3 },
+  { q: `4. Čemu na Valašsku říkají „koliba“?`,
+    o: [`ohradě, do které se na noc zahánějí ovce`, `dřevěné pastýřské chatě na salaši`, `kamenné sýpce stojící stranou od stavení`, `dřevěné zvonici uprostřed vesnice`], a: 1 },
+  { q: `5. Čemu na východní Moravě říkají „šráky“?`,
+    o: [`šlím ke kalhotám`, `širokému koženému opasku`, `tkaničkám do bot`, `nákolenicím pod kalhoty`], a: 0 },
+  { q: `6. Čemu na Hané říkají „morák“?`,
+    o: [`houserovi`, `mladému kohoutkovi`, `krocanovi`, `kačerovi`], a: 2 },
+  { q: `7. Čemu na Slovácku říkají „gajdy“?`,
+    o: [`houslím s plechovou troubou`, `dudám potaženým kozí kůží`, `cimbálu s dřevěnými paličkami`, `píšťale vyřezané z bezového dřeva`], a: 1 },
+  { q: `8. Čemu na Slovácku říkají „búda“, když nejde o kůlnu ani přístřešek?`,
+    o: [`vinici na jižním svahu nad dědinou`, `sušárně ovoce postavené na zahradě`, `lisovně vína bez sklepa`, `letní kuchyni přistavěné ke stavení`], a: 2 },
+  { q: `9. Co na Valašsku znamená, když někdo „banuje“?`,
+    o: [`lituje a stýská si`, `chvástá se před ostatními`, `otálí a nemá se k práci`, `trucuje a nemluví s nikým`], a: 0 },
+  { q: `10. Čemu na Valašsku říkají „kyselica“?`,
+    o: [`zelí naloženému v kameninovém sudu`, `syrovátce zbylé po výrobě sýra`, `kysanému mléku podávanému k chlebu`, `hutné polévce z kysaného zelí`], a: 3 }
+];
+
+var VERDICTS = [
+  { max: 3, t: `Na kovaného Moraváka to zatím není. Tři a méně bodů znamená, že u většiny výrazů rozhodl los mezi čtyřmi nabídkami. Moravská nářečí přitom nejsou jeden celek, jazykovědci je dělí nejméně na tři velké skupiny a rozdíl mezi nimi uslyšíte během jedné hodiny jízdy autem. Vy jste se zachytili jen tam, kde slovo znělo povědomě.` },
+  { max: 6, t: `Polovina sedla, polovina ne. Bodovali jste u slov, která se drží na větším území, a zakopli u těch, co patří jen jedné z moravských nářečních oblastí. Kovaný Moravák tyhle hranice slyší, pro vás jsou zatím neviditelné. Přesně tady leží rozdíl mezi polovinou a plným počtem.` },
+  { max: 9, t: `Kovaný Moravák ve vás je. Zvládli jste i slova vázaná na jediný kraj a nenachytaly vás varianty mířící na příbuzný význam. Moravská nářečí drží takových slov víc než mluva v Čechách, kde je setřela obecná čeština. Chybí vám nanejvýš tři položky do plného počtu.` },
+  { max: 10, t: `Deset z deseti a nic se k tomu dodat nedá. Uspěli jste i u výrazů, které Český jazykový atlas zakresluje do úzkého pruhu Moravy, tedy tam, kde je slýchá sotva pár okresů. Kovanějšího Moraváka aby člověk pohledal: rozumíte Hané, Valašsku i Slovácku najednou.` }
+];
+
+var LETTERS = [`a)`, `b)`, `c)`, `d)`];
+var picks = [];
+var done = false;
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+
+function build() {
+  quizEl.innerHTML = ``;
+  picks = [];
+  done = false;
+  resultEl.style.display = `none`;
+  warnEl.textContent = ``;
+  submitEl.disabled = true;
+
+  QUESTIONS.forEach(function (item, qi) {
+    picks.push(null);
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var title = document.createElement(`p`);
+    title.className = `qt`;
+    title.textContent = item.q;
+    box.appendChild(title);
+
+    item.o.forEach(function (text, oi) {
+      var btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.type = `button`;
+      btn.textContent = LETTERS[oi] + ` ` + text;
+      btn.addEventListener(`click`, function () {
+        if (done) { return; }
+        picks[qi] = oi;
+        var sibs = box.querySelectorAll(`.opt`);
+        for (var i = 0; i < sibs.length; i++) { sibs[i].classList.remove(`sel`); }
+        btn.classList.add(`sel`);
+        refresh();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function refresh() {
+  var all = picks.every(function (p) { return p !== null; });
+  submitEl.disabled = !all;
+  if (all) { warnEl.textContent = ``; }
+}
+
+submitEl.addEventListener(`click`, function () {
+  if (submitEl.disabled) { return; }
+  done = true;
+  var score = 0;
+  var boxes = quizEl.querySelectorAll(`.q`);
+  QUESTIONS.forEach(function (item, qi) {
+    var opts = boxes[qi].querySelectorAll(`.opt`);
+    for (var i = 0; i < opts.length; i++) {
+      opts[i].disabled = true;
+      opts[i].classList.remove(`sel`);
+      if (i === item.a) { opts[i].classList.add(`ok`); }
+      else if (i === picks[qi]) { opts[i].classList.add(`bad`); }
+    }
+    if (picks[qi] === item.a) { score++; }
+  });
+
+  var text = ``;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score <= VERDICTS[v].max) { text = VERDICTS[v].t; break; }
+  }
+  document.getElementById(`score`).textContent = score + ` z ` + QUESTIONS.length;
+  document.getElementById(`verdict`).textContent = text;
+  resultEl.style.display = `block`;
+  submitEl.disabled = true;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+document.getElementById(`again`).addEventListener(`click`, function () {
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+submitEl.addEventListener(`mouseover`, function () {
+  if (submitEl.disabled && !done) { warnEl.textContent = `Odpovězte prosím na všechny otázky`; }
+});
+
+build();
+</script>
+</body>
+</html>
