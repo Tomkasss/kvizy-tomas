@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz: rychlá rozcvička mozku, Kdo nedá aspoň 8/10, ten není připravený</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #f5f0eb;
+    font-family: Georgia, "Times New Roman", serif;
+    color: #2c2c2c;
+    line-height: 1.5;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+  }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.25;
+    margin: 0 0 16px;
+    color: #2c2c2c;
+  }
+  .perex {
+    font-size: 1.05rem;
+    color: #4a4a4a;
+    margin: 0 0 28px;
+  }
+  .box {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin: 0 0 16px;
+  }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    margin: 0 0 10px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    cursor: pointer;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected {
+    background: #dcd3c7;
+    border: 1px solid #a89e92;
+    font-weight: bold;
+  }
+  .opt.correct {
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    color: #1e5631;
+  }
+  .opt.wrong {
+    background: #f8d7da;
+    border: 1px solid #d4848a;
+    color: #721c24;
+  }
+  .locked .opt { cursor: default; }
+  .locked .opt:hover { background: #f7f4f0; }
+  .locked .opt.selected:hover { background: #dcd3c7; }
+  .locked .opt.correct:hover { background: #d4edda; }
+  .locked .opt.wrong:hover { background: #f8d7da; }
+  .feedback {
+    margin-top: 14px;
+    font-size: 0.98rem;
+    display: none;
+  }
+  .feedback.ok { color: #1e5631; display: block; }
+  .feedback.bad { color: #721c24; display: block; }
+  .btn {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .btn:hover { background: #4a6b4e; }
+  .btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint {
+    text-align: center;
+    color: #721c24;
+    margin-top: 12px;
+    font-size: 0.95rem;
+  }
+  .result {
+    display: none;
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    margin-top: 40px;
+  }
+  .score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    text-align: center;
+    margin: 0 0 12px;
+  }
+  .verdict {
+    font-size: 1rem;
+    color: #4a4a4a;
+    text-align: center;
+    margin: 0;
+  }
+  .btn.retry { background: #8c7b6b; margin-top: 28px; }
+  .btn.retry:hover { background: #756658; }
+  @media (max-width: 600px) {
+    .wrap { padding: 20px 16px 40px; }
+    .box { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="title"></h1>
+  <p class="perex" id="perex"></p>
+  <div id="questions"></div>
+  <button type="button" class="btn" id="evaluate" disabled>Vyhodnotit</button>
+  <p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+  <div class="box result" id="result">
+    <p class="score" id="score"></p>
+    <p class="verdict" id="verdict"></p>
+    <button type="button" class="btn retry" id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+(function () {
+  const TITLE = `Kvíz: rychlá rozcvička mozku, Kdo nedá aspoň 8/10, ten není připravený`;
+  const PEREX = `Od slovenské měny přes krvavě rudý koktejl, biblický příběh, formuli 1 a bondovku až po prezidenty vytesané do skály. Kdo trefí aspoň osm, může do dne vyrazit s čistým svědomím.`;
+
+  const QUESTIONS = [
+    { q: `1. Od kterého roku platí Slováci eurem?`,
+      options: [`a) 2004`, `b) 2007`, `c) 2009`, `d) 2011`], correct: 2 },
+    { q: `2. Která lihovina je základem koktejlu Bloody Mary?`,
+      options: [`a) vodka`, `b) gin`, `c) rum`, `d) tequila`], correct: 0 },
+    { q: `3. Ve které válce se odehrává Hemingwayův román Komu zvoní hrana?`,
+      options: [`a) v první světové válce`, `b) ve druhé světové válce`, `c) ve španělské občanské válce`, `d) v korejské válce`], correct: 2 },
+    { q: `4. Kdo získal v letech 2021 až 2024 čtyři tituly mistra světa formule 1 za sebou?`,
+      options: [`a) Lewis Hamilton`, `b) Charles Leclerc`, `c) Fernando Alonso`, `d) Max Verstappen`], correct: 3 },
+    { q: `5. Kdo spolu s Billem Gatesem založil firmu Microsoft?`,
+      options: [`a) Paul Allen`, `b) Steve Ballmer`, `c) Steve Wozniak`, `d) Larry Ellison`], correct: 0 },
+    { q: `6. Který herec hrál v bondovce Casino Royale z roku 2006 padoucha Le Chiffra?`,
+      options: [`a) Javier Bardem`, `b) Christoph Waltz`, `c) Mads Mikkelsen`, `d) Mathieu Amalric`], correct: 2 },
+    { q: `7. Který apoštol třikrát zapřel Ježíše?`,
+      options: [`a) Jidáš`, `b) Petr`, `c) Tomáš`, `d) Jan`], correct: 1 },
+    { q: `8. Na jaký hudební nástroj hrál Jan Kubelík?`,
+      options: [`a) violoncello`, `b) housle`, `c) klavír`, `d) violu`], correct: 1 },
+    { q: `9. Kdo sestrojil první elektrickou baterii?`,
+      options: [`a) Luigi Galvani`, `b) Charles-Augustin de Coulomb`, `c) Michael Faraday`, `d) Alessandro Volta`], correct: 3 },
+    { q: `10. Ve kterém státě USA stojí Mount Rushmore?`,
+      options: [`a) Jižní Dakota`, `b) Wyoming`, `c) Montana`, `d) Colorado`], correct: 0 }
+  ];
+
+  const VERDICTS = [
+    { min: 0, max: 3, text: `Tohle bylo spíš protahování než rozcvička. K osmičce máte ještě daleko, ale právě na to se rozcvička hodí: zkusíte ji znovu a uvidíte, kolik se toho mezitím chytí.` },
+    { min: 4, max: 6, text: `Základ je, laťka ale zatím ne. Do osmičky vám chybějí dvě až čtyři správné odpovědi, takže připravení ještě nejste.` },
+    { min: 7, max: 9, text: `Se sedmi body stojíte těsně pod laťkou a chybí vám jediná odpověď. S osmi nebo devíti ji máte za sebou a připravení jste, spletli jste se nanejvýš dvakrát.` },
+    { min: 10, max: 10, text: `Všech deset správně. Laťku jste přeskočili s rezervou a nezaváhali jste ani u té nejtěžší otázky.` }
+  ];
+
+  const answers = new Array(QUESTIONS.length).fill(null);
+  let locked = false;
+
+  const qWrap = document.getElementById(`questions`);
+  const evalBtn = document.getElementById(`evaluate`);
+  const hint = document.getElementById(`hint`);
+  const result = document.getElementById(`result`);
+  const scoreEl = document.getElementById(`score`);
+  const verdictEl = document.getElementById(`verdict`);
+  const retryBtn = document.getElementById(`retry`);
+
+  document.getElementById(`title`).textContent = TITLE;
+  document.getElementById(`perex`).textContent = PEREX;
+
+  function render() {
+    qWrap.innerHTML = ``;
+    QUESTIONS.forEach(function (item, qi) {
+      const box = document.createElement(`div`);
+      box.className = `box`;
+      const p = document.createElement(`p`);
+      p.className = `q-text`;
+      p.textContent = item.q;
+      box.appendChild(p);
+      item.options.forEach(function (opt, oi) {
+        const b = document.createElement(`button`);
+        b.type = `button`;
+        b.className = `opt`;
+        b.textContent = opt;
+        b.dataset.q = String(qi);
+        b.dataset.o = String(oi);
+        b.addEventListener(`click`, onPick);
+        box.appendChild(b);
+      });
+      const fb = document.createElement(`div`);
+      fb.className = `feedback`;
+      box.appendChild(fb);
+      qWrap.appendChild(box);
+    });
+  }
+
+  function onPick(e) {
+    if (locked) return;
+    const qi = Number(e.currentTarget.dataset.q);
+    const oi = Number(e.currentTarget.dataset.o);
+    answers[qi] = oi;
+    const box = qWrap.children[qi];
+    box.querySelectorAll(`.opt`).forEach(function (b) {
+      b.classList.toggle(`selected`, Number(b.dataset.o) === oi);
+    });
+    updateButton();
+  }
+
+  function updateButton() {
+    const all = answers.every(function (a) { return a !== null; });
+    evalBtn.disabled = !all;
+    hint.style.display = all ? `none` : `block`;
+  }
+
+  function evaluate() {
+    if (locked) return;
+    if (!answers.every(function (a) { return a !== null; })) return;
+    locked = true;
+    let score = 0;
+    QUESTIONS.forEach(function (item, qi) {
+      const box = qWrap.children[qi];
+      box.classList.add(`locked`);
+      const fb = box.querySelector(`.feedback`);
+      box.querySelectorAll(`.opt`).forEach(function (b) {
+        const oi = Number(b.dataset.o);
+        b.classList.remove(`selected`);
+        if (oi === item.correct) b.classList.add(`correct`);
+        else if (oi === answers[qi]) b.classList.add(`wrong`);
+      });
+      if (answers[qi] === item.correct) {
+        score++;
+        fb.className = `feedback ok`;
+        fb.textContent = `Správně.`;
+      } else {
+        fb.className = `feedback bad`;
+        fb.textContent = `Špatně. Správná odpověď: ` + item.options[item.correct];
+      }
+    });
+    scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+    const v = VERDICTS.find(function (r) { return score >= r.min && score <= r.max; });
+    verdictEl.textContent = v ? v.text : ``;
+    evalBtn.disabled = true;
+    evalBtn.style.display = `none`;
+    hint.style.display = `none`;
+    result.style.display = `block`;
+    result.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function reset() {
+    locked = false;
+    answers.fill(null);
+    render();
+    result.style.display = `none`;
+    evalBtn.style.display = `block`;
+    updateButton();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evalBtn.addEventListener(`click`, evaluate);
+  retryBtn.addEventListener(`click`, reset);
+
+  render();
+  updateButton();
+})();
+</script>
+</body>
+</html>
