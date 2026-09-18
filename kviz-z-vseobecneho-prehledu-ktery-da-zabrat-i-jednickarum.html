@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz z všeobecného přehledu, který dá zabrat i jedničkářům: 10/10 v něm dá málokdo</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #f5f0eb;
+    font-family: Georgia, "Times New Roman", serif;
+    color: #2c2c2c;
+    line-height: 1.5;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+  }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.25;
+    margin: 0 0 16px;
+    color: #2c2c2c;
+  }
+  .perex {
+    font-size: 1.05rem;
+    color: #4a4a4a;
+    margin: 0 0 28px;
+  }
+  .box {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin: 0 0 16px;
+  }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    margin: 0 0 10px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    cursor: pointer;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected {
+    background: #dcd3c7;
+    border: 1px solid #a89e92;
+    font-weight: bold;
+  }
+  .opt.correct {
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    color: #1e5631;
+  }
+  .opt.wrong {
+    background: #f8d7da;
+    border: 1px solid #d4848a;
+    color: #721c24;
+  }
+  .locked .opt { cursor: default; }
+  .locked .opt:hover { background: #f7f4f0; }
+  .locked .opt.selected:hover { background: #dcd3c7; }
+  .locked .opt.correct:hover { background: #d4edda; }
+  .locked .opt.wrong:hover { background: #f8d7da; }
+  .feedback {
+    margin-top: 14px;
+    font-size: 0.98rem;
+    display: none;
+  }
+  .feedback.ok { color: #1e5631; display: block; }
+  .feedback.bad { color: #721c24; display: block; }
+  .btn {
+    display: block;
+    margin: 40px auto 0;
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .btn:hover { background: #4a6b4e; }
+  .btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint {
+    text-align: center;
+    color: #721c24;
+    margin-top: 12px;
+    font-size: 0.95rem;
+  }
+  .result {
+    display: none;
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    margin-top: 40px;
+  }
+  .score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    text-align: center;
+    margin: 0 0 12px;
+  }
+  .verdict {
+    font-size: 1rem;
+    color: #4a4a4a;
+    text-align: center;
+    margin: 0;
+  }
+  .btn.retry { background: #8c7b6b; margin-top: 28px; }
+  .btn.retry:hover { background: #756658; }
+  @media (max-width: 600px) {
+    .wrap { padding: 20px 16px 40px; }
+    .box { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="title"></h1>
+  <p class="perex" id="perex"></p>
+  <div id="questions"></div>
+  <button type="button" class="btn" id="evaluate" disabled>Vyhodnotit</button>
+  <p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+  <div class="box result" id="result">
+    <p class="score" id="score"></p>
+    <p class="verdict" id="verdict"></p>
+    <button type="button" class="btn retry" id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+(function () {
+  const TITLE = `Kvíz z všeobecného přehledu, který dá zabrat i jedničkářům: 10/10 v něm dá málokdo`;
+  const PEREX = `Samé jedničky dokazují, že umíte látku, kterou vám někdo předložil. Všeobecný přehled se ale sbírá jinde: v knihách, které nebyly povinné, ve zprávách ze světa a v zajímavostech, na které ve škole nezbyl čas.`;
+
+  const QUESTIONS = [
+    { q: `1. Ve které zemi původně planě roste liána, jejíž plody známe jako kiwi?`,
+      options: [`a) na Novém Zélandu`, `b) v Austrálii`, `c) v Číně`, `d) v Chile`], correct: 2 },
+    { q: `2. Která země je největším producentem kávy na světě?`,
+      options: [`a) Kolumbie`, `b) Vietnam`, `c) Brazílie`, `d) Etiopie`], correct: 2 },
+    { q: `3. Který celovečerní animovaný film uvedlo studio Walta Disneyho do kin jako úplně první?`,
+      options: [`a) Alenka v říši divů`, `b) Sněhurka a sedm trpaslíků`, `c) Pinocchio`, `d) Dumbo`], correct: 1 },
+    { q: `4. Ve které zemi začala v 18. století průmyslová revoluce?`,
+      options: [`a) v Nizozemsku`, `b) ve Francii`, `c) v Prusku`, `d) ve Velké Británii`], correct: 3 },
+    { q: `5. Kterou řeku přehrazuje čínská přehrada Tři soutěsky?`,
+      options: [`a) Jang-c'-ťiang`, `b) Žlutou řeku`, `c) Perlovou řeku`, `d) Amur`], correct: 0 },
+    { q: `6. Kdo je tvůrcem World Wide Webu (WWW)?`,
+      options: [`a) Tim Berners-Lee`, `b) Vint Cerf`, `c) Marc Andreessen`, `d) Donald Davies`], correct: 0 },
+    { q: `7. Jak se jmenuje pes v knize Tři muži ve člunu?`,
+      options: [`a) Wellington`, `b) Montmorency`, `c) Marlborough`, `d) Beaufort`], correct: 1 },
+    { q: `8. Který klub vyhrál Ligu mistrů včetně dřívějšího Poháru mistrů evropských zemí nejvíckrát?`,
+      options: [`a) Real Madrid`, `b) AC Milán`, `c) Bayern Mnichov`, `d) Liverpool`], correct: 0 },
+    { q: `9. Který kosmický dalekohled odstartoval do vesmíru v prosinci 2021?`,
+      options: [`a) Hubbleův dalekohled`, `b) Spitzerův dalekohled`, `c) Keplerův dalekohled`, `d) Webbův dalekohled`], correct: 3 },
+    { q: `10. Který chemický prvek dostal jméno podle latinského názvu Země?`,
+      options: [`a) selen`, `b) terbium`, `c) cer`, `d) tellur`], correct: 3 }
+  ];
+
+  const VERDICTS = [
+    { min: 0, max: 3, text: `Tentokrát to nevyšlo. Známky ze školy ukazují, jak jste zvládali látku, kterou vám někdo předložil, ale tenhle kvíz chtěl i to, co se nabírá bokem. Dobrá zpráva je, že přehled se dá dohnat kdykoli.` },
+    { min: 4, max: 6, text: `Solidní základ, jen s několika mezerami. Zhruba polovinu jste měli v kapse, u zbytku rozhodl odhad. Kdo míří na jedničku i tady, potřebuje už jen víc zvědavosti mimo osnovy.` },
+    { min: 7, max: 9, text: `Tohle je výkon jedničkáře, který se nezastavil u učebnic. Pár chyb se vloudilo, ale přehled máte široký a nezůstal zavřený ve školních sešitech.` },
+    { min: 10, max: 10, text: `Plný počet, na který dosáhne jen hrstka lidí. Nezaváhali jste ani tam, kde se chytají i ti nejlepší ze třídy. Váš přehled nekončí u vysvědčení.` }
+  ];
+
+  const answers = new Array(QUESTIONS.length).fill(null);
+  let locked = false;
+
+  const qWrap = document.getElementById(`questions`);
+  const evalBtn = document.getElementById(`evaluate`);
+  const hint = document.getElementById(`hint`);
+  const result = document.getElementById(`result`);
+  const scoreEl = document.getElementById(`score`);
+  const verdictEl = document.getElementById(`verdict`);
+  const retryBtn = document.getElementById(`retry`);
+
+  document.getElementById(`title`).textContent = TITLE;
+  document.getElementById(`perex`).textContent = PEREX;
+
+  function render() {
+    qWrap.innerHTML = ``;
+    QUESTIONS.forEach(function (item, qi) {
+      const box = document.createElement(`div`);
+      box.className = `box`;
+      const p = document.createElement(`p`);
+      p.className = `q-text`;
+      p.textContent = item.q;
+      box.appendChild(p);
+      item.options.forEach(function (opt, oi) {
+        const b = document.createElement(`button`);
+        b.type = `button`;
+        b.className = `opt`;
+        b.textContent = opt;
+        b.dataset.q = String(qi);
+        b.dataset.o = String(oi);
+        b.addEventListener(`click`, onPick);
+        box.appendChild(b);
+      });
+      const fb = document.createElement(`div`);
+      fb.className = `feedback`;
+      box.appendChild(fb);
+      qWrap.appendChild(box);
+    });
+  }
+
+  function onPick(e) {
+    if (locked) return;
+    const qi = Number(e.currentTarget.dataset.q);
+    const oi = Number(e.currentTarget.dataset.o);
+    answers[qi] = oi;
+    const box = qWrap.children[qi];
+    box.querySelectorAll(`.opt`).forEach(function (b) {
+      b.classList.toggle(`selected`, Number(b.dataset.o) === oi);
+    });
+    updateButton();
+  }
+
+  function updateButton() {
+    const all = answers.every(function (a) { return a !== null; });
+    evalBtn.disabled = !all;
+    hint.style.display = all ? `none` : `block`;
+  }
+
+  function evaluate() {
+    if (locked) return;
+    if (!answers.every(function (a) { return a !== null; })) return;
+    locked = true;
+    let score = 0;
+    QUESTIONS.forEach(function (item, qi) {
+      const box = qWrap.children[qi];
+      box.classList.add(`locked`);
+      const fb = box.querySelector(`.feedback`);
+      box.querySelectorAll(`.opt`).forEach(function (b) {
+        const oi = Number(b.dataset.o);
+        b.classList.remove(`selected`);
+        if (oi === item.correct) b.classList.add(`correct`);
+        else if (oi === answers[qi]) b.classList.add(`wrong`);
+      });
+      if (answers[qi] === item.correct) {
+        score++;
+        fb.className = `feedback ok`;
+        fb.textContent = `Správně.`;
+      } else {
+        fb.className = `feedback bad`;
+        fb.textContent = `Špatně. Správná odpověď: ` + item.options[item.correct];
+      }
+    });
+    scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+    const v = VERDICTS.find(function (r) { return score >= r.min && score <= r.max; });
+    verdictEl.textContent = v ? v.text : ``;
+    evalBtn.disabled = true;
+    evalBtn.style.display = `none`;
+    hint.style.display = `none`;
+    result.style.display = `block`;
+    result.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function reset() {
+    locked = false;
+    answers.fill(null);
+    render();
+    result.style.display = `none`;
+    evalBtn.style.display = `block`;
+    updateButton();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evalBtn.addEventListener(`click`, evaluate);
+  retryBtn.addEventListener(`click`, reset);
+
+  render();
+  updateButton();
+})();
+</script>
+</body>
+</html>
