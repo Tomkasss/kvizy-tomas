@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test výpočtů z hlavy pro seniory: kdo dá 10/10, ten má hlavu v pořádku jako ve 30</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px}
+.perex{font-size:1.08rem;line-height:1.6;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.45}
+.inp{width:100%;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit}
+.inp:focus{outline:none;border-color:#a89e92;background:#fff}
+.inp.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.inp.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.fb{margin-top:12px;font-size:1rem}
+.fb.ok{color:#1e5631}.fb.bad{color:#721c24}
+.btn{display:block;margin:40px auto 0;background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#721c24;margin-top:12px;min-height:1.2em}
+.result{background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:32px;display:none;text-align:center}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;margin:0 0 12px}
+.evtext{font-size:1rem;color:#4a4a4a;line-height:1.6;margin:0}
+.again{background:#8c7b6b;margin-top:24px}
+.again:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test výpočtů z hlavy pro seniory: kdo dá 10/10, ten má hlavu v pořádku jako ve 30</h1>
+<p class="perex">Kalkulačka v mobilu je pohodlná, jenže hlava to často zvládne rychleji. Spropitné v restauraci, sýr na váhu nebo benzin na cestu: spočítejte to zpaměti a uvidíte, jestli máte počtářskou kondici třicátníka.</p>
+<div id="quiz"></div>
+<button type="button" id="check" class="btn" disabled>Vyhodnotit</button>
+<p id="hint" class="hint">Odpovězte prosím na všechny otázky</p>
+<div id="result" class="box result">
+<p id="score" class="score"></p>
+<p id="evtext" class="evtext"></p>
+<button type="button" id="again" class="btn again">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q=[
+{q:`Kolik minut týdně stráví chůzí člověk, který chodí pět všedních dnů po 35 minutách a v sobotu i v neděli vždy hodinu a čtvrt?`,a:[`325`],show:`325`},
+{q:`Kolik korun vrátí prodavačka zákazníkovi, který za tři balení kávy po 289 korunách zaplatí dvoutisícovkou?`,a:[`1 133`,`1133`],show:`1 133`},
+{q:`Kolik procent je 63 z 180?`,a:[`35`],show:`35`},
+{q:`Kolik korun zaplatí za vodu za celý rok domácnost, která platí měsíční zálohu 1 850 korun a při ročním vyúčtování doplatí 740 korun?`,a:[`22940`,`22 940`],show:`22 940`},
+{q:`Kolik korun stojí 350 gramů sýra, jehož kilogram stojí 260 korun?`,a:[`91`],show:`91`},
+{q:`Kolik korun stojí dlaždice na podlahu o rozměrech 2,4 × 1,8 metru, jestliže jedna dlaždice o rozměru 30 × 30 centimetrů stojí 45 korun, žádná se nemusí řezat a spáry se nepočítají?`,a:[`2 160`,`2160`],show:`2 160`},
+{q:`Kolik korun zaplatí za benzin na cestu dlouhou 280 kilometrů řidič auta se spotřebou 7,5 litru na 100 kilometrů, jestliže litr benzinu stojí 38 korun?`,a:[`798`],show:`798`},
+{q:`Kolik gramů masa zůstane z kuřete vážícího 2,4 kilogramu, jestliže kosti a kůže tvoří 35 % jeho hmotnosti?`,a:[`1560`,`1 560`],show:`1 560`},
+{q:`Kolik korun zaplatí každý ze tří přátel, když si účet 1 290 korun navýšený o 10 % spropitného rozdělí rovným dílem?`,a:[`473`],show:`473`},
+{q:`Kolik korun stojí elektřina pro přímotop o příkonu 1 500 W, který je 30 dní zapnutý 6 hodin denně, při ceně 5,80 Kč za kWh?`,a:[`1566`,`1 566`],show:`1 566`}
+];
+const EV=[`Na hlavu jako ve 30 to tentokrát nestačilo a k slibu titulku zbývá ještě kus cesty. Postupy ale většinou nezmizely, jen se v hlavě nestihne udržet mezivýsledek. Pár příkladů týdně zpaměti tenhle odstup zkracuje rychleji, než by člověk čekal.`,`Hlava jako ve 30 to zatím není, základ je ale pevný. Převody času a jednoduchá procenta jdou spolehlivě, jakmile je však potřeba držet v hlavě dva mezivýsledky najednou, třeba u spropitného nebo u ceny dlaždic, začne se to sypat. Od slibu titulku vás dělí hlavně cvik, ne schopnosti.`,`K hlavě jako ve 30 chybí jen málo. Procenta, převody i slovní úlohy zvládáte zpaměti a chyba přišla nejspíš u delšího řetězce kroků, typicky jeden přehlédnutý krok nebo posunutá desetinná čárka.`,`Slib titulku je splněný: počítáte z hlavy jako ve 30. Deset úloh bez chyby, včetně elektřiny pro přímotop, kde se lidé nejčastěji spletou při převodu wattů na kilowatthodiny. Takový výsledek odevzdá menšina řešitelů.`];
+const quiz=document.getElementById(`quiz`);
+const check=document.getElementById(`check`);
+const hint=document.getElementById(`hint`);
+const result=document.getElementById(`result`);
+let locked=false;
+function norm(s){return s.normalize(`NFD`).replace(/[\u0300-\u036f]/g,``).toLowerCase().replace(/\s+/g,``).replace(/,/g,`.`).trim();}
+const inputs=[];const fbs=[];
+Q.forEach(function(item,i){
+  const box=document.createElement(`div`);box.className=`box`;
+  const p=document.createElement(`p`);p.className=`qtext`;p.textContent=(i+1)+`. `+item.q;
+  const inp=document.createElement(`input`);inp.type=`text`;inp.className=`inp`;inp.inputMode=`decimal`;inp.autocomplete=`off`;inp.placeholder=`Napište číslo`;
+  inp.setAttribute(`aria-label`,`Odpověď na otázku `+(i+1));
+  const fb=document.createElement(`div`);fb.className=`fb`;
+  inp.addEventListener(`input`,update);
+  box.appendChild(p);box.appendChild(inp);box.appendChild(fb);quiz.appendChild(box);
+  inputs.push(inp);fbs.push(fb);
+});
+function update(){
+  if(locked)return;
+  const all=inputs.every(function(x){return x.value.trim()!==``;});
+  check.disabled=!all;hint.textContent=all?``:`Odpovězte prosím na všechny otázky`;
+}
+check.addEventListener(`click`,function(){
+  if(locked)return;locked=true;let score=0;
+  Q.forEach(function(item,i){
+    const v=norm(inputs[i].value);const ok=item.a.some(function(a){return norm(a)===v;});
+    inputs[i].readOnly=true;inputs[i].classList.add(ok?`ok`:`bad`);
+    fbs[i].className=`fb `+(ok?`ok`:`bad`);
+    fbs[i].textContent=ok?`Správně.`:`Špatně. Správná odpověď: `+item.show;
+    if(ok)score++;
+  });
+  document.getElementById(`score`).textContent=score+` z `+Q.length;
+  document.getElementById(`evtext`).textContent=score<=3?EV[0]:score<=6?EV[1]:score<=9?EV[2]:EV[3];
+  check.disabled=true;hint.textContent=``;
+  result.style.display=`block`;result.scrollIntoView({behavior:`smooth`,block:`start`});
+});
+document.getElementById(`again`).addEventListener(`click`,function(){
+  locked=false;
+  inputs.forEach(function(x,i){x.value=``;x.readOnly=false;x.classList.remove(`ok`,`bad`);fbs[i].textContent=``;fbs[i].className=`fb`;});
+  result.style.display=`none`;update();window.scrollTo({top:0,behavior:`smooth`});
+});
+update();
+</script>
+</body>
+</html>
