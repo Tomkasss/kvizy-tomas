@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test stáří mozku pro seniory: kdo v něm dá 10/10, ten má pořád svěží mysl jako ve 20</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px;
+    background: #f5f0eb;
+    font-family: Georgia, "Times New Roman", serif;
+    color: #2c2c2c;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.25; margin: 8px 0 16px; color: #2c2c2c; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 28px; }
+  .question {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 16px; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    cursor: pointer;
+  }
+  .option:hover:not(:disabled) { background: #ede8e1; }
+  .option.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .option:disabled { cursor: default; }
+  .option.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .option.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .feedback { margin-top: 14px; font-size: 1rem; display: none; }
+  .feedback.ok { color: #1e5631; display: block; }
+  .feedback.bad { color: #721c24; display: block; }
+  .btn {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn:hover:not(:disabled) { background: #4a6b4e; }
+  .btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint { text-align: center; color: #721c24; margin-top: 12px; font-size: 0.95rem; }
+  .result {
+    display: none;
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+    border-top: 4px solid #5b7e5f;
+  }
+  .score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  .result-text { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  .btn-retry { background: #8c7b6b; margin-top: 28px; }
+  .btn-retry:hover:not(:disabled) { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    .question, .result { padding: 20px 16px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test stáří mozku pro seniory: kdo v něm dá 10/10, ten má pořád svěží mysl jako ve 20</h1>
+  <p class="perex">Kolik let je doopravdy vaší hlavě? Tenhle test sahá do knih, filmů a pověstí, které jste poznali v mládí, i do dějin, techniky a dalekých zemí. Kdo zvládne všechno bez chyby, má mysl stejně svěží jako ve dvaceti.</p>
+  <div id="quiz"></div>
+  <button type="button" class="btn" id="evaluate" disabled>Vyhodnotit</button>
+  <p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+  <div class="result" id="result">
+    <p class="score" id="score"></p>
+    <p class="result-text" id="result-text"></p>
+    <button type="button" class="btn btn-retry" id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+(function () {
+  const questions = [
+    { q: `Která česká tenistka vyhrála v roce 1998 dvouhru ve Wimbledonu?`, o: [`Hana Mandlíková`, `Jana Novotná`, `Helena Suková`, `Martina Navrátilová`], c: 1 },
+    { q: `Ve které válce se odehrává román Vojna a mír?`, o: [`v krymské válce`, `v sedmileté válce`, `v rusko-turecké válce`, `v napoleonských válkách`], c: 3 },
+    { q: `Kdo si v roce 1876 nechal patentovat telefon?`, o: [`Alexander Graham Bell`, `Werner von Siemens`, `Samuel Morse`, `Heinrich Hertz`], c: 0 },
+    { q: `Který herec hrál Fanfána Tulipána ve filmu z roku 1952?`, o: [`Jean Marais`, `Yves Montand`, `Gérard Philipe`, `Jean Gabin`], c: 2 },
+    { q: `Kdo byl podle Bible otcem Izáka?`, o: [`Jákob`, `Abraham`, `Mojžíš`, `Noe`], c: 1 },
+    { q: `Kdo složil Uherské rapsodie?`, o: [`Franz Liszt`, `Johannes Brahms`, `Béla Bartók`, `Zoltán Kodály`], c: 0 },
+    { q: `Který jazyk je úředním jazykem Brazílie?`, o: [`španělština`, `italština`, `francouzština`, `portugalština`], c: 3 },
+    { q: `Kdo byl prvním kancléřem Spolkové republiky Německo?`, o: [`Willy Brandt`, `Ludwig Erhard`, `Konrad Adenauer`, `Helmut Schmidt`], c: 2 },
+    { q: `Kdo podle pověsti povede rytíře spící v hoře Blaník?`, o: [`svatý Václav`, `Bruncvík`, `Přemysl Oráč`, `Karel IV.`], c: 0 },
+    { q: `Kdo namaloval obraz Burlaci na Volze?`, o: [`Ivan Ajvazovskij`, `Ivan Šiškin`, `Vasilij Surikov`, `Ilja Repin`], c: 3 }
+  ];
+  const letters = [`a`, `b`, `c`, `d`];
+  const results = [
+    { min: 0, max: 3, text: `Věk mozku podle testu: kolem 80 let. Tentokrát se odpovědi nechaly hledat dlouho a řada z nich se nenašla. Paměť ale reaguje na trénink v každém věku. Pomáhá vracet se ke knihám, křížovkám a k rozhovorům o tom, co jste kdysi četli a viděli.` },
+    { min: 4, max: 6, text: `Věk mozku podle testu: 60 až 65 let. Základ držíte pevně, jen některá jména už se schovávají hlouběji. Stačilo by si pár z nich vybavit o chvilku rychleji a výsledek by poskočil.` },
+    { min: 7, max: 9, text: `Věk mozku podle testu: 35 až 45 let. Jistě se pohybujete mezi knihami, sportem, hudbou i dějinami a zaváháte jen výjimečně. Od plného počtu vás dělí jen pár odpovědí.` },
+    { min: 10, max: 10, text: `Věk mozku podle testu: 20 let. Deset z deseti a ani jedna chyba. Titulek to sliboval a vy jste to splnili: hlava jako ve dvaceti, bystrá a připravená na cokoli.` }
+  ];
+
+  const quizEl = document.getElementById(`quiz`);
+  const evalBtn = document.getElementById(`evaluate`);
+  const hint = document.getElementById(`hint`);
+  const resultEl = document.getElementById(`result`);
+  const scoreEl = document.getElementById(`score`);
+  const resultText = document.getElementById(`result-text`);
+  const retryBtn = document.getElementById(`retry`);
+  let answers = [];
+  let locked = false;
+
+  function render() {
+    quizEl.innerHTML = ``;
+    answers = new Array(questions.length).fill(null);
+    locked = false;
+    questions.forEach(function (item, qi) {
+      const box = document.createElement(`div`);
+      box.className = `question`;
+      const p = document.createElement(`p`);
+      p.className = `q-text`;
+      p.textContent = (qi + 1) + `. ` + item.q;
+      box.appendChild(p);
+      const opts = document.createElement(`div`);
+      opts.className = `options`;
+      item.o.forEach(function (text, oi) {
+        const b = document.createElement(`button`);
+        b.type = `button`;
+        b.className = `option`;
+        b.textContent = letters[oi] + `) ` + text;
+        b.addEventListener(`click`, function () {
+          if (locked) return;
+          answers[qi] = oi;
+          Array.prototype.forEach.call(opts.children, function (el) { el.classList.remove(`selected`); });
+          b.classList.add(`selected`);
+          updateState();
+        });
+        opts.appendChild(b);
+      });
+      box.appendChild(opts);
+      const fb = document.createElement(`p`);
+      fb.className = `feedback`;
+      box.appendChild(fb);
+      quizEl.appendChild(box);
+    });
+    resultEl.style.display = `none`;
+    evalBtn.style.display = `block`;
+    updateState();
+  }
+
+  function updateState() {
+    const done = answers.every(function (a) { return a !== null; });
+    evalBtn.disabled = !done;
+    hint.style.display = done ? `none` : `block`;
+  }
+
+  evalBtn.addEventListener(`click`, function () {
+    if (evalBtn.disabled) return;
+    locked = true;
+    let score = 0;
+    const boxes = quizEl.querySelectorAll(`.question`);
+    questions.forEach(function (item, qi) {
+      const box = boxes[qi];
+      const btns = box.querySelectorAll(`.option`);
+      const fb = box.querySelector(`.feedback`);
+      btns.forEach(function (b, oi) {
+        b.disabled = true;
+        b.classList.remove(`selected`);
+        if (oi === item.c) b.classList.add(`correct`);
+        else if (oi === answers[qi]) b.classList.add(`wrong`);
+      });
+      if (answers[qi] === item.c) {
+        score++;
+        fb.className = `feedback ok`;
+        fb.textContent = `Správně.`;
+      } else {
+        fb.className = `feedback bad`;
+        fb.textContent = `Špatně. Správná odpověď: ` + letters[item.c] + `) ` + item.o[item.c];
+      }
+    });
+    scoreEl.textContent = score + ` z ` + questions.length;
+    const r = results.find(function (x) { return score >= x.min && score <= x.max; });
+    resultText.textContent = r ? r.text : ``;
+    evalBtn.style.display = `none`;
+    hint.style.display = `none`;
+    resultEl.style.display = `block`;
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  });
+
+  retryBtn.addEventListener(`click`, function () {
+    render();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
