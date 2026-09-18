@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test pro ty, co mají rádi český jazyk: 10 otázek odhalí, jak je na tom vaše znalost mateřštiny</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin-top:8px;font-size:.95rem;display:none}
+.fb.ok{color:#1e5631;display:block}
+.fb.bad{color:#721c24;display:block}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a7f74;font-size:.95rem;margin-top:12px}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.evtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test pro ty, co mají rádi český jazyk: 10 otázek odhalí, jak je na tom vaše znalost mateřštiny</h1>
+<p class="perex">Rádi listujete slovníkem, zarazí vás chyba v novinovém titulku a z hezky zvoleného slova máte radost? Pak je čas zjistit, jestli vaše láska k mateřštině stojí i na pevných znalostech, nebo spíš na tom, co vám zní přirozeně.</p>
+<div id="quiz"></div>
+<button class="btn" id="check" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="evtext" id="evtext"></p>
+<button class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q = [
+{q:`Jakým druhem číslovky je slovo „dvojí"?`,o:[`základní`,`řadová`,`druhová`,`násobná`],a:2},
+{q:`Která dvojice přídavných jmen odvozených od názvů Brandýs a Kavkaz je napsána správně?`,o:[`brandýsský a kavkazský`,`brandýsský a kavkaský`,`brandýský a kavkazský`,`brandýský a kavkaský`],a:2},
+{q:`Jak zní spisovný tvar 7. pádu množného čísla slova „host"?`,o:[`hosty`,`hosti`,`hostmi`,`hostěmi`],a:0},
+{q:`Jakým větným členem je slovo „unavený" ve větě „Otec se vrátil z práce unavený"?`,o:[`přívlastkem shodným`,`doplňkem`,`příslovečným určením způsobu`,`jmennou částí přísudku`],a:1},
+{q:`Do kterého funkčního stylu patří strukturovaný životopis?`,o:[`prostě sdělovacího`,`odborného`,`publicistického`,`administrativního`],a:3},
+{q:`Ve kterém spojení předložka podle spisovné výslovnosti obvykle nenese hlavní přízvuk?`,o:[`skrz okno`,`přes okno`,`do okna`,`za oknem`],a:0},
+{q:`K jakému vzoru patří sloveso „skákat"?`,o:[`nese`,`peče`,`bere`,`maže`],a:3},
+{q:`V jakém významovém poměru jsou věty v souvětí „Pršelo, a proto jsme zůstali doma"?`,o:[`příčinném`,`důsledkovém`,`odporovacím`,`vylučovacím`],a:1},
+{q:`Ze kterého jazyka převzala čeština slovo „kočár"?`,o:[`z němčiny`,`z italštiny`,`z maďarštiny`,`z francouzštiny`],a:2},
+{q:`Pod vedením kterého jazykovědce vznikla první úřední pravidla českého pravopisu?`,o:[`Josef Dobrovský`,`Václav Ertl`,`František Trávníček`,`Jan Gebauer`],a:3}
+];
+const E = [`Mateřštinu používáte bez potíží, ale její mluvnická stránka se vám už vytratila. Mluvíte i píšete, jak jste zvyklí. Jakmile ale máte tvar zařadit ke vzoru nebo říct, co se ve větě vlastně děje, nemáte se o co opřít. Stačí projít školní přehled tvarosloví a skladby a velká část se vám vrátí.`,`Na slušné úrovni to je. Běžné tvary a styly textů poznáte. Hůř vám jde to, co se ve škole probíralo jen krátce: slovesné vzory, původ přejatých slov nebo počátky pravopisné normy. V těchto oblastech se u vás čeština opírá spíš o cit než o znalost.`,`S češtinou jste na tom velmi dobře. Nejen víte, jak jazyk zní, ale rozumíte i tomu, jak funguje. Chybovat jste mohli nanejvýš tam, kde otázka šla nad běžnou maturitní látku. Na tom se dá stavět i při psaní náročnějších textů.`,`Plný počet. Mateřštinu máte zmapovanou do hloubky, od výslovnosti přes časování sloves až po dějiny spisovné normy. Když si kamarádi nebo kolegové nebudou vědět rady se vzorem, přízvukem nebo původem slova, můžete jim klidně dělat jazykovou poradnu.`];
+const L = [`a`,`b`,`c`,`d`];
+let answers = new Array(Q.length).fill(null);
+let locked = false;
+const quiz = document.getElementById(`quiz`);
+const checkBtn = document.getElementById(`check`);
+const hint = document.getElementById(`hint`);
+function render() {
+  quiz.innerHTML = ``;
+  Q.forEach((q, i) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (i + 1) + `. ` + q.q;
+    box.appendChild(p);
+    q.o.forEach((o, j) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = L[j] + `) ` + o;
+      b.dataset.q = i; b.dataset.o = j;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[i] = j;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`sel`));
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`div`);
+    fb.className = `fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+}
+function update() {
+  const all = answers.every(a => a !== null);
+  checkBtn.disabled = !all;
+  hint.style.display = all ? `none` : `block`;
+}
+checkBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) return;
+  locked = true;
+  let score = 0;
+  quiz.querySelectorAll(`.box`).forEach((box, i) => {
+    const q = Q[i];
+    const opts = box.querySelectorAll(`.opt`);
+    opts.forEach((b, j) => {
+      b.disabled = true;
+      b.classList.remove(`sel`);
+      if (j === q.a) b.classList.add(`correct`);
+      else if (j === answers[i]) b.classList.add(`wrong`);
+    });
+    const fb = box.querySelector(`.fb`);
+    if (answers[i] === q.a) { score++; fb.className = `fb ok`; fb.textContent = `Správně.`; }
+    else { fb.className = `fb bad`; fb.textContent = `Špatně. Správná odpověď: ` + L[q.a] + `) ` + q.o[q.a]; }
+  });
+  let idx = score <= 3 ? 0 : score <= 6 ? 1 : score <= 9 ? 2 : 3;
+  document.getElementById(`score`).textContent = score + ` z ` + Q.length;
+  document.getElementById(`evtext`).textContent = E[idx];
+  checkBtn.style.display = `none`;
+  hint.style.display = `none`;
+  const r = document.getElementById(`result`);
+  r.style.display = `block`;
+  r.scrollIntoView({behavior: `smooth`, block: `start`});
+});
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  answers = new Array(Q.length).fill(null);
+  locked = false;
+  document.getElementById(`result`).style.display = `none`;
+  checkBtn.style.display = `block`;
+  render(); update();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+render(); update();
+</script>
+</body>
+</html>
