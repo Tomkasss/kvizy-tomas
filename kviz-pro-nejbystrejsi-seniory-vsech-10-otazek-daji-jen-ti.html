@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro nejbystřejší seniory: všech 10 otázek dají jen ti, kterým to v důchodu pořád pálí naplno</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 20px 64px;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+h1 {
+  font-size: 1.9rem;
+  line-height: 1.3;
+  color: #2c2c2c;
+  margin: 0 0 20px;
+}
+.perex {
+  font-size: 1.05rem;
+  color: #4a4a4a;
+  margin: 0 0 32px;
+}
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni {
+  font-weight: bold;
+  font-size: 1.15rem;
+  color: #2c2c2c;
+  margin: 0 0 18px;
+}
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.varianta:last-child { margin-bottom: 0; }
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana {
+  background: #dcd3c7;
+  border: 1px solid #a89e92;
+  font-weight: bold;
+}
+.varianta.spravna {
+  background: #d4edda;
+  border: 1px solid #7cb987;
+  color: #1e5631;
+}
+.varianta.spatna {
+  background: #f8d7da;
+  border: 1px solid #d4848a;
+  color: #721c24;
+}
+#vyhodnotit, #znovu {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#znovu { background: #8c7b6b; }
+#znovu:hover { background: #756658; }
+#hlaska {
+  text-align: center;
+  color: #721c24;
+  margin-top: 14px;
+  min-height: 1.4em;
+}
+#vysledek {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 24px;
+}
+#skore {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #5b7e5f;
+  text-align: center;
+  margin: 0 0 12px;
+}
+#hodnoceni {
+  font-size: 1rem;
+  color: #4a4a4a;
+  text-align: center;
+  margin: 0;
+}
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka { padding: 20px; }
+}
+</style>
+</head>
+<body>
+
+<h1>Kvíz pro nejbystřejší seniory: všech 10 otázek dají jen ti, kterým to v důchodu pořád pálí naplno</h1>
+
+<p class="perex">Bible, britský trůn, zeměpis, rock, české dějiny, Jirásek, hokej, film, malířství i centrální banka. Deset z deseti dá jen ten, komu paměť i zvědavost v důchodu slouží bez přestávky.</p>
+
+<div id="kviz"></div>
+
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p id="hlaska"></p>
+
+<div id="vysledek" hidden>
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+
+<script>
+var otazky = [
+  {
+    zneni: `1. Která skupina vydala v roce 1973 album The Dark Side of the Moon?`,
+    varianty: [`Pink Floyd`, `Led Zeppelin`, `Deep Purple`, `Genesis`],
+    spravna: 0
+  },
+  {
+    zneni: `2. Ve kterém státě dnes leží Sedmihradsko?`,
+    varianty: [`Rumunsko`, `Maďarsko`, `Srbsko`, `Bulharsko`],
+    spravna: 0
+  },
+  {
+    zneni: `3. Kdo rozeslal evropským panovníkům návrh mírového svazu křesťanských vládců?`,
+    varianty: [`Petr Chelčický`, `Zikmund Lucemburský`, `Jiří z Poděbrad`, `Karel IV.`],
+    spravna: 2
+  },
+  {
+    zneni: `4. Ve kterém městě se odehrává Jiráskova novela Filosofská historie?`,
+    varianty: [`Hronov`, `Polička`, `Náchod`, `Litomyšl`],
+    spravna: 3
+  },
+  {
+    zneni: `5. Kdo byl podle Starého zákona prvním izraelským králem?`,
+    varianty: [`David`, `Saul`, `Šalamoun`, `Samuel`],
+    spravna: 1
+  },
+  {
+    zneni: `6. Který britský král opakovaně pobýval na léčení v Mariánských Lázních?`,
+    varianty: [`Jiří IV.`, `Jiří V.`, `Eduard VII.`, `Eduard VIII.`],
+    spravna: 2
+  },
+  {
+    zneni: `7. Ve kterém městě získali čeští hokejisté roku 1996 první titul mistrů světa pro samostatnou Českou republiku?`,
+    varianty: [`Helsinky`, `Vídeň`, `Stockholm`, `Petrohrad`],
+    spravna: 1
+  },
+  {
+    zneni: `8. Kdo hrál Karla Kopfrkingla ve filmu Spalovač mrtvol?`,
+    varianty: [`Vlastimil Brodský`, `Miloš Kopecký`, `Josef Somr`, `Rudolf Hrušínský`],
+    spravna: 3
+  },
+  {
+    zneni: `9. Kdo byl prvním guvernérem České národní banky?`,
+    varianty: [`Zdeněk Tůma`, `Miroslav Singer`, `Josef Tošovský`, `Jiří Rusnok`],
+    spravna: 2
+  },
+  {
+    zneni: `10. Kdo namaloval obraz Piják absintu, jehož kopie visí v pražské kavárně Slavia?`,
+    varianty: [`Alfons Mucha`, `Viktor Oliva`, `Luděk Marold`, `Vojtěch Hynais`],
+    spravna: 1
+  }
+];
+
+var hodnoceni = [
+  { min: 0, max: 3, text: `Tentokrát jste se teprve rozjížděli. Žádná ostuda, jiná sada otázek vám může sednout mnohem líp, a tak to zkuste znovu.` },
+  { min: 4, max: 6, text: `Hlava pracuje poctivě. Na něco jste si vzpomněli hned, jindy vám jméno zůstalo schované na jazyku. Tyhle mezery dožene čtení a zvídavost.` },
+  { min: 7, max: 9, text: `Skvělý výsledek, myslíte svižně a spolehlivě. K plnému počtu vám chyběl jen krůček.` },
+  { min: 10, max: 10, text: `Deset z deseti. Patříte k těm, kterým to v důchodu pořád pálí naplno, a nic nenaznačuje, že by se to mělo změnit.` }
+];
+
+var pismena = [`a)`, `b)`, `c)`, `d)`];
+var odpovedi = new Array(otazky.length).fill(null);
+var uzamceno = false;
+
+var kvizEl = document.getElementById(`kviz`);
+var vyhodnotitEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function vykresli() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = o.zneni;
+    box.appendChild(zneni);
+
+    o.varianty.forEach(function (v, j) {
+      var btn = document.createElement(`button`);
+      btn.type = `button`;
+      btn.className = `varianta`;
+      btn.textContent = pismena[j] + ` ` + v;
+      btn.addEventListener(`click`, function () {
+        if (uzamceno) { return; }
+        odpovedi[i] = j;
+        var sousedi = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < sousedi.length; k++) {
+          sousedi[k].classList.remove(`vybrana`);
+        }
+        btn.classList.add(`vybrana`);
+        hlaskaEl.textContent = ``;
+        aktualizujTlacitko();
+      });
+      box.appendChild(btn);
+    });
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function aktualizujTlacitko() {
+  var hotovo = odpovedi.every(function (o) { return o !== null; });
+  vyhodnotitEl.disabled = !hotovo;
+  if (!uzamceno) { hlaskaEl.textContent = hotovo ? `` : `Odpovězte prosím na všechny otázky`; }
+}
+
+vyhodnotitEl.addEventListener(`click`, function () {
+  if (vyhodnotitEl.disabled) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  uzamceno = true;
+  var skore = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  otazky.forEach(function (o, i) {
+    var tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].classList.remove(`vybrana`);
+      if (j === o.spravna) {
+        tlacitka[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === o.spravna) { skore++; }
+  });
+
+  skoreEl.textContent = skore + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore >= hodnoceni[h].min && skore <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+  vyhodnotitEl.disabled = true;
+  hlaskaEl.textContent = ``;
+  vysledekEl.hidden = false;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+znovuEl.addEventListener(`click`, function () {
+  uzamceno = false;
+  odpovedi = new Array(otazky.length).fill(null);
+  vysledekEl.hidden = true;
+  hlaskaEl.textContent = ``;
+  vykresli();
+  aktualizujTlacitko();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+vykresli();
+aktualizujTlacitko();
+</script>
+
+</body>
+</html>
