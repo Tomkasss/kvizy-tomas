@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro seniory: těžká rozcvička mozku. Kdo v ní dokáže dát 10/10, ten má pořád mladý mozek i v důchodu</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover:not(.ok):not(.bad):not(.sel){background:#f7f4f0}
+.fb{margin-top:8px;font-size:.95rem}
+.fb.ok{color:#1e5631}.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a6d5a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rt{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#again{background:#8c7b6b}
+#again:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:16px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro seniory: těžká rozcvička mozku. Kdo v ní dokáže dát 10/10, ten má pořád mladý mozek i v důchodu</h1>
+<p class="perex">Francouzský filmový padouch, Haškův dobrý voják, velbloudí hrb i nejstarší maraton světa. Kdo z vás, milí senioři, pamatuje kino šedesátých let i školní přírodopis, má napůl vyhráno.</p>
+<div id="quiz"></div>
+<button class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="rt" id="rtext"></p>
+<button class="btn" id="again">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q=[
+{q:`Čím si Haškův dobrý voják Švejk přivydělával, než ho zastihla válka?`,o:[`čepoval pivo v hostinci`,`prodával psy`,`roznášel noviny`,`spravoval deštníky`],c:1},
+{q:`Po které řece vede velká část hranice mezi Spojenými státy a Mexikem?`,o:[`po Pecosu`,`po Coloradu`,`po Rio Grande`,`po Brazosu`],c:2},
+{q:`Který herec hrál Fantomase ve francouzských filmech ze šedesátých let?`,o:[`Louis de Funès`,`Jean-Paul Belmondo`,`Alain Delon`,`Jean Marais`],c:3},
+{q:`Co mají velbloudi uloženo v hrbu?`,o:[`zásobu vody`,`zásobu tuku`,`zásobu natrávené potravy`,`zásobu minerálních solí`],c:1},
+{q:`Které dílo tradičně zahajuje hudební festival Pražské jaro?`,o:[`Dvořákova symfonie Z nového světa`,`Beethovenova Devátá symfonie`,`Janáčkova Sinfonietta`,`Smetanova Má vlast`],c:3},
+{q:`Čím se živil apoštol Matouš, než ho Ježíš povolal?`,o:[`byl rybářem`,`byl tesařem`,`byl celníkem`,`byl pastýřem`],c:2},
+{q:`Ve kterém městě uzavřely Prusko a Rakousko v roce 1866 konečnou mírovou smlouvu, která mezi nimi ukončila válku?`,o:[`v Praze`,`ve Vídni`,`v Berlíně`,`v Mikulově`],c:0},
+{q:`Ze kterých semen se připravuje pasta tahini?`,o:[`z cizrny`,`z arašídů`,`ze slunečnicových semínek`,`ze sezamu`],c:3},
+{q:`Kdy bývá u nás nejkratší den v roce?`,o:[`kolem 13. prosince`,`kolem 21. prosince`,`kolem 1. ledna`,`kolem 6. prosince`],c:1},
+{q:`Ve kterém městě se od roku 1897 běží nejstarší každoroční maraton na světě?`,o:[`v Bostonu`,`v New Yorku`,`v Košicích`,`v Londýně`],c:0}
+];
+const E=[
+{min:0,max:3,t:`Tentokrát se hlava rozjížděla pomalu a víc odpovědí jste spíš tipovali. Nevadí, paměť se rozhýbe tím, že ji používáte. Za pár dní si otázky projděte znovu a u těch, které vás zaskočily, si dohledejte, jak to s nimi je.`},
+{min:4,max:6,t:`Polovina a kousek navíc. Mozek je v provozu a na známé věci si sáhne. Víc vás potrápily okruhy, kterým se běžně nevěnujete. Stačí trocha zvědavosti navíc a příště se posunete o patro výš.`},
+{min:7,max:9,t:`Takhle odpovídá člověk, který má přehled a nenechá se snadno nachytat. Hlava vám v důchodu pracuje svižně a plné skóre jste měli skoro v kapse. Chybělo jen málo.`},
+{min:10,max:10,t:`Bez jediné chyby. Přesně jak slibuje titulek: máte pořád mladý mozek i v důchodu. Nezaskočil vás Švejk ani Fantomas, nespletl vás velbloudí hrb ani tahini a stejně jistě jste si poradili s Pražským jarem, rokem 1866, nejkratším dnem v roce i nejstarším maratonem.`}
+];
+const quiz=document.getElementById(`quiz`);
+const evalBtn=document.getElementById(`eval`);
+const hint=document.getElementById(`hint`);
+const result=document.getElementById(`result`);
+let answers=[],locked=false;
+function render(){
+  quiz.innerHTML=``;answers=new Array(Q.length).fill(null);locked=false;quiz.classList.remove(`locked`);
+  Q.forEach((q,i)=>{
+    const box=document.createElement(`div`);box.className=`box`;
+    const t=document.createElement(`p`);t.className=`qt`;t.textContent=(i+1)+`. `+q.q;box.appendChild(t);
+    q.o.forEach((o,j)=>{
+      const b=document.createElement(`button`);b.type=`button`;b.className=`opt`;
+      b.textContent=`abcd`[j]+`) `+o;
+      b.addEventListener(`click`,()=>{
+        if(locked)return;answers[i]=j;
+        box.querySelectorAll(`.opt`).forEach(x=>x.classList.remove(`sel`));b.classList.add(`sel`);update();
+      });
+      box.appendChild(b);
+    });
+    const fb=document.createElement(`p`);fb.className=`fb`;box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  result.style.display=`none`;update();
+}
+function update(){
+  const all=answers.every(a=>a!==null);
+  evalBtn.disabled=!all||locked;
+  hint.style.display=(!all&&!locked)?`block`:`none`;
+  evalBtn.style.display=locked?`none`:`block`;
+}
+evalBtn.addEventListener(`click`,()=>{
+  if(!answers.every(a=>a!==null))return;
+  locked=true;quiz.classList.add(`locked`);let s=0;
+  quiz.querySelectorAll(`.box`).forEach((box,i)=>{
+    const opts=box.querySelectorAll(`.opt`);const c=Q[i].c;const fb=box.querySelector(`.fb`);
+    opts.forEach(o=>o.classList.remove(`sel`));
+    opts[c].classList.add(`ok`);
+    if(answers[i]===c){s++;fb.className=`fb ok`;fb.textContent=`Správně.`;}
+    else{opts[answers[i]].classList.add(`bad`);fb.className=`fb bad`;fb.textContent=`Správná odpověď: `+`abcd`[c]+`) `+Q[i].o[c];}
+  });
+  document.getElementById(`score`).textContent=s+` z `+Q.length;
+  const e=E.find(x=>s>=x.min&&s<=x.max);
+  document.getElementById(`rtext`).textContent=e?e.t:``;
+  result.style.display=`block`;update();
+  result.scrollIntoView({behavior:`smooth`,block:`start`});
+});
+document.getElementById(`again`).addEventListener(`click`,()=>{render();window.scrollTo({top:0,behavior:`smooth`});});
+render();
+</script>
+</body>
+</html>
