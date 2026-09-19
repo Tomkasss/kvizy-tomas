@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro ty, co ovládají jazyk: 10, slov která používali naši praprarodiče. Víte, co znamenají?</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px;color:#2c2c2c}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer;line-height:1.4}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin-top:8px;font-size:.95rem;line-height:1.4}
+.fb.ok{color:#1e5631}
+.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a6d6d;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro ty, co ovládají jazyk: 10, slov která používali naši praprarodiče. Víte, co znamenají?</h1>
+<p class="perex">Naši praprarodiče mluvili češtinou, ve které by se dnešní člověk místy ztratil. Deset slov, která kdysi zněla v chalupách i v městských ulicích, ukáže, kolik z té staré slovní zásoby ve vás pořád žije.</p>
+<div id="quiz"></div>
+<button class="btn" id="submit" type="button" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="rtext" id="rtext"></p>
+<button class="btn" id="retry" type="button">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q=[
+{q:`Co byl štrozok?`,o:[`pytel na mouku ze mlýna`,`plachta na přikrytí vozu`,`vak s obrokem pro koně`,`slamník na spaní v posteli`],c:3},
+{q:`Co byl šnuptychl?`,o:[`kapesník na utírání nosu`,`pytlík na šňupavý tabák`,`šátek, který si ženy vázaly na hlavu`,`ubrousek na přikrytí chleba v ošatce`],c:0},
+{q:`Kam mířil ten, kdo si vyšel na špacír?`,o:[`na taneční zábavu do hospody`,`na pouť do sousední vsi`,`na týdenní trh do města`,`na volnou procházku po okolí`],c:3},
+{q:`Na čem si vydělával člověk, který hauzíroval?`,o:[`na nádenické práci v cihelně`,`na sezonní práci u sedláků ve žních`,`na podomním obchodu s drobným zbožím`,`na pronajímání pokojů ve vlastním domě`],c:2},
+{q:`Co dělal člověk, který brebentil?`,o:[`mluvil rychle a nesrozumitelně`,`hlasitě se hádal se sousedy`,`potichu si pobrukoval písničku`,`naříkal a stěžoval si na bolesti`],c:0},
+{q:`Co se dělalo, když ženy chodily na dračky?`,o:[`předl se len na přízi`,`loupal se mák a louskaly ořechy`,`připravovalo se husí peří do peřin`,`šily se a spravovaly košile`],c:2},
+{q:`Co byla u venkovského stavení náspa?`,o:[`vyvýšené místo na peci, kde se v zimě spalo`,`zvýšený chodník podél stěny se vstupními dveřmi`,`přístěnek pro nářadí pod společnou střechou se stodolou`,`udusaná hliněná podlaha stodoly na mlácení obilí`],c:1},
+{q:`Jaký oděv byla čamara?`,o:[`šedý plášť z hrubého sukna s kápí`,`černý kabát zapínaný na šňůrky`,`bílý kožíšek vyšívaný barevnou vlnou`,`modrý plátěný kabátec s mosaznými knoflíky`],c:1},
+{q:`Co sháněl člověk, který hledal kvartýr?`,o:[`byt, kde by mohl bydlet`,`výpomoc na čtvrt roku u sedláka`,`čtvrtku vína v hospodě`,`kupce na úrodu z pole`],c:0},
+{q:`Jaké zboží nabízel ve své dílně pasíř?`,o:[`hliněné hrnce a mísy`,`kovové spony, kování a ozdoby`,`tkané pásky a tkanice z příze`,`vyřezávané dřevěné lžíce a vařečky`],c:1}
+];
+const B=[
+{min:0,max:3,t:`Slovník praprarodičů je pro vás zatím zavřená kniha. Otevírá se ale snadno: pár večerů s venkovskými povídkami z předminulého století a slova jako náspa nebo dračky přestanou být hádankou.`},
+{min:4,max:6,t:`Něco z jazyka praprarodičů vám zůstalo, hlavně slova ze školní četby a z pohádek. U výrazů z venkovské práce a z hovorové řeči jste ale častěji odhadovali, než věděli.`},
+{min:7,max:9,t:`Jazyk ovládáte i v jeho starší podobě. Většině toho, co by praprarodiče řekli u stolu, byste rozuměli, a chybovali jste nanejvýš u slov, která dnes už skoro nikdo neslyší.`},
+{min:10,max:10,t:`Všech deset. Staré češtině rozumíte tak, že byste se s praprarodiči domluvili bez tlumočníka, a to i u slov, na která narazí jen pozorný čtenář.`}
+];
+const quiz=document.getElementById(`quiz`),submit=document.getElementById(`submit`),hint=document.getElementById(`hint`),result=document.getElementById(`result`);
+let sel=[],locked=false;
+function render(){
+  quiz.innerHTML=``;sel=Q.map(()=>null);locked=false;
+  Q.forEach((q,i)=>{
+    const box=document.createElement(`div`);box.className=`box`;
+    const p=document.createElement(`p`);p.className=`qtext`;p.textContent=(i+1)+`. `+q.q;box.appendChild(p);
+    q.o.forEach((o,j)=>{
+      const b=document.createElement(`button`);b.type=`button`;b.className=`opt`;
+      b.textContent=`abcd`[j]+`) `+o;
+      b.addEventListener(`click`,()=>{
+        if(locked)return;sel[i]=j;
+        box.querySelectorAll(`.opt`).forEach((x,k)=>x.classList.toggle(`sel`,k===j));
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb=document.createElement(`div`);fb.className=`fb`;box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  result.style.display=`none`;update();
+}
+function update(){
+  const all=sel.every(x=>x!==null);
+  submit.disabled=!all||locked;
+  hint.style.display=(all||locked)?`none`:`block`;
+}
+submit.addEventListener(`click`,()=>{
+  if(locked||sel.some(x=>x===null))return;
+  locked=true;let s=0;
+  quiz.querySelectorAll(`.box`).forEach((box,i)=>{
+    const opts=box.querySelectorAll(`.opt`),q=Q[i],fb=box.querySelector(`.fb`);
+    opts.forEach((b,k)=>{b.disabled=true;b.classList.remove(`sel`);
+      if(k===q.c)b.classList.add(`ok`);else if(k===sel[i])b.classList.add(`bad`);});
+    if(sel[i]===q.c){s++;fb.className=`fb ok`;fb.textContent=`Správně.`;}
+    else{fb.className=`fb bad`;fb.textContent=`Špatně. Správná odpověď: `+`abcd`[q.c]+`) `+q.o[q.c];}
+  });
+  document.getElementById(`score`).textContent=s+` z `+Q.length;
+  const band=B.find(b=>s>=b.min&&s<=b.max);
+  document.getElementById(`rtext`).textContent=band?band.t:``;
+  result.style.display=`block`;update();
+  result.scrollIntoView({behavior:`smooth`,block:`start`});
+});
+document.getElementById(`retry`).addEventListener(`click`,()=>{render();window.scrollTo({top:0,behavior:`smooth`});});
+render();
+</script>
+</body>
+</html>
