@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz starých slov z ČSSR: jenom starší generace v něm dají víc než 8/10. Dnešní mladí už je neznají</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px;color:#2c2c2c}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer;line-height:1.4}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover:not(.ok):not(.bad):not(.sel){background:#f7f4f0}
+.fb{margin-top:8px;font-size:.95rem}
+.fb.ok{color:#1e5631}
+.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;font-size:.95rem;margin-top:12px}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:16px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz starých slov z ČSSR: jenom starší generace v něm dají víc než 8/10. Dnešní mladí už je neznají</h1>
+<p class="perex">Tahle slova se v Československu ozývala v továrnách, na úřadech, na vsi i v kasárnách. Kdo tehdy dospíval, vybaví si je bez přemýšlení, dnešní mladí je v běžném hovoru nikdy neslyšeli. Kolik jich ve vás přežilo?</p>
+<div id="quiz"></div>
+<button id="eval" class="btn" disabled>Vyhodnotit</button>
+<p id="hint" class="hint">Odpovězte prosím na všechny otázky</p>
+<div id="result" class="box">
+<p id="score" class="score"></p>
+<p id="rtext" class="rtext"></p>
+<button id="retry" class="btn">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q = [
+{q:`Co vytáhl z tašky člověk, který si na koupaliště přinesl tranďák?`,o:[`kapesní kazetový magnetofon`,`přenosný bateriový televizor`,`přenosný rozhlasový přijímač`,`kufříkový gramofon na desky`],c:2},
+{q:`Co dělal v továrně normovač?`,o:[`určoval, kolik času a lidí vyžaduje každý pracovní úkon`,`kontroloval, zda výrobky odpovídají státním technickým normám`,`hlídal, aby provoz dodržoval hygienické normy hluku a prašnosti`,`posuzoval, zda výrobek smí nést státní značku jakosti`],c:0},
+{q:`Kam mířili mladí, kteří se v neděli chystali na čaje?`,o:[`do cukrárny na zákusek a limonádu`,`na besedu se zajímavým hostem v klubu`,`na vycházku s turistickým oddílem`,`na taneční odpoledne s živou kapelou`],c:3},
+{q:`Co měl na starosti domovní důvěrník v městském činžáku?`,o:[`vybíral od nájemníků nájemné pro bytový podnik`,`za národní výbor dohlížel na údržbu i sváteční výzdobu domu`,`jako okrskář Veřejné bezpečnosti dbal na klid v ulici`,`odečítal nájemníkům stav vodoměrů a plynoměrů`],c:1},
+{q:`Kam patřil člověk, kterému se za socialismu říkalo svazák?`,o:[`do Svazu pro spolupráci s armádou`,`do Svazu požární ochrany`,`do Socialistického svazu mládeže`,`do Svazu družstevních rolníků`],c:2},
+{q:`Proč si mnozí diváci na začátku normalizace kupovali ke staršímu televizoru konvertor?`,o:[`aby zachytili nově spuštěný druhý program`,`aby se televizor po skončení vysílání sám vypnul`,`aby jim televizor začal ukazovat barevný obraz`,`aby zvuk z televizoru šel pouštět do rádia`],c:0},
+{q:`Co sdíleli dva sousedé, kteří měli telefon na podvojné přípojce?`,o:[`jedno telefonní číslo, takže při zvonění mohl hovor vzít kterýkoli z nich`,`jedno účastnické vedení, takže když telefonoval jeden, druhý měl hluchý telefon`,`jeden přístroj na chodbě domu, takže si ho odemykali každý vlastním klíčkem`,`jedno vyúčtování hovorného, takže si poplatky za hovory dělili napůl`],c:1},
+{q:`Na čem hospodařil družstevník, který se po práci v JZD šel starat o záhumenek?`,o:[`na obecní louce, kterou si na sezonu pronajal od národního výboru`,`na malém políčku, které směl obdělávat pro vlastní potřebu`,`na školním pozemku, kde vedl dětem pěstitelský kroužek`,`na zahrádce v osadě, kterou mu přidělil zahrádkářský svaz`],c:1},
+{q:`Kdo nejčastěji usedal do lavic VUML?`,o:[`dělníci, kteří si večer po směně doplňovali maturitu`,`vedoucí pionýrských oddílů na kurzech práce s dětmi`,`straníci a lidé, kteří mířili na vedoucí místa`,`důstojníci z povolání před povýšením do vyšší hodnosti`],c:2},
+{q:`Čím se od ostatních vojáků lišil absík?`,o:[`absolvoval už dřív celou vojnu a do kasáren se vrátil jen na cvičení v záloze`,`absolvoval poddůstojnickou školu a jako desátník pak velel celému družstvu`,`absolvoval už většinu služby a do civilu mu zbývala poslední stovka dní`,`absolvoval vysokou školu s vojenskou katedrou, a proto sloužil zkráceně`],c:3}
+];
+const E = [
+{min:0,max:3,label:`0 až 3 správné odpovědi`,text:`V paměti vám z téhle řeči zůstalo jen málo a většinu odpovědí rozhodl odhad. Tady obvykle končí ti, kdo Československo znají jen z filmů a vyprávění. Titulek to říká předem: bez vlastní zkušenosti se tahle slova trefují těžko.`},
+{min:4,max:6,label:`4 až 6 správných odpovědí`,text:`Část té řeči vám zůstala, ale u víc než třetiny výrazů jste zaváhali nebo tipovali. Takový výsledek je běžný u těch, kdo dobový slovník znají spíš z doslechu. Ke skóre, které titulek přisuzuje starší generaci, ještě kus chybí.`},
+{min:7,max:9,label:`7 až 9 správných odpovědí`,text:`Slova z doby ČSSR máte pevně uložená. Sedm nebo osm bodů je solidní výsledek pamětníka. Devítka už je víc než osm z deseti, jak slibuje titulek, a řadí vás mezi ty, pro které to byla běžná řeč, od telefonní linky po kasárna.`},
+{min:10,max:10,label:`10 správných odpovědí`,text:`Nechybělo nic. Zvládli jste i výraz, který znal hlavně ten, koho se osobně týkal, a nespletly vás ani varianty, které zněly stejně dobově. Na takové skóre dnešní mladí nemají a mezi pamětníky ho dosáhne jen menšina.`}
+];
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+let answers = new Array(Q.length).fill(null);
+let locked = false;
+function render() {
+  quiz.innerHTML = ``;
+  quiz.classList.remove(`locked`);
+  Q.forEach((item, i) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (i + 1) + `. ` + item.q;
+    box.appendChild(p);
+    item.o.forEach((opt, j) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = `abcd`[j] + `) ` + opt;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[i] = j;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`sel`));
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`div`);
+    fb.className = `fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+}
+function update() {
+  const all = answers.every(a => a !== null);
+  evalBtn.disabled = !all || locked;
+  hint.style.display = all || locked ? `none` : `block`;
+}
+evalBtn.addEventListener(`click`, () => {
+  if (locked || answers.some(a => a === null)) return;
+  locked = true;
+  quiz.classList.add(`locked`);
+  let score = 0;
+  quiz.querySelectorAll(`:scope > .box`).forEach((box, i) => {
+    const opts = box.querySelectorAll(`.opt`);
+    const c = Q[i].c;
+    const fb = box.querySelector(`.fb`);
+    opts[c].classList.add(`ok`);
+    if (answers[i] === c) {
+      score++;
+      fb.className = `fb ok`;
+      fb.textContent = `Správně.`;
+    } else {
+      opts[answers[i]].classList.remove(`sel`);
+      opts[answers[i]].classList.add(`bad`);
+      fb.className = `fb bad`;
+      fb.textContent = `Špatně. Správná odpověď: ` + `abcd`[c] + `) ` + Q[i].o[c];
+    }
+  });
+  const e = E.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`score`).textContent = score + ` z ` + Q.length;
+  document.getElementById(`rtext`).textContent = e.text;
+  result.style.display = `block`;
+  update();
+  result.scrollIntoView({behavior: `smooth`, block: `start`});
+});
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  answers = new Array(Q.length).fill(null);
+  locked = false;
+  result.style.display = `none`;
+  render();
+  update();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+render();
+update();
+</script>
+</body>
+</html>
