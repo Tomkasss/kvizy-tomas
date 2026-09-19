@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test paměti pro seniory: co všechno si pamatujete o Československu? Kdo dá 10/10, ten má hlavu jako zamlada</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 36px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.5; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.varianta:last-child { margin-bottom: 0; }
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#hlaska { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; min-height: 1.2em; }
+#vysledek {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+  display: none;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.65; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test paměti pro seniory: co všechno si pamatujete o Československu? Kdo dá 10/10, ten má hlavu jako zamlada</h1>
+<p class="perex">Pamatujete si, čím se tehdy jezdilo, co se večer potajmu poslouchalo v kuchyni nebo odkud přicházely zprávy z nemocnic a sportovišť? Kdo prožil v Československu mládí i dospělost, může teď ukázat, že mu paměť slouží jako dřív.</p>
+<div id="kviz"></div>
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p id="hlaska"></p>
+<div id="vysledek">
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var OTAZKY = [
+  { z: `Kudy vede pražské metro přes Nuselské údolí?`,
+    v: [`po samostatném mostě souběžně s Nuselským mostem`, `po horní mostovce Nuselského mostu vedle aut`, `tunelem pod dnem údolí`, `uvnitř Nuselského mostu pod vozovkou`], s: 3 },
+  { z: `Ze kterého města vysílala za socialismu do Československa rozhlasová stanice Svobodná Evropa?`,
+    v: [`z Vídně`, `ze Západního Berlína`, `z Londýna`, `z Mnichova`], s: 3 },
+  { z: `Kde se od roku 1961 každoročně koná festival filmů pro děti a mládež?`,
+    v: [`v Karlových Varech`, `v Uherském Hradišti`, `ve Zlíně`, `v Ostravě`], s: 2 },
+  { z: `Kterému ministerstvu podléhaly sportovní kluby Dukla?`,
+    v: [`ministerstvu vnitra`, `ministerstvu zemědělství`, `ministerstvu národní obrany`, `ministerstvu dopravy`], s: 2 },
+  { z: `Jaké jméno nesly od roku 1951 plzeňské Škodovy závody?`,
+    v: [`Závody Klementa Gottwalda`, `Závody V. I. Lenina`, `Stalinovy závody`, `Závody Julia Fučíka`], s: 1 },
+  { z: `Jaké mistrovství světa se v únoru 1970 konalo ve Vysokých Tatrách?`,
+    v: [`v klasickém lyžování`, `v alpském lyžování`, `v biatlonu`, `v jízdě na bobech`], s: 0 },
+  { z: `Jaké jméno nesla v letech 1960 až 1990 dnešní Masarykova univerzita v Brně?`,
+    v: [`Univerzita Julia Fučíka`, `Univerzita Zdeňka Nejedlého`, `Univerzita Josefa Dobrovského`, `Univerzita Jana Evangelisty Purkyně`], s: 3 },
+  { z: `Ve které pražské čtvrti se v srpnu 1968 tajně sešel mimořádný sjezd KSČ?`,
+    v: [`v Karlíně`, `v Libni`, `ve Vysočanech`, `v Holešovicích`], s: 2 },
+  { z: `Ve kterém městě provedli lékaři v roce 1968 první transplantaci srdce v Československu?`,
+    v: [`v Praze`, `v Bratislavě`, `v Brně`, `v Hradci Králové`], s: 1 },
+  { z: `Kterým typem letadla zahájily Československé aerolinie v roce 1957 pravidelnou proudovou dopravu?`,
+    v: [`Tupolev Tu-104`, `Iljušin Il-18`, `Iljušin Il-62`, `Jakovlev Jak-40`], s: 0 }
+];
+
+var PISMENA = [`a`, `b`, `c`, `d`];
+
+var HODNOCENI = [
+  { min: 0, max: 3, t: `Tentokrát se vám vzpomínky moc nevybavily. Tyhle věci šly asi mimo vás, i když jste u nich byli. Stačí ale jedno povídání se známými nebo pár starých fotek a spousta z nich se vrátí.` },
+  { min: 4, max: 6, t: `Pevný základ. Hodně z toho, co tehdy hýbalo republikou, máte pořád v paměti, jen některá jména a místa se vám za ta léta rozostřila. Na hlavu jako zamlada to zatím nestačí, ale moc vám nechybí.` },
+  { min: 7, max: 9, t: `Výborné. Pamatujete si nejen, jak se tehdy žilo, ale i co se dělo v továrnách, na univerzitách, v nemocnicích a na sportovištích. Sem se dostane většina pamětníků, kteří tehdy sledovali, co se kolem nich děje.` },
+  { min: 10, max: 10, t: `Všechno správně, a to se podaří jen menšině. Nezaskočilo vás ani první proudové letadlo ČSA. Hlavu máte opravdu jako zamlada.` }
+];
+
+var odpovedi = [];
+var zamceno = false;
+var kvizEl = document.getElementById(`kviz`);
+var btnVyhodnotit = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var btnZnovu = document.getElementById(`znovu`);
+
+function vykresli() {
+  kvizEl.innerHTML = ``;
+  for (var i = 0; i < OTAZKY.length; i++) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = (i + 1) + `. ` + OTAZKY[i].z;
+    box.appendChild(zneni);
+    for (var j = 0; j < OTAZKY[i].v.length; j++) {
+      var btn = document.createElement(`button`);
+      btn.className = `varianta`;
+      btn.type = `button`;
+      btn.textContent = PISMENA[j] + `) ` + OTAZKY[i].v[j];
+      btn.setAttribute(`data-o`, String(i));
+      btn.setAttribute(`data-v`, String(j));
+      btn.addEventListener(`click`, klikVarianta);
+      box.appendChild(btn);
+    }
+    kvizEl.appendChild(box);
+  }
+}
+
+function klikVarianta(e) {
+  if (zamceno) { return; }
+  var btn = e.currentTarget;
+  var o = parseInt(btn.getAttribute(`data-o`), 10);
+  var v = parseInt(btn.getAttribute(`data-v`), 10);
+  odpovedi[o] = v;
+  var sourozenci = btn.parentNode.querySelectorAll(`.varianta`);
+  for (var k = 0; k < sourozenci.length; k++) {
+    sourozenci[k].classList.remove(`vybrana`);
+  }
+  btn.classList.add(`vybrana`);
+  hlaskaEl.textContent = ``;
+  overStav();
+}
+
+function overStav() {
+  var hotovo = 0;
+  for (var i = 0; i < OTAZKY.length; i++) {
+    if (typeof odpovedi[i] === `number`) { hotovo++; }
+  }
+  btnVyhodnotit.disabled = (hotovo !== OTAZKY.length);
+}
+
+function vyhodnot() {
+  var hotovo = 0;
+  for (var i = 0; i < OTAZKY.length; i++) {
+    if (typeof odpovedi[i] === `number`) { hotovo++; }
+  }
+  if (hotovo !== OTAZKY.length) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  zamceno = true;
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  for (var o = 0; o < OTAZKY.length; o++) {
+    var tlacitka = boxy[o].querySelectorAll(`.varianta`);
+    var spravna = OTAZKY[o].s;
+    var zvolena = odpovedi[o];
+    if (zvolena === spravna) { body++; }
+    for (var t = 0; t < tlacitka.length; t++) {
+      tlacitka[t].classList.remove(`vybrana`);
+      if (t === spravna) {
+        tlacitka[t].classList.add(`spravna`);
+      } else if (t === zvolena) {
+        tlacitka[t].classList.add(`spatna`);
+      }
+    }
+  }
+  skoreEl.textContent = body + ` z ` + OTAZKY.length;
+  var text = ``;
+  for (var h = 0; h < HODNOCENI.length; h++) {
+    if (body >= HODNOCENI[h].min && body <= HODNOCENI[h].max) { text = HODNOCENI[h].t; }
+  }
+  hodnoceniEl.textContent = text;
+  vysledekEl.style.display = `block`;
+  btnVyhodnotit.disabled = true;
+  hlaskaEl.textContent = ``;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function znovu() {
+  odpovedi = [];
+  zamceno = false;
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  vykresli();
+  btnVyhodnotit.disabled = true;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+btnVyhodnotit.addEventListener(`click`, vyhodnot);
+btnZnovu.addEventListener(`click`, znovu);
+vykresli();
+</script>
+</body>
+</html>
