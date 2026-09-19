@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test slovenštiny pro seniory: těchto 10 slov zná skoro každý člověk ze starší generace, ale mladí už často nedají ani 5/10</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.1rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover{background:#f7f4f0}
+.locked .opt.sel:hover{background:#dcd3c7}
+.locked .opt.ok:hover{background:#d4edda}
+.locked .opt.bad:hover{background:#f8d7da}
+.fb{margin:12px 0 0;font-size:.95rem}
+.fb:empty{display:none}
+.fb.ok{color:#1e5631}
+.fb.bad{color:#721c24}
+.btn{display:block;margin:40px auto 0;background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;font-family:inherit;cursor:pointer}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin:12px 0 0;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test slovenštiny pro seniory: těchto 10 slov zná skoro každý člověk ze starší generace, ale mladí už často nedají ani 5/10</h1>
+<p class="perex">Kdo si pamatuje federální televizi, slovenské filmy a kolegy z Bratislavy, rozuměl slovenštině bez slovníku. Dnešní mladí ji už skoro neslyší. Deset běžných slov, která mají s češtinou společného málo, nebo jen zdánlivě.</p>
+<div id="quiz">
+<div class="box q" id="q0"><p class="qt">1. Co vám prodají na slovenském trhu, když si řeknete o „kilo paradajok&quot;?</p><div class="opts"><button type="button" class="opt" data-q="0" data-o="0">a) papriky</button><button type="button" class="opt" data-q="0" data-o="1">b) brambory</button><button type="button" class="opt" data-q="0" data-o="2">c) rajčata</button><button type="button" class="opt" data-q="0" data-o="3">d) okurky</button></div><p class="fb"></p></div>
+<div class="box q" id="q1"><p class="qt">2. Co má na sobě Slovák, který si pochvaluje nové topánky?</p><div class="opts"><button type="button" class="opt" data-q="1" data-o="0">a) boty</button><button type="button" class="opt" data-q="1" data-o="1">b) ponožky</button><button type="button" class="opt" data-q="1" data-o="2">c) kalhoty</button><button type="button" class="opt" data-q="1" data-o="3">d) rukavice</button></div><p class="fb"></p></div>
+<div class="box q" id="q2"><p class="qt">3. Jak byste česky řekli slovenské „naozaj&quot;?</p><div class="opts"><button type="button" class="opt" data-q="2" data-o="0">a) snad</button><button type="button" class="opt" data-q="2" data-o="1">b) naopak</button><button type="button" class="opt" data-q="2" data-o="2">c) nakonec</button><button type="button" class="opt" data-q="2" data-o="3">d) opravdu</button></div><p class="fb"></p></div>
+<div class="box q" id="q3"><p class="qt">4. Co dělá Slovák, když vraví?</p><div class="opts"><button type="button" class="opt" data-q="3" data-o="0">a) vrávorá</button><button type="button" class="opt" data-q="3" data-o="1">b) povídá</button><button type="button" class="opt" data-q="3" data-o="2">c) vrčí</button><button type="button" class="opt" data-q="3" data-o="3">d) váhá</button></div><p class="fb"></p></div>
+<div class="box q" id="q4"><p class="qt">5. Co pro Slováka znamená rozprávka?</p><div class="opts"><button type="button" class="opt" data-q="4" data-o="0">a) pohádka</button><button type="button" class="opt" data-q="4" data-o="1">b) rozhovor</button><button type="button" class="opt" data-q="4" data-o="2">c) přednáška</button><button type="button" class="opt" data-q="4" data-o="3">d) pomluva</button></div><p class="fb"></p></div>
+<div class="box q" id="q5"><p class="qt">6. Co vám přinesou ve slovenském penzionu, když si řeknete o další paplón?</p><div class="opts"><button type="button" class="opt" data-q="5" data-o="0">a) polštář</button><button type="button" class="opt" data-q="5" data-o="1">b) prostěradlo</button><button type="button" class="opt" data-q="5" data-o="2">c) peřinu</button><button type="button" class="opt" data-q="5" data-o="3">d) matraci</button></div><p class="fb"></p></div>
+<div class="box q" id="q6"><p class="qt">7. Co trápí Slováka, který má nádchu?</p><div class="opts"><button type="button" class="opt" data-q="6" data-o="0">a) kašel</button><button type="button" class="opt" data-q="6" data-o="1">b) rýma</button><button type="button" class="opt" data-q="6" data-o="2">c) horečka</button><button type="button" class="opt" data-q="6" data-o="3">d) bolest v krku</button></div><p class="fb"></p></div>
+<div class="box q" id="q7"><p class="qt">8. Jakého člověka Slovák označí za čudného?</p><div class="opts"><button type="button" class="opt" data-q="7" data-o="0">a) líného</button><button type="button" class="opt" data-q="7" data-o="1">b) lakomého</button><button type="button" class="opt" data-q="7" data-o="2">c) smutného</button><button type="button" class="opt" data-q="7" data-o="3">d) divného</button></div><p class="fb"></p></div>
+<div class="box q" id="q8"><p class="qt">9. Co dělá babička, která vnouče šteklí?</p><div class="opts"><button type="button" class="opt" data-q="8" data-o="0">a) houpe ho</button><button type="button" class="opt" data-q="8" data-o="1">b) konejší ho</button><button type="button" class="opt" data-q="8" data-o="2">c) lechtá ho</button><button type="button" class="opt" data-q="8" data-o="3">d) koupe ho</button></div><p class="fb"></p></div>
+<div class="box q" id="q9"><p class="qt">10. Kterého ptáka Slováci nazývají čajka?</p><div class="opts"><button type="button" class="opt" data-q="9" data-o="0">a) čejku</button><button type="button" class="opt" data-q="9" data-o="1">b) racka</button><button type="button" class="opt" data-q="9" data-o="2">c) volavku</button><button type="button" class="opt" data-q="9" data-o="3">d) labuť</button></div><p class="fb"></p></div>
+</div>
+<button type="button" class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result"><p class="score" id="score"></p><p class="rtext" id="rtext"></p><button type="button" class="btn" id="retry">Zkusit znovu</button></div>
+</div>
+<script>
+(function(){
+var OPTS=[[`papriky`,`brambory`,`rajčata`,`okurky`],[`boty`,`ponožky`,`kalhoty`,`rukavice`],[`snad`,`naopak`,`nakonec`,`opravdu`],[`vrávorá`,`povídá`,`vrčí`,`váhá`],[`pohádka`,`rozhovor`,`přednáška`,`pomluva`],[`polštář`,`prostěradlo`,`peřinu`,`matraci`],[`kašel`,`rýma`,`horečka`,`bolest v krku`],[`líného`,`lakomého`,`smutného`,`divného`],[`houpe ho`,`konejší ho`,`lechtá ho`,`koupe ho`],[`čejku`,`racka`,`volavku`,`labuť`]];
+var KEY=[2, 0, 3, 1, 0, 2, 1, 3, 2, 1];
+var EVALS=[{min:0,max:3,label:`0–3 body`,text:`Slovenština je pro vás cizí jazyk. S tímhle výsledkem patříte k většině, která pětku nedá. Stačí ale pár večerů se slovenskými filmy a první slova se vrátí sama.`},{min:4,max:6,label:`4–6 bodů`,text:`Hranici, na které mladí obvykle končí, jste zvládli nebo jste se k ní aspoň přiblížili. Něco vám uvízlo v paměti, u méně častých slov jste ale spíš tipovali.`},{min:7,max:9,label:`7–9 bodů`,text:`Tak dopadne člověk, který slovenštinu léta slýchal v televizi, v rádiu i od kolegů. Laťku z titulku jste s rezervou přeskočili a zaváhali jste nanejvýš u tří slov.`},{min:10,max:10,label:`10 bodů`,text:`Plný počet. Slovenštině rozumíte, jako byste ji slýchali každý den, a nenachytala vás ani slova, která jen vypadají česky.`}];
+var ans=new Array(KEY.length).fill(null);
+var locked=false;
+var evalBtn=document.getElementById(`eval`),hint=document.getElementById(`hint`);
+function upd(){var all=ans.every(function(a){return a!==null});evalBtn.disabled=!all;hint.style.display=all?`none`:`block`;}
+document.querySelectorAll(`.opt`).forEach(function(b){b.addEventListener(`click`,function(){
+if(locked)return;var q=+b.dataset.q,o=+b.dataset.o;ans[q]=o;
+document.querySelectorAll(`#q`+q+` .opt`).forEach(function(x){x.classList.toggle(`sel`,x===b)});upd();})});
+evalBtn.addEventListener(`click`,function(){
+if(locked||evalBtn.disabled)return;locked=true;document.getElementById(`quiz`).classList.add(`locked`);var sc=0;
+KEY.forEach(function(k,i){var bs=document.querySelectorAll(`#q`+i+` .opt`),fb=document.querySelector(`#q`+i+` .fb`);
+if(ans[i]===k){sc++;bs[k].classList.add(`ok`);fb.className=`fb ok`;fb.textContent=`Správně.`;}
+else{bs[ans[i]].classList.add(`bad`);bs[k].classList.add(`ok`);fb.className=`fb bad`;fb.textContent=`Špatně. Správná odpověď: `+`abcd`[k]+`) `+OPTS[i][k];}});
+var ev=EVALS.filter(function(x){return sc>=x.min&&sc<=x.max})[0];
+document.getElementById(`score`).textContent=sc+` z `+KEY.length;
+document.getElementById(`rtext`).textContent=ev.label+`: `+ev.text;
+var r=document.getElementById(`result`);r.style.display=`block`;evalBtn.style.display=`none`;hint.style.display=`none`;
+r.scrollIntoView({behavior:`smooth`,block:`start`});});
+document.getElementById(`retry`).addEventListener(`click`,function(){
+locked=false;ans.fill(null);document.getElementById(`quiz`).classList.remove(`locked`);
+document.querySelectorAll(`.opt`).forEach(function(x){x.classList.remove(`sel`,`ok`,`bad`)});
+document.querySelectorAll(`.fb`).forEach(function(x){x.textContent=``;x.className=`fb`});
+document.getElementById(`result`).style.display=`none`;evalBtn.style.display=`block`;upd();window.scrollTo({top:0,behavior:`smooth`});});
+upd();
+})();
+</script>
+</body>
+</html>
