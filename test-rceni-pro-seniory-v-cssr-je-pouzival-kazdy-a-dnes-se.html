@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test rčení pro seniory: v ČSSR je používal každý a dnes se na ně už zapomnělo. Dáte aspoň 7/10</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta:disabled { cursor: default; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.2em; }
+#vysledek {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+  border-top: 4px solid #5b7e5f;
+  display: none;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 14px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test rčení pro seniory: v ČSSR je používal každý a dnes se na ně už zapomnělo. Dáte aspoň 7/10</h1>
+<p class="perex">V ČSSR se těmihle obraty mluvilo v práci, v hospodě i doma u stolu a nikdo je nemusel vysvětlovat. Dnes je mladší ročníky neslyší skoro vůbec. Deset otázek ukáže, kolik z té řeči vám zůstalo nejen v uších, ale i v hlavě.</p>
+<div id="kviz"></div>
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p id="hlaska"></p>
+<div id="vysledek">
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var otazky = [
+  {
+    z: `1. V jaké situaci se o někom řeklo, že přišel s křížkem po funuse?`,
+    v: [
+      `když na sebe strhl pozornost tam, kde měl být zticha`,
+      `když dorazil v nejnevhodnější chvíli a všechny zdržel`,
+      `když se dostavil, až když už bylo po všem`,
+      `když se omlouval slovy, kterým nikdo nevěřil`
+    ],
+    s: 2
+  },
+  {
+    z: `2. Co udělal ten, kdo vzal někoho na hůl?`,
+    v: [
+      `ošidil ho a nedal mu, co mu patřilo`,
+      `připravil ho o všechno a uvrhl do bídy`,
+      `přinutil ho k ústupku tvrdým nátlakem`,
+      `pokáral ho veřejně před ostatními lidmi`
+    ],
+    s: 0
+  },
+  {
+    z: `3. K čemu se odhodlal ten, kdo kápl božskou?`,
+    v: [
+      `odpřisáhl při všem, co je mu svaté, že mluví pravdu`,
+      `prozradil tajemství, které mu někdo svěřil`,
+      `omluvil se za to, co provedl`,
+      `přiznal po zapírání, jak to doopravdy bylo`
+    ],
+    s: 3
+  },
+  {
+    z: `4. Čím vynikal ten, o kom se řeklo, že má filipa?`,
+    v: [
+      `známostmi, díky kterým si všude dokázal zařídit své`,
+      `zdravým rozumem a bystrým úsudkem`,
+      `pamětí, ve které mu nic nezapadlo`,
+      `klidem, který neztratil ani v nejhorší chvíli`
+    ],
+    s: 1
+  },
+  {
+    z: `5. Jak se k sobě chovali dva lidé, kteří spolu drželi basu?`,
+    v: [
+      `udávali ostatním tón a rozhodovali za ně`,
+      `vydrželi spolu, přestože si nerozuměli`,
+      `stáli při sobě a navzájem se kryli`,
+      `trvali tvrdošíjně na svém proti všem ostatním`
+    ],
+    s: 2
+  },
+  {
+    z: `6. Co se říkalo o člověku, kterému koukala sláma z bot?`,
+    v: [
+      `že je chudý a nemá na pořádné šaty`,
+      `že je na něm znát selský původ a nevzdělanost`,
+      `že je nepořádný a nedbá o svůj zevnějšek`,
+      `že se marně snaží vydávat za někoho jiného`
+    ],
+    s: 1
+  },
+  {
+    z: `7. Co tím mínil ten, kdo prohlásil, že je v tom čertovo kopyto?`,
+    v: [
+      `že je ve věci skrytý háček, o kterém se neví`,
+      `že se věc protahuje déle, než kdokoli čekal`,
+      `že se do toho připletla smůla`,
+      `že se věc vymkla z rukou a nedá se zastavit`
+    ],
+    s: 0
+  },
+  {
+    z: `8. Z čeho vzniklo rčení o tom, že někdo zůstal na ocet?`,
+    v: [
+      `z piva, které v sudu zkyslo a šlo už jen do octa`,
+      `z okurek, které se v sudu nechaly do dalšího roku`,
+      `z mléka, které zůstalo stát v konvi a srazilo se`,
+      `z vína, které se včas nevypije a samo zoctovatí`
+    ],
+    s: 3
+  },
+  {
+    z: `9. Na koho nebo na co narazil ten, o kom se řeklo, že padla kosa na kámen?`,
+    v: [
+      `na dřinu, která se nakonec ukázala jako marná`,
+      `na spojence, který se s ním nečekaně rozešel ve zlém`,
+      `na spor, který se vyhrotil tak, že už nešlo couvnout`,
+      `na protivníka, na kterého nestačil`
+    ],
+    s: 3
+  },
+  {
+    z: `10. Co býval tipec, který se podle rčení zatíná?`,
+    v: [
+      `chorobný nárůst na jazyku drůbeže`,
+      `tvrdý výrůstek na noze koně, který se odřezával`,
+      `dřevěný klín jistící bidlo na cepu`,
+      `zaříznutá špička došku na hřebeni střechy`
+    ],
+    s: 0
+  }
+];
+
+var hodnoceni = [
+  { min: 0, max: 3, text: `Laťka sedm z deseti zůstala daleko. Většinu obratů jste nejspíš odhadovali podle slov, která v nich stojí, jenže obrazná řeč se podle jednotlivých slov vyložit nedá. Tahle vrstva jazyka se vrací rychle, stačí ji zase začít slýchat.` },
+  { min: 4, max: 6, text: `Poctivý střed, ale k sedmičce z titulku vám jeden až tři body chybí. Obraty, které se udržely v běžné mluvě, jste vyložili správně; jakmile ale přišla řada na ty, co se z hovoru vytratily, nebo na dvě otázky, které se ptaly na to, z čeho rčení vzniklo, začalo se tipovat. Základ držíte pevně, starší vrstva vám uniká.` },
+  { min: 7, max: 9, text: `Laťku z titulku jste překonali. Rozuměli jste i obratům, které se dnes v běžném hovoru neozvou, a nenechali jste se svést výklady, jež zněly blízko, ale mířily vedle. Devět bodů znamená, že jste kromě významů trefili i to, na čem rčení stojí, a to už je znalost daleko nad běžný průměr.` },
+  { min: 10, max: 10, text: `Plný počet, a ten zvládne jen menšina. Zvládli jste i otázku, kde se ptalo na slovo, jehož původní význam zná dnes sotva kdo mimo okruh lidí, co se o jazyk zajímají nad rámec běžného zájmu. Řeč, kterou se v ČSSR mluvilo bez vysvětlování, u sebe držíte v plné šíři. Klobouk dolů.` }
+];
+
+var odpovedi = new Array(otazky.length).fill(null);
+var hotovo = false;
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoVyhodnotit = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var tlacitkoZnovu = document.getElementById(`znovu`);
+
+function vykresli() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var zneni = document.createElement(`p`);
+    zneni.className = `zneni`;
+    zneni.textContent = o.z;
+    box.appendChild(zneni);
+    o.v.forEach(function (text, j) {
+      var b = document.createElement(`button`);
+      b.className = `varianta`;
+      b.type = `button`;
+      b.textContent = text;
+      b.addEventListener(`click`, function () {
+        if (hotovo) { return; }
+        odpovedi[i] = j;
+        Array.prototype.forEach.call(box.querySelectorAll(`.varianta`), function (x) {
+          x.classList.remove(`vybrana`);
+        });
+        b.classList.add(`vybrana`);
+        hlaskaEl.textContent = ``;
+        zkontrolujHotovost();
+      });
+      box.appendChild(b);
+    });
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujHotovost() {
+  var vse = odpovedi.every(function (x) { return x !== null; });
+  tlacitkoVyhodnotit.disabled = !vse;
+}
+
+tlacitkoVyhodnotit.addEventListener(`click`, function () {
+  if (tlacitkoVyhodnotit.disabled) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  hotovo = true;
+  var body = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  otazky.forEach(function (o, i) {
+    var varianty = boxy[i].querySelectorAll(`.varianta`);
+    Array.prototype.forEach.call(varianty, function (b, j) {
+      b.disabled = true;
+      b.classList.remove(`vybrana`);
+      if (j === o.s) { b.classList.add(`spravna`); }
+      else if (j === odpovedi[i]) { b.classList.add(`spatna`); }
+    });
+    if (odpovedi[i] === o.s) { body++; }
+  });
+  tlacitkoVyhodnotit.disabled = true;
+  skoreEl.textContent = body + ` z ` + otazky.length;
+  var pasmo = hodnoceni.find(function (h) { return body >= h.min && body <= h.max; });
+  hodnoceniEl.textContent = pasmo ? pasmo.text : ``;
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+tlacitkoZnovu.addEventListener(`click`, function () {
+  odpovedi = new Array(otazky.length).fill(null);
+  hotovo = false;
+  vysledekEl.style.display = `none`;
+  hlaskaEl.textContent = ``;
+  tlacitkoVyhodnotit.disabled = true;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+vykresli();
+</script>
+</body>
+</html>
