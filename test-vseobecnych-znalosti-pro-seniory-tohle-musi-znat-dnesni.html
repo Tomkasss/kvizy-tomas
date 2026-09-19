@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test všeobecných znalostí pro seniory: tohle musí znát dnešní mladí ve škole, ale starší generace už to často zapomněla</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:24px;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto}
+h1{font-size:1.8rem;line-height:1.3;color:#2c2c2c;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.q-text{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-family:inherit;font-size:1rem;color:#3a3a3a;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.selected{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover{background:inherit}
+.locked .opt.correct:hover{background:#d4edda}
+.locked .opt.wrong:hover{background:#f8d7da}
+.locked .opt.selected:not(.correct):not(.wrong):hover{background:#dcd3c7}
+.locked .opt:not(.correct):not(.wrong):not(.selected):hover{background:#f7f4f0}
+.feedback{margin-top:14px;font-size:1rem;line-height:1.5}
+.feedback.ok{color:#1e5631}
+.feedback.bad{color:#721c24}
+.btn{display:block;margin:40px auto 0;padding:16px 40px;border:none;border-radius:8px;font-family:inherit;font-size:1.1rem;font-weight:bold;color:#fff;background:#5b7e5f;cursor:pointer}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.btn.retry{background:#8c7b6b}
+.btn.retry:hover{background:#756658}
+.hint{text-align:center;color:#8a8a8a;font-size:.95rem;margin-top:12px}
+.result{background:#fefcf9;border-top:4px solid #5b7e5f;display:none;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.verdict{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+@media (max-width:600px){body{padding:16px}.box{padding:20px}h1{font-size:1.45rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test všeobecných znalostí pro seniory: tohle musí znát dnešní mladí ve škole, ale starší generace už to často zapomněla</h1>
+<p class="perex">Dnešní školáci tohle probírají v přírodopisu, dějepisu i češtině, vy jste stejné učivo měli před desítkami let. Zkuste, kolik z něj vám zůstalo v hlavě a jestli byste u tabule obstáli vedle vlastních vnoučat.</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="evaluate" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box result" id="result">
+<p class="score" id="score"></p>
+<p class="verdict" id="verdict"></p>
+<button type="button" class="btn retry" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  {q: `Který z těchto chemických prvků patří mezi kovy?`, o: [`síra`, `uhlík`, `hořčík`, `jod`], a: 2},
+  {q: `Kdo v Česku jmenuje předsedu vlády?`, o: [`Poslanecká sněmovna`, `Senát`, `prezident republiky`, `předseda Poslanecké sněmovny`], a: 2},
+  {q: `Jak dlouho letí světlo ze Slunce na Zemi?`, o: [`asi 8 sekund`, `asi 8 minut`, `asi 80 minut`, `asi 8 hodin`], a: 1},
+  {q: `Jakým větným členem je slovo „koláč“ ve větě „Babička peče koláč“?`, o: [`podmětem`, `přísudkem`, `přívlastkem`, `předmětem`], a: 3},
+  {q: `Kdo byl upálen v Kostnici rok po Janu Husovi?`, o: [`Jan Želivský`, `Jeroným Pražský`, `Jakoubek ze Stříbra`, `Petr Chelčický`], a: 1},
+  {q: `Do jaké výše jsou v Česku ze zákona pojištěné vklady jednoho klienta v jedné bance?`, o: [`20 000 eur`, `50 000 eur`, `100 000 eur`, `250 000 eur`], a: 2},
+  {q: `Ve které Erbenově baladě nechá matka své dítě v otevřené skále?`, o: [`Poklad`, `Polednice`, `Dceřina kletba`, `Vrba`], a: 0},
+  {q: `Který z těchto živočichů je obojetník?`, o: [`rak říční`, `stonožka`, `klíště obecné`, `žížala obecná`], a: 3},
+  {q: `Který stát je nejmladším členem OSN?`, o: [`Černá Hora`, `Jižní Súdán`, `Východní Timor`, `Švýcarsko`], a: 1},
+  {q: `Kdo namaloval obraz Růžencová slavnost?`, o: [`Albrecht Dürer`, `Jan van Eyck`, `Pieter Bruegel starší`, `Hans Memling`], a: 0}
+];
+const letters = [`a`, `b`, `c`, `d`];
+const verdicts = [
+  {min: 0, max: 3, text: `Tady se školní léta ozvala jen slabě. Tohle učivo se ale dá oprášit snadno. Stačí jedno odpoledne nad učebnicí vnoučat a příště budete u tabule vy ten, kdo se hlásí.`},
+  {min: 4, max: 6, text: `Zhruba polovina toho, co jste kdysi dřeli do sešitu, vám zůstala. U zbytku se za ta léta vytratilo přesné jméno nebo pojem, i když tušíte, že jste ho kdysi znali. Na dnešní pololetní písemku by to stačilo na slušnou trojku.`},
+  {min: 7, max: 9, text: `Sem kvíz míří a vy jste se sem dostali. Většinu toho, co dnes děti dřou do sešitů, máte pořád po ruce, i když od vaší poslední písemky uběhlo půl století.`},
+  {min: 10, max: 10, text: `Plný počet, a to včetně otázky, na které se zasekne i leckterý maturant. Vedle vlastních vnoučat byste u tabule obstáli bez zaváhání a jejich domácí úkoly můžete kontrolovat bez nahlížení do klíče.`}
+];
+const quizEl = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`evaluate`);
+const hint = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+let answers = new Array(questions.length).fill(null);
+let locked = false;
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `q-text`;
+    p.textContent = `${qi + 1}. ${item.q}`;
+    box.appendChild(p);
+    item.o.forEach((opt, oi) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = `${letters[oi]}) ${opt}`;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`selected`));
+        b.classList.add(`selected`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`div`);
+    fb.className = `feedback`;
+    box.appendChild(fb);
+    quizEl.appendChild(box);
+  });
+}
+
+function update() {
+  const done = answers.every(x => x !== null);
+  evalBtn.disabled = !done;
+  hint.style.display = done ? `none` : `block`;
+}
+
+evalBtn.addEventListener(`click`, () => {
+  if (locked || answers.some(x => x === null)) return;
+  locked = true;
+  quizEl.classList.add(`locked`);
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.box`);
+  questions.forEach((item, qi) => {
+    const opts = boxes[qi].querySelectorAll(`.opt`);
+    const fb = boxes[qi].querySelector(`.feedback`);
+    opts[item.a].classList.add(`correct`);
+    if (answers[qi] === item.a) {
+      score++;
+      fb.className = `feedback ok`;
+      fb.textContent = `Správně.`;
+    } else {
+      opts[answers[qi]].classList.add(`wrong`);
+      fb.className = `feedback bad`;
+      fb.textContent = `Špatně. Správná odpověď: ${letters[item.a]}) ${item.o[item.a]}`;
+    }
+  });
+  document.getElementById(`score`).textContent = `${score} z ${questions.length}`;
+  const v = verdicts.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`verdict`).textContent = v ? v.text : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({behavior: `smooth`, block: `start`});
+});
+
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  answers = new Array(questions.length).fill(null);
+  locked = false;
+  quizEl.classList.remove(`locked`);
+  resultEl.style.display = `none`;
+  evalBtn.style.display = `block`;
+  render();
+  update();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+
+render();
+update();
+</script>
+</body>
+</html>
