@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retro kvíz pro starší: pamatujete si život v ČSSR? Husákovy děti v něm většinou dají v klidu 10/10</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px;color:#2c2c2c}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer;line-height:1.4}
+.opt:last-child{margin-bottom:0}
+.opt:hover:not(:disabled){background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border:1px solid #7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border:1px solid #d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.note{margin-top:14px;font-size:.95rem}
+.note.ok{color:#1e5631}.note.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover:not(:disabled){background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;font-size:.95rem;margin-top:12px}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 14px}
+.eval{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b;margin-top:28px}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Retro kvíz pro starší: pamatujete si život v ČSSR? Husákovy děti v něm většinou dají v klidu 10/10</h1>
+<p class="perex">Husákovy děti a jejich rodiče znali ČSSR ne z učebnic, ale z každého všedního dne. Vybavte si, jak to tehdy doopravdy chodilo, a uvidíte, kolik z toho vám v paměti zůstalo i po víc než třiceti letech.</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="submit" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result"><p class="score" id="score"></p><p class="eval" id="evaltext"></p><button type="button" class="btn" id="retry">Zkusit znovu</button></div>
+</div>
+<script>
+const Q=[
+{q:`Jaký motiv nesla československá jednokorunová mince vydávaná od roku 1957?`,o:[`dívku sázející lipku`,`horníka s kahanem`,`ženu se snopem obilí`,`kováře u kovadliny`],a:0},
+{q:`Z jakého materiálu byla typická bytová jádra v panelácích?`,o:[`ze sololitu`,`z novoduru`,`z umakartu`,`z eternitu`],a:2},
+{q:`Kterého dne se v Československu slavil Den učitelů?`,o:[`1. září`,`28. března`,`5. října`,`15. června`],a:1},
+{q:`Pod jakým názvem hrál v 70. a 80. letech hokejový klub z Pardubic?`,o:[`Dynamo Pardubice`,`Synthesia Pardubice`,`Slavia Pardubice`,`Tesla Pardubice`],a:3},
+{q:`Odkud se do ČSSR vozily nazelenalé pomeranče s tuhou slupkou, které se prodávaly hlavně před Vánoci?`,o:[`z Vietnamu`,`z Kuby`,`z Albánie`,`z Angoly`],a:1},
+{q:`Kolik dní před odchodem do civilu začínali vojáci základní služby stříhat krejčovský metr?`,o:[`100`,`120`,`150`,`200`],a:2},
+{q:`Která strana vydávala za normalizace deník Svobodné slovo?`,o:[`Komunistická strana Československa`,`Československá strana socialistická`,`Československá strana lidová`,`Československá sociální demokracie`],a:1},
+{q:`Kterým dnem začínal Měsíc československo-sovětského přátelství?`,o:[`9. května`,`22. dubna`,`25. února`,`7. listopadu`],a:3},
+{q:`Na kandidátce které organizace stáli ve volbách za normalizace všichni kandidáti?`,o:[`Národní fronty`,`Revolučního odborového hnutí`,`Socialistického svazu mládeže`,`Svazu československo-sovětského přátelství`],a:0},
+{q:`Jak zněl celý název odznaku zdatnosti PPOV, o který se v ČSSR soutěžilo v tělovýchově?`,o:[`Připraven k pomoci a ochraně vlasti`,`Připraven pro práci a ochranu vlasti`,`Připraven pro pomoc a obranu vlasti`,`Připraven k práci a obraně vlasti`],a:3}
+];
+const E=[
+{min:0,max:3,t:`Tentokrát se vám ČSSR z paměti spíš vytratila. Buď jste tu dobu zažili jen z vyprávění, nebo jste ji po roce 1989 rádi pustili z hlavy. Stačí ale jedno odpoledne nad starými fotkami a spousta věcí se vám vybaví.`},
+{min:4,max:6,t:`Všední dny té doby máte pořád v hlavě, jen některé detaily už vybledly. Co jste zažívali každý den, jste poznali hned. U věcí, které tehdy běžely spíš mimo vás, jste chvíli tápali.`},
+{min:7,max:9,t:`Tohle je výsledek člověka, který v ČSSR opravdu žil a dával pozor. Poznali jste noviny, vánoční ovoce i tehdejší zvyklosti, jen jedna nebo dvě drobnosti vám vyklouzly. S takovou pamětí můžete vnoučatům vyprávět, jak to tehdy chodilo.`},
+{min:10,max:10,t:`Plný počet, přesně jak slibuje titulek. Život v ČSSR si pamatujete od drobných mincí až po celý název odznaku PPOV. Tahle Husákova generace na nic nezapomněla.`}
+];
+const quiz=document.getElementById(`quiz`),submit=document.getElementById(`submit`),hint=document.getElementById(`hint`),result=document.getElementById(`result`);
+let sel=[],done=false;
+function render(){
+quiz.innerHTML=``;sel=Q.map(()=>null);done=false;
+Q.forEach((q,i)=>{
+const box=document.createElement(`div`);box.className=`box`;
+const p=document.createElement(`p`);p.className=`qtext`;p.textContent=(i+1)+`. `+q.q;box.appendChild(p);
+q.o.forEach((o,j)=>{const b=document.createElement(`button`);b.type=`button`;b.className=`opt`;b.textContent=String.fromCharCode(97+j)+`) `+o;
+b.addEventListener(`click`,()=>{if(done)return;sel[i]=j;box.querySelectorAll(`.opt`).forEach((x,k)=>x.classList.toggle(`sel`,k===j));update();});box.appendChild(b);});
+quiz.appendChild(box);});
+result.style.display=`none`;update();}
+function update(){const all=sel.every(s=>s!==null);submit.disabled=!all||done;hint.style.display=all||done?`none`:`block`;}
+submit.addEventListener(`click`,()=>{
+if(done||sel.some(s=>s===null))return;done=true;let sc=0;
+Q.forEach((q,i)=>{const box=quiz.children[i],bs=box.querySelectorAll(`.opt`);
+bs.forEach((b,k)=>{b.disabled=true;b.classList.remove(`sel`);if(k===q.a)b.classList.add(`correct`);else if(k===sel[i])b.classList.add(`wrong`);});
+const n=document.createElement(`p`);
+if(sel[i]===q.a){sc++;n.className=`note ok`;n.textContent=`Správně.`;}else{n.className=`note bad`;n.textContent=`Správná odpověď: `+String.fromCharCode(97+q.a)+`) `+q.o[q.a];}
+box.appendChild(n);});
+document.getElementById(`score`).textContent=sc+` z `+Q.length;
+const e=E.find(x=>sc>=x.min&&sc<=x.max);document.getElementById(`evaltext`).textContent=e?e.t:``;
+result.style.display=`block`;update();result.scrollIntoView({behavior:`smooth`,block:`start`});});
+document.getElementById(`retry`).addEventListener(`click`,()=>{render();window.scrollTo({top:0,behavior:`smooth`});});
+render();
+</script>
+</body>
+</html>
