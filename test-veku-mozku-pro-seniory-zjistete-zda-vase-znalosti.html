@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test věku mozku pro seniory: zjistěte zda vaše znalosti odpovídají věku mozku 20, 40 či 70 let</title>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; background: #f5f0eb; font-family: Georgia, "Times New Roman", serif; color: #2c2c2c; }
+.wrap { max-width: 720px; margin: 0 auto; padding: 32px 20px 48px; }
+h1 { font-size: 1.8rem; line-height: 1.3; margin: 0 0 16px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 28px; }
+.box { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 28px; margin-bottom: 24px; }
+.qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 16px; line-height: 1.45; }
+.opt { display: block; width: 100%; text-align: left; padding: 14px 18px; background: #f7f4f0; border: 1px solid #d9d2c9; border-radius: 8px; font-size: 1rem; color: #3a3a3a; font-family: inherit; margin-bottom: 10px; cursor: pointer; }
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.locked .opt { cursor: default; }
+.locked .opt:hover { background: #f7f4f0; }
+.locked .opt.sel:hover { background: #dcd3c7; }
+.opt.ok, .locked .opt.ok:hover { background: #d4edda; border-color: #7cb987; color: #1e5631; }
+.opt.bad, .locked .opt.bad:hover { background: #f8d7da; border-color: #d4848a; color: #721c24; }
+.fb { margin-top: 12px; font-size: .95rem; }
+.fb.good { color: #1e5631; }
+.fb.wrong { color: #721c24; }
+.btn { background: #5b7e5f; color: #fff; padding: 16px 40px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; border: none; display: block; margin: 40px auto 0; cursor: pointer; font-family: inherit; }
+.btn:hover { background: #4a6b4e; }
+.btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hint { text-align: center; color: #8a8a8a; font-size: .95rem; margin-top: 12px; }
+.result { background: #fefcf9; border-top: 4px solid #5b7e5f; margin-top: 40px; display: none; }
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+.rtext { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+.btn.again { background: #8c7b6b; margin-top: 24px; }
+.btn.again:hover { background: #756658; }
+@media (max-width: 600px) {
+  .wrap { padding: 20px 16px 36px; }
+  .box { padding: 20px 16px; }
+  h1 { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test věku mozku pro seniory: zjistěte zda vaše znalosti odpovídají věku mozku 20, 40 či 70 let</h1>
+<p class="perex">Dvacet, čtyřicet, nebo sedmdesát let? Bible, antické báje, elektřina, noční obloha, cestování, kuchyně i divadlo prověří, jak pohotově vám naskakuje to, co jste za život přečetli, viděli a zažili.</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box result" id="result">
+<p class="score" id="score"></p>
+<p class="rtext" id="rtext"></p>
+<button type="button" class="btn again" id="again">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q = [
+  {q: `Kterého proroka podle Bible spolkla velká ryba?`, opts: [`Daniela`, `Jonáše`, `Eliáše`, `Jeremiáše`], a: 1},
+  {q: `Ve které zemi leží Dolomity, horská skupina zapsaná v roce 2009 na seznam světového dědictví UNESCO?`, opts: [`v Rakousku`, `ve Slovinsku`, `v Itálii`, `ve Francii`], a: 2},
+  {q: `Jaké jmenovité napětí má dnes běžná zásuvka v české domácnosti?`, opts: [`110 V`, `220 V`, `230 V`, `240 V`], a: 2},
+  {q: `Který ostrov byl podle Homéra Odysseovým královstvím?`, opts: [`Kréta`, `Salamína`, `Rhodos`, `Ithaka`], a: 3},
+  {q: `Kterou zemi označuje mezinárodní poznávací značka CH na autech?`, opts: [`Chorvatsko`, `Švýcarsko`, `Chile`, `Čínu`], a: 1},
+  {q: `Ve kterém roce se v Praze přešlo z jízdy vlevo na jízdu vpravo?`, opts: [`1918`, `1926`, `1939`, `1948`], a: 2},
+  {q: `Ve které zemi je maté národním nápojem?`, opts: [`v Argentině`, `v Mexiku`, `v Kolumbii`, `v Peru`], a: 0},
+  {q: `Jakým lidovým jménem se u nás označuje hvězdokupa Plejády?`, opts: [`Jesličky`, `Kůzlátka`, `Tři králové`, `Kuřátka`], a: 3},
+  {q: `Který světec je tradičně uctíván jako patron řidičů a cestujících?`, opts: [`svatý Kryštof`, `svatý Florián`, `svatý Vavřinec`, `svatý Vojtěch`], a: 0},
+  {q: `Kdo založil pražské Divadlo za branou?`, opts: [`Alfréd Radok`, `Otomar Krejča`, `Jan Grossman`, `Emil František Burian`], a: 1}
+];
+const E = [
+  {lo: 0, hi: 3, t: `Věk mozku kolem 70 let. Většina odpovědí dnes zůstala schovaná v zadních šuplících paměti a na povrch se nedostala. Projděte si správná řešení a u každého si řekněte, kde jste se s ním kdysi potkali. Když si vzpomínku ukotvíte ke konkrétnímu místu nebo knize, vybaví se vám příště mnohem snáz.`},
+  {lo: 4, hi: 6, t: `Věk mozku kolem 40 let. Pevný základ máte a běžně známá fakta vám naskakují spolehlivě. Body jste ztratili hlavně u méně obvyklých podrobností, kde se dvě možnosti tvářily stejně věrohodně. Tam rozhoduje hlavně to, jak živě si fakt pamatujete.`},
+  {lo: 7, hi: 9, t: `Věk mozku kolem 20 let. Pohybujete se od Bible přes hvězdné nebe až po divadelní zákulisí a jen málokterá odpověď vám unikla. Paměť vám slouží rychle a přesně a obory, které spolu zdánlivě nesouvisejí, se vám v hlavě nepletou.`},
+  {lo: 10, hi: 10, t: `Věk mozku 20 let. Všechno jste trefili, včetně otázek, kde nabídka svedla k podobně znějící možnosti. Takový rozsah znalostí a jistotu při výběru má jen menšina řešitelů.`}
+];
+const L = [`a`, `b`, `c`, `d`];
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+let chosen = [];
+let locked = false;
+
+function render() {
+  quiz.innerHTML = ``;
+  chosen = Q.map(() => null);
+  locked = false;
+  Q.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(p);
+    item.opts.forEach((o, oi) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = L[oi] + `) ` + o;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        chosen[qi] = oi;
+        box.querySelectorAll(`.opt`).forEach((x, xi) => x.classList.toggle(`sel`, xi === oi));
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`p`);
+    fb.className = `fb`;
+    fb.style.display = `none`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  result.style.display = `none`;
+  evalBtn.style.display = `block`;
+  update();
+}
+
+function update() {
+  const all = chosen.every(c => c !== null);
+  evalBtn.disabled = !all;
+  hint.style.display = all ? `none` : `block`;
+}
+
+evalBtn.addEventListener(`click`, () => {
+  if (chosen.some(c => c === null)) return;
+  locked = true;
+  let score = 0;
+  quiz.querySelectorAll(`.box`).forEach((box, qi) => {
+    box.classList.add(`locked`);
+    const opts = box.querySelectorAll(`.opt`);
+    const a = Q[qi].a;
+    opts[a].classList.add(`ok`);
+    const fb = box.querySelector(`.fb`);
+    fb.style.display = `block`;
+    if (chosen[qi] === a) {
+      score++;
+      fb.className = `fb good`;
+      fb.textContent = `Správně.`;
+    } else {
+      opts[chosen[qi]].classList.add(`bad`);
+      fb.className = `fb wrong`;
+      fb.textContent = `Správná odpověď: ` + L[a] + `) ` + Q[qi].opts[a];
+    }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + Q.length;
+  const e = E.find(x => score >= x.lo && score <= x.hi);
+  document.getElementById(`rtext`).textContent = e ? e.t : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior: `smooth`, block: `start`});
+});
+
+document.getElementById(`again`).addEventListener(`click`, () => {
+  render();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+
+render();
+</script>
+</body>
+</html>
