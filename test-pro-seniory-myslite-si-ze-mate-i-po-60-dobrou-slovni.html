@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test pro seniory: myslíte si, že máte i po 60 dobrou slovní zásobu? Zkuste 10 těžkých slov v češtině</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  line-height: 1.5;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta:disabled { cursor: default; }
+#vyhodnotit {
+  background: #5b7e5f;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; pointer-events: none; }
+#obal-vyhodnotit { cursor: not-allowed; }
+#hlaska { text-align: center; color: #8c5b5b; margin-top: 14px; min-height: 1.4em; }
+#vysledek {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#znovu {
+  background: #8c7b6b;
+  color: #fff;
+  padding: 16px 40px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  display: block;
+  margin: 40px auto 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+#znovu:hover { background: #756658; }
+@media (max-width: 640px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test pro seniory: myslíte si, že máte i po 60 dobrou slovní zásobu? Zkuste 10 těžkých slov v češtině</h1>
+  <p class="perex">Po šedesátce máte za sebou spoustu přečtených novin a knih. Poznáte ale i slova, která dnes zaznívají spíš v literatuře a slavnostních projevech než v běžném hovoru? Vyzkoušejte, jak na tom vaše slovní zásoba opravdu je.</p>
+  <div id="kviz"></div>
+  <div id="obal-vyhodnotit"><button id="vyhodnotit" disabled>Vyhodnotit</button></div>
+  <p id="hlaska"></p>
+  <div id="vysledek" style="display:none">
+    <p id="skore"></p>
+    <p id="hodnoceni"></p>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var otazky = [
+  {
+    z: `Jaký je člověk, o kterém se říká, že je marnivý?`,
+    v: [
+      `ješitný, rád se parádí a touží po obdivu`,
+      `líný, zbytečně marní čas nicneděláním`,
+      `lakomý, lituje každé vydané koruny`,
+      `nevrlý, věčně s něčím nespokojený`
+    ],
+    s: 0
+  },
+  {
+    z: `Co znamená přídavné jméno „blazeovaný“?`,
+    v: [
+      `zasněný, duchem stále někde jinde`,
+      `blažený, šťastný a se vším spokojený`,
+      `přesycený a znuděný, nic ho nebaví`,
+      `nesmělý, ve společnosti se ostýchá`
+    ],
+    s: 2
+  },
+  {
+    z: `Kde se vede rozhovor, o kterém noviny píší, že proběhl v kuloárech?`,
+    v: [
+      `v jednacím sále přímo během zasedání`,
+      `na chodbách a v předsálí mimo jednání`,
+      `na náměstí při setkání s voliči`,
+      `v soukromém bytě u večeře s politikem`
+    ],
+    s: 1
+  },
+  {
+    z: `Co znamená slovo „malomyslný“?`,
+    v: [
+      `malicherný, lpí na každé drobnosti`,
+      `sklíčený, ztratil odvahu a víru v úspěch`,
+      `roztržitý, na všechno hned zapomene`,
+      `skromný, spokojí se s málem`
+    ],
+    s: 1
+  },
+  {
+    z: `Co je to bonmot?`,
+    v: [
+      `zdvořilý kompliment pronesený k dámě`,
+      `krátké veršované přání k narozeninám`,
+      `stručné oficiální prohlášení pro tisk`,
+      `vtipný a pohotový výrok hodný citace`
+    ],
+    s: 3
+  },
+  {
+    z: `Co v domácnosti označuje slovo „otoman“?`,
+    v: [
+      `čalouněné lůžko bez opěradla`,
+      `konvička na vaření turecké kávy`,
+      `stojan na odkládání kabátů`,
+      `nízká kamínka na topení dřevem`
+    ],
+    s: 0
+  },
+  {
+    z: `Kdo je to „parvenu“?`,
+    v: [
+      `zchudlý šlechtic, který žije ze staré slávy`,
+      `nezvaný host, který přijde na oslavu`,
+      `povýšenec, který se vyšvihl z nižších vrstev`,
+      `věčný student, který nedokončí školu`
+    ],
+    s: 2
+  },
+  {
+    z: `Jak se pohybuje člověk, o kterém se v knize píše, že se šinul?`,
+    v: [
+      `spěchal drobnými rychlými krůčky`,
+      `potácel se ze strany na stranu`,
+      `poskakoval a nadšeně se rozhlížel`,
+      `pomalu a plynule postupoval vpřed`
+    ],
+    s: 3
+  },
+  {
+    z: `Co je to pelerína?`,
+    v: [
+      `plátěná zástěra s laclem přes prsa`,
+      `volná pláštěnka bez rukávů přes ramena`,
+      `dlouhý pletený šál omotaný kolem krku`,
+      `vysoká šněrovací bota ke kroji`
+    ],
+    s: 1
+  },
+  {
+    z: `Co znamená slovo „sinekura“?`,
+    v: [
+      `dobře placené místo s minimem práce`,
+      `lázeňská léčebná kúra na předpis`,
+      `neplacené volno v zaměstnání`,
+      `odměna za dlouholetou věrnost firmě`
+    ],
+    s: 0
+  }
+];
+
+var hodnoceni = [
+  { max: 3, text: `Na dobrou slovní zásobu to tentokrát nestačí. Většina slov vás tentokrát zaskočila. Dobrá zpráva je, že knižní slova se vracejí rychle: pár románů od starších autorů a výsledek bude jinde.` },
+  { max: 6, text: `Slovní zásobu máte průměrnou, zatím ne dobrou. Část knižních a cizích slov vás ještě zaskočila a k dobrému výsledku vám chybí jen pár výrazů.` },
+  { max: 9, text: `Ano, slovní zásobu máte dobrou. Většina slov vás nezaskočila a chyby padly jen na pár vzácnějších výrazů, které se dnes čtou hlavně ve starších knihách.` },
+  { max: 10, text: `Slovní zásobu máte výbornou. Znáte i slova, na která dnes narazí jen opravdu vášnivý čtenář, a žádné slovo vás nezaskočilo.` }
+];
+
+var pismena = [`a)`, `b)`, `c)`, `d)`];
+var odpovedi = new Array(otazky.length).fill(null);
+var hotovo = false;
+var kvizEl = document.getElementById(`kviz`);
+var tlacitkoEl = document.getElementById(`vyhodnotit`);
+var hlaskaEl = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function vykresli() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    var p = document.createElement(`p`);
+    p.className = `zneni`;
+    p.textContent = (i + 1) + `. ` + o.z;
+    box.appendChild(p);
+    o.v.forEach(function (text, j) {
+      var b = document.createElement(`button`);
+      b.className = `varianta`;
+      b.type = `button`;
+      b.textContent = pismena[j] + ` ` + text;
+      b.addEventListener(`click`, function () {
+        if (hotovo) { return; }
+        odpovedi[i] = j;
+        var sourozenci = box.querySelectorAll(`.varianta`);
+        for (var k = 0; k < sourozenci.length; k++) {
+          sourozenci[k].classList.remove(`vybrana`);
+        }
+        b.classList.add(`vybrana`);
+        hlaskaEl.textContent = ``;
+        zkontrolujHotovost();
+      });
+      box.appendChild(b);
+    });
+    kvizEl.appendChild(box);
+  });
+}
+
+function zkontrolujHotovost() {
+  var vse = odpovedi.every(function (o) { return o !== null; });
+  tlacitkoEl.disabled = !vse;
+}
+
+document.getElementById(`obal-vyhodnotit`).addEventListener(`click`, function () {
+  if (tlacitkoEl.disabled && !hotovo) {
+    hlaskaEl.textContent = `Odpovězte prosím na všechny otázky`;
+  }
+});
+
+tlacitkoEl.addEventListener(`click`, function () {
+  if (tlacitkoEl.disabled) { return; }
+  hotovo = true;
+  var skore = 0;
+  var boxy = kvizEl.querySelectorAll(`.otazka`);
+  otazky.forEach(function (o, i) {
+    var tlacitka = boxy[i].querySelectorAll(`.varianta`);
+    for (var j = 0; j < tlacitka.length; j++) {
+      tlacitka[j].disabled = true;
+      tlacitka[j].classList.remove(`vybrana`);
+      if (j === o.s) {
+        tlacitka[j].classList.add(`spravna`);
+      } else if (j === odpovedi[i]) {
+        tlacitka[j].classList.add(`spatna`);
+      }
+    }
+    if (odpovedi[i] === o.s) { skore++; }
+  });
+  tlacitkoEl.disabled = true;
+  hlaskaEl.textContent = ``;
+  skoreEl.textContent = skore + ` z ` + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+znovuEl.addEventListener(`click`, function () {
+  hotovo = false;
+  odpovedi = new Array(otazky.length).fill(null);
+  vysledekEl.style.display = `none`;
+  tlacitkoEl.disabled = true;
+  hlaskaEl.textContent = ``;
+  vykresli();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+vykresli();
+</script>
+</body>
+</html>
