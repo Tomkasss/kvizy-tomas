@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz: pamatujete si večerníčky z dětství? Plný počet 10/10 dají jen děti z ČSSR</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 24px 16px;
+  line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.8rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 16px; }
+.perex { font-size: 1.1rem; color: #4a4a4a; margin: 0 0 28px; }
+.q {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 16px; }
+.opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+#submit, #retry {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  color: #fff;
+  cursor: pointer;
+}
+#submit { background: #5b7e5f; }
+#submit:hover { background: #4a6b4e; }
+#submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#retry { background: #8c7b6b; }
+#retry:hover { background: #756658; }
+.warn { text-align: center; color: #a04040; margin-top: 14px; min-height: 1.2em; }
+#result {
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 32px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz: pamatujete si večerníčky z dětství? Plný počet 10/10 dají jen děti z ČSSR</h1>
+<p class="perex">Kdo vyrůstal v ČSSR, měl večer jasný program: umytý, v pyžamu a včas u obrazovky. Z těch let zůstali v hlavě kreslení i loutkoví hrdinové, jejich kamarádi a protivníci i hlasy, které je každý večer provázely.</p>
+<div id="quiz"></div>
+<button id="submit" disabled>Vyhodnotit</button>
+<div class="warn" id="warn"></div>
+<div id="result" style="display:none;">
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  { q: `Co se ve znělce Večerníčku promění v automobil?`, options: [`koloběžka`, `houpací koník`, `dřevěný vláček`, `tříkolka`], correct: 1 },
+  { q: `Kterému kouzelníkovi patřil klobouk, v němž bydlí králíci Bob a Bobek?`, options: [`Čáryfukovi`, `Hokusíkovi`, `Abrakadabrovi`, `Pokustonovi`], correct: 3 },
+  { q: `U kterého města se v prvním díle večerníčku Pojďte pane, budeme si hrát potkali oba medvídci?`, options: [`u Kolína`, `u Nymburka`, `u Poděbrad`, `u Kutné Hory`], correct: 0 },
+  { q: `Co má vlk z večerníčku Jen počkej, zajíci! často v tlamě?`, options: [`dýmku`, `doutník`, `cigaretu`, `stéblo trávy`], correct: 2 },
+  { q: `Jak se jmenuje jičínský starosta, kvůli kterému musel loupežník Rumcajs odejít z města do lesa?`, options: [`Chlupáč`, `Vrtílek`, `Bumbrla`, `Humpál`], correct: 3 },
+  { q: `Jak se jmenuje moudrý havran, věrný společník Malé čarodějnice?`, options: [`Abraxas`, `Kalifax`, `Barnabáš`, `Baltazar`], correct: 0 },
+  { q: `Jak byla ve večerníčku Dášeňka ztvárněna titulní hrdinka?`, options: [`jako kreslená postavička`, `jako loutka`, `jako skutečné štěně`, `jako plastelínová figurka`], correct: 2 },
+  { q: `Který pták v Krkonošských pohádkách donáší Krakonošovi zprávy o Trautenberkových plánech?`, options: [`straka`, `sojka`, `havran`, `sýkora`], correct: 1 },
+  { q: `Který starý kocour je kamarádem kocourka Filemona?`, options: [`Bonifác`, `Leopold`, `Ambrož`, `Tobiáš`], correct: 0 },
+  { q: `Kdo vyprávěl večerníček O vodníku Česílkovi?`, options: [`Martin Růžek`, `Karel Höger`, `František Filipovský`, `Josef Kemr`], correct: 1 }
+];
+
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit`);
+const warnEl = document.getElementById(`warn`);
+const resultEl = document.getElementById(`result`);
+
+function letter(i) { return [`a`, `b`, `c`, `d`][i]; }
+
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const qt = document.createElement(`div`);
+    qt.className = `q-text`;
+    qt.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    item.options.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `opt`;
+      btn.textContent = letter(oi) + `) ` + opt;
+      if (answers[qi] === oi) btn.classList.add(`selected`);
+      btn.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        render();
+        updateSubmit();
+      });
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function updateSubmit() {
+  const done = answers.every(a => a !== null);
+  submitBtn.disabled = !done;
+  if (done) warnEl.textContent = ``;
+}
+
+function evaluate() {
+  if (!answers.every(a => a !== null)) {
+    warnEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.q`);
+  questions.forEach((item, qi) => {
+    const opts = boxes[qi].querySelectorAll(`.opt`);
+    opts.forEach((btn, oi) => {
+      btn.classList.remove(`selected`);
+      if (oi === item.correct) btn.classList.add(`correct`);
+      else if (oi === answers[qi]) btn.classList.add(`wrong`);
+    });
+    if (answers[qi] === item.correct) score++;
+  });
+  submitBtn.disabled = true;
+  showResult(score);
+}
+
+function verdictText(s) {
+  if (s <= 3) return `Večerníčky vám nejspíš utekly, nebo z nich zůstaly jen titulní postavy a ty tady nestačily. Otázky šly po drobnostech, které si pamatuje jen ten, kdo u obrazovky seděl večer co večer. Do starých dílů se dá kdykoli pustit znovu a třeba tam narazíte na mnohé, co vám tenkrát uniklo.`;
+  if (s <= 6) return `Něco z večerníčků vám zůstalo, hlavně to, co se opakovalo nejčastěji. Vedlejší postavy a drobnosti z děje už se vytratily. Takhle zpravidla dopadne ten, kdo večerníčky znal spíš z vyprávění nebo z pozdějších repríz než z vlastních večerů před spaním.`;
+  if (s <= 9) return `Takhle odpovídá dítě z ČSSR, které večerníčky opravdu sledovalo. Pamatujete si seriály i to, co se v nich dělo kolem hlavních postav. Chyběl jen kousek, jeden méně vysílaný seriál nebo detail, který se v paměti časem zamlžil.`;
+  return `Plný počet, přesně jak slibuje titulek. Tolik si z večerníčků pamatuje jen dítě z ČSSR, které u obrazovky sedělo každý večer a všímalo si i toho, co ostatní přehlédli. Takhle neodpovídá ani každý pamětník.`;
+}
+
+function showResult(score) {
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  document.getElementById(`verdict`).textContent = verdictText(score);
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+}
+
+function reset() {
+  for (let i = 0; i < answers.length; i++) answers[i] = null;
+  locked = false;
+  resultEl.style.display = `none`;
+  warnEl.textContent = ``;
+  submitBtn.disabled = true;
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitBtn.addEventListener(`click`, evaluate);
+document.getElementById(`retry`).addEventListener(`click`, reset);
+render();
+</script>
+</body>
+</html>
