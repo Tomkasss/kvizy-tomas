@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test starých přísloví z ČSSR: starší generace si pamatuje všech 10, ale mladí je už neznají</title>
+<style>
+*{box-sizing:border-box;}
+body{font-family:Georgia,"Times New Roman",serif;background:#f5f0eb;margin:0;padding:40px 20px;color:#2c2c2c;}
+.wrap{max-width:720px;margin:0 auto;}
+h1{font-size:1.9rem;line-height:1.3;color:#2c2c2c;margin:0 0 20px;}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px;}
+.q{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px;}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px;line-height:1.45;}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer;line-height:1.45;}
+.opt:last-child{margin-bottom:0;}
+.opt:hover{background:#ede8e1;}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold;}
+.opt.ok{background:#d4edda;border:1px solid #7cb987;color:#1e5631;}
+.opt.bad{background:#f8d7da;border:1px solid #d4848a;color:#721c24;}
+.locked .opt{cursor:default;}
+#sub,#again{display:block;margin:40px auto 0;padding:16px 40px;border:none;border-radius:8px;font-size:1.1rem;font-weight:bold;color:#fff;font-family:inherit;cursor:pointer;}
+#sub{background:#5b7e5f;}
+#sub:hover{background:#4a6b4e;}
+#sub:disabled{background:#b5b5b5;cursor:not-allowed;}
+#again{background:#8c7b6b;}
+#again:hover{background:#756658;}
+#warn{text-align:center;color:#721c24;margin-top:14px;min-height:1.2em;}
+#res{background:#fefcf9;border-top:4px solid #5b7e5f;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-top:32px;display:none;}
+#score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 14px;}
+#verdict{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.65;margin:0;}
+@media(max-width:600px){body{padding:16px;}h1{font-size:1.5rem;}.q{padding:20px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test starých přísloví z ČSSR: starší generace si pamatuje všech 10, ale mladí je už neznají</h1>
+<p class="perex">Tyhle obraty fungovaly jako heslo. Kdo je slyšel doma nebo v dílně, rozuměl jim bez přemýšlení, kdo ne, hádal. Deset otázek, a u každé jen jedna ze čtyř možností sedí tak, jak se to kdysi říkalo.</p>
+<div id="quiz"></div>
+<button id="sub" disabled>Vyhodnotit</button>
+<p id="warn"></p>
+<div id="res">
+<p id="score"></p>
+<p id="verdict"></p>
+<button id="again">Zkusit znovu</button>
+</div>
+</div>
+<script>
+var DATA=[
+{q:`1. Koho popisuje přísloví „Kam vítr, tam plášť“?`,o:[`toho, kdo se rozhoduje až na poslední chvíli ze strachu z chybného kroku`,`toho, kdo často mění zaměstnání i bydliště a nikde dlouho nevydrží`,`toho, kdo se přikloní hned k jedné, hned k druhé straně podle prospěchu`,`toho, kdo se vyhýbá sporům a nechá rozhodnutí vždycky na ostatních`],a:2},
+{q:`2. Čemu se říkalo tlouct špačky?`,o:[`netrpělivému bubnování prsty do stolu, než na člověka přijde řada`,`zívání, které se v místnosti přenáší z jednoho na druhého`,`pokašlávání, kterým dává někdo najevo, že chce mluvit`,`podřimování vsedě, při kterém hlava klesá a zase se zvedá`],a:3},
+{q:`3. Co se stalo tomu, komu spadl hřebínek?`,o:[`přišel o místo, na kterém si ze všeho nejvíc zakládal`,`zkrotl a přestal se před ostatními vytahovat`,`ztratil přehled o tom, co se kolem něj děje`,`propadl trudnomyslnosti a přestal se stýkat s lidmi`],a:1},
+{q:`4. Co v přísloví následuje po slovech „Líná huba…“?`,o:[`holé neštěstí`,`hotová bída`,`věčná škoda`,`samé trápení`],a:0},
+{q:`5. Jak se zachoval ten, kdo nechal druhého ve štychu?`,o:[`slíbil mu pomoc a pak si za ni nechal zaplatit`,`opustil ho ve chvíli, kdy pomoc potřeboval nejvíc`,`postavil se proti němu na stranu jeho protivníka`,`vyzradil o něm něco, co mu měl podržet pro sebe`],a:1},
+{q:`6. Jak skončil vztah, ve kterém jeden dal druhému vale?`,o:[`urovnal s ním starý spor a začali spolu nanovo`,`vyčetl mu všechno, co měl na srdci, a pak zmlkl`,`natrvalo se s ním rozešel a přestal se s ním vídat`,`přenechal mu své postavení a odešel jinam za lepším`],a:2},
+{q:`7. Co se mínilo tím, že někdo má na kahánku?`,o:[`že se dopustil něčeho, co mu ostatní dlouho nezapomenou`,`že se blíží jeho konec a nikdo mu už nedává naději`,`že si na sebe naložil víc práce, než dokáže zvládnout`,`že upadl v nemilost a lidé se mu začali vyhýbat`],a:1},
+{q:`8. Co o sobě dává najevo ten, kdo si sype popel na hlavu?`,o:[`že truchlí nad ztrátou někoho blízkého`,`že se vzdal naděje a smířil se s porážkou`,`že si stěžuje na osud, který ho nešetří`,`že přiznává vlastní vinu a lituje jí`],a:3},
+{q:`9. Jaké jednání hájí přísloví „Na hrubý pytel hrubá záplata“?`,o:[`oplatit hrubé jednání stejně hrubým jednáním`,`urovnat spor dřív, než přeroste v otevřenou hádku`,`svěřit těžkou práci tomu, kdo je na ni stavěný`,`nešetřit na věcech, které mají vydržet dlouhá léta`],a:0},
+{q:`10. Co znamená slovo šproch z přísloví „Není šprochu, aby na něm nebylo pravdy trochu“?`,o:[`domněnka, kterou si někdo utvoří sám pro sebe a nevysloví ji`,`posměšná poznámka pronesená někomu přímo do očí`,`řeč, která koluje mezi lidmi, aniž by ji kdokoli doložil`,`unáhlený slib, o kterém ten, kdo ho dal, hned ví, že ho nesplní`],a:2}
+];
+var LET=[`a) `,`b) `,`c) `,`d) `];
+var TEXTS=[
+{max:3,t:`Deset obratů, které titulek přisuzuje pamětníkům, se u vás zatím neozvalo. Není to ani tak otázka paměti jako toho, jak často je člověk slyší, a co se neslyší, to se vytratí. Projděte si správné odpovědi a pusťte si test znovu za týden, rozdíl bude znát.`},
+{max:6,t:`Polovina padla, polovina ne, a čára mezi nimi vede přesně tam, kde se obrat přestal používat. Povědomé významy jste poznali napoprvé, u těch vzdálenějších jste váhali nad dvěma výklady a rozhodlo štěstí. Na desítku, kterou titulek připisuje starší generaci, to ještě nestačí.`},
+{max:9,t:`Takhle dopadne ten, kdo tuhle řeč zná z doslechu, ne z čítanky. Netrefili jste jednu až tři otázky, nejspíš zrovna ty, u kterých se význam za ta léta v paměti o kousek posunul. Plný počet je odsud na dosah.`},
+{max:10,t:`Titulek tvrdí, že starší generace si pamatuje všech deset, a vy jste ho potvrdili do posledního bodu. Zkuste stejných deset otázek předložit vnoučatům nebo mladším kolegům a uvidíte, jak rychle se začnou ptát, co ta slova vlastně znamenají.`}
+];
+var picks=new Array(DATA.length).fill(-1);
+var done=false;
+var quiz=document.getElementById(`quiz`);
+var sub=document.getElementById(`sub`);
+var warn=document.getElementById(`warn`);
+var res=document.getElementById(`res`);
+var scoreEl=document.getElementById(`score`);
+var verdictEl=document.getElementById(`verdict`);
+
+function build(){
+  quiz.innerHTML=``;
+  for(var i=0;i<DATA.length;i++){
+    var box=document.createElement(`div`);
+    box.className=`q`;
+    var t=document.createElement(`p`);
+    t.className=`qt`;
+    t.textContent=DATA[i].q;
+    box.appendChild(t);
+    for(var j=0;j<DATA[i].o.length;j++){
+      var b=document.createElement(`button`);
+      b.className=`opt`;
+      b.type=`button`;
+      b.textContent=LET[j]+DATA[i].o[j];
+      b.setAttribute(`data-q`,i);
+      b.setAttribute(`data-o`,j);
+      b.addEventListener(`click`,onPick);
+      box.appendChild(b);
+    }
+    quiz.appendChild(box);
+  }
+}
+function onPick(e){
+  if(done){return;}
+  var qi=parseInt(e.currentTarget.getAttribute(`data-q`),10);
+  var oi=parseInt(e.currentTarget.getAttribute(`data-o`),10);
+  picks[qi]=oi;
+  var box=e.currentTarget.parentNode;
+  var opts=box.getElementsByClassName(`opt`);
+  for(var k=0;k<opts.length;k++){opts[k].classList.remove(`sel`);}
+  e.currentTarget.classList.add(`sel`);
+  warn.textContent=``;
+  refresh();
+}
+function refresh(){
+  var all=true;
+  for(var i=0;i<picks.length;i++){if(picks[i]<0){all=false;break;}}
+  sub.disabled=!all;
+}
+function evaluate(){
+  if(done){return;}
+  for(var i=0;i<picks.length;i++){
+    if(picks[i]<0){warn.textContent=`Odpovězte prosím na všechny otázky`;return;}
+  }
+  done=true;
+  var score=0;
+  var boxes=quiz.getElementsByClassName(`q`);
+  for(var q=0;q<DATA.length;q++){
+    var opts=boxes[q].getElementsByClassName(`opt`);
+    boxes[q].classList.add(`locked`);
+    for(var o=0;o<opts.length;o++){
+      opts[o].classList.remove(`sel`);
+      if(o===DATA[q].a){opts[o].classList.add(`ok`);}
+      else if(o===picks[q]){opts[o].classList.add(`bad`);}
+    }
+    if(picks[q]===DATA[q].a){score++;}
+  }
+  sub.disabled=true;
+  scoreEl.textContent=score+` z `+DATA.length;
+  for(var t=0;t<TEXTS.length;t++){
+    if(score<=TEXTS[t].max){verdictEl.textContent=TEXTS[t].t;break;}
+  }
+  res.style.display=`block`;
+  res.scrollIntoView({behavior:`smooth`,block:`start`});
+}
+function reset(){
+  done=false;
+  picks=new Array(DATA.length).fill(-1);
+  res.style.display=`none`;
+  warn.textContent=``;
+  sub.disabled=true;
+  build();
+  window.scrollTo({top:0,behavior:`smooth`});
+}
+sub.addEventListener(`click`,evaluate);
+document.getElementById(`again`).addEventListener(`click`,reset);
+build();
+</script>
+</body>
+</html>
