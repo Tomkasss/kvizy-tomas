@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz o životě v ČSSR: pamatujete si těchto 10 věcí?</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f5f0eb;
+  margin: 0;
+  padding: 40px 20px;
+  color: #2c2c2c;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+.otazka {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; line-height: 1.45; }
+.varianta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: Georgia, "Times New Roman", serif;
+  cursor: pointer;
+  margin-bottom: 10px;
+  line-height: 1.45;
+}
+.varianta:last-child { margin-bottom: 0; }
+.varianta:hover { background: #ede8e1; }
+.varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.varianta:disabled { cursor: default; }
+#vyhodnotit, #znovu {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  background: #5b7e5f;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: Georgia, "Times New Roman", serif;
+  cursor: pointer;
+}
+#vyhodnotit:hover { background: #4a6b4e; }
+#vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+#znovu { background: #8c7b6b; }
+#znovu:hover { background: #756658; }
+.hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.2em; }
+#vysledek {
+  background: #fefcf9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid #5b7e5f;
+  padding: 28px;
+  margin-top: 40px;
+}
+#skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 16px; }
+#hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 1.5rem; }
+  .otazka, #vysledek { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz o životě v ČSSR: pamatujete si těchto 10 věcí? Pak jste ho určitě zažili na vlastní kůži</h1>
+<p class="perex">Pořadníky, poukazy a obchody, kde se leccos schovávalo pod pult. Kdo v socialistickém Československu žil jako dospělý nebo dospívající, zná tenhle svět z první ruky. Připomeňte si, jak vypadal obyčejný všední den mezi lety 1960 a 1989.</p>
+
+<div id="kviz"></div>
+
+<button id="vyhodnotit" disabled>Vyhodnotit</button>
+<p class="hlaska" id="hlaska"></p>
+
+<div id="vysledek" style="display:none">
+  <p id="skore"></p>
+  <p id="hodnoceni"></p>
+  <button id="znovu">Zkusit znovu</button>
+</div>
+</div>
+
+<script>
+var otazky = [
+  {
+    zneni: `1. Jaký materiál se v socialistickém Československu používal na ražbu pětihaléřů a desetihaléřů?`,
+    varianty: [`mosaz`, `hliník`, `měď`, `nikl`],
+    spravna: 1
+  },
+  {
+    zneni: `2. Jak si cestující v 80. letech v pražské tramvaji označil papírovou jízdenku?`,
+    varianty: [`vložil ji do strojku a přitáhl kryt, který vyrazil dírky`, `nechal si ji proštípnout kleštěmi od průvodčího ve voze`, `orazítkoval si ji v přístroji vedle kabiny řidiče`, `utrhl z ní rožek podle předtištěné čáry na okraji`],
+    spravna: 0
+  },
+  {
+    zneni: `3. Čím se od pravé čokolády odlišovala takzvaná pochoutka?`,
+    varianty: [`měla vyšší podíl kakaa, ale výrazně hrubší strukturu`, `byla slazená umělým sladidlem místo řepného cukru`, `neobsahovala vůbec žádnou mléčnou složku`, `obsahovala rostlinný tuk místo kakaového másla`],
+    spravna: 3
+  },
+  {
+    zneni: `4. Co musela rodina v socialistickém Československu dostat, než se mohla nastěhovat do bytu, na který čekala v pořadníku?`,
+    varianty: [`nájemní smlouvu uzavřenou s podnikem`, `dekret vydaný místním národním výborem`, `doporučení od závodního výboru ROH`, `souhlas domovní správy s přihlášením`],
+    spravna: 1
+  },
+  {
+    zneni: `5. Jak dlouhá byla podle občanského zákoníku z roku 1964 zákonná záruka na běžné spotřební zboží prodané v obchodě?`,
+    varianty: [`tři měsíce`, `šest měsíců`, `dvanáct měsíců`, `dvacet čtyři měsíců`],
+    spravna: 1
+  },
+  {
+    zneni: `6. Kolik let trvala v Československu povinná školní docházka po školské reformě z roku 1978?`,
+    varianty: [`osm let`, `devět let`, `deset let`, `jedenáct let`],
+    spravna: 2
+  },
+  {
+    zneni: `7. Jaká nejvyšší rychlost platila v 80. letech pro jízdu osobním autem v obci přes den?`,
+    varianty: [`40 km/h`, `50 km/h`, `60 km/h`, `70 km/h`],
+    spravna: 2
+  },
+  {
+    zneni: `8. Jaký suvenýr si turisté tradičně odnášejí z cíle dálkového pochodu z Prahy do Prčice?`,
+    varianty: [`malou botičku zvanou škrpál`, `vyšívanou nášivku s vlaštovkou`, `pamětní list s razítkem obce`, `keramický zvoneček`],
+    spravna: 0
+  },
+  {
+    zneni: `9. Čím musel československý muzikant za normalizace prokázat, že smí veřejně vystupovat za honorář?`,
+    varianty: [`registrací u Svazu českých skladatelů`, `členstvím v Českém hudebním fondu`, `povolením okresního kulturního střediska`, `složenou kvalifikační zkouškou před komisí`],
+    spravna: 3
+  },
+  {
+    zneni: `10. Která organizace vybírala pro československá kina zahraniční snímky a zadávala jejich dabing do češtiny?`,
+    varianty: [`Československý filmexport`, `Filmové studio Barrandov`, `Ústřední půjčovna filmů`, `Ústřední ředitelství Čs. filmu`],
+    spravna: 2
+  }
+];
+
+var hodnoceni = [
+  { max: 3, text: `Tenhle svět vám zůstal spíš z vyprávění než z vlastní paměti. Mince v kapse, úřední papíry a pravidla, kterými se tehdy řídil každý nákup i každé stěhování, vám dnes splývají do jedné mlhy. Odpovědi si projděte jako příběh o době, která už skončila.` },
+  { max: 6, text: `Tady končí většina řešitelů. Zhruba polovinu otázek jste trefili, u zbytku jste tipovali nebo se rozhodovali mezi dvěma variantami, které se držely těsně u sebe. Nejhůř se drží v paměti přesná čísla, lhůty a názvy institucí, a právě na nich tenhle výsledek obvykle uvízne.` },
+  { max: 9, text: `Tohle je výsledek člověka, který v ČSSR žil a dával pozor. Poznali jste nejen to, co měl doma každý, ale i pravidla a instituce, které stály v pozadí a dnes si je vybaví málokdo. K plnému počtu vám chybělo pár drobností.` },
+  { max: 10, text: `Plný počet, a to v kvízu, kde se u několika otázek držely dvě varianty těsně u sebe. Drobné mince, úřední papíry, dopravní předpisy i cesta filmu do kina vám zapadly do jedné poskládané představy o všedním dnu v socialistickém Československu. Takhle ucelený přehled dnes má málokdo, ať už ho člověk nasbíral vlastní pamětí, nebo čtením a vyprávěním.` }
+];
+
+var pismena = [`a) `, `b) `, `c) `, `d) `];
+var odpovedi = new Array(otazky.length).fill(null);
+var vyhodnoceno = false;
+
+var kvizEl = document.getElementById('kviz');
+var tlacitkoVyhodnotit = document.getElementById('vyhodnotit');
+var hlaskaEl = document.getElementById('hlaska');
+var vysledekEl = document.getElementById('vysledek');
+var skoreEl = document.getElementById('skore');
+var hodnoceniEl = document.getElementById('hodnoceni');
+var tlacitkoZnovu = document.getElementById('znovu');
+
+function postav() {
+  kvizEl.innerHTML = '';
+  otazky.forEach(function (o, i) {
+    var box = document.createElement('div');
+    box.className = 'otazka';
+    var p = document.createElement('p');
+    p.className = 'zneni';
+    p.textContent = o.zneni;
+    box.appendChild(p);
+    o.varianty.forEach(function (v, j) {
+      var b = document.createElement('button');
+      b.className = 'varianta';
+      b.textContent = pismena[j] + v;
+      b.addEventListener('click', function () { vyber(i, j); });
+      box.appendChild(b);
+    });
+    kvizEl.appendChild(box);
+  });
+}
+
+function vyber(i, j) {
+  if (vyhodnoceno) return;
+  odpovedi[i] = j;
+  var box = kvizEl.children[i];
+  var tlacitka = box.querySelectorAll('.varianta');
+  for (var k = 0; k < tlacitka.length; k++) {
+    tlacitka[k].classList.toggle('vybrana', k === j);
+  }
+  hlaskaEl.textContent = '';
+  tlacitkoVyhodnotit.disabled = odpovedi.indexOf(null) !== -1;
+}
+
+function vyhodnot() {
+  if (odpovedi.indexOf(null) !== -1) {
+    hlaskaEl.textContent = 'Odpovězte prosím na všechny otázky';
+    return;
+  }
+  vyhodnoceno = true;
+  var skore = 0;
+  otazky.forEach(function (o, i) {
+    var box = kvizEl.children[i];
+    var tlacitka = box.querySelectorAll('.varianta');
+    for (var k = 0; k < tlacitka.length; k++) {
+      tlacitka[k].classList.remove('vybrana');
+      tlacitka[k].disabled = true;
+      if (k === o.spravna) tlacitka[k].classList.add('spravna');
+      else if (k === odpovedi[i]) tlacitka[k].classList.add('spatna');
+    }
+    if (odpovedi[i] === o.spravna) skore++;
+  });
+  tlacitkoVyhodnotit.disabled = true;
+  skoreEl.textContent = skore + ' z ' + otazky.length;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore <= hodnoceni[h].max) { hodnoceniEl.textContent = hodnoceni[h].text; break; }
+  }
+  vysledekEl.style.display = 'block';
+  vysledekEl.scrollIntoView({ behavior: 'smooth' });
+}
+
+function reset() {
+  odpovedi = new Array(otazky.length).fill(null);
+  vyhodnoceno = false;
+  vysledekEl.style.display = 'none';
+  hlaskaEl.textContent = '';
+  tlacitkoVyhodnotit.disabled = true;
+  postav();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+tlacitkoVyhodnotit.addEventListener('click', vyhodnot);
+tlacitkoZnovu.addEventListener('click', reset);
+postav();
+</script>
+</body>
+</html>
