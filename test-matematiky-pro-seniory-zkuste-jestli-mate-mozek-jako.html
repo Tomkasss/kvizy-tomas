@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test matematiky pro seniory: zkuste, jestli máte mozek jako ve 30 a dáte i v důchodu 10 bodů z 10</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px 80px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 36px; }
+  .otazka {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .zneni { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; line-height: 1.5; margin-bottom: 18px; }
+  .varianta {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+  .varianta:last-child { margin-bottom: 0; }
+  .varianta:hover { background: #ede8e1; }
+  .varianta.vybrana { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .varianta.spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .varianta.spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  input[type="text"] {
+    display: block;
+    width: 100%;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+  }
+  input[type="text"]:focus { outline: none; background: #ede8e1; border-color: #a89e92; }
+  input[type="text"].spravna { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  input[type="text"].spatna { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .reseni { margin-top: 14px; font-size: 1rem; color: #1e5631; }
+  .reseni.chybne { color: #721c24; }
+  #vyhodnotit, #znovu {
+    display: block;
+    margin: 40px auto 0;
+    padding: 16px 40px;
+    background: #5b7e5f;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #vyhodnotit:hover { background: #4a6b4e; }
+  #vyhodnotit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #znovu { background: #8c7b6b; }
+  #znovu:hover { background: #756658; }
+  #hlaska { text-align: center; color: #721c24; margin-top: 14px; min-height: 1.2em; }
+  #vysledek {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+    display: none;
+  }
+  #skore { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 14px; }
+  #hodnoceni { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; }
+  @media (max-width: 600px) {
+    body { padding: 20px 16px 60px; }
+    h1 { font-size: 1.5rem; }
+    .otazka, #vysledek { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test matematiky pro seniory: zkuste, jestli máte mozek jako ve 30 a dáte i v důchodu 10 bodů z 10</h1>
+  <p class="perex">Matematika ze školních let se zapomíná pomaleji, než byste čekali. Deset úloh, u kterých kalkulačka zůstane v šuplíku. Ukáže se, jestli vám to počítá stejně ochotně jako ve třiceti, nebo jestli si každý krok musíte rozmyslet dvakrát.</p>
+
+  <div id="kviz"></div>
+
+  <button id="vyhodnotit" disabled>Vyhodnotit</button>
+  <p id="hlaska"></p>
+
+  <div id="vysledek">
+    <div id="skore"></div>
+    <div id="hodnoceni"></div>
+    <button id="znovu">Zkusit znovu</button>
+  </div>
+</div>
+
+<script>
+var otazky = [
+  {
+    zneni: `1. Kolik centimetrů měří obvod obdélníkového ubrusu o délce 135 centimetrů a šířce 82 centimetrů?`,
+    typ: `text`,
+    spravne: [`434`, `434 cm`, `434 centimetru`, `434 centimetrů`],
+    zobrazit: `434`
+  },
+  {
+    zneni: `2. Kolik metrů pod hladinou bude potápěč, který se z hloubky 19 metrů ponoří ještě o 13 metrů a potom vystoupá o 6 metrů?`,
+    typ: `text`,
+    spravne: [`26`, `26 m`, `26 metru`, `26 metrů`],
+    zobrazit: `26`
+  },
+  {
+    zneni: `3. Kolik metrů čtverečních měří obsah lichoběžníkového pozemku, jehož rovnoběžné strany jsou dlouhé 27 a 35 metrů a výška měří 16 metrů?`,
+    typ: `text`,
+    spravne: [`496`, `496 m2`, `496 m²`],
+    zobrazit: `496`
+  },
+  {
+    zneni: `4. Jaký objem v litrech má nádoba tvaru kvádru o vnitřních rozměrech 65, 40 a 35 centimetrů?`,
+    typ: `text`,
+    spravne: [`91`, `91 l`, `91 litru`, `91 litrů`],
+    zobrazit: `91`
+  },
+  {
+    zneni: `5. Které z těchto čísel je prvočíslo?`,
+    typ: `volba`,
+    varianty: [`a) 143`, `b) 149`, `c) 147`, `d) 141`],
+    spravnyIndex: 1,
+    zobrazit: `b) 149`
+  },
+  {
+    zneni: `6. Kolik eur dostane ve směnárně zákazník, který mění 4 590 korun při kurzu 24 korun za euro, jestliže si směnárna nejprve odečte poplatek 150 korun z měněné částky?`,
+    typ: `text`,
+    spravne: [`185`, `185 eur`, `185 €`],
+    zobrazit: `185`
+  },
+  {
+    zneni: `7. Kolik motocyklů stojí na parkovišti, na kterém je celkem 34 vozidel, jen osobní automobily a motocykly, a dohromady mají 118 kol?`,
+    typ: `text`,
+    spravne: [`9`, `9 motocyklu`, `9 motocyklů`],
+    zobrazit: `9`
+  },
+  {
+    zneni: `8. Kolika různými způsoby si lze poskládat oběd z nabídky čtyř polévek, sedmi hlavních jídel a tří moučníků, jestliže se z každé skupiny vybírá právě jedna položka?`,
+    typ: `text`,
+    spravne: [`84`, `84 zpusobu`, `84 způsobů`],
+    zobrazit: `84`
+  },
+  {
+    zneni: `9. Kolik stupňů měří menší z úhlů, které spolu svírají hodinová a minutová ručička ve 4 hodiny a 20 minut?`,
+    typ: `text`,
+    spravne: [`10`, `10 stupnu`, `10 stupňů`, `10°`],
+    zobrazit: `10`
+  },
+  {
+    zneni: `10. Jaká je v procentech pravděpodobnost, že dvě kuličky postupně vytažené bez vracení ze sáčku se čtyřmi modrými a dvanácti zelenými budou obě modré?`,
+    typ: `text`,
+    spravne: [`5`, `5 %`, `5%`, `5 procent`],
+    zobrazit: `5`
+  }
+];
+
+var hodnoceni = [
+  { min: 0, max: 3, text: `Počítání z hlavy máte na úrovni, která odpovídá zhruba věku 65 až 75 let. Vzorce se vytratily a čísla se drobí. Není to nic nevratného, jen se s nimi léta nepracovalo naplno.` },
+  { min: 4, max: 6, text: `Výkon odpovídá zhruba věku 50 až 60 let. Základní počty držíte pevně, ale tam, kde se mají udržet dva mezivýsledky naráz, se tempo láme. Trénink na úlohách o dvou krocích to posune rychle.` },
+  { min: 7, max: 9, text: `Počítáte na úrovni zhruba pětatřicátníka až pětačtyřicátníka. Vzorce vytahujete bez zaváhání a nekulatá čísla vás nerozhodí. Chybělo málo.` },
+  { min: 10, max: 10, text: `Počítáte na úrovni třicátníka, přesně jak slibuje název. Geometrie, prvočísla, kombinatorika i pravděpodobnost sedí bez jediného zaškobrtnutí a plný počet tady dá jen menšina.` }
+];
+
+var odpovedi = new Array(otazky.length).fill(null);
+var hotovo = false;
+
+function normalizuj(s) {
+  return String(s)
+    .trim()
+    .toLowerCase()
+    .normalize(`NFD`)
+    .replace(/[̀-ͯ]/g, ``)
+    .replace(/\s+/g, ` `)
+    .replace(/[.,;]+$/, ``);
+}
+
+var kvizEl = document.getElementById(`kviz`);
+var tlacitko = document.getElementById(`vyhodnotit`);
+var hlaska = document.getElementById(`hlaska`);
+var vysledekEl = document.getElementById(`vysledek`);
+var skoreEl = document.getElementById(`skore`);
+var hodnoceniEl = document.getElementById(`hodnoceni`);
+var znovuEl = document.getElementById(`znovu`);
+
+function postav() {
+  kvizEl.innerHTML = ``;
+  otazky.forEach(function (o, i) {
+    var box = document.createElement(`div`);
+    box.className = `otazka`;
+    box.id = `otazka-` + i;
+
+    var zneni = document.createElement(`div`);
+    zneni.className = `zneni`;
+    zneni.textContent = o.zneni;
+    box.appendChild(zneni);
+
+    if (o.typ === `volba`) {
+      o.varianty.forEach(function (v, j) {
+        var b = document.createElement(`button`);
+        b.type = `button`;
+        b.className = `varianta`;
+        b.textContent = v;
+        b.addEventListener(`click`, function () {
+          if (hotovo) return;
+          odpovedi[i] = j;
+          var vsechny = box.querySelectorAll(`.varianta`);
+          for (var k = 0; k < vsechny.length; k++) {
+            vsechny[k].classList.remove(`vybrana`);
+          }
+          b.classList.add(`vybrana`);
+          prekresliTlacitko();
+        });
+        box.appendChild(b);
+      });
+    } else {
+      var vstup = document.createElement(`input`);
+      vstup.type = `text`;
+      vstup.setAttribute(`inputmode`, `numeric`);
+      vstup.setAttribute(`autocomplete`, `off`);
+      vstup.placeholder = `Napište odpověď`;
+      vstup.addEventListener(`input`, function () {
+        if (hotovo) return;
+        odpovedi[i] = vstup.value.trim() === `` ? null : vstup.value;
+        prekresliTlacitko();
+      });
+      box.appendChild(vstup);
+    }
+
+    kvizEl.appendChild(box);
+  });
+}
+
+function prekresliTlacitko() {
+  var vse = odpovedi.every(function (o) { return o !== null; });
+  tlacitko.disabled = !vse;
+  if (vse) hlaska.textContent = ``;
+}
+
+function vyhodnot() {
+  if (odpovedi.some(function (o) { return o === null; })) {
+    hlaska.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  hotovo = true;
+  tlacitko.disabled = true;
+  var skore = 0;
+
+  otazky.forEach(function (o, i) {
+    var box = document.getElementById(`otazka-` + i);
+    var spravne = false;
+
+    if (o.typ === `volba`) {
+      spravne = odpovedi[i] === o.spravnyIndex;
+      var vsechny = box.querySelectorAll(`.varianta`);
+      for (var k = 0; k < vsechny.length; k++) {
+        vsechny[k].disabled = true;
+        vsechny[k].classList.remove(`vybrana`);
+        if (k === o.spravnyIndex) {
+          vsechny[k].classList.add(`spravna`);
+        } else if (k === odpovedi[i]) {
+          vsechny[k].classList.add(`spatna`);
+        }
+      }
+    } else {
+      var zadano = normalizuj(odpovedi[i]);
+      spravne = o.spravne.some(function (s) { return normalizuj(s) === zadano; });
+      var vstup = box.querySelector(`input`);
+      vstup.disabled = true;
+      vstup.classList.add(spravne ? `spravna` : `spatna`);
+      if (!spravne) {
+        var reseni = document.createElement(`div`);
+        reseni.className = `reseni chybne`;
+        reseni.textContent = `Správná odpověď: ` + o.zobrazit;
+        box.appendChild(reseni);
+      }
+    }
+
+    if (spravne) skore++;
+  });
+
+  skoreEl.textContent = skore + ` z 10`;
+  for (var h = 0; h < hodnoceni.length; h++) {
+    if (skore >= hodnoceni[h].min && skore <= hodnoceni[h].max) {
+      hodnoceniEl.textContent = hodnoceni[h].text;
+      break;
+    }
+  }
+  vysledekEl.style.display = `block`;
+  vysledekEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function resetuj() {
+  hotovo = false;
+  odpovedi = new Array(otazky.length).fill(null);
+  vysledekEl.style.display = `none`;
+  hlaska.textContent = ``;
+  postav();
+  prekresliTlacitko();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+tlacitko.addEventListener(`click`, vyhodnot);
+znovuEl.addEventListener(`click`, resetuj);
+
+postav();
+prekresliTlacitko();
+</script>
+</body>
+</html>
