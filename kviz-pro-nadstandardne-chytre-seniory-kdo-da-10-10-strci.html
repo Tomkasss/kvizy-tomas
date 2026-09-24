@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro nadstandardně chytré seniory: kdo dá 10/10, strčí dnešní třicátníky do kapsy</title>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; padding: 32px 20px; background: #f5f0eb; font-family: Georgia, "Times New Roman", serif; color: #2c2c2c; }
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.3; margin: 0 0 16px; color: #2c2c2c; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 28px; }
+.question { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 28px; margin-bottom: 24px; }
+.qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 16px; line-height: 1.4; }
+.opt { display: block; width: 100%; text-align: left; padding: 14px 18px; margin-bottom: 10px; background: #f7f4f0; border: 1px solid #d9d2c9; border-radius: 8px; font-size: 1rem; color: #3a3a3a; font-family: inherit; cursor: pointer; }
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+.opt.locked:hover { background: #f7f4f0; }
+.opt.locked.selected:hover { background: #dcd3c7; }
+.opt.locked.correct:hover { background: #d4edda; }
+.opt.locked.wrong:hover { background: #f8d7da; }
+.answer-note { margin-top: 12px; font-size: .95rem; color: #1e5631; }
+.btn { display: block; margin: 40px auto 0; background: #5b7e5f; color: #fff; border: none; padding: 16px 40px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; font-family: inherit; cursor: pointer; }
+.btn:hover { background: #4a6b4e; }
+.btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+.btn.retry { background: #8c7b6b; }
+.btn.retry:hover { background: #756658; }
+.hint { text-align: center; color: #8a5a5a; margin-top: 12px; font-size: .95rem; }
+.result { background: #fefcf9; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 28px; margin-top: 40px; border-top: 4px solid #5b7e5f; display: none; }
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+.verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  .question { padding: 20px 16px; }
+  h1 { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro nadstandardně chytré seniory: kdo dá 10/10, strčí dnešní třicátníky do kapsy</h1>
+<p class="perex">Třicátníci mají všechno v telefonu, vy to nosíte v hlavě. Deset otázek od klasických románů přes olympijské tratě po starou fyziku prověří, jestli vám paměť slouží tak dobře, abyste mladší generaci strčili do kapsy.</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="evaluate" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="result" id="result">
+<p class="score" id="score"></p>
+<p class="verdict" id="verdict"></p>
+<button type="button" class="btn retry" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  { q: `Jak se jmenuje sluha Phileasa Fogga?`, opts: [`Fix`, `Planchet`, `Passepartout`, `Conseil`], correct: 2 },
+  { q: `Která řeka vyhloubila Grand Canyon?`, opts: [`Colorado`, `Rio Grande`, `Missouri`, `Arkansas`], correct: 0 },
+  { q: `Které písmeno se v Morseově abecedě zapisuje jedinou tečkou?`, opts: [`I`, `E`, `T`, `S`], correct: 1 },
+  { q: `Po kom je pojmenován dezert Pavlova?`, opts: [`po ruské velkokněžně`, `po ruské baletce`, `po ruské krasobruslařce`, `po ruské spisovatelce`], correct: 1 },
+  { q: `Kdo sestrojil první rtuťový barometr?`, opts: [`Evangelista Torricelli`, `Blaise Pascal`, `Otto von Guericke`, `Galileo Galilei`], correct: 0 },
+  { q: `Který běžec vyhrál bos olympijský maraton?`, opts: [`Mamo Wolde`, `Miruts Yifter`, `Abebe Bikila`, `Kipchoge Keino`], correct: 2 },
+  { q: `Který herec hrál Harmoniku ve filmu Tenkrát na Západě?`, opts: [`Henry Fonda`, `Charles Bronson`, `Jason Robards`, `Clint Eastwood`], correct: 1 },
+  { q: `Který architekt navrhl Tančící dům spolu s Frankem Gehrym?`, opts: [`Josef Pleskot`, `Bořek Šípek`, `Ladislav Lábus`, `Vlado Milunić`], correct: 3 },
+  { q: `Ve které zemi se jako v první na světě stala předsedkyní vlády žena?`, opts: [`Indie`, `Pákistán`, `Izrael`, `Srí Lanka`], correct: 3 },
+  { q: `Která ryba si staví hnízdo z kousků rostlin?`, opts: [`koljuška tříostná`, `vranka obecná`, `hořavka duhová`, `okoun říční`], correct: 0 }
+];
+const bands = [
+  { min: 0, max: 3, text: `Tentokrát by vás průměrný třicátník s telefonem v ruce předběhl. Otázky ale šly daleko za běžnou školní látku, takže tohle skóre o vašem přehledu mnoho neříká. Stačí jedno kolo navíc a karty se můžou obrátit.` },
+  { min: 4, max: 6, text: `Slušná bilance v kvízu, který se často pouštěl za hranice školní látky. Základ máte pevný a k tomu, abyste mladší generaci začali utíkat, vám chybí pár bodů z okrajových oborů.` },
+  { min: 7, max: 9, text: `Takový rozhled se nedá vygooglovat. Pamatujete si i věci, které se ve škole nikdy neprobíraly, a od toho, abyste dnešní třicátníky strčili do kapsy, vás dělí už jen drobná zaváhání.` },
+  { min: 10, max: 10, text: `Plný počet, a ten se v tomhle kvízu nedává zadarmo. Poradili jste si s fyzikou, architekturou, westerny i rybami, takže dnešní třicátníky s přehledem strčíte do kapsy.` }
+];
+const quizEl = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`evaluate`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+const scoreEl = document.getElementById(`score`);
+const verdictEl = document.getElementById(`verdict`);
+const retryBtn = document.getElementById(`retry`);
+const letters = [`a`, `b`, `c`, `d`];
+let answers = [];
+let locked = false;
+
+function render() {
+  quizEl.innerHTML = ``;
+  answers = questions.map(() => null);
+  locked = false;
+  questions.forEach((q, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `question`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (qi + 1) + `. ` + q.q;
+    box.appendChild(p);
+    q.opts.forEach((o, oi) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = letters[oi] + `) ` + o;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`selected`));
+        b.classList.add(`selected`);
+        updateButton();
+      });
+      box.appendChild(b);
+    });
+    quizEl.appendChild(box);
+  });
+  resultEl.style.display = `none`;
+  updateButton();
+}
+
+function updateButton() {
+  const done = answers.every(a => a !== null);
+  evalBtn.disabled = !done || locked;
+  hintEl.style.display = (!done && !locked) ? `block` : `none`;
+}
+
+evalBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null) || locked) return;
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.question`);
+  questions.forEach((q, qi) => {
+    const opts = boxes[qi].querySelectorAll(`.opt`);
+    opts.forEach(o => { o.classList.add(`locked`); o.disabled = true; });
+    if (answers[qi] === q.correct) {
+      score++;
+      opts[q.correct].classList.add(`correct`);
+    } else {
+      opts[answers[qi]].classList.remove(`selected`);
+      opts[answers[qi]].classList.add(`wrong`);
+      opts[q.correct].classList.add(`correct`);
+      const note = document.createElement(`p`);
+      note.className = `answer-note`;
+      note.textContent = `Správná odpověď: ` + letters[q.correct] + `) ` + q.opts[q.correct];
+      boxes[qi].appendChild(note);
+    }
+  });
+  scoreEl.textContent = score + ` z ` + questions.length;
+  const band = bands.find(b => score >= b.min && score <= b.max);
+  verdictEl.textContent = band ? band.text : ``;
+  resultEl.style.display = `block`;
+  updateButton();
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+retryBtn.addEventListener(`click`, () => {
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+render();
+</script>
+</body>
+</html>
