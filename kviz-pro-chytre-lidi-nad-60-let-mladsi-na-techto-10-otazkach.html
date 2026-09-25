@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro chytré lidi nad 60 let: mladší na těchto 10 otázkách často pohoří</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px;color:#2c2c2c}
+.perex{font-size:1.05rem;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover:not(:disabled){background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin-top:12px;font-size:.95rem}
+.fb.ok{color:#1e5631} .fb.bad{color:#721c24}
+.btn{display:block;margin:40px auto 0;background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;font-family:inherit;cursor:pointer}
+.btn:hover:not(:disabled){background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;font-size:.95rem;margin-top:12px}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.etext{font-size:1rem;color:#4a4a4a;text-align:center;margin:0}
+#retry{background:#8c7b6b;margin-top:24px}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}h1{font-size:1.5rem}.box{padding:20px 16px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro chytré lidi nad 60 let: mladší na těchto 10 otázkách často pohoří</h1>
+<p class="perex">Heyerdahlova plavba, Foglarovy Rychlé šípy, fotbalové zlato z Bělehradu nebo lampa, se kterou se lezlo do sklepa i do jeskyně. Pamětníci nad šedesát si tu odpovědi vybaví snáz, dnešní třicátníci budou častěji tápat.</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="etext" id="etext"></p>
+<button type="button" class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q=[
+{q:`Ze kterého přístavu vyplul Heyerdahlův vor Kon-Tiki?`,o:[`Guayaquil`,`Callao`,`Antofagasta`,`Buenaventura`],a:1},
+{q:`Která z těchto hub roste v přírodě hlavně na jaře?`,o:[`hřib smrkový`,`liška obecná`,`smrž obecný`,`bedla vysoká`],a:2},
+{q:`Jak se jmenuje městská čtvrť, v níž se odehrává Foglarova Záhada hlavolamu?`,o:[`Stínadla`,`Podskalí`,`Zátiší`,`Rokle`],a:0},
+{q:`Po kterých dvou řekách vede hranice mezi Německem a Polskem?`,o:[`Visla a Varta`,`Labe a Lužická Nisa`,`Odra a Varta`,`Odra a Lužická Nisa`],a:3},
+{q:`Jak se jmenoval Vinnetoův kůň?`,o:[`Ríh`,`Hatátitla`,`Ilči`,`Syrr`],a:2},
+{q:`Ve kterém městě uzavřelo Rakousko s Napoleonem mír po bitvě u Slavkova?`,o:[`ve Vídni`,`v Brně`,`v Linci`,`v Bratislavě`],a:3},
+{q:`Jak se jmenuje chlapec, který vypráví Poláčkovu knihu Bylo nás pět?`,o:[`Petr Bajza`,`Čeněk Jirsák`,`Antonín Bejval`,`Éda Kemlink`],a:0},
+{q:`Který plyn hořel v karbidové lampě?`,o:[`acetylen`,`metan`,`svítiplyn`,`propan`],a:0},
+{q:`Který hlavní trenér dovedl československé fotbalisty k jejich jedinému titulu mistrů Evropy?`,o:[`Rudolf Vytlačil`,`Václav Ježek`,`Josef Masopust`,`Jozef Marko`],a:1},
+{q:`Jak se jmenuje země obrů, kterou navštívil Gulliver?`,o:[`Laputa`,`Brobdingnag`,`Balnibarbi`,`Luggnagg`],a:1}
+];
+const E=[
+{min:0,max:3,t:`Tentokrát vám otázky nesedly a mladší ročník by s vámi nejspíš udržel tempo. Deset otázek je ale malý vzorek a příště může přijít téma, ve kterém se budete cítit jako doma.`},
+{min:4,max:6,t:`Kolem tohoto skóre se obvykle zastaví dnešní třicátníci. Od mladších jste se tentokrát výrazně neodtrhli, chybí vám ale jen pár bodů.`},
+{min:7,max:9,t:`S takovým výsledkem mladší z kvízu obvykle neodcházejí. Školní látka i vlastní vzpomínky drží a chyba padla nanejvýš u zapeklitějších otázek.`},
+{min:10,max:10,t:`Deset trefených odpovědí. Nespletla vás ani Gulliverova země obrů, kterou si i zdatní čtenáři zaměňují s dalšími Swiftovými zeměmi, a takový výsledek se v tomto kvízu podaří opravdu výjimečně.`}
+];
+const quiz=document.getElementById(`quiz`);
+const evalBtn=document.getElementById(`eval`);
+const hint=document.getElementById(`hint`);
+const result=document.getElementById(`result`);
+let ans=[];let done=false;
+function render(){
+  quiz.innerHTML=``;ans=Q.map(()=>null);done=false;
+  Q.forEach((q,i)=>{
+    const box=document.createElement(`div`);box.className=`box`;
+    const p=document.createElement(`p`);p.className=`qtext`;p.textContent=(i+1)+`. `+q.q;box.appendChild(p);
+    q.o.forEach((o,j)=>{
+      const b=document.createElement(`button`);b.type=`button`;b.className=`opt`;
+      b.textContent=`abcd`[j]+`) `+o;
+      b.addEventListener(`click`,()=>{
+        if(done)return;ans[i]=j;
+        box.querySelectorAll(`.opt`).forEach((x,k)=>x.classList.toggle(`sel`,k===j));
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb=document.createElement(`div`);fb.className=`fb`;box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  result.style.display=`none`;update();
+}
+function update(){
+  const all=ans.every(a=>a!==null);
+  evalBtn.disabled=!all||done;
+  hint.style.display=all||done?`none`:`block`;
+}
+evalBtn.addEventListener(`click`,()=>{
+  if(done||!ans.every(a=>a!==null))return;
+  done=true;let s=0;
+  quiz.querySelectorAll(`.box`).forEach((box,i)=>{
+    const opts=box.querySelectorAll(`.opt`);
+    opts.forEach((b,k)=>{b.disabled=true;b.classList.remove(`sel`);
+      if(k===Q[i].a)b.classList.add(`ok`);
+      else if(k===ans[i])b.classList.add(`bad`);});
+    const fb=box.querySelector(`.fb`);
+    if(ans[i]===Q[i].a){s++;fb.className=`fb ok`;fb.textContent=`Správně.`;}
+    else{fb.className=`fb bad`;fb.textContent=`Špatně. Správná odpověď: `+`abcd`[Q[i].a]+`) `+Q[i].o[Q[i].a];}
+  });
+  document.getElementById(`score`).textContent=s+` z `+Q.length;
+  const e=E.find(x=>s>=x.min&&s<=x.max);
+  document.getElementById(`etext`).textContent=e?e.t:``;
+  result.style.display=`block`;update();
+  result.scrollIntoView({behavior:`smooth`,block:`start`});
+});
+document.getElementById(`retry`).addEventListener(`click`,()=>{render();window.scrollTo({top:0,behavior:`smooth`});});
+render();
+</script>
+</body>
+</html>
