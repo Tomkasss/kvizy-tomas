@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Těžký vědomostní kvíz pro seniory: většina lidí nezvládne správně ani osm otázek</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:24px;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto}
+h1{font-size:1.9rem;line-height:1.25;margin:8px 0 16px;color:#2c2c2c}
+.perex{font-size:1.1rem;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.q-text{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-family:inherit;font-size:1rem;color:#3a3a3a;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.selected{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border:1px solid #7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border:1px solid #d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.opt.locked:hover{background:inherit}
+.note{margin-top:8px;font-size:.95rem}
+.note.ok{color:#1e5631}
+.note.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.verdict{font-size:1rem;color:#4a4a4a;text-align:center;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){body{padding:16px}.box{padding:20px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1 id="title"></h1>
+<p class="perex" id="perex"></p>
+<div id="quiz"></div>
+<button class="btn" id="submit" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="verdict" id="verdict"></p>
+<button class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const TITLE = `Těžký vědomostní kvíz pro seniory: většina lidí nezvládne správně ani osm otázek`;
+const PEREX = `Deset otázek z dějin, přírody, filmu, kuchyně i sportu, u kterých nestačí jen tušit. Kdo prošel desítkami let četby, cest a televize, má šanci, ale osm správných odpovědí zvládne jen menšina.`;
+const QUESTIONS = [
+  {q:`1. Který přírodovědec zavedl dvouslovné vědecké pojmenování rostlin a živočichů?`, o:[`a) Charles Darwin`,`b) Carl Linné`,`c) Jean-Baptiste Lamarck`,`d) Georges Cuvier`], a:1},
+  {q:`2. Ve které zemi leží Kappadokie?`, o:[`a) v Řecku`,`b) v Arménii`,`c) v Íránu`,`d) v Turecku`], a:3},
+  {q:`3. Za který film získala Elizabeth Taylorová svého druhého Oscara za hlavní roli?`, o:[`a) Kleopatra`,`b) Kočka na rozpálené plechové střeše`,`c) Obr`,`d) Kdo se bojí Virginie Woolfové?`], a:3},
+  {q:`4. Jak se jmenuje starý rybář v Hemingwayově novele Stařec a moře?`, o:[`a) Manolin`,`b) Pedro`,`c) Santiago`,`d) Diego`], a:2},
+  {q:`5. Ve kterém městě sídlí sklárna Moser?`, o:[`a) v Novém Boru`,`b) v Karlových Varech`,`c) v Poděbradech`,`d) ve Světlé nad Sázavou`], a:1},
+  {q:`6. Který řecký filozof byl v Athénách odsouzen k smrti a zemřel po vypití jedu z bolehlavu?`, o:[`a) Platón`,`b) Aristotelés`,`c) Sókratés`,`d) Diogenés`], a:2},
+  {q:`7. Která omáčka se připravuje ze žloutků, rozpuštěného másla a citronové šťávy?`, o:[`a) holandská`,`b) bearnéská`,`c) majonéza`,`d) aioli`], a:0},
+  {q:`8. Která z manželek Karla IV. byla jeho první ženou?`, o:[`a) Anna Falcká`,`b) Anna Svídnická`,`c) Blanka z Valois`,`d) Alžběta Pomořanská`], a:2},
+  {q:`9. Kdo vytvořil sochu Mojžíše v parčíku u Staronové synagogy v Praze?`, o:[`a) Jan Štursa`,`b) František Bílek`,`c) Ladislav Šaloun`,`d) Stanislav Sucharda`], a:1},
+  {q:`10. Které město slavilo první titul mistra samostatné české hokejové extraligy?`, o:[`a) Olomouc`,`b) Pardubice`,`c) Kladno`,`d) Vsetín`], a:0}
+];
+const RESULTS = [
+  {min:0, max:3, t:`Tahle desítka mířila za okraj školních osnov a tentokrát vám utekla. Nic, co by nenapravila jedna dobrá kniha nebo cestopis.`},
+  {min:4, max:6, t:`Pevný základ s mezerami. Polovinu jste trefili s jistotou, na zbytek chyběly drobnosti z oborů, kterým se člověk běžně nevěnuje.`},
+  {min:7, max:9, t:`Sedm bodů je krok před hranicí. Osm nebo devět už znamená, že patříte k menšině, která tenhle kvíz opravdu zdolá.`},
+  {min:10, max:10, t:`Deset z deseti a žádná díra v rozhledu. Tohle skóre je tady opravdová rarita.`}
+];
+
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+const answers = new Array(QUESTIONS.length).fill(null);
+let locked = false;
+
+document.getElementById(`title`).textContent = TITLE;
+document.getElementById(`perex`).textContent = PEREX;
+
+function render() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `q-text`;
+    p.textContent = item.q;
+    box.appendChild(p);
+    item.o.forEach((opt, oi) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = opt;
+      b.dataset.q = qi;
+      b.dataset.o = oi;
+      b.addEventListener(`click`, () => choose(qi, oi));
+      box.appendChild(b);
+    });
+    const note = document.createElement(`div`);
+    note.className = `note`;
+    note.id = `note-` + qi;
+    box.appendChild(note);
+    quizEl.appendChild(box);
+  });
+}
+
+function choose(qi, oi) {
+  if (locked) return;
+  answers[qi] = oi;
+  document.querySelectorAll(`.opt[data-q="` + qi + `"]`).forEach(b => {
+    b.classList.toggle(`selected`, Number(b.dataset.o) === oi);
+  });
+  updateSubmit();
+}
+
+function updateSubmit() {
+  const all = answers.every(a => a !== null);
+  submitBtn.disabled = !all;
+  hintEl.style.display = all ? `none` : `block`;
+}
+
+function evaluate() {
+  if (locked || answers.some(a => a === null)) return;
+  locked = true;
+  let score = 0;
+  QUESTIONS.forEach((item, qi) => {
+    const ok = answers[qi] === item.a;
+    if (ok) score++;
+    document.querySelectorAll(`.opt[data-q="` + qi + `"]`).forEach(b => {
+      const oi = Number(b.dataset.o);
+      b.disabled = true;
+      b.classList.add(`locked`);
+      b.classList.remove(`selected`);
+      if (oi === item.a) b.classList.add(`correct`);
+      else if (oi === answers[qi]) b.classList.add(`wrong`);
+    });
+    const note = document.getElementById(`note-` + qi);
+    if (ok) { note.className = `note ok`; note.textContent = `Správně.`; }
+    else { note.className = `note bad`; note.textContent = `Špatně. Správná odpověď: ` + item.o[item.a]; }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + QUESTIONS.length;
+  const r = RESULTS.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`verdict`).textContent = r ? r.t : ``;
+  submitBtn.style.display = `none`;
+  hintEl.style.display = `none`;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({behavior: `smooth`, block: `start`});
+}
+
+function reset() {
+  locked = false;
+  answers.fill(null);
+  render();
+  resultEl.style.display = `none`;
+  submitBtn.style.display = `block`;
+  updateSubmit();
+  window.scrollTo({top: 0, behavior: `smooth`});
+}
+
+submitBtn.addEventListener(`click`, evaluate);
+document.getElementById(`retry`).addEventListener(`click`, reset);
+render();
+updateSubmit();
+</script>
+</body>
+</html>
