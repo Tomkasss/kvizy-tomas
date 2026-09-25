@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vědomostní test pro seniory: plný počet získají jen lidé s mimořádným přehledem</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 32px 20px 60px;
+    background: #f5f0eb;
+    font-family: Georgia, "Times New Roman", serif;
+    color: #2c2c2c;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 16px; color: #2c2c2c; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+  .question {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover { background: #ede8e1; }
+  .option.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .option.correct { background: #d4edda; border-color: #7cb987; color: #1e5631; }
+  .option.wrong { background: #f8d7da; border-color: #d4848a; color: #721c24; }
+  .locked .option { cursor: default; }
+  .locked .option:hover { background: #f7f4f0; }
+  .locked .option.selected:hover { background: #dcd3c7; }
+  .locked .option.correct:hover { background: #d4edda; }
+  .locked .option.wrong:hover { background: #f8d7da; }
+  .feedback { margin-top: 14px; font-size: 1rem; display: none; }
+  .feedback.show { display: block; }
+  .feedback.ok { color: #1e5631; }
+  .feedback.ko { color: #721c24; }
+  .btn {
+    display: block;
+    margin: 40px auto 0;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    background: #5b7e5f;
+    color: #fff;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .btn:hover { background: #4a6b4e; }
+  .btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .btn.retry { background: #8c7b6b; }
+  .btn.retry:hover { background: #756658; }
+  .hint { text-align: center; color: #721c24; margin-top: 12px; font-size: .95rem; }
+  .result {
+    display: none;
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 40px;
+  }
+  .result.show { display: block; }
+  .score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  .verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  @media (max-width: 600px) {
+    body { padding: 20px 0 40px; }
+    .wrap { padding: 0 16px; }
+    .question, .result { padding: 20px 16px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Vědomostní test pro seniory: plný počet získají jen lidé s mimořádným přehledem</h1>
+  <p class="perex">Kvíz pro každého, kdo rád čte noviny a sleduje televizní soutěže. Otázky vedou do antiky, dějin, literatury, filmu, sportu, umění, ochrany přírody, staré české kuchyně i kosmonautiky.</p>
+  <div id="quiz"></div>
+  <button type="button" class="btn" id="evaluate" disabled>Vyhodnotit</button>
+  <p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+  <div class="result" id="result">
+    <p class="score" id="score"></p>
+    <p class="verdict" id="verdict"></p>
+    <button type="button" class="btn retry" id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+(function () {
+  const questions = [
+    { q: `Ve kterém městě stál maják, který patřil mezi sedm divů starověkého světa?`, o: [`Rhodos`, `Alexandrie`, `Kartágo`, `Syrakusy`], c: 1 },
+    { q: `Ze které české zoo odvezli v roce 2009 nosorožce bílé severní do Keni?`, o: [`ze zoo v Praze`, `ze zoo v Brně`, `ze zoo v Ostravě`, `ze zoo ve Dvoře Králové nad Labem`], c: 3 },
+    { q: `Jak se jmenoval hostinský U Kalicha v Haškově Švejkovi?`, o: [`Palivec`, `Bretschneider`, `Vodička`, `Baloun`], c: 0 },
+    { q: `Kterou filmovou postavu proslavil Johnny Weissmüller?`, o: [`Zorra`, `Flashe Gordona`, `Tarzana`, `Hopalonga Cassidyho`], c: 2 },
+    { q: `Kde se jezdí sjezd na trati Streif?`, o: [`Schladming`, `St. Anton am Arlberg`, `Bad Gastein`, `Kitzbühel`], c: 3 },
+    { q: `Ve kterém městě vyšlo první vydání Domácí kuchařky Magdaleny Dobromily Rettigové?`, o: [`v Litomyšli`, `v Hradci Králové`, `v Praze`, `v Rychnově nad Kněžnou`], c: 1 },
+    { q: `Kterou hru propagoval plakát, jímž Alfons Mucha prorazil v Paříži?`, o: [`Gismondu`, `Dámu s kaméliemi`, `Médeu`, `Tosku`], c: 0 },
+    { q: `Kdo byl hlavním konstruktérem rakety, která vynesla Jurije Gagarina do vesmíru?`, o: [`Valentin Gluško`, `Andrej Tupolev`, `Sergej Koroljov`, `Vladimir Čelomej`], c: 2 },
+    { q: `Kdo byl posledním předsedou federální vlády Československa?`, o: [`Jan Stráský`, `Marián Čalfa`, `Petr Pithart`, `Ján Čarnogurský`], c: 0 },
+    { q: `Ve kterém roce byl v Československu naposledy vykonán trest smrti?`, o: [`1977`, `1985`, `1989`, `1990`], c: 2 }
+  ];
+
+  const verdicts = [
+    { min: 0, max: 3, text: `Tentokrát se sešla hlavně témata, ke kterým jste se zatím nedostali. Otázky šly do šíře a hodně z nich stálo na detailu, který člověk nepotká každý den. Zkuste si kvíz za čas zopakovat, protože odpovědi, u kterých jste zaváhali, si teď snáz zapamatujete.` },
+    { min: 4, max: 6, text: `Základ máte pevný a v několika oborech jste se trefili bezpečně. Body jste ztratili tam, kde bylo potřeba vybavit si přesné jméno nebo rok, ne jen obecnou souvislost. Na kvíz postavený na přesných jménech a místech je to solidní výsledek.` },
+    { min: 7, max: 9, text: `Výborné skóre. Poradili jste si i s otázkami, u kterých stály vedle sebe velmi podobné možnosti. K plnému počtu vám chybělo jen pár detailů. Váš přehled sahá do mnoha oborů najednou, a to se nevidí často.` },
+    { min: 10, max: 10, text: `Plný počet, přesně jak slibuje titulek. Zvládli jste literaturu i sport, starou českou kuchyni stejně jako soudobé dějiny a vždy jste vybrali tu správnou z několika blízkých možností. Takový přehled je opravdu mimořádný.` }
+  ];
+
+  const letters = [`a`, `b`, `c`, `d`];
+  const quizEl = document.getElementById(`quiz`);
+  const evalBtn = document.getElementById(`evaluate`);
+  const hint = document.getElementById(`hint`);
+  const resultEl = document.getElementById(`result`);
+  const scoreEl = document.getElementById(`score`);
+  const verdictEl = document.getElementById(`verdict`);
+  const retryBtn = document.getElementById(`retry`);
+  let answers = [];
+  let locked = false;
+
+  function render() {
+    quizEl.innerHTML = ``;
+    answers = new Array(questions.length).fill(null);
+    locked = false;
+    questions.forEach(function (item, qi) {
+      const box = document.createElement(`div`);
+      box.className = `question`;
+      const p = document.createElement(`p`);
+      p.className = `q-text`;
+      p.textContent = (qi + 1) + `. ` + item.q;
+      box.appendChild(p);
+      item.o.forEach(function (opt, oi) {
+        const b = document.createElement(`button`);
+        b.type = `button`;
+        b.className = `option`;
+        b.textContent = letters[oi] + `) ` + opt;
+        b.addEventListener(`click`, function () {
+          if (locked) return;
+          answers[qi] = oi;
+          box.querySelectorAll(`.option`).forEach(function (x) { x.classList.remove(`selected`); });
+          b.classList.add(`selected`);
+          updateButton();
+        });
+        box.appendChild(b);
+      });
+      const fb = document.createElement(`p`);
+      fb.className = `feedback`;
+      box.appendChild(fb);
+      quizEl.appendChild(box);
+    });
+    resultEl.classList.remove(`show`);
+    evalBtn.style.display = `block`;
+    updateButton();
+  }
+
+  function updateButton() {
+    const done = answers.every(function (a) { return a !== null; });
+    evalBtn.disabled = !done;
+    hint.style.display = done ? `none` : `block`;
+  }
+
+  evalBtn.addEventListener(`click`, function () {
+    if (evalBtn.disabled) return;
+    locked = true;
+    let score = 0;
+    const boxes = quizEl.querySelectorAll(`.question`);
+    questions.forEach(function (item, qi) {
+      const box = boxes[qi];
+      box.classList.add(`locked`);
+      const opts = box.querySelectorAll(`.option`);
+      const fb = box.querySelector(`.feedback`);
+      opts[item.c].classList.add(`correct`);
+      if (answers[qi] === item.c) {
+        score++;
+        fb.textContent = `Správně.`;
+        fb.className = `feedback show ok`;
+      } else {
+        opts[answers[qi]].classList.add(`wrong`);
+        fb.textContent = `Špatně. Správná odpověď: ` + letters[item.c] + `) ` + item.o[item.c];
+        fb.className = `feedback show ko`;
+      }
+    });
+    scoreEl.textContent = score + ` z ` + questions.length;
+    const v = verdicts.find(function (r) { return score >= r.min && score <= r.max; });
+    verdictEl.textContent = v ? v.text : ``;
+    evalBtn.style.display = `none`;
+    hint.style.display = `none`;
+    resultEl.classList.add(`show`);
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  });
+
+  retryBtn.addEventListener(`click`, function () {
+    render();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
