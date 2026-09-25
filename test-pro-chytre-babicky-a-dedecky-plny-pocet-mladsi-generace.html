@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test pro chytré babičky a dědečky: plný počet mladší generace jen tak nepřekoná</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.1rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover{background:#f7f4f0}
+.locked .opt.ok:hover{background:#d4edda}
+.locked .opt.bad:hover{background:#f8d7da}
+.fb{margin-top:8px;font-size:.95rem;color:#4a4a4a}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rt{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#again{background:#8c7b6b}
+#again:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test pro chytré babičky a dědečky: plný počet mladší generace jen tak nepřekoná</h1>
+<p class="perex">Babičky a dědečkové, tady rozhoduje paměť na vlastní mládí. Zdravotnictví, tisk, oblečení, kuchyně, metro, hokej, stavby na řekách, lidová víra, auta i námořní plavba. Vnoučata tu zaváhají dřív než vy a deset z deseti jen tak nedají.</p>
+<div id="quiz"></div>
+<button class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result"><p class="score" id="score"></p><p class="rt" id="rtext"></p><button class="btn" id="again">Zkusit znovu</button></div>
+</div>
+<script>
+const Q=[
+{q:`Kterou nemoc Československo jako první země na světě vymýtilo plošným očkováním?`,o:[`tuberkulózu`,`dětskou obrnu`,`černý kašel`,`břišní tyfus`],c:1},
+{q:`Který podnik se skrýval pod písmeny PNS na stáncích s novinami a cigaretami?`,o:[`Podnik novinových stánků`,`Prodejní novinová síť`,`Propagační a novinová služba`,`Poštovní novinová služba`],c:3},
+{q:`Jakou barvu měla svazácká košile, kterou nosili členové Československého svazu mládeže?`,o:[`červenou`,`zelenou`,`modrou`,`hnědou`],c:2},
+{q:`Z jakého masa se připravuje moravský vrabec?`,o:[`z kuřecího`,`z hovězího`,`z vepřového`,`z králičího`],c:2},
+{q:`Jak se do roku 1990 jmenovala stanice pražského metra Anděl?`,o:[`Moskevská`,`Leninova`,`Sokolovská`,`Gottwaldova`],c:0},
+{q:`Který z těchto hokejistů zahynul v listopadu 1948, když se nad průlivem La Manche ztratilo letadlo s československými reprezentanty?`,o:[`Vladimír Zábrodský`,`Bohumil Modrý`,`Ladislav Troják`,`Stanislav Konopásek`],c:2},
+{q:`Jak se jmenovalo maďarské vodní dílo na Dunaji, které mělo s Gabčíkovem tvořit jednu společnou soustavu?`,o:[`Esztergom`,`Komárom`,`Mohács`,`Nagymaros`],c:3},
+{q:`Kterému plazovi se podle lidové víry nesmělo ve stavení ublížit, protože chránil dům a přinášel štěstí?`,o:[`ještěrce obecné`,`slepýši křehkému`,`zmiji obecné`,`užovce obojkové`],c:3},
+{q:`Pod jakou značkou se po válce vyráběl malý osobní automobil Minor?`,o:[`Aero`,`Tatra`,`Praga`,`Škoda`],c:0},
+{q:`Jaký domovský přístav měly zapsaný lodě Československé námořní plavby?`,o:[`Bratislava`,`Praha`,`Děčín`,`Komárno`],c:1}
+];
+const E=[
+{min:0,max:3,t:`Tentokrát by vás mladší generace dohnala. Takový výsledek zvládne i leckterý dvacátník, takže se vyplatí zalistovat ve staré čítance a v ročenkách a pak to zkusit znovu.`},
+{min:4,max:6,t:`Jste zhruba tam, kam se obvykle dostanou i mladší ročníky. Stačí pár odpovědí navíc a začnete jim utíkat.`},
+{min:7,max:9,t:`Tady už má mladší generace co dohánět. Na takové skóre dvacátníci a třicátníci většinou nedosáhnou a o dokonalé kolo vás připravily jen jedna až tři zrádné otázky.`},
+{min:10,max:10,t:`Plný počet. Deset z deseti je výkon, který mladší ročníky jen tak nezopakují. Klidně je nechte, ať to zkusí po vás.`}
+];
+const quiz=document.getElementById(`quiz`),ev=document.getElementById(`eval`),hint=document.getElementById(`hint`),res=document.getElementById(`result`);
+let sel=[],locked=false;
+function render(){
+ quiz.innerHTML=``;sel=Q.map(()=>-1);locked=false;quiz.classList.remove(`locked`);
+ Q.forEach((q,i)=>{
+  const b=document.createElement(`div`);b.className=`box`;
+  const p=document.createElement(`p`);p.className=`qt`;p.textContent=(i+1)+`. `+q.q;b.appendChild(p);
+  q.o.forEach((o,j)=>{
+   const x=document.createElement(`button`);x.type=`button`;x.className=`opt`;x.textContent=`abcd`[j]+`) `+o;
+   x.addEventListener(`click`,()=>{if(locked)return;sel[i]=j;[...b.querySelectorAll(`.opt`)].forEach((y,k)=>y.classList.toggle(`sel`,k===j));upd();});
+   b.appendChild(x);
+  });
+  quiz.appendChild(b);
+ });
+ res.style.display=`none`;upd();
+}
+function upd(){const all=sel.every(s=>s>=0);ev.disabled=!all||locked;hint.style.display=(all||locked)?`none`:`block`;}
+ev.addEventListener(`click`,()=>{
+ if(sel.some(s=>s<0))return;
+ locked=true;quiz.classList.add(`locked`);let sc=0;
+ [...quiz.children].forEach((b,i)=>{
+  const os=[...b.querySelectorAll(`.opt`)];const c=Q[i].c;
+  os.forEach(o=>o.classList.remove(`sel`));
+  os[c].classList.add(`ok`);
+  if(sel[i]===c){sc++;}else{os[sel[i]].classList.add(`bad`);const f=document.createElement(`p`);f.className=`fb`;f.textContent=`Správná odpověď: `+`abcd`[c]+`) `+Q[i].o[c];b.appendChild(f);}
+ });
+ document.getElementById(`score`).textContent=sc+` z `+Q.length;
+ const e=E.find(e=>sc>=e.min&&sc<=e.max);document.getElementById(`rtext`).textContent=e?e.t:``;
+ res.style.display=`block`;upd();res.scrollIntoView({behavior:`smooth`});
+});
+document.getElementById(`again`).addEventListener(`click`,()=>{render();window.scrollTo({top:0,behavior:`smooth`});});
+render();
+</script>
+</body>
+</html>
