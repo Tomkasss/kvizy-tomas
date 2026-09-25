@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz všeobecného přehledu pro seniory: kdo získá 9/10, patří mezi nejlepší</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border:1px solid #7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border:1px solid #d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin-top:8px;font-size:.95rem}
+.fb.ok{color:#1e5631}.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;font-size:.95rem;margin-top:12px}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.evtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:16px}.box{padding:20px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz všeobecného přehledu pro seniory: kdo získá 9/10, patří mezi nejlepší</h1>
+<p class="perex">Jadranský přístav, vražda císařovny, olomoucký dóm, pražská věž, slavné nizozemské plátno i cvičný letoun z dob ČSSR. Deset otázek pro seniory, kteří léta čtou noviny a nepouštějí svět z očí.</p>
+<div id="quiz"></div>
+<button class="btn" id="submit" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result"><p class="score" id="score"></p><p class="evtext" id="evtext"></p><button class="btn" id="retry">Zkusit znovu</button></div>
+</div>
+<script>
+const Q = [
+{q:`Ve kterém státě leží přístav Rijeka?`,o:[`ve Slovinsku`,`v Itálii`,`v Chorvatsku`,`v Černé Hoře`],a:2},
+{q:`S jakým vynálezem je spojeno jméno Prokopa Diviše?`,o:[`s lodním šroubem`,`s obloukovou lampou`,`s parním strojem`,`s bleskosvodem`],a:3},
+{q:`Ve kterém městě byla zavražděna císařovna Alžběta, zvaná Sisi?`,o:[`v Ženevě`,`ve Vídni`,`v Mnichově`,`v Terstu`],a:0},
+{q:`Která země přijala 1. ledna 2026 euro jako svou měnu?`,o:[`Rumunsko`,`Bulharsko`,`Maďarsko`,`Polsko`],a:1},
+{q:`Ve kterém muzeu visí Rembrandtova Noční hlídka?`,o:[`v Mauritshuis`,`v Rijksmuseum`,`v Ermitáži`,`v Louvru`],a:1},
+{q:`Ve kterém městě se narodil Emil Zátopek?`,o:[`v Kopřivnici`,`ve Zlíně`,`ve Frenštátě pod Radhoštěm`,`v Novém Jičíně`],a:0},
+{q:`Komu je dnes zasvěcena katedrála v Olomouci?`,o:[`svatému Vítovi`,`svatému Mořici`,`svatým Petrovi a Pavlovi`,`svatému Václavovi`],a:3},
+{q:`Který jazyk je jediným úředním jazykem Surinamu?`,o:[`angličtina`,`portugalština`,`nizozemština`,`francouzština`],a:2},
+{q:`Kdo navrhl Žižkovský vysílač?`,o:[`Václav Aulický`,`Karel Hubáček`,`Karel Prager`,`Věra Machoninová`],a:0},
+{q:`Který podnik vyráběl letoun L-39 Albatros?`,o:[`Let Kunovice`,`Aero Vodochody`,`Moravan Otrokovice`,`Avia`],a:1}
+];
+const EV = [{min:0,max:3,t:`Tentokrát to nevyšlo. Otázky mířily napříč obory a několik z nich jde hodně za běžnou školní látku, takže nízké skóre o vašem rozhledu mnoho neříká. Příště to může být úplně jiná desítka otázek a s ní i jiný výsledek.`},{min:4,max:6,t:`Solidní výsledek. Základ máte pevný, body vám nejspíš utekly u otázek, které jdou za školní látku a vyžadují zájem o konkrétní obor.`},{min:7,max:9,t:`Výborné. Se sedmi nebo osmi body máte široký přehled a s devíti už patříte mezi nejlepší, jak slibuje titulek.`},{min:10,max:10,t:`Plný počet. Nezaskočil vás autor pražského vysílače, výrobce cvičného letounu ani jazyk jihoamerické země. Takový přehled mají jen skutečně sečtělí lidé.`}];
+const quiz = document.getElementById(`quiz`);
+const submit = document.getElementById(`submit`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+let answers = [];
+let locked = false;
+function render() {
+  quiz.innerHTML = ``;
+  answers = new Array(Q.length).fill(null);
+  locked = false;
+  Q.forEach((item, i) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (i + 1) + `. ` + item.q;
+    box.appendChild(p);
+    item.o.forEach((opt, j) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = `abcd`[j] + `) ` + opt;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[i] = j;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`sel`));
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`div`);
+    fb.className = `fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  result.style.display = `none`;
+  submit.style.display = `block`;
+  update();
+}
+function update() {
+  const all = answers.every(a => a !== null);
+  submit.disabled = !all;
+  hint.style.display = all ? `none` : `block`;
+}
+submit.addEventListener(`click`, () => {
+  if (submit.disabled) return;
+  locked = true;
+  let score = 0;
+  const boxes = quiz.querySelectorAll(`.box`);
+  Q.forEach((item, i) => {
+    const opts = boxes[i].querySelectorAll(`.opt`);
+    opts.forEach(o => { o.disabled = true; o.classList.remove(`sel`); });
+    const fb = boxes[i].querySelector(`.fb`);
+    if (answers[i] === item.a) {
+      score++;
+      opts[item.a].classList.add(`correct`);
+      fb.className = `fb ok`;
+      fb.textContent = `Správně.`;
+    } else {
+      opts[answers[i]].classList.add(`wrong`);
+      opts[item.a].classList.add(`correct`);
+      fb.className = `fb bad`;
+      fb.textContent = `Správná odpověď: ` + `abcd`[item.a] + `) ` + item.o[item.a];
+    }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + Q.length;
+  const ev = EV.find(e => score >= e.min && score <= e.max);
+  document.getElementById(`evtext`).textContent = ev ? ev.t : ``;
+  submit.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior: `smooth`});
+});
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  render();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+render();
+</script>
+</body>
+</html>
