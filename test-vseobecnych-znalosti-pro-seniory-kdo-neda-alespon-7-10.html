@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test všeobecných znalostí pro seniory: kdo nedá alespoň 7/10, měl by doplnit mezery</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px;
+    background: #f5f0eb;
+    font-family: Georgia, "Times New Roman", serif;
+    color: #2c2c2c;
+    line-height: 1.5;
+  }
+  .container { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.25; margin: 16px 0 16px; color: #2c2c2c; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+  .question {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .question-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 16px; }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #3a3a3a;
+    cursor: pointer;
+  }
+  .option:last-child { margin-bottom: 0; }
+  .option:hover:not(:disabled) { background: #ede8e1; }
+  .option.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .option:disabled { cursor: default; }
+  .option.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .option.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .feedback { margin-top: 14px; font-size: 1rem; display: none; }
+  .feedback.show { display: block; }
+  .feedback.ok { color: #1e5631; }
+  .feedback.bad { color: #721c24; }
+  .btn {
+    display: block;
+    margin: 40px auto 0;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #fff;
+    cursor: pointer;
+  }
+  #evaluate { background: #5b7e5f; }
+  #evaluate:hover:not(:disabled) { background: #4a6b4e; }
+  #evaluate:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #hint { text-align: center; color: #8a8a8a; margin-top: 12px; font-size: 0.95rem; }
+  #result {
+    display: none;
+    background: #fefcf9;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border-top: 4px solid #5b7e5f;
+    padding: 28px;
+    margin-top: 40px;
+  }
+  #result.show { display: block; }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #retry { background: #8c7b6b; margin-top: 28px; }
+  #retry:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    .question { padding: 20px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Test všeobecných znalostí pro seniory: kdo nedá alespoň 7/10, měl by doplnit mezery</h1>
+  <p class="perex">Dějepis, zeměpis a čítanka ze školních lavic, k tomu kuchyně, příroda, staré báje, cestování, film a sport. Kdo desítky let četl noviny a sledoval sportovní přenosy, má náskok, i když část těch věcí se naposledy probírala ve škole.</p>
+  <div id="quiz"></div>
+  <button type="button" id="evaluate" class="btn" disabled>Vyhodnotit</button>
+  <p id="hint">Odpovězte prosím na všechny otázky</p>
+  <div id="result">
+    <p id="score"></p>
+    <p id="verdict"></p>
+    <button type="button" id="retry" class="btn">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+(function () {
+  var questions = [
+    { q: `Na kterém ostrově se narodil Napoleon Bonaparte?`, options: [`na Elbě`, `na Korsice`, `na Sardinii`, `na Svaté Heleně`], correct: 1 },
+    { q: `Ve kterém městě stojí proslulá bronzová soška čůrajícího chlapečka Manneken Pis?`, options: [`v Amsterdamu`, `v Bruselu`, `v Antverpách`, `v Bruggách`], correct: 1 },
+    { q: `Které italské město je považováno za rodiště pizzy?`, options: [`Řím`, `Janov`, `Boloňa`, `Neapol`], correct: 3 },
+    { q: `Které volně žijící zvíře bylo v Česku hlavním přenašečem vztekliny?`, options: [`liška`, `jezevec`, `kuna`, `netopýr`], correct: 0 },
+    { q: `Kdo byl ve slovanské mytologii bohem hromu a blesku?`, options: [`Veles`, `Perun`, `Svarog`, `Svantovít`], correct: 1 },
+    { q: `Kam dojížděl od roku 1889 přímo z Paříže slavný vlak Orient expres?`, options: [`do Atén`, `do Varny`, `do Bukurešti`, `do Konstantinopole`], correct: 3 },
+    { q: `Kdo uspořádal 28. prosince 1895 v pařížské kavárně Grand Café proslulé placené promítání filmů?`, options: [`Thomas Alva Edison`, `Georges Méliès`, `bratři Lumièrové`, `bratři Pathéové`], correct: 2 },
+    { q: `Jaké zvíře je Akéla v Kiplingově Knize džunglí?`, options: [`medvěd`, `panter`, `vlk`, `tygr`], correct: 2 },
+    { q: `Které město tvořilo spolu s Prahou a Varšavou trojici metropolí, mezi nimiž se tradičně jezdil cyklistický Závod míru?`, options: [`Berlín`, `Budapešť`, `Bělehrad`, `Sofie`], correct: 0 },
+    { q: `Ve které obci leží geografický střed České republiky?`, options: [`Číhošť`, `Humpolec`, `Ledeč nad Sázavou`, `Světlá nad Sázavou`], correct: 0 }
+  ];
+
+  var verdicts = [
+    { min: 0, max: 3, text: `Tady je mezer víc než jistých odpovědí. Nic se neděje, každá chybná odpověď vám rovnou řekla, kam se podívat. Vezměte si ty nejzajímavější, třeba vlak do Konstantinopole nebo slovanské bohy, a za týden si test zkuste znovu.` },
+    { min: 4, max: 6, text: `Základ máte, ale na sedmičku to tentokrát nestačilo. Mezer je čtyři až šest a každou z nich vám správné odpovědi rovnou ukázaly, takže je doplníte rychle.` },
+    { min: 7, max: 9, text: `Laťku jste přeskočili, doplňovat nemusíte. Napříč dějinami, zeměpisem, přírodou i kulturou máte pevný základ a těch pár chybějících bodů je spíš drobná nepozornost než skutečná mezera.` },
+    { min: 10, max: 10, text: `Všech deset správně, a to dá jen menšina. Poradili jste si i s nejtěžší otázkou o středu republiky. Tady není žádná mezera, kterou byste museli doplňovat.` }
+  ];
+
+  var letters = [`a`, `b`, `c`, `d`];
+  var answers = [];
+  var locked = false;
+  var quizEl = document.getElementById(`quiz`);
+  var evalBtn = document.getElementById(`evaluate`);
+  var hint = document.getElementById(`hint`);
+  var result = document.getElementById(`result`);
+  var scoreEl = document.getElementById(`score`);
+  var verdictEl = document.getElementById(`verdict`);
+  var retryBtn = document.getElementById(`retry`);
+
+  function build() {
+    quizEl.innerHTML = ``;
+    answers = questions.map(function () { return null; });
+    questions.forEach(function (item, qi) {
+      var box = document.createElement(`div`);
+      box.className = `question`;
+      var p = document.createElement(`p`);
+      p.className = `question-text`;
+      p.textContent = (qi + 1) + `. ` + item.q;
+      box.appendChild(p);
+      item.options.forEach(function (opt, oi) {
+        var b = document.createElement(`button`);
+        b.type = `button`;
+        b.className = `option`;
+        b.textContent = letters[oi] + `) ` + opt;
+        b.addEventListener(`click`, function () {
+          if (locked) return;
+          answers[qi] = oi;
+          Array.prototype.forEach.call(box.querySelectorAll(`.option`), function (el) { el.classList.remove(`selected`); });
+          b.classList.add(`selected`);
+          updateState();
+        });
+        box.appendChild(b);
+      });
+      var fb = document.createElement(`p`);
+      fb.className = `feedback`;
+      box.appendChild(fb);
+      quizEl.appendChild(box);
+    });
+    updateState();
+  }
+
+  function updateState() {
+    var all = answers.every(function (a) { return a !== null; });
+    evalBtn.disabled = !all || locked;
+    hint.style.display = all || locked ? `none` : `block`;
+  }
+
+  function evaluate() {
+    if (locked) return;
+    if (!answers.every(function (a) { return a !== null; })) return;
+    locked = true;
+    var score = 0;
+    var boxes = quizEl.querySelectorAll(`.question`);
+    questions.forEach(function (item, qi) {
+      var box = boxes[qi];
+      var opts = box.querySelectorAll(`.option`);
+      var fb = box.querySelector(`.feedback`);
+      Array.prototype.forEach.call(opts, function (el) { el.disabled = true; el.classList.remove(`selected`); });
+      opts[item.correct].classList.add(`correct`);
+      if (answers[qi] === item.correct) {
+        score++;
+        fb.textContent = `Správně.`;
+        fb.className = `feedback show ok`;
+      } else {
+        opts[answers[qi]].classList.add(`wrong`);
+        fb.textContent = `Špatně. Správná odpověď: ` + letters[item.correct] + `) ` + item.options[item.correct];
+        fb.className = `feedback show bad`;
+      }
+    });
+    scoreEl.textContent = score + ` z ` + questions.length;
+    var v = verdicts.filter(function (x) { return score >= x.min && score <= x.max; })[0];
+    verdictEl.textContent = v ? v.text : ``;
+    result.classList.add(`show`);
+    evalBtn.style.display = `none`;
+    hint.style.display = `none`;
+    result.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function reset() {
+    locked = false;
+    result.classList.remove(`show`);
+    evalBtn.style.display = `block`;
+    build();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evalBtn.addEventListener(`click`, evaluate);
+  retryBtn.addEventListener(`click`, reset);
+  build();
+})();
+</script>
+</body>
+</html>
