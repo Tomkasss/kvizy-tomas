@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Všeobecný kvíz pro seniory: kdo nepozná správné odpovědi, ten ve škole nejspíš nedával pozor</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover{background:#f7f4f0}
+.locked .opt.sel:hover{background:#dcd3c7}
+.locked .opt.ok:hover{background:#d4edda}
+.locked .opt.bad:hover{background:#f8d7da}
+.fb{margin-top:8px;font-size:.95rem}
+.fb.ok{color:#1e5631} .fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+#hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+#score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+#evtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:16px} .box{padding:20px} h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Všeobecný kvíz pro seniory: kdo nepozná správné odpovědi, ten ve škole nejspíš nedával pozor</h1>
+<p class="perex">Školní lavice jste opustili před desítkami let, ale látka z nich se neztrácí tak snadno, jak se říká. Dějepis, zeměpis, přírodopis, chemie i čeština se tu potkávají znovu. Ukažte, jestli jste tehdy u tabule opravdu dávali pozor.</p>
+<div id="quiz"></div>
+<button id="eval" class="btn" disabled>Vyhodnotit</button>
+<p id="hint">Odpovězte prosím na všechny otázky</p>
+<div id="result" class="box">
+<p id="score"></p>
+<p id="evtext"></p>
+<button id="retry" class="btn">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q=[
+{q:`Jaké zvíře přinesl Bivoj na Vyšehrad?`,o:[`medvěda`,`kance`,`jelena`,`zubra`],a:1},
+{q:`Která barva je doplňková k červené?`,o:[`modrá`,`žlutá`,`fialová`,`zelená`],a:3},
+{q:`Součástí které horské soustavy jsou Vysoké Tatry?`,o:[`Karpat`,`Alp`,`Sudet`,`Dinárských hor`],a:0},
+{q:`Jakou látkou je hašené vápno?`,o:[`oxidem vápenatým`,`uhličitanem vápenatým`,`hydroxidem vápenatým`,`síranem vápenatým`],a:2},
+{q:`Ve kterém slově se na vynechané místo píše ú s čárkou?`,o:[`st_l`,`ne_roda`,`k_ň`,`r_že`],a:1},
+{q:`Jak se jmenovali psi v Babičce Boženy Němcové?`,o:[`Hektor a Azor`,`Brok a Lord`,`Sultán a Tyrl`,`Rek a Amor`],a:2},
+{q:`Který z těchto stromů má složené listy?`,o:[`buk`,`lípa`,`dub`,`jasan`],a:3},
+{q:`Který francouzský král jako první přesídlil s dvorem do Versailles?`,o:[`Ludvík XIV.`,`Ludvík XIII.`,`Ludvík XV.`,`Ludvík XVI.`],a:0},
+{q:`Mezi drahami kterých dvou planet leží hlavní pás planetek?`,o:[`Země a Marsu`,`Jupiteru a Saturnu`,`Marsu a Jupiteru`,`Venuše a Země`],a:2},
+{q:`Co dokazuje Foucaultovo kyvadlo?`,o:[`otáčení Země kolem vlastní osy`,`oběh Země kolem Slunce`,`kulatý tvar Země`,`působení Měsíce na příliv`],a:0}
+];
+const E=[{min:0,max:3,t:`Ve škole jste se nejspíš víc dívali z okna než na tabuli. Nic se ale neztratilo, protože staré učebnice se dají otevřít i dnes a po letech se z nich čte mnohem líp.`},{min:4,max:6,t:`Něco vám v hlavě zůstalo, ale mezery jsou vidět. Pozor jste dávali, jen ne v každé hodině a ne u každého učitele.`},{min:7,max:9,t:`Pěkný výsledek. Ve škole jste poslouchali a látka vám drží pohromadě i po desítkách let. Chyběl jen kousek k vysvědčení bez jediné chyby.`},{min:10,max:10,t:`Ani jedna chyba. Byli jste žák, kterého si učitelé přáli mít v každé třídě, protože jste pozor dávali opravdu ve všech předmětech.`}];
+const L=[`a)`,`b)`,`c)`,`d)`];
+const quiz=document.getElementById(`quiz`),ev=document.getElementById(`eval`),hint=document.getElementById(`hint`),res=document.getElementById(`result`);
+let sel=[],done=false;
+function render(){
+  quiz.innerHTML=``;sel=new Array(Q.length).fill(null);done=false;quiz.classList.remove(`locked`);
+  Q.forEach((q,i)=>{
+    const b=document.createElement(`div`);b.className=`box`;
+    const t=document.createElement(`p`);t.className=`qt`;t.textContent=(i+1)+`. `+q.q;b.appendChild(t);
+    q.o.forEach((o,j)=>{
+      const btn=document.createElement(`button`);btn.type=`button`;btn.className=`opt`;btn.textContent=L[j]+` `+o;
+      btn.addEventListener(`click`,()=>{if(done)return;sel[i]=j;b.querySelectorAll(`.opt`).forEach((x,k)=>x.classList.toggle(`sel`,k===j));upd();});
+      b.appendChild(btn);
+    });
+    const fb=document.createElement(`div`);fb.className=`fb`;b.appendChild(fb);
+    quiz.appendChild(b);
+  });
+  res.style.display=`none`;ev.style.display=`block`;upd();
+}
+function upd(){const all=sel.every(x=>x!==null);ev.disabled=!all;hint.style.display=all?`none`:`block`;}
+ev.addEventListener(`click`,()=>{
+  if(ev.disabled)return;done=true;quiz.classList.add(`locked`);let s=0;
+  quiz.querySelectorAll(`:scope > .box`).forEach((b,i)=>{
+    const opts=b.querySelectorAll(`.opt`),fb=b.querySelector(`.fb`),a=Q[i].a;
+    opts[a].classList.add(`ok`);
+    if(sel[i]===a){s++;fb.className=`fb ok`;fb.textContent=`Správně`;}
+    else{opts[sel[i]].classList.add(`bad`);fb.className=`fb bad`;fb.textContent=`Špatně. Správná odpověď: `+L[a]+` `+Q[i].o[a];}
+  });
+  document.getElementById(`score`).textContent=s+` z `+Q.length;
+  const e=E.find(x=>s>=x.min&&s<=x.max);document.getElementById(`evtext`).textContent=e?e.t:``;
+  ev.style.display=`none`;hint.style.display=`none`;res.style.display=`block`;
+  res.scrollIntoView({behavior:`smooth`,block:`start`});
+});
+document.getElementById(`retry`).addEventListener(`click`,()=>{render();window.scrollTo({top:0,behavior:`smooth`});});
+render();
+</script>
+</body>
+</html>
