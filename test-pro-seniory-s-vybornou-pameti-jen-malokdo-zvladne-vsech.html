@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test pro seniory s výbornou pamětí: jen málokdo zvládne všech 10 otázek bez chyby</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f5f0eb;
+    margin: 0;
+    padding: 40px 20px;
+    color: #2c2c2c;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.3; color: #2c2c2c; margin: 0 0 20px; }
+  .perex { font-size: 1.1rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 32px; }
+  .q {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; line-height: 1.4; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #3a3a3a;
+    font-family: inherit;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover:not(.locked) { background: #ede8e1; }
+  .opt.sel { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.right { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .opt.locked { cursor: default; }
+  #submit {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #submit:hover:not(:disabled) { background: #4a6b4e; }
+  #submit:disabled { background: #b5b5b5; cursor: not-allowed; }
+  #warn { text-align: center; color: #721c24; margin-top: 14px; font-size: .95rem; }
+  #result {
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-top: 32px;
+  }
+  #score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 14px; }
+  #verdict { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; }
+  #again {
+    background: #8c7b6b;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #again:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    .q, #result { padding: 20px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test pro seniory s výbornou pamětí: jen málokdo zvládne všech 10 otázek bez chyby</h1>
+  <p class="perex">Staré pověsti i Bible, Babička, cukrárna, chlév, paragrafy, středověký panovník, barevný plamen, moravská krajina a slovenský film. Tohle všechno jste kdysi dobře znali. Víte to ještě i dnes?</p>
+  <div id="quiz"></div>
+  <button id="submit" disabled>Vyhodnotit</button>
+  <div id="warn">Odpovězte prosím na všechny otázky</div>
+  <div id="result" hidden>
+    <div id="score"></div>
+    <div id="verdict"></div>
+    <button id="again">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+var QUESTIONS = [
+  { q: `1. Po kom převzala podle Starých pověstí českých vládu kněžna Libuše?`,
+    opts: [`Čech`, `Přemysl`, `Nezamysl`, `Krok`], correct: 3 },
+  { q: `2. Z jakého těsta se tradičně pečou větrníky?`,
+    opts: [`z listového`, `z kynutého`, `z odpalovaného`, `z lineckého`], correct: 2 },
+  { q: `3. Kterou ženu dostal podle Bible Jákob podvodem za manželku dřív než milovanou Ráchel?`,
+    opts: [`Rebeku`, `Leu`, `Dínu`, `Tamar`], correct: 1 },
+  { q: `4. Jaké křestní jméno měla titulní postava Babičky Boženy Němcové?`,
+    opts: [`Magdalena`, `Dorota`, `Terezie`, `Kateřina`], correct: 0 },
+  { q: `5. Ve kterém městě zemřel roku 1437 Zikmund Lucemburský?`,
+    opts: [`v Brně`, `v Jihlavě`, `v Bratislavě`, `ve Znojmě`], correct: 3 },
+  { q: `6. Jak dlouho přibližně trvá březost klisny?`,
+    opts: [`7 měsíců`, `9 měsíců`, `11 měsíců`, `13 měsíců`], correct: 2 },
+  { q: `7. Jak český zákon nazývá trestný čin, kterého se dopustí mladistvý?`,
+    opts: [`přestupek`, `přečin`, `delikt`, `provinění`], correct: 3 },
+  { q: `8. Jakou barvu dávají plameni sloučeniny sodíku?`,
+    opts: [`žlutou`, `fialovou`, `zelenou`, `cihlově červenou`], correct: 0 },
+  { q: `9. Které dvě pohoří od sebe odděluje Moravská brána?`,
+    opts: [`Nízký Jeseník a Beskydy`, `Chřiby a Ždánický les`, `Hrubý Jeseník a Králický Sněžník`, `Bílé Karpaty a Javorníky`], correct: 0 },
+  { q: `10. Kdo ztvárnil zbojníka Jánošíka ve dvoudílném slovenském filmu, který měl premiéru v srpnu 1963?`,
+    opts: [`Paľo Bielik`, `František Kuchta`, `Ladislav Chudík`, `Marek Perepeczko`], correct: 1 }
+];
+
+var LETTERS = [`a`, `b`, `c`, `d`];
+
+var VERDICTS = [
+  { max: 3, text: `Body utekly hlavně na přesných názvech. Otázky skákaly od Krokovy dcery přes cukrářskou dílnu až k paragrafům a skoro každá chtěla konkrétní jméno, číslo nebo odborný termín. U většiny z nich stačí jednou vidět správnou variantu a příště se vybaví sama.` },
+  { max: 6, text: `Ze školy i z běžného života vám zůstalo víc, než by se po letech dalo čekat. Nejsnáz se tu chybuje u variant, které se liší jen jemností, jako přečin a provinění nebo Znojmo a Jihlava.` },
+  { max: 9, text: `Tady už rozhoduje paměť na detaily. Uhlídali jste i jemné rozdíly mezi podobnými odpověďmi a k plnému počtu vám zbývala jedna, dvě nebo tři otázky.` },
+  { max: 10, text: `Bez jediného zakolísání. Patříte k těm opravdu málokterým, kdo celý test zvládne bez chyby: od Krokovy dcery přes Leu a větrníky až po Moravskou bránu jste ani jednou nezaváhali.` }
+];
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var done = false;
+var quizEl = document.getElementById(`quiz`);
+var submitEl = document.getElementById(`submit`);
+var warnEl = document.getElementById(`warn`);
+var resultEl = document.getElementById(`result`);
+var scoreEl = document.getElementById(`score`);
+var verdictEl = document.getElementById(`verdict`);
+var againEl = document.getElementById(`again`);
+
+function build() {
+  quizEl.textContent = ``;
+  QUESTIONS.forEach(function (item, qi) {
+    var box = document.createElement(`div`);
+    box.className = `q`;
+    var t = document.createElement(`div`);
+    t.className = `qtext`;
+    t.textContent = item.q;
+    box.appendChild(t);
+    item.opts.forEach(function (opt, oi) {
+      var b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = LETTERS[oi] + `) ` + opt;
+      b.addEventListener(`click`, function () { pick(qi, oi); });
+      box.appendChild(b);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function pick(qi, oi) {
+  if (done) { return; }
+  answers[qi] = oi;
+  var boxes = quizEl.querySelectorAll(`.q`);
+  var btns = boxes[qi].querySelectorAll(`.opt`);
+  for (var i = 0; i < btns.length; i++) {
+    if (i === oi) { btns[i].classList.add(`sel`); } else { btns[i].classList.remove(`sel`); }
+  }
+  refresh();
+}
+
+function refresh() {
+  var all = answers.every(function (a) { return a !== null; });
+  submitEl.disabled = !all;
+  warnEl.hidden = all;
+}
+
+function evaluate() {
+  if (done) { return; }
+  if (!answers.every(function (a) { return a !== null; })) {
+    warnEl.hidden = false;
+    return;
+  }
+  done = true;
+  warnEl.hidden = true;
+  submitEl.disabled = true;
+  var score = 0;
+  var boxes = quizEl.querySelectorAll(`.q`);
+  QUESTIONS.forEach(function (item, qi) {
+    var btns = boxes[qi].querySelectorAll(`.opt`);
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.add(`locked`);
+      btns[i].classList.remove(`sel`);
+      if (i === item.correct) { btns[i].classList.add(`right`); }
+      else if (i === answers[qi]) { btns[i].classList.add(`wrong`); }
+    }
+    if (answers[qi] === item.correct) { score++; }
+  });
+  scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+  for (var v = 0; v < VERDICTS.length; v++) {
+    if (score <= VERDICTS[v].max) { verdictEl.textContent = VERDICTS[v].text; break; }
+  }
+  resultEl.hidden = false;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+}
+
+function reset() {
+  answers = new Array(QUESTIONS.length).fill(null);
+  done = false;
+  resultEl.hidden = true;
+  warnEl.hidden = false;
+  submitEl.disabled = true;
+  build();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+}
+
+submitEl.addEventListener(`click`, evaluate);
+againEl.addEventListener(`click`, reset);
+build();
+</script>
+</body>
+</html>
