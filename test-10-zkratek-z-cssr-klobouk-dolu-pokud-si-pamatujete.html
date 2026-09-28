@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test 10 zkratek z ČSSR: klobouk dolů, pokud si pamatujete všechny</title>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; background: #f5f0eb; font-family: Georgia, "Times New Roman", serif; color: #2c2c2c; }
+.wrap { max-width: 720px; margin: 0 auto; padding: 32px 16px 48px; }
+h1 { font-size: 1.9rem; line-height: 1.3; margin: 0 0 16px; color: #2c2c2c; }
+.perex { font-size: 1.05rem; line-height: 1.6; color: #4a4a4a; margin: 0 0 28px; }
+.box { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 28px; margin-bottom: 24px; }
+.qtext { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 16px; line-height: 1.4; }
+.opt { display: block; width: 100%; text-align: left; padding: 14px 18px; background: #f7f4f0; border: 1px solid #d9d2c9; border-radius: 8px; font-size: 1rem; color: #3a3a3a; font-family: inherit; margin-bottom: 10px; cursor: pointer; }
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.opt:disabled { cursor: default; }
+.opt:disabled:hover { }
+.fb { margin-top: 12px; font-size: .95rem; }
+.fb.ok { color: #1e5631; }
+.fb.bad { color: #721c24; }
+.btn { background: #5b7e5f; color: #fff; padding: 16px 40px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; border: none; display: block; margin: 40px auto 0; cursor: pointer; font-family: inherit; }
+.btn:hover { background: #4a6b4e; }
+.btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hint { text-align: center; color: #8a7f74; font-size: .95rem; margin-top: 12px; }
+#result { display: none; background: #fefcf9; border-top: 4px solid #5b7e5f; margin-top: 40px; }
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+.rtext { font-size: 1rem; color: #4a4a4a; text-align: center; line-height: 1.6; margin: 0; }
+#retry { background: #8c7b6b; }
+#retry:hover { background: #756658; }
+@media (max-width: 600px) { .wrap { padding: 20px 16px 40px; } .box { padding: 20px 16px; } h1 { font-size: 1.5rem; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test 10 zkratek z ČSSR: klobouk dolů, pokud si pamatujete všechny</h1>
+<p class="perex">Za socialismu měl zkratku skoro každý úřad, podnik i spolek. Denně jste je potkávali na cedulích i v novinách, ale víte ještě, co přesně znamenaly? Deset zkratek z ČSSR, u každé čtyři možnosti.</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="evaluate" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="rtext" id="rtext"></p>
+<button type="button" class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const QUESTIONS = [
+  { q: `Co znamenala zkratka PS VB?`, opts: [`Pomocná služba Veřejné bezpečnosti`, `Pomocný sbor Veřejné bezpečnosti`, `Pomocná stráž Veřejné bezpečnosti`, `Pořádková stráž Veřejné bezpečnosti`], a: 2 },
+  { q: `Co znamenala zkratka SČSP?`, opts: [`Spolek československo-sovětského přátelství`, `Sdružení československo-sovětského přátelství`, `Společnost československo-sovětského přátelství`, `Svaz československo-sovětského přátelství`], a: 3 },
+  { q: `Co znamenala zkratka ČKD?`, opts: [`Českomoravská-Kolben-Daněk`, `Českomoravská-Křižík-Daněk`, `Českomoravské kovodělné dílny`, `Českomoravská-Kolben-Dvořák`], a: 0 },
+  { q: `Co znamenala zkratka OÚNZ?`, opts: [`Okresní úřad národního zdravotnictví`, `Oblastní ústav národního zdraví`, `Okresní ústav národního zdraví`, `Okresní ústav nemocenského zabezpečení`], a: 2 },
+  { q: `Co znamenala zkratka PKO v názvu pražského výstaviště?`, opts: [`Park kultury a odpočinku`, `Park kultury a oddechu`, `Park kultury a osvěty`, `Park kultury a oslav`], a: 1 },
+  { q: `Co znamenala zkratka Svazarm?`, opts: [`Svaz pro součinnost s armádou`, `Svaz pro spolupráci s armádou`, `Svaz pro podporu armády`, `Svaz pro pomoc armádě`], a: 1 },
+  { q: `Co znamenala zkratka STS?`, opts: [`Sdružená traktorová stanice`, `Strojní a technická služba`, `Správa traktorových strojů`, `Strojní a traktorová stanice`], a: 3 },
+  { q: `Co znamenala zkratka ČSVTS v době ČSSR?`, opts: [`Československá vědeckotechnická společnost`, `Československý svaz vědeckých a technických spolků`, `Československá vědeckotechnická služba`, `Československý svaz výzkumných a technických středisek`], a: 0 },
+  { q: `Jak zněla celým názvem zkratka ČSPLO?`, opts: [`Československá paroplavba labsko-oderská`, `Československá plavba labsko-oderská`, `Československé přístavy labsko-oderské`, `Československá přeprava labsko-oderská`], a: 1 },
+  { q: `Co znamenala zkratka ÚLUV?`, opts: [`Ústředí lidové umělecké výroby`, `Ústředí lidové uměleckořemeslné výroby`, `Ústředí lidové uměleckoprůmyslové výroby`, `Ústav lidové umělecké výroby`], a: 0 }
+];
+const RESULTS = [
+  { min: 0, max: 3, text: `Zkratky vám z paměti vyprchaly a zbyla jen písmena. Nic zvláštního, jejich plné znění se tehdy stejně skoro nevyslovovalo, všichni říkali prostě „svazarm“ nebo „čékádé“. Většinu z nich jste ale určitě znali od vidění.` },
+  { min: 4, max: 6, text: `Tady končí většina řešitelů. Zkratky, které jste mívali denně na očích, jste rozluštili, u podniků a institucí mimo běžný život vás svedla podobná slova. Když rozdíl dělá jediné slovo, je to dobrý výkon.` },
+  { min: 7, max: 9, text: `Výborná paměť. Nezaváhali jste ani u zkratek, které se četly mnohem častěji, než se rozepisovaly, a nenechali jste se nachytat skoro žádnou těsnou záměnou. Takových řešitelů moc není.` },
+  { min: 10, max: 10, text: `Klobouk dolů, pamatujete si všech deset zkratek do posledního slova. Poznat správně pomocnou stráž na páskách, labsko-oderskou plavbu i ústředí, a ne ústav, lidové umělecké výroby dokáže opravdu málokdo.` }
+];
+const LETTERS = [`a`, `b`, `c`, `d`];
+const quizEl = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`evaluate`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+let answers = [];
+let locked = false;
+function render() {
+  quizEl.innerHTML = ``;
+  answers = new Array(QUESTIONS.length).fill(null);
+  locked = false;
+  QUESTIONS.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(p);
+    item.opts.forEach((o, oi) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = LETTERS[oi] + `) ` + o;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`selected`));
+        b.classList.add(`selected`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`p`);
+    fb.className = `fb`;
+    fb.hidden = true;
+    box.appendChild(fb);
+    quizEl.appendChild(box);
+  });
+  resultEl.style.display = `none`;
+  evalBtn.style.display = `block`;
+  update();
+}
+function update() {
+  const done = answers.every(a => a !== null);
+  evalBtn.disabled = !done;
+  hintEl.style.display = done ? `none` : `block`;
+}
+evalBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) return;
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.box`);
+  QUESTIONS.forEach((item, qi) => {
+    const opts = boxes[qi].querySelectorAll(`.opt`);
+    opts.forEach(o => { o.disabled = true; o.classList.remove(`selected`); });
+    const fb = boxes[qi].querySelector(`.fb`);
+    fb.hidden = false;
+    opts[item.a].classList.add(`correct`);
+    if (answers[qi] === item.a) {
+      score++;
+      fb.className = `fb ok`;
+      fb.textContent = `Správně.`;
+    } else {
+      opts[answers[qi]].classList.add(`wrong`);
+      fb.className = `fb bad`;
+      fb.textContent = `Správná odpověď: ` + LETTERS[item.a] + `) ` + item.opts[item.a];
+    }
+  });
+  const r = RESULTS.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`score`).textContent = score + ` z ` + QUESTIONS.length;
+  document.getElementById(`rtext`).textContent = r ? r.text : ``;
+  evalBtn.style.display = `none`;
+  hintEl.style.display = `none`;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+render();
+</script>
+</body>
+</html>
