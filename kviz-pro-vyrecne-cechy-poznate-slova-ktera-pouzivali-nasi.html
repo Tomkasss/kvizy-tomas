@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro výřečné Čechy: poznáte slova, která používali naši praprarodiče? (střední obtížnost)</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:1.8rem;line-height:1.3;margin:0 0 16px;color:#2c2c2c}
+.perex{font-size:1.05rem;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.opt.ok:hover{background:#d4edda}.opt.bad:hover{background:#f8d7da}
+.opt.locked:not(.ok):not(.bad):hover{background:#f7f4f0}
+.fb{margin-top:12px;font-size:.95rem}
+.fb.ok{color:#1e5631}.fb.bad{color:#721c24}
+.btn{display:block;margin:40px auto 0;background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;font-family:inherit;cursor:pointer}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a7f73;font-size:.95rem;margin-top:12px}
+#result{background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px;display:none}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.etext{font-size:1rem;color:#4a4a4a;text-align:center;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro výřečné Čechy: poznáte slova, která používali naši praprarodiče? (střední obtížnost)</h1>
+<p class="perex">Výřeční Češi, tady je deset slov, která se běžně ozývala v kuchyních, na ulici i v hospodách v dobách našich praprarodičů. Kolik z nich byste dnes bez zaváhání vysvětlili?</p>
+<div id="quiz"></div>
+<button id="submit" class="btn" type="button" disabled>Vyhodnotit</button>
+<p id="hint" class="hint">Odpovězte prosím na všechny otázky</p>
+<div id="result" class="box">
+<p id="score" class="score"></p>
+<p id="etext" class="etext"></p>
+<button id="retry" class="btn" type="button">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q = [
+{q:`Co znamenalo sloveso „kasírovat“?`,o:[`platit v obchodě hotovými penězi`,`vybírat peníze, třeba za zboží či službu`,`vést pokladní knihu a účty`,`rozměňovat bankovky na drobné`],c:1},
+{q:`Co bylo rekomando?`,o:[`spěšný dopis doručovaný zvláštním poslem`,`dopis, jehož poštovné platil až adresát`,`telegram doručený poslíčkem až do domu`,`doporučený dopis předávaný proti podpisu`],c:3},
+{q:`Co byl škopek?`,o:[`nižší okrouhlá nádoba s uchy na praní a mytí`,`vysoký dřevěný džbán na nošení mléka`,`hliněný hrnec na uchovávání sádla`,`proutěný koš na nošení prádla`],c:0},
+{q:`Co byl kramflek?`,o:[`jazyk boty schovaný pod tkaničkami`,`kovová přezka na dámském střevíci`,`podpatek pod patou boty či střevíce`,`horní část vysoké boty u lýtka`],c:2},
+{q:`Kdo byl floutek?`,o:[`vychytralý podomní obchodník, který šidil na váze`,`lehkomyslný mladík dbající hlavně na svůj zevnějšek`,`zamlklý starý mládenec, který se straní společnosti`,`věčně nespokojený bručoun, který si na všechno stěžuje`],c:1},
+{q:`Co byla putyka?`,o:[`hospoda nejnižšího řádu`,`úzká sklenička na pálenku`,`krámek s laciným zbožím`,`sklep na sudy s pivem`],c:0},
+{q:`Co byl cvikr?`,o:[`divadelní kukátko na dlouhé rukojeti`,`jediné sklíčko nošené v oku`,`zvětšovací lupa na řetízku`,`brýle bez straniček sevřené na nose`],c:3},
+{q:`Co bylo šodó?`,o:[`sladká ovocná polévka zahuštěná krupicí`,`sněhová pusinka pečená z bílků a cukru`,`horká pěna šlehaná z vína a žloutků`,`karamelová poleva z cukru a másla`],c:2},
+{q:`Co byl deputát?`,o:[`mzda vyplácená v naturáliích`,`podíl úrody odváděný vrchnosti jako daň`,`roční nájemné placené za pronajaté pole`,`záloha složená při koupi dobytka na trhu`],c:0},
+{q:`Co byla pakostnice?`,o:[`měknutí a křivení kostí u malých dětí`,`vleklé bolestivé onemocnění kloubů`,`svědivá vyrážka na kůži`,`horečnaté onemocnění střev`],c:1}
+];
+const E = [
+{min:0,max:3,t:`S praprarodiči byste si u stolu spíš kývali, než rozuměli. Jejich řeč pro vás zůstává trochu cizím krajem, ale deset nových slov máte teď v kapse a příště už tolik tápat nebudete.`},
+{min:4,max:6,t:`Běžný rozhovor s praprarodiči byste zvládli, jen u některých výrazů by vás museli nechat hádat z kontextu. Na půl cesty jste a s trochou zvědavosti se brzy dostanete dál.`},
+{min:7,max:9,t:`Takhle vypadá opravdu výřečný Čech. S praprarodiči byste si rozuměli skoro ve všem a jen občas by vás zaskočilo slovo, které se ani v jejich době neříkalo každý den.`},
+{min:10,max:10,t:`Plný počet, který zvládne jen menšina. S praprarodiči byste si popovídali bez jediného zaváhání, ať by řeč přišla na hospodu, na rekomando z pošty, nebo na bolavé klouby.`}
+];
+const quiz = document.getElementById(`quiz`);
+const submit = document.getElementById(`submit`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+let answers = [];
+let locked = false;
+function render() {
+  quiz.innerHTML = ``;
+  answers = new Array(Q.length).fill(null);
+  locked = false;
+  Q.forEach(function (item, qi) {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(p);
+    item.o.forEach(function (opt, oi) {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = `abcd`[oi] + `) ` + opt;
+      b.addEventListener(`click`, function () {
+        if (locked) return;
+        answers[qi] = oi;
+        box.querySelectorAll(`.opt`).forEach(function (x) { x.classList.remove(`sel`); });
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`p`);
+    fb.className = `fb`;
+    fb.hidden = true;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  result.style.display = `none`;
+  submit.style.display = `block`;
+  update();
+}
+function update() {
+  const done = answers.every(function (a) { return a !== null; });
+  submit.disabled = !done;
+  hint.style.display = done ? `none` : `block`;
+}
+submit.addEventListener(`click`, function () {
+  if (submit.disabled) return;
+  locked = true;
+  let score = 0;
+  quiz.querySelectorAll(`.box`).forEach(function (box, qi) {
+    const opts = box.querySelectorAll(`.opt`);
+    const c = Q[qi].c;
+    const fb = box.querySelector(`.fb`);
+    opts.forEach(function (b, oi) {
+      b.classList.add(`locked`);
+      b.disabled = true;
+      if (oi === c) b.classList.add(`ok`);
+      if (oi === answers[qi] && oi !== c) b.classList.add(`bad`);
+    });
+    fb.hidden = false;
+    if (answers[qi] === c) {
+      score++;
+      fb.className = `fb ok`;
+      fb.textContent = `Správně.`;
+    } else {
+      fb.className = `fb bad`;
+      fb.textContent = `Špatně. Správná odpověď: ` + `abcd`[c] + `) ` + Q[qi].o[c];
+    }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + Q.length;
+  const ev = E.find(function (e) { return score >= e.min && score <= e.max; });
+  document.getElementById(`etext`).textContent = ev ? ev.t : ``;
+  submit.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+document.getElementById(`retry`).addEventListener(`click`, function () {
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+render();
+</script>
+</body>
+</html>
