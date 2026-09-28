@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vědomostní výzva pro seniory: kdo pokoří hranici 8/10, má stále obdivuhodně svěží mozek</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:24px;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px}
+.perex{font-size:1.05rem;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.q-text{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.selected{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.feedback{margin-top:12px;font-size:.95rem}
+.feedback.ok{color:#1e5631}
+.feedback.bad{color:#721c24}
+.btn{display:block;margin:40px auto 0;background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;font-family:inherit;cursor:pointer}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8c7b6b;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:32px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.eval{font-size:1rem;color:#4a4a4a;text-align:center;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){body{padding:16px}.box{padding:20px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Vědomostní výzva pro seniory: kdo pokoří hranici 8/10, má stále obdivuhodně svěží mozek</h1>
+<p class="perex">Antické báje, zámořské plavby, stříbrné plátno, závodní okruhy i renesanční malířství. Kdo si z let čtení, televize a sportovních přenosů uchoval podrobnosti, a ne jen dojem, osmičku pokoří a jeho paměť slouží na výbornou.</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="evaluate" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="eval" id="evaltext"></p>
+<button type="button" class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  {q:`1. Při jaké příležitosti vzniklo bruselské Atomium?`, o:[`pro světovou výstavu roku 1958`,`k podpisu Římských smluv roku 1957`,`pro letní olympijské hry`,`ke stému výročí belgické nezávislosti`], c:0},
+  {q:`2. Kdo podle řeckých bájí zabil Achilla?`, o:[`Hektor`,`Aineiás`,`Paris`,`Agamemnón`], c:2},
+  {q:`3. Jaké zvíře chová ve filmu Snídaně u Tiffanyho hlavní hrdinka Holly Golightly?`, o:[`jezevčíka`,`kanárka`,`papouška`,`kocoura`], c:3},
+  {q:`4. Čím se proslavil americký mechanik Elisha Otis?`, o:[`šicím strojem`,`bezpečnostní brzdou výtahu`,`ostnatým drátem`,`mechanickou žačkou`], c:1},
+  {q:`5. Který královský dvůr nakonec financoval Kolumbovu první výpravu přes Atlantik?`, o:[`portugalský`,`španělský`,`anglický`,`francouzský`], c:1},
+  {q:`6. Co zobrazuje znak automobilky Ferrari?`, o:[`vzpínajícího se koně`,`útočícího býka`,`lva ve skoku`,`stočeného hada`], c:0},
+  {q:`7. Kdo byl bytnou Sherlocka Holmese?`, o:[`paní Warrenová`,`paní Bridgesová`,`paní Pearceová`,`paní Hudsonová`], c:3},
+  {q:`8. S kým svedl Björn Borg slavné wimbledonské finále roku 1980?`, o:[`s Johnem McEnroem`,`s Ivanem Lendlem`,`s Guillermem Vilasem`,`s Iliem Năstasem`], c:0},
+  {q:`9. Kam Leonardo da Vinci namaloval Poslední večeři?`, o:[`na strop vatikánské kaple`,`na zeď jídelny milánského kláštera`,`na desku oltáře florentské katedrály`,`na stěnu sálu benátského Dóžecího paláce`], c:1},
+  {q:`10. Čím se převážně živí plejtvák obrovský?`, o:[`hejny sleďů a makrel`,`olihněmi a chobotnicemi`,`drobnými korýši, krilem`,`řasami a rostlinným planktonem`], c:2}
+];
+const letters = [`a`,`b`,`c`,`d`];
+const evaluations = [
+  {min:0, max:3, t:`Témata vám cizí nejsou, jen tentokrát podrobnosti nepřišly a vyhrála jména, která zněla povědomě. Zkuste kvíz znovu za pár dní. Paměť na staré filmy a knihy se opakováním rychle probouzí.`},
+  {min:4, max:6, t:`Máte pevný základ. Bruselskou výstavu nebo Holmesův svět znáte, ale u drobností, jako kdo zaplatil Kolumbovy lodě nebo co jí největší tvor oceánů, jste volili mezi dvěma možnostmi. K hranici z titulku chybí jen kousek.`},
+  {min:7, max:9, t:`Se sedmi body stojíte těsně pod hranicí a chyběla jediná trefa. Osm a devět bodů ji pokořilo. Máte svěží mozek, který si z filmů, knih i dějin drží podrobnosti, ne jen obecný dojem.`},
+  {min:10, max:10, t:`Plný počet zvládne menšina. Nezaskočil vás ani americký mechanik, jehož jméno dodnes čteme na dveřích výtahů, ani tenisový soupeř z roku 1980. Máte obdivuhodně svěží mozek, přesně jak slibuje titulek.`}
+];
+const quizEl = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`evaluate`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+let answers = [];
+let locked = false;
+
+function render() {
+  quizEl.innerHTML = ``;
+  answers = new Array(questions.length).fill(null);
+  locked = false;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `q-text`;
+    p.textContent = item.q;
+    box.appendChild(p);
+    item.o.forEach((opt, oi) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = letters[oi] + `) ` + opt;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`selected`));
+        b.classList.add(`selected`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`p`);
+    fb.className = `feedback`;
+    box.appendChild(fb);
+    quizEl.appendChild(box);
+  });
+  result.style.display = `none`;
+  evalBtn.style.display = `block`;
+  update();
+}
+
+function update() {
+  const done = answers.every(a => a !== null);
+  evalBtn.disabled = !done;
+  hint.style.display = done ? `none` : `block`;
+}
+
+evalBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) return;
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.box`);
+  questions.forEach((item, qi) => {
+    const opts = boxes[qi].querySelectorAll(`.opt`);
+    const fb = boxes[qi].querySelector(`.feedback`);
+    opts.forEach((b, oi) => {
+      b.disabled = true;
+      if (oi === item.c) b.classList.add(`correct`);
+      if (oi === answers[qi] && oi !== item.c) b.classList.add(`wrong`);
+    });
+    if (answers[qi] === item.c) {
+      score++;
+      fb.className = `feedback ok`;
+      fb.textContent = `Správně`;
+    } else {
+      fb.className = `feedback bad`;
+      fb.textContent = `Špatně. Správná odpověď: ` + letters[item.c] + `) ` + item.o[item.c];
+    }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  const ev = evaluations.find(e => score >= e.min && score <= e.max);
+  document.getElementById(`evaltext`).textContent = ev ? ev.t : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior: `smooth`, block: `start`});
+});
+
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  render();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+
+render();
+</script>
+</body>
+</html>
