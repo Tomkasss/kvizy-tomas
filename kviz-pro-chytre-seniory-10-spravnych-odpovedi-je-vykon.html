@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro chytré seniory: 10 správných odpovědí je výkon hodný vědomostní elity</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px}
+.perex{font-size:1.08rem;line-height:1.6;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer;margin-bottom:10px}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border:1px solid #7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border:1px solid #d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin-top:8px;font-size:.98rem}
+.fb.ok{color:#1e5631}
+.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a7f73;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.evtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro chytré seniory: 10 správných odpovědí je výkon hodný vědomostní elity</h1>
+<p class="perex">Deset otázek vede od Starého zákona přes Homéra, olympijskou gymnastiku a Babičku až k francouzskému filmu a Melvillovu oceánu, se zastávkou na druhém konci světa. Kolik z toho vám po letech čtení zůstalo v hlavě?</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="evtext" id="evtext"></p>
+<button type="button" class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q = [
+{q:`Kterého krále podle Bible navštívila královna ze Sáby?`,o:[`Davida`,`Šalamouna`,`Nabukadnesara`,`Chizkijáše`],a:1},
+{q:`Kdo byla manželkou Odyssea?`,o:[`Helena`,`Andromaché`,`Klytaimnéstra`,`Pénelopé`],a:3},
+{q:`Která gymnastka dostala na olympijských hrách jako první v historii plné hodnocení 10 bodů?`,o:[`Olga Korbutová`,`Věra Čáslavská`,`Ludmila Turiščevová`,`Nadia Comăneciová`],a:3},
+{q:`Ve kterém městě byla podepsána americká Deklarace nezávislosti?`,o:[`v Bostonu`,`v New Yorku`,`ve Filadelfii`,`v Baltimoru`],a:2},
+{q:`Nad kterým městem se zvedá Stolová hora?`,o:[`nad Rio de Janeirem`,`nad Buenos Aires`,`nad Kapským Městem`,`nad Sydney`],a:2},
+{q:`Z čeho se připravuje omáčka guacamole?`,o:[`z avokáda`,`z cizrny`,`z lilku`,`z fazolí`],a:0},
+{q:`Kdo ilustroval Babičku Boženy Němcové vydanou roku 1903?`,o:[`Josef Lada`,`Mikoláš Aleš`,`Max Švabinský`,`Adolf Kašpar`],a:3},
+{q:`Která herečka hrála Angeliku ve francouzských filmech ze 60. let?`,o:[`Brigitte Bardot`,`Catherine Deneuve`,`Michèle Mercier`,`Claudia Cardinale`],a:2},
+{q:`Kde žije leguán mořský?`,o:[`na Galapágách`,`na Madagaskaru`,`na Havajských ostrovech`,`na Novém Zélandu`],a:0},
+{q:`Kdo je vypravěčem románu Bílá velryba?`,o:[`Achab`,`Izmael`,`Starbuck`,`Stubb`],a:1}
+];
+const E = [
+{min:0,max:3,t:`K vědomostní elitě z titulku máte zatím daleko. Deset otázek z deseti různých oborů je tvrdá zkouška, a když hned několik oborů nesedne, body rychle mizí. Uvidíte, že jinak poskládaný výběr vám půjde líp.`},
+{min:4,max:6,t:`Pevný základ máte, ale na elitu to ještě není. Ve dvou nebo třech oborech se cítíte jako doma. Body jste ztráceli nejspíš tam, kde se nabízely dvě velmi podobné možnosti a rozhodla by až jistá znalost.`},
+{min:7,max:9,t:`Tady končí většina zvídavých čtenářů, a to je dobrý výsledek. K elitě vám chybí jen malý kousek, obvykle jedna nebo dvě otázky, kde by pomohla kniha, kterou člověk přečte jednou za život.`},
+{min:10,max:10,t:`Tohle je ten výkon, o kterém mluví titulek. Prošli jste Biblí, antikou, sportem, dějinami, zeměpisem, kuchyní, filmem, přírodou i českou a světovou literaturou a nezaváhali jste ani u otázky, na kterou si vzpomene jen opravdový čtenář. Mezi vědomostní elitu patříte právem.`}
+];
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+let sel = [];
+let locked = false;
+function render() {
+  quiz.innerHTML = ``;
+  sel = Q.map(() => null);
+  locked = false;
+  Q.forEach((item, i) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (i + 1) + `. ` + item.q;
+    box.appendChild(p);
+    item.o.forEach((opt, j) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = `abcd`[j] + `) ` + opt;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        sel[i] = j;
+        box.querySelectorAll(`.opt`).forEach((x, k) => x.classList.toggle(`sel`, k === j));
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`div`);
+    fb.className = `fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  result.style.display = `none`;
+  evalBtn.style.display = `block`;
+  update();
+}
+function update() {
+  const done = sel.every(s => s !== null);
+  evalBtn.disabled = !done;
+  hint.style.display = done ? `none` : `block`;
+}
+evalBtn.addEventListener(`click`, () => {
+  if (sel.some(s => s === null)) return;
+  locked = true;
+  let score = 0;
+  quiz.querySelectorAll(`.box`).forEach((box, i) => {
+    const opts = box.querySelectorAll(`.opt`);
+    const fb = box.querySelector(`.fb`);
+    opts.forEach(o => { o.disabled = true; o.classList.remove(`sel`); });
+    opts[Q[i].a].classList.add(`ok`);
+    if (sel[i] === Q[i].a) {
+      score++;
+      fb.className = `fb ok`;
+      fb.textContent = `Správně.`;
+    } else {
+      opts[sel[i]].classList.add(`bad`);
+      fb.className = `fb bad`;
+      fb.textContent = `Špatně. Správná odpověď: ` + `abcd`[Q[i].a] + `) ` + Q[i].o[Q[i].a];
+    }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + Q.length;
+  const ev = E.find(e => score >= e.min && score <= e.max);
+  document.getElementById(`evtext`).textContent = ev ? ev.t : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior: `smooth`, block: `start`});
+});
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  render();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+render();
+</script>
+</body>
+</html>
