@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro nadstandardně chytré Čechy: kdo dá 10/10, může se považovat za génia</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:24px;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-family:inherit;font-size:1rem;color:#3a3a3a;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover:not(.ok):not(.bad):not(.sel){background:#f7f4f0}
+.fb{margin-top:12px;font-size:.98rem}
+.fb.good{color:#1e5631}
+.fb.wrong{color:#721c24}
+.btn{display:block;margin:40px auto 0;background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;font-family:inherit;cursor:pointer}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.evtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b;margin-top:24px}
+#retry:hover{background:#756658}
+@media (max-width:600px){body{padding:16px}.box{padding:20px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro nadstandardně chytré Čechy: kdo dá 10/10, může se považovat za génia</h1>
+<p class="perex">Kdo v Česku platí za chytrou hlavu, tady to může dokázat. Otázky skáčou od filmu a fotbalu přes počítačové hry a pražskou architekturu po psychologii a ruské dějiny a génius z titulku je jen ten, kdo nezaváhá ani jednou. Obstojíte?</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="evtext" id="evtext"></p>
+<button type="button" class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q=[
+{q:`Ve kterém z těchto filmů vystupuje doktor Hannibal Lecter?`,o:[`Sedm`,`Psycho`,`Mlčení jehňátek`,`Osvícení`],a:2},
+{q:`Ve které zemi sídlí fotbalový klub Ajax?`,o:[`v Belgii`,`v Dánsku`,`v Řecku`,`v Nizozemsku`],a:3},
+{q:`Ze které kuchyně pochází nudlová polévka pho?`,o:[`z vietnamské`,`z thajské`,`z korejské`,`z japonské`],a:0},
+{q:`Pod jakou značkou prodává Google své chytré telefony?`,o:[`Galaxy`,`Xperia`,`Pixel`,`Lumia`],a:2},
+{q:`Která z těchto pražských staveb je postavena v kubistickém slohu?`,o:[`Obecní dům`,`Veletržní palác`,`Tančící dům`,`Dům U Černé Matky Boží`],a:3},
+{q:`Ve které zemi žije Heidi, děvčátko z hor, se svým dědečkem na horské pastvině?`,o:[`ve Švýcarsku`,`v Rakousku`,`v Itálii`,`ve Francii`],a:0},
+{q:`Kterou počítačovou hru vytvořilo pražské studio Warhorse Studios?`,o:[`Mafia`,`Kingdom Come: Deliverance`,`Zaklínač 3: Divoký hon`,`Arma 3`],a:1},
+{q:`Která země jako první na světě uzákonila bitcoin jako zákonné platidlo?`,o:[`Venezuela`,`Salvador`,`Středoafrická republika`,`Argentina`],a:1},
+{q:`Který psycholog sestavil známou pyramidu lidských potřeb?`,o:[`Abraham Maslow`,`Carl Rogers`,`Erich Fromm`,`Alfred Adler`],a:0},
+{q:`Z jakého panovnického rodu pocházel car Ivan IV. Hrozný?`,o:[`z Romanovců`,`z Rurikovců`,`z Godunovců`,`z Gediminovců`],a:1}
+];
+const E=[
+{min:0,max:3,t:`Génius z titulku se dnes neukázal. Otázky vedly do oborů, které spolu jinak vůbec nesousedí, od chytrých telefonů po ruské cary, a stačí pár cizích témat, aby body utekly. Zkuste to znovu za pár dní s čerstvou hlavou.`},
+{min:4,max:6,t:`Základ máte pevný, jen ke géniovi ještě pár kroků chybí. Snadnější otázky jste nejspíš zvládli a ztráty přišly tam, kde se volilo mezi dvěma podobně věrohodnými možnostmi.`},
+{min:7,max:9,t:`Takový výsledek má jen člověk s opravdu širokým rozhledem. Od génia vás dělí jen pár zaváhání, obvykle tam, kde vedle správné odpovědi stála jiná, která zněla skoro stejně pravděpodobně.`},
+{min:10,max:10,t:`Plný počet, a slib z titulku tím platí: můžete se s klidem považovat za génia. Bez jediné chyby jste prošli fotbalem, počítačovými hrami, pražskou architekturou, psychologií i ruskými dějinami, a to se povede jen menšině.`}
+];
+const quiz=document.getElementById(`quiz`);
+const evalBtn=document.getElementById(`eval`);
+const hint=document.getElementById(`hint`);
+const result=document.getElementById(`result`);
+let answers=[],locked=false;
+function render(){
+  quiz.innerHTML=``;answers=new Array(Q.length).fill(null);locked=false;
+  Q.forEach((q,i)=>{
+    const box=document.createElement(`div`);box.className=`box`;
+    const p=document.createElement(`p`);p.className=`qtext`;p.textContent=(i+1)+`. `+q.q;box.appendChild(p);
+    const letters=[`a`,`b`,`c`,`d`];
+    q.o.forEach((o,j)=>{
+      const b=document.createElement(`button`);b.type=`button`;b.className=`opt`;b.textContent=letters[j]+`) `+o;
+      b.addEventListener(`click`,()=>{
+        if(locked)return;
+        answers[i]=j;
+        box.querySelectorAll(`.opt`).forEach(x=>x.classList.remove(`sel`));
+        b.classList.add(`sel`);update();
+      });
+      box.appendChild(b);
+    });
+    const fb=document.createElement(`div`);fb.className=`fb`;box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  quiz.classList.remove(`locked`);result.style.display=`none`;evalBtn.style.display=`block`;update();
+}
+function update(){
+  const done=answers.every(a=>a!==null);
+  evalBtn.disabled=!done;hint.style.display=done?`none`:`block`;
+}
+evalBtn.addEventListener(`click`,()=>{
+  if(evalBtn.disabled)return;
+  locked=true;quiz.classList.add(`locked`);let s=0;
+  const letters=[`a`,`b`,`c`,`d`];
+  quiz.querySelectorAll(`.box`).forEach((box,i)=>{
+    const opts=box.querySelectorAll(`.opt`);const fb=box.querySelector(`.fb`);
+    opts[Q[i].a].classList.add(`ok`);
+    if(answers[i]===Q[i].a){s++;fb.className=`fb good`;fb.textContent=`Správně.`;}
+    else{opts[answers[i]].classList.add(`bad`);fb.className=`fb wrong`;fb.textContent=`Špatně. Správná odpověď: `+letters[Q[i].a]+`) `+Q[i].o[Q[i].a];}
+  });
+  document.getElementById(`score`).textContent=s+` z `+Q.length;
+  const e=E.find(x=>s>=x.min&&s<=x.max);
+  document.getElementById(`evtext`).textContent=e?e.t:``;
+  evalBtn.style.display=`none`;hint.style.display=`none`;
+  result.style.display=`block`;result.scrollIntoView({behavior:`smooth`});
+});
+document.getElementById(`retry`).addEventListener(`click`,()=>{render();window.scrollTo({top:0,behavior:`smooth`});});
+render();
+</script>
+</body>
+</html>
