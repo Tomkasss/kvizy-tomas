@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Velký kvíz pro seniory: jen opravdový mistr všeobecných znalostí získá 10/10</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px;color:#2c2c2c}
+.perex{font-size:1.05rem;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer;margin-bottom:10px}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.selected{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border:1px solid #7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border:1px solid #d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover:not(.correct):not(.wrong):not(.selected){background:#f7f4f0}
+.fb{margin-top:12px;font-size:.95rem;display:none}
+.fb.ok{color:#1e5631;display:block}
+.fb.bad{color:#721c24;display:block}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#4a4a4a;font-size:.95rem;margin-top:12px}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.evaltext{font-size:1rem;color:#4a4a4a;text-align:center;margin:0}
+#retry{background:#8c7b6b;margin-top:28px}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:16px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Velký kvíz pro seniory: jen opravdový mistr všeobecných znalostí získá 10/10</h1>
+<p class="perex">Kdo celý život četl, cestoval a díval se kolem sebe, má teď příležitost to prokázat. Dějiny, věda, sport, kuchyně i literatura: plný počet tu získá jen ten, komu se za ta léta v hlavě usadilo opravdu všechno podstatné.</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="evaluate" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="evaltext" id="evaltext"></p>
+<button type="button" class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  {q: `Kde zemřel Tomáš Garrigue Masaryk?`, opts: [`v Praze`, `v Lánech`, `v Topoľčiankách`, `v Hodoníně`], correct: 1},
+  {q: `Jakou barvu získá lakmus v kyselině?`, opts: [`červenou`, `modrou`, `zelenou`, `žlutou`], correct: 0},
+  {q: `Ze které země pochází víno retsina?`, opts: [`ze Španělska`, `z Chorvatska`, `z Řecka`, `z Turecka`], correct: 2},
+  {q: `Kde se narodil Albert Einstein?`, opts: [`ve Švýcarsku`, `v Rakousku`, `v Nizozemsku`, `v Německu`], correct: 3},
+  {q: `Za kterou zemi závodil cyklista Eddy Merckx?`, opts: [`za Belgii`, `za Nizozemsko`, `za Německo`, `za Lucembursko`], correct: 0},
+  {q: `Ve kterém městě zemřel Jan Kalvín?`, opts: [`v Curychu`, `v Basileji`, `v Ženevě`, `ve Štrasburku`], correct: 2},
+  {q: `Ve kterém světadílu žijí kolibříci ve volné přírodě?`, opts: [`v Africe`, `v Asii`, `v Austrálii`, `v Americe`], correct: 3},
+  {q: `Kde byl vězněn Edmond Dantès z Dumasova románu?`, opts: [`v Bastile`, `v pevnosti If`, `v pevnosti Vincennes`, `na Mont-Saint-Michel`], correct: 1},
+  {q: `Který kus oblečení dostal jméno podle atolu, na kterém Spojené státy v roce 1946 zkoušely atomové bomby?`, opts: [`bermudy`, `džíny`, `capri kalhoty`, `bikiny`], correct: 3},
+  {q: `Na kterém havajském ostrově leží Honolulu?`, opts: [`na Havaji`, `na Oahu`, `na Maui`, `na Kauai`], correct: 1}
+];
+const evaluations = [
+  {min: 0, max: 3, text: `Tentokrát to vyšlo nanejvýš na tři body. Otázky se střídaly od chemie přes sport až po módu a v takové směsi se snadno stane, že se trefí jen máloco. U správných odpovědí najdete, jak to bylo, a řada z nich stojí za zapamatování.`},
+  {min: 4, max: 6, text: `Trefili jste zhruba každou druhou otázku, u ostatních padla volba vedle. Na plný počet ještě znatelný kus chybí, základ ale v hlavě zůstal.`},
+  {min: 7, max: 9, text: `Dobré skóre s pevným základem. Sedm bodů je poctivý standard, osm a devět už znamená přehled nad běžným průměrem. K plnému počtu vám scházelo jen málo.`},
+  {min: 10, max: 10, text: `Deset z deseti a s tím i právo říkat si mistr všeobecných znalostí. Neodolala vám ani jediná otázka a takový výkon je vzácný.`}
+];
+const letters = [`a`, `b`, `c`, `d`];
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`evaluate`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+
+function render() {
+  quiz.innerHTML = ``;
+  questions.forEach((q, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (qi + 1) + `. ` + q.q;
+    box.appendChild(p);
+    const opts = document.createElement(`div`);
+    opts.className = `opts`;
+    q.opts.forEach((o, oi) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = letters[oi] + `) ` + o;
+      b.addEventListener(`click`, () => select(qi, oi));
+      opts.appendChild(b);
+    });
+    box.appendChild(opts);
+    const fb = document.createElement(`div`);
+    fb.className = `fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+}
+
+function select(qi, oi) {
+  if (locked) return;
+  answers[qi] = oi;
+  const btns = quiz.children[qi].querySelectorAll(`.opt`);
+  btns.forEach((b, i) => b.classList.toggle(`selected`, i === oi));
+  const done = answers.every(a => a !== null);
+  evalBtn.disabled = !done;
+  hint.style.display = done ? `none` : `block`;
+}
+
+evalBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) return;
+  locked = true;
+  let score = 0;
+  questions.forEach((q, qi) => {
+    const box = quiz.children[qi];
+    box.querySelector(`.opts`).classList.add(`locked`);
+    const btns = box.querySelectorAll(`.opt`);
+    const fb = box.querySelector(`.fb`);
+    btns.forEach((b, i) => {
+      if (i === q.correct) b.classList.add(`correct`);
+      else if (i === answers[qi]) b.classList.add(`wrong`);
+    });
+    if (answers[qi] === q.correct) {
+      score++;
+      fb.className = `fb ok`;
+      fb.textContent = `Správně.`;
+    } else {
+      fb.className = `fb bad`;
+      fb.textContent = `Správná odpověď: ` + letters[q.correct] + `) ` + q.opts[q.correct];
+    }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  const ev = evaluations.find(e => score >= e.min && score <= e.max);
+  document.getElementById(`evaltext`).textContent = ev ? ev.text : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior: `smooth`, block: `start`});
+});
+
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  answers.fill(null);
+  locked = false;
+  render();
+  result.style.display = `none`;
+  evalBtn.style.display = `block`;
+  evalBtn.disabled = true;
+  hint.style.display = `block`;
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+
+render();
+</script>
+</body>
+</html>
