@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Těžký kvíz všeobecného přehledu: na posledních třech otázkách pohoří skoro každý</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:24px 16px;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto}
+h1{font-size:1.8rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;color:#4a4a4a;margin:0 0 28px}
+.q{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin-bottom:10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-family:inherit;font-size:1rem;color:#3a3a3a;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border:1px solid #7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border:1px solid #d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover{}
+.fb{margin-top:14px;font-size:.98rem}
+.fb.okt{color:#1e5631}
+.fb.badt{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a6d3b;margin-top:12px;font-size:.95rem}
+.result{background:#fefcf9;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-top:32px;border-top:4px solid #5b7e5f;display:none}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;margin:0}
+.again{background:#8c7b6b}
+.again:hover{background:#756658}
+@media (max-width:600px){body{padding:16px}.q{padding:20px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Těžký kvíz všeobecného přehledu: na posledních třech otázkách pohoří skoro každý</h1>
+<p class="perex">Pirát z pohádky, poutní cesta, kuchyňské náčiní, šipky, bondovky, úřední jazyky, bankovky v peněžence, britské impérium, fotoaparáty a parní stroje.</p>
+<div id="quiz"></div>
+<button id="eval" class="btn" disabled>Vyhodnotit</button>
+<p id="hint" class="hint">Odpovězte prosím na všechny otázky</p>
+<div id="result" class="result">
+<p id="score" class="score"></p>
+<p id="rtext" class="rtext"></p>
+<button id="again" class="btn again">Zkusit znovu</button>
+</div>
+</div>
+<script>
+(function(){
+const questions = [
+  {q:`1. Které zvíře v příběhu o Petru Panovi pronásleduje kapitána Hooka?`, o:[`žralok`,`tygr`,`medvěd`,`krokodýl`], a:3},
+  {q:`2. Do které země míří poutníci po Svatojakubské cestě?`, o:[`do Španělska`,`do Francie`,`do Portugalska`,`do Itálie`], a:0},
+  {q:`3. Co se v kuchyni dělá mandolínou?`, o:[`krájí se jí zelenina na tenké plátky`,`šlehají se jí bílky`,`cedí se jí těstoviny`,`naklepává se jí maso`], a:0},
+  {q:`4. Kolik bodů je nejvyšší možný nához třemi šipkami v jednom kole?`, o:[`150`,`170`,`180`,`200`], a:2},
+  {q:`5. Kterým filmem začala filmová série o Jamesi Bondovi?`, o:[`Goldfinger`,`Dr. No`,`Srdečné pozdravy z Ruska`,`Thunderball`], a:1},
+  {q:`6. Který jazyk je úředním jazykem Andorry?`, o:[`španělština`,`francouzština`,`katalánština`,`baskičtina`], a:2},
+  {q:`7. Čí podpis nesou české bankovky?`, o:[`prezidenta republiky`,`guvernéra České národní banky`,`ministra financí`,`předsedy vlády`], a:1},
+  {q:`8. Který britský premiér prosadil, aby královna Viktorie přijala titul indické císařovny?`, o:[`William Gladstone`,`lord Palmerston`,`lord Salisbury`,`Benjamin Disraeli`], a:3},
+  {q:`9. Ve které firmě vznikl první přenosný digitální fotoaparát?`, o:[`Sony`,`Canon`,`Kodak`,`Nikon`], a:2},
+  {q:`10. Kdo sestrojil první parní lokomotivu, která jezdila po kolejích?`, o:[`George Stephenson`,`Richard Trevithick`,`Matthew Murray`,`William Hedley`], a:1}
+];
+const letters = [`a`,`b`,`c`,`d`];
+const ranges = [
+  {min:0,max:3,t:`Tentokrát jste nezaváhali až na konci, cesta se zadrhla už v první sedmičce. Otázky ze začátku jsou přitom ty, které se dají nejsnáz dohnat. Stačí jedna knihovna a jeden atlas.`},
+  {min:4,max:6,t:`Úvod jste zvládli, ale ve středu kvízu začaly body ubývat a k posledním třem otázkám jste dorazili bez rezervy. Solidní základ, jen je v něm pár děr.`},
+  {min:7,max:9,t:`Tady končí většina lidí, kteří se o svět zajímají. S takovým skóre jste první sedmičku prošli skoro bez ztráty a body jste nechali hlavně v závěrečné trojici, přesně jak slibuje titulek.`},
+  {min:10,max:10,t:`Prošli jste i poslední trojicí, na které si láme zuby skoro každý. Neposlali vás špatným směrem ani indická koruna, ani fotoaparát, ani koleje. Plný počet dá jen menšina a vy mezi ni patříte.`}
+];
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+const scoreEl = document.getElementById(`score`);
+const rtext = document.getElementById(`rtext`);
+const againBtn = document.getElementById(`again`);
+let answers = [];
+let locked = false;
+
+function render(){
+  quiz.innerHTML = ``;
+  answers = new Array(questions.length).fill(null);
+  locked = false;
+  questions.forEach(function(item, qi){
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const qt = document.createElement(`p`);
+    qt.className = `qt`;
+    qt.textContent = item.q;
+    box.appendChild(qt);
+    item.o.forEach(function(opt, oi){
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = letters[oi] + `) ` + opt;
+      b.addEventListener(`click`, function(){
+        if (locked) return;
+        answers[qi] = oi;
+        box.querySelectorAll(`.opt`).forEach(function(x){ x.classList.remove(`sel`); });
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`p`);
+    fb.className = `fb`;
+    fb.style.display = `none`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  result.style.display = `none`;
+  evalBtn.style.display = `block`;
+  update();
+}
+
+function update(){
+  const done = answers.every(function(x){ return x !== null; });
+  evalBtn.disabled = !done;
+  hint.style.display = done ? `none` : `block`;
+}
+
+evalBtn.addEventListener(`click`, function(){
+  if (evalBtn.disabled || locked) return;
+  locked = true;
+  let score = 0;
+  const boxes = quiz.querySelectorAll(`.q`);
+  questions.forEach(function(item, qi){
+    const box = boxes[qi];
+    box.classList.add(`locked`);
+    const opts = box.querySelectorAll(`.opt`);
+    opts.forEach(function(o){ o.classList.remove(`sel`); });
+    opts[item.a].classList.add(`ok`);
+    const fb = box.querySelector(`.fb`);
+    fb.style.display = `block`;
+    if (answers[qi] === item.a) {
+      score++;
+      fb.className = `fb okt`;
+      fb.textContent = `Správně.`;
+    } else {
+      opts[answers[qi]].classList.add(`bad`);
+      fb.className = `fb badt`;
+      fb.textContent = `Špatně. Správná odpověď: ` + letters[item.a] + `) ` + item.o[item.a];
+    }
+  });
+  scoreEl.textContent = score + ` z ` + questions.length;
+  const r = ranges.find(function(x){ return score >= x.min && score <= x.max; });
+  rtext.textContent = r ? r.t : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior:`smooth`, block:`start`});
+});
+
+againBtn.addEventListener(`click`, function(){
+  render();
+  window.scrollTo({top:0, behavior:`smooth`});
+});
+
+render();
+})();
+</script>
+</body>
+</html>
