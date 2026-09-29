@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vědomostní kvíz pro seniory 70+: kdo dá 9/10, má přehled jako málokdo</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px;color:#2c2c2c}
+.perex{font-size:1.05rem;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border:1px solid #7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border:1px solid #d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover:not(.sel):not(.correct):not(.wrong){background:#f7f4f0}
+.fb{margin-top:14px;font-size:.98rem;display:none}
+.fb.ok{color:#1e5631}
+.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a7f74;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Vědomostní kvíz pro seniory 70+: kdo dá 9/10, má přehled jako málokdo</h1>
+<p class="perex">Do školy jste chodili v padesátých či šedesátých letech a od té doby jste přečetli tisíce novin a vyslechli stovky rozhlasových pořadů. Teď se ukáže, kolik z toho zůstalo, od literatury a dějin po zeměpis, umění, přírodu a sport.</p>
+<div id="quiz"></div>
+<button id="eval" class="btn" type="button" disabled>Vyhodnotit</button>
+<p id="hint" class="hint">Odpovězte prosím na všechny otázky</p>
+<div id="result" class="box">
+<p class="score" id="score"></p>
+<p class="rtext" id="rtext"></p>
+<button id="retry" class="btn" type="button">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q = [
+  {q: `Který řecký hrdina oslepil kyklopa Polyféma?`, o: [`Achilleus`, `Odysseus`, `Héraklés`, `Perseus`], a: 1},
+  {q: `Jak se jmenuje hlavní postava Kafkovy Proměny?`, o: [`Josef K.`, `Karel Rossmann`, `Jiří Bendemann`, `Řehoř Samsa`], a: 3},
+  {q: `Kdo byl podle evangelií sťat na příkaz Heroda Antipy, když si jeho hlavu vyžádala Herodiadina dcera?`, o: [`Jan Křtitel`, `Pavel z Tarsu`, `Jan Evangelista`, `Šimon Petr`], a: 0},
+  {q: `Který herec hrál ve filmu Obecná škola nového třídního učitele Igora Hnízda?`, o: [`Rudolf Hrušínský`, `Zdeněk Svěrák`, `Jan Tříska`, `Josef Abrhám`], a: 2},
+  {q: `Ve které zemi leží historický kraj Bretaň?`, o: [`Velká Británie`, `Francie`, `Irsko`, `Belgie`], a: 1},
+  {q: `Kdo byl posledním generálním tajemníkem ÚV KSČ?`, o: [`Karel Urbánek`, `Miloš Jakeš`, `Ladislav Adamec`, `Vasil Biľak`], a: 0},
+  {q: `Ve kterém roce byla v Česku zavedena daň z přidané hodnoty?`, o: [`1990`, `1991`, `1993`, `2004`], a: 2},
+  {q: `Ve kterém městě se narodil Pablo Picasso?`, o: [`Barcelona`, `Madrid`, `Sevilla`, `Málaga`], a: 3},
+  {q: `Samci kterého ptáka jsou nejtěžšími létajícími ptáky Evropy?`, o: [`labuť zpěvná`, `drop velký`, `sup hnědý`, `kormorán velký`], a: 1},
+  {q: `Který atlet získal na olympijských hrách 1936 v Berlíně čtyři zlaté medaile?`, o: [`Jesse Owens`, `Carl Lewis`, `Paavo Nurmi`, `Bob Beamon`], a: 0}
+];
+const E = [
+  {min: 0, max: 3, t: `Tentokrát se toho vybavilo málo. Otázky vedly od Odyssea a Kafky přes evangelia a Obecnou školu až k dropům a berlínské olympiádě a body nejspíš utekly i u některé z nejsnazších.`},
+  {min: 4, max: 6, t: `Základ držíte, Odysseus, Jan Křtitel nebo Jesse Owens vám potíže nejspíš nedělali. Body se ztrácely tam, kde vedle správné odpovědi stála velmi podobná, třeba Barcelona vedle Málagy nebo rok 1991 vedle roku 1993.`},
+  {min: 7, max: 9, t: `Sedm bodů odpovídá zhruba průměrnému řešiteli, je to solidní výsledek, ale ještě ne výjimka. Osm bodů už je nad průměrem: chyběly jen dvě odpovědi a poradili jste si i s většinou otázek, u kterých školní paměť nestačí. Devět bodů je přehled jako málokdo, přesně jak slibuje titulek: zaváhali jste jen u jediné otázky z deseti.`},
+  {min: 10, max: 10, t: `Bez jediné chyby, včetně Karla Urbánka, posledního generálního tajemníka ÚV KSČ, kterého v paměti většiny lidí zastínil jeho předchůdce Miloš Jakeš. Urbánek zastával funkci necelý měsíc, než ji mimořádný sjezd v prosinci 1989 zrušil. Plný počet napříč deseti tak rozdílnými obory je výjimka.`}
+];
+const answers = new Array(Q.length).fill(null);
+let locked = false;
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+function render() {
+  quiz.innerHTML = ``;
+  Q.forEach((item, i) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (i + 1) + `. ` + item.q;
+    box.appendChild(p);
+    item.o.forEach((opt, j) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = `abcd`[j] + `) ` + opt;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[i] = j;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`sel`));
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`p`);
+    fb.className = `fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+}
+function update() {
+  const all = answers.every(a => a !== null);
+  evalBtn.disabled = !all;
+  hint.style.display = all ? `none` : `block`;
+}
+evalBtn.addEventListener(`click`, () => {
+  if (evalBtn.disabled) return;
+  locked = true;
+  quiz.classList.add(`locked`);
+  let score = 0;
+  quiz.querySelectorAll(`.box`).forEach((box, i) => {
+    const opts = box.querySelectorAll(`.opt`);
+    const fb = box.querySelector(`.fb`);
+    const ok = answers[i] === Q[i].a;
+    if (ok) score++;
+    opts[Q[i].a].classList.add(`correct`);
+    if (!ok) opts[answers[i]].classList.add(`wrong`);
+    fb.style.display = `block`;
+    fb.className = `fb ` + (ok ? `ok` : `bad`);
+    fb.textContent = ok ? `Správně.` : `Správná odpověď: ` + `abcd`[Q[i].a] + `) ` + Q[i].o[Q[i].a];
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + Q.length;
+  const e = E.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`rtext`).textContent = e ? e.t : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior: `smooth`, block: `start`});
+});
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  answers.fill(null);
+  locked = false;
+  quiz.classList.remove(`locked`);
+  result.style.display = `none`;
+  evalBtn.style.display = `block`;
+  render();
+  update();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+render();
+update();
+</script>
+</body>
+</html>
