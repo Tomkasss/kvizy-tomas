@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test všeobecných znalostí: plný počet získají jen lidé s mimořádným přehledem</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px;color:#2c2c2c}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border:1px solid #7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border:1px solid #d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover{background:#f7f4f0}
+.locked .opt.sel:hover{background:#dcd3c7}
+.locked .opt.ok:hover{background:#d4edda}
+.locked .opt.bad:hover{background:#f8d7da}
+.fb{margin-top:8px;font-size:.95rem}
+.fb.good{color:#1e5631}
+.fb.wrong{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a7f73;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.evtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test všeobecných znalostí: plný počet získají jen lidé s mimořádným přehledem</h1>
+<p class="perex">Od vysokorychlostních tratí přes loga aerolinek až po arktický led a nápoje z dalekých krajů. Mimořádný přehled poznáte podle toho, že jistotu máte i tam, kam vás zájem nikdy cíleně nezavedl.</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="evtext" id="evtext"></p>
+<button type="button" class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q = [
+{q:`Ve které zemi začaly v roce 1981 jezdit rychlovlaky TGV?`,o:[`v Německu`,`ve Francii`,`v Itálii`,`ve Španělsku`],c:1},
+{q:`Ve kterém oceánu leží Mariánský příkop?`,o:[`v Atlantském`,`v Indickém`,`v Tichém`,`v Severním ledovém`],c:2},
+{q:`Čím byl pařížský Louvre na konci 16. století?`,o:[`sídlem arcibiskupa`,`sídlem městské rady`,`sídlem univerzity`,`sídlem královského dvora`],c:3},
+{q:`Koho představuje hračka Woody, hlavní hrdina animovaného filmu Toy Story: Příběh hraček?`,o:[`kovboje`,`astronauta`,`rytíře`,`piráta`],c:0},
+{q:`Která letecká společnost má ve svém znaku klokana?`,o:[`Air New Zealand`,`Fiji Airways`,`Qantas`,`Virgin Australia`],c:2},
+{q:`Kdo patřil mezi zakladatele sociální sítě Twitter, dnes X?`,o:[`Elon Musk`,`Mark Zuckerberg`,`Jack Dorsey`,`Kevin Systrom`],c:2},
+{q:`Ve které zemi se jezdí dálkový lyžařský závod Vasův běh?`,o:[`v Norsku`,`ve Švédsku`,`ve Finsku`,`v Rakousku`],c:1},
+{q:`Jakou barvu má kůže dospělého ledního medvěda?`,o:[`bílou`,`hnědou`,`šedou`,`černou`],c:3},
+{q:`Ve které zemi roste planě keř, z něhož se připravuje nápoj rooibos?`,o:[`v Jihoafrické republice`,`v Keni`,`na Srí Lance`,`v Číně`],c:0},
+{q:`Na území kterého dnešního státu se podle tradice narodil Buddha?`,o:[`Indie`,`Nepál`,`Srí Lanka`,`Thajsko`],c:1}
+];
+const E = [
+{min:0,max:3,t:`Tentokrát to na mimořádný přehled nestačilo. Široký rozhled se skládá po kouscích a každá otázka, na které jste zaváhali, je dobrý tip, kde začít.`},
+{min:4,max:6,t:`Základ máte, jen k mimořádnému přehledu z titulku ještě kus chybí. Některé obory máte jisté, u vzdálenějších přišlo zaváhání.`},
+{min:7,max:9,t:`Pevný přehled napříč obory. K plnému počtu vám chybělo jen pár otázek, které sahají za hranici běžného zájmu.`},
+{min:10,max:10,t:`Plný počet, který titulek slibuje jen lidem s mimořádným přehledem. Prošli jste všemi deseti otázkami bez jediné chyby, takže tohle označení vám po právu patří.`}
+];
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+let answers = [];
+let locked = false;
+function render() {
+  quiz.innerHTML = ``;
+  quiz.classList.remove(`locked`);
+  answers = new Array(Q.length).fill(null);
+  locked = false;
+  Q.forEach((item, i) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const qt = document.createElement(`p`);
+    qt.className = `qt`;
+    qt.textContent = (i + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    item.o.forEach((opt, j) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = `abcd`[j] + `) ` + opt;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[i] = j;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`sel`));
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`div`);
+    fb.className = `fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  result.style.display = `none`;
+  evalBtn.style.display = `block`;
+  update();
+}
+function update() {
+  const all = answers.every(a => a !== null);
+  evalBtn.disabled = !all;
+  hint.style.display = all ? `none` : `block`;
+}
+evalBtn.addEventListener(`click`, () => {
+  if (evalBtn.disabled) return;
+  locked = true;
+  quiz.classList.add(`locked`);
+  let score = 0;
+  const boxes = quiz.querySelectorAll(`.box`);
+  Q.forEach((item, i) => {
+    const opts = boxes[i].querySelectorAll(`.opt`);
+    const fb = boxes[i].querySelector(`.fb`);
+    opts[item.c].classList.add(`ok`);
+    if (answers[i] === item.c) {
+      score++;
+      fb.className = `fb good`;
+      fb.textContent = `Správně`;
+    } else {
+      opts[answers[i]].classList.add(`bad`);
+      fb.className = `fb wrong`;
+      fb.textContent = `Špatně. Správná odpověď: ` + `abcd`[item.c] + `) ` + item.o[item.c];
+    }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + Q.length;
+  const band = E.find(e => score >= e.min && score <= e.max);
+  document.getElementById(`evtext`).textContent = band ? band.t : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior: `smooth`, block: `start`});
+});
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  render();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+render();
+</script>
+</body>
+</html>
