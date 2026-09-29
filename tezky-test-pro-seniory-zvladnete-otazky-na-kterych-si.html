@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Těžký test pro seniory: zvládnete otázky, na kterých si vylámou zuby i vysokoškoláci?</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px;color:#2c2c2c}
+.perex{font-size:1.1rem;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-family:inherit;font-size:1rem;color:#3a3a3a;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover{background:#f7f4f0}
+.locked .opt.sel:hover{background:#dcd3c7}
+.locked .opt.correct:hover{background:#d4edda}
+.locked .opt.wrong:hover{background:#f8d7da}
+.fb{margin-top:14px;font-size:.95rem;display:none}
+.fb.ok{color:#1e5631;display:block}
+.fb.bad{color:#721c24;display:block}
+.btn{display:block;margin:40px auto 0;background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;font-family:inherit;cursor:pointer}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;margin:0}
+#retry{background:#8c7b6b;margin-top:24px}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Těžký test pro seniory: zvládnete otázky, na kterých si vylámou zuby i vysokoškoláci?</h1>
+<p class="perex">Vysokoškolský diplom tu nerozhoduje. Rozhodují léta čtení, luštění a sledování světa, a v tom mají senioři před čerstvými absolventy náskok. Bible, mytologie, dějiny, literatura, hvězdné nebe, šifry, šachy i matematika. Obhájíte ho?</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="submit" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="rtext" id="rtext"></p>
+<button type="button" class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions=[
+{q:`Kdo musel roku 1633 před inkvizicí odvolat učení o pohybu Země kolem Slunce?`,o:[`Mikuláš Koperník`,`Galileo Galilei`,`Giordano Bruno`,`Johannes Kepler`],c:1},
+{q:`Kterou planetu lidé odedávna nazývají Jitřenka nebo Večernice?`,o:[`Mars`,`Jupiter`,`Venuše`,`Merkur`],c:2},
+{q:`Kdo byl za druhé světové války prezidentem Slovenského státu?`,o:[`Jozef Tiso`,`Vojtech Tuka`,`Andrej Hlinka`,`Alexander Mach`],c:0},
+{q:`Kdo podle Bible převedl Izraelity po Mojžíšově smrti přes Jordán do zaslíbené země?`,o:[`Áron`,`Kálef`,`Jozue`,`Gedeon`],c:2},
+{q:`Která bohyně byla v řecké mytologii matkou Persefony?`,o:[`Héra`,`Démétér`,`Rheia`,`Afrodíté`],c:1},
+{q:`Kterého mistra světa v šachu porazil roku 1997 v zápase počítač Deep Blue od firmy IBM?`,o:[`Garri Kasparov`,`Anatolij Karpov`,`Bobby Fischer`,`Viswanathan Anand`],c:0},
+{q:`Ve kterém románu vystupuje Jean Valjean?`,o:[`Hrabě Monte Christo`,`Chrám Matky Boží v Paříži`,`Tři mušketýři`,`Bídníci`],c:3},
+{q:`Který matematik sehrál za druhé světové války v Bletchley Parku klíčovou roli při prolomení německé šifry Enigma?`,o:[`Kurt Gödel`,`John von Neumann`,`Claude Shannon`,`Alan Turing`],c:3},
+{q:`Kdo uspořádal roku 1907 na ostrově Brownsea první skautský tábor?`,o:[`Robert Baden-Powell`,`Ernest Thompson Seton`,`Antonín Benjamin Svojsík`,`Jaroslav Foglar`],c:0},
+{q:`Kdo dokázal Velkou Fermatovu větu?`,o:[`Grigorij Perelman`,`Andrew Wiles`,`John Nash`,`Paul Erdős`],c:1}
+];
+const evaluations=[
+{min:0,max:3,t:`Tentokrát vám body utekly a v přímém souboji s čerstvými absolventy vysokých škol byste zatím tahali za kratší konec. Otázky skáčou z oboru do oboru, a kde se člověk necítí doma, body ztrácí rychle. Zkuste to znovu za pár dní, mnohé odpovědi vám teď už utkví.`},
+{min:4,max:6,t:`Solidní střed. Na polovině otázek jste obstáli, na té druhé byste měli nejspíš stejné potíže jako leckterý čerstvý absolvent. Chybí jen trocha té šíře, kterou člověk nasbírá čtením a filmy.`},
+{min:7,max:9,t:`Tady už byste v přímém souboji s vysokoškoláky vyhrávali. Tolik správných odpovědí napříč Biblí, mytologií, dějinami, literaturou, astronomií, šiframi, šachy i matematikou svědčí o opravdu širokém rozhledu.`},
+{min:10,max:10,t:`Plný počet, a ten zvládne jen menšina. Prošli jste všemi obory bez jediného zaváhání a s takovým rozhledem byste strčili do kapsy leckterého vysokoškoláka. Klobouk dolů.`}
+];
+const letters=[`a`,`b`,`c`,`d`];
+const quiz=document.getElementById(`quiz`);
+const submit=document.getElementById(`submit`);
+const hint=document.getElementById(`hint`);
+const result=document.getElementById(`result`);
+let answers=[];
+let locked=false;
+function render(){
+  quiz.innerHTML=``;
+  answers=new Array(questions.length).fill(null);
+  locked=false;
+  quiz.classList.remove(`locked`);
+  questions.forEach(function(q,qi){
+    const box=document.createElement(`div`);
+    box.className=`box`;
+    const p=document.createElement(`p`);
+    p.className=`qtext`;
+    p.textContent=(qi+1)+`. `+q.q;
+    box.appendChild(p);
+    q.o.forEach(function(opt,oi){
+      const b=document.createElement(`button`);
+      b.type=`button`;
+      b.className=`opt`;
+      b.textContent=letters[oi]+`) `+opt;
+      b.addEventListener(`click`,function(){
+        if(locked)return;
+        answers[qi]=oi;
+        box.querySelectorAll(`.opt`).forEach(function(x){x.classList.remove(`sel`);});
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb=document.createElement(`div`);
+    fb.className=`fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  update();
+}
+function update(){
+  const done=answers.every(function(a){return a!==null;});
+  submit.disabled=!done||locked;
+  hint.style.display=done||locked?`none`:`block`;
+}
+submit.addEventListener(`click`,function(){
+  if(locked)return;
+  locked=true;
+  quiz.classList.add(`locked`);
+  let score=0;
+  const boxes=quiz.querySelectorAll(`.box`);
+  questions.forEach(function(q,qi){
+    const opts=boxes[qi].querySelectorAll(`.opt`);
+    const fb=boxes[qi].querySelector(`.fb`);
+    opts[q.c].classList.add(`correct`);
+    if(answers[qi]===q.c){
+      score++;
+      fb.className=`fb ok`;
+      fb.textContent=`Správně.`;
+    }else{
+      opts[answers[qi]].classList.add(`wrong`);
+      fb.className=`fb bad`;
+      fb.textContent=`Špatně. Správná odpověď: `+letters[q.c]+`) `+q.o[q.c];
+    }
+  });
+  document.getElementById(`score`).textContent=score+` z `+questions.length;
+  const ev=evaluations.find(function(e){return score>=e.min&&score<=e.max;});
+  document.getElementById(`rtext`).textContent=ev?ev.t:``;
+  result.style.display=`block`;
+  update();
+  result.scrollIntoView({behavior:`smooth`,block:`start`});
+});
+document.getElementById(`retry`).addEventListener(`click`,function(){
+  result.style.display=`none`;
+  render();
+  window.scrollTo({top:0,behavior:`smooth`});
+});
+render();
+</script>
+</body>
+</html>
