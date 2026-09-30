@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test základního přehledu: otázky vypadají snadně, přesto na nich většina lidí pohoří</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 32px 20px; background: #f5f0eb; font-family: Georgia, "Times New Roman", serif; color: #2c2c2c; line-height: 1.5; }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 16px; color: #2c2c2c; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+  .box { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 28px; margin-bottom: 24px; }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 16px; }
+  .opt { display: block; width: 100%; text-align: left; padding: 14px 18px; margin: 0 0 10px; background: #f7f4f0; border: 1px solid #d9d2c9; border-radius: 8px; font-family: inherit; font-size: 1rem; color: #3a3a3a; cursor: pointer; }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+  .locked .opt { cursor: default; }
+  .locked .opt:hover:not(.selected):not(.correct):not(.wrong) { background: #f7f4f0; }
+  .feedback { margin-top: 14px; font-size: 0.98rem; }
+  .feedback.ok { color: #1e5631; }
+  .feedback.bad { color: #721c24; }
+  .btn { display: block; margin: 40px auto 0; background: #5b7e5f; color: #fff; padding: 16px 40px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; border: none; font-family: inherit; cursor: pointer; }
+  .btn:hover { background: #4a6b4e; }
+  .btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .btn.retry { background: #8c7b6b; }
+  .btn.retry:hover { background: #756658; }
+  .hint { text-align: center; color: #8a6d5a; margin-top: 12px; font-size: 0.95rem; min-height: 1.2em; }
+  .result { background: #fefcf9; border-top: 4px solid #5b7e5f; margin-top: 40px; display: none; }
+  .score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  .verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    .box { padding: 16px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test základního přehledu: otázky vypadají snadně, přesto na nich většina lidí pohoří</h1>
+  <p class="perex">Z jakého masa je pravý vídeňský řízek, odkud pochází Tintin a který papež dal jméno kalendáři, podle něhož žijeme? Vypadá to na školní látku, jenže u každé otázky číhá odpověď, která zní správně, a přesto není.</p>
+  <div id="quiz"></div>
+  <button type="button" class="btn" id="evaluate" disabled>Vyhodnotit</button>
+  <p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+  <div class="box result" id="result">
+    <p class="score" id="score"></p>
+    <p class="verdict" id="verdict"></p>
+    <button type="button" class="btn retry" id="retry">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+(function () {
+  const questions = [
+    { q: `Z jakého masa se připravuje pravý vídeňský řízek?`, o: [`z vepřového`, `z kuřecího`, `z telecího`, `z krůtího`], a: 2 },
+    { q: `Ze které země pochází komiksový reportér Tintin?`, o: [`z Belgie`, `z Francie`, `ze Švýcarska`, `z Nizozemska`], a: 0 },
+    { q: `Ze které země pochází tanec tango?`, o: [`ze Španělska`, `z Brazílie`, `z Portugalska`, `z Argentiny`], a: 3 },
+    { q: `Co je zákonným platidlem v Lichtenštejnsku?`, o: [`euro`, `švýcarský frank`, `lichtenštejnská koruna`, `euro i švýcarský frank souběžně`], a: 1 },
+    { q: `Ve které zemi stojí zámek Neuschwanstein?`, o: [`v Rakousku`, `v Německu`, `ve Švýcarsku`, `v Lucembursku`], a: 1 },
+    { q: `Který britský panovník vládl nejdéle před Alžbětou II.?`, o: [`Jiří III.`, `Alžběta I.`, `Jindřich VIII.`, `Viktorie`], a: 3 },
+    { q: `Ze které země pochází hardrocková skupina AC/DC?`, o: [`z Velké Británie`, `z USA`, `z Austrálie`, `z Kanady`], a: 2 },
+    { q: `Ve které zemi leží oblast, po níž dostalo jméno psí plemeno čivava?`, o: [`v Mexiku`, `ve Španělsku`, `v Argentině`, `v Peru`], a: 0 },
+    { q: `Kdo je autorem Petra Pana?`, o: [`Lewis Carroll`, `James Matthew Barrie`, `Rudyard Kipling`, `Oscar Wilde`], a: 1 },
+    { q: `Který papež zavedl gregoriánský kalendář?`, o: [`Řehoř I. Veliký`, `Řehoř VII.`, `Řehoř XIII.`, `Řehoř XVI.`], a: 2 }
+  ];
+  const letters = [`a`, `b`, `c`, `d`];
+  const verdicts = [
+    { min: 0, max: 3, text: `Tady se naplnilo, co slibuje titulek. Nachytala vás odpověď, která zněla povědomě, a ta správná se schovávala o kousek vedle. Základní přehled vám nechybí, jen jste tentokrát věřili prvnímu dojmu víc, než si zasloužil.` },
+    { min: 4, max: 6, text: `Zhruba polovinu nástrah jste prokoukli, u zbytku vás přelstila varianta, která se nabízela sama. Pevný základ máte, jen ho sem tam přebije rozšířený omyl.` },
+    { min: 7, max: 9, text: `Na těchhle otázkách jste nepohořeli. Lákavé odpovědi jste většinou poznali a chybovali jste nanejvýš ve třech zrádných. Váš základní přehled je opravdu nad průměrem.` },
+    { min: 10, max: 10, text: `Plný počet, a ten zvládne jen menšina. Nenachytala vás jediná lákavá varianta, od kuchyně přes taneční parket až po papežský kalendář. Takhle vypadá základní přehled, na který se dá spolehnout.` }
+  ];
+
+  const quizEl = document.getElementById(`quiz`);
+  const evalBtn = document.getElementById(`evaluate`);
+  const hint = document.getElementById(`hint`);
+  const resultEl = document.getElementById(`result`);
+  const scoreEl = document.getElementById(`score`);
+  const verdictEl = document.getElementById(`verdict`);
+  const retryBtn = document.getElementById(`retry`);
+  let answers = [];
+  let locked = false;
+
+  function render() {
+    quizEl.innerHTML = ``;
+    answers = new Array(questions.length).fill(null);
+    locked = false;
+    questions.forEach(function (item, qi) {
+      const box = document.createElement(`div`);
+      box.className = `box`;
+      const p = document.createElement(`p`);
+      p.className = `q-text`;
+      p.textContent = (qi + 1) + `. ` + item.q;
+      box.appendChild(p);
+      item.o.forEach(function (opt, oi) {
+        const b = document.createElement(`button`);
+        b.type = `button`;
+        b.className = `opt`;
+        b.textContent = letters[oi] + `) ` + opt;
+        b.addEventListener(`click`, function () {
+          if (locked) return;
+          answers[qi] = oi;
+          Array.prototype.forEach.call(box.querySelectorAll(`.opt`), function (el, i) {
+            el.classList.toggle(`selected`, i === oi);
+          });
+          updateButton();
+        });
+        box.appendChild(b);
+      });
+      const fb = document.createElement(`div`);
+      fb.className = `feedback`;
+      box.appendChild(fb);
+      quizEl.appendChild(box);
+    });
+    resultEl.style.display = `none`;
+    evalBtn.style.display = `block`;
+    updateButton();
+  }
+
+  function updateButton() {
+    const done = answers.every(function (a) { return a !== null; });
+    evalBtn.disabled = !done;
+    hint.textContent = done ? `` : `Odpovězte prosím na všechny otázky`;
+  }
+
+  evalBtn.addEventListener(`click`, function () {
+    if (evalBtn.disabled) return;
+    locked = true;
+    let score = 0;
+    const boxes = quizEl.querySelectorAll(`.box`);
+    questions.forEach(function (item, qi) {
+      const box = boxes[qi];
+      box.classList.add(`locked`);
+      const opts = box.querySelectorAll(`.opt`);
+      const fb = box.querySelector(`.feedback`);
+      const ok = answers[qi] === item.a;
+      if (ok) score++;
+      opts[item.a].classList.add(`correct`);
+      if (!ok) opts[answers[qi]].classList.add(`wrong`);
+      fb.className = `feedback ` + (ok ? `ok` : `bad`);
+      fb.textContent = ok ? `Správně.` : `Špatně. Správná odpověď: ` + letters[item.a] + `) ` + item.o[item.a];
+    });
+    scoreEl.textContent = score + ` z ` + questions.length;
+    const v = verdicts.find(function (x) { return score >= x.min && score <= x.max; });
+    verdictEl.textContent = v ? v.text : ``;
+    evalBtn.style.display = `none`;
+    hint.textContent = ``;
+    resultEl.style.display = `block`;
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  });
+
+  retryBtn.addEventListener(`click`, function () {
+    render();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
