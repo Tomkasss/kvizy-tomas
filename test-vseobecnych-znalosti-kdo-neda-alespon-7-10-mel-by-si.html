@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test všeobecných znalostí: kdo nedá alespoň 7/10, měl by si doplnit mezery</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin-top:6px;font-size:.95rem}
+.fb.ok{color:#1e5631} .fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;font-family:inherit;cursor:pointer}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;font-size:.95rem;margin-top:12px}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.evtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test všeobecných znalostí: kdo nedá alespoň 7/10, měl by si doplnit mezery</h1>
+<p class="perex">Moderní dějiny, počasí nad Českem, lesní zvěř, vinné sklepy, stavba atomu, česká ústava, stolní tenis, americký seriál, armády i první textové zprávy. Deset oborů prověří, jestli vám rozhled drží, nebo v něm zejí díry.</p>
+<div id="quiz"></div>
+<button id="eval" class="btn" disabled>Vyhodnotit</button>
+<p id="hint" class="hint">Odpovězte prosím na všechny otázky</p>
+<div id="result" class="box">
+<p class="score" id="score"></p>
+<p class="evtext" id="evtext"></p>
+<button id="retry" class="btn">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q=[
+{q:`Kterou zemi zbavila v dubnu 1974 dlouholeté diktatury takzvaná karafiátová revoluce?`,o:[`Španělsko`,`Portugalsko`,`Řecko`,`Chile`],k:1},
+{q:`Ze které světové strany vane v Česku vítr nejčastěji?`,o:[`z jihu`,`z východu`,`ze západu`,`ze severu`],k:2},
+{q:`Kdy jelen lesní shazuje parohy?`,o:[`na podzim hned po říji`,`na konci zimy a na jaře`,`uprostřed léta`,`na začátku zimy s prvním sněhem`],k:1},
+{q:`Které víno se tradičně vyrábí z hroznů scvrklých na keři působením plísně šedé?`,o:[`sherry`,`portské`,`madeira`,`tokajské`],k:3},
+{q:`Do kolika vítězných bodů se hraje jeden set ve stolním tenise?`,o:[`25`,`21`,`15`,`11`],k:3},
+{q:`Čím se od sebe liší izotopy téhož prvku?`,o:[`počtem protonů v jádře`,`počtem elektronů v obalu`,`počtem neutronů v jádře`,`počtem valenčních elektronů`],k:2},
+{q:`Kdo jmenuje soudce Ústavního soudu České republiky?`,o:[`Senát na návrh prezidenta republiky`,`prezident republiky na návrh vlády`,`Poslanecká sněmovna na návrh vlády`,`prezident republiky se souhlasem Senátu`],k:3},
+{q:`Ve kterém americkém městě vařil Walter White pervitin v seriálu Perníkový táta?`,o:[`Albuquerque`,`Phoenix`,`Las Vegas`,`El Paso`],k:0},
+{q:`Který stát zrušil v roce 1948 svou armádu?`,o:[`Kostarika`,`Panama`,`Island`,`Lichtenštejnsko`],k:0},
+{q:`Ve kterém roce byla odeslána první SMS zpráva?`,o:[`1985`,`1989`,`1992`,`1997`],k:2}
+];
+const EV=[
+{min:0,max:3,t:`K sedmičce z titulku je daleko. Nesedly ani lehčí otázky, jako směr větru, parohy nebo set ve stolním tenise, a mezery tak nejsou v jednom oboru, ale ve většině z nich. Dobrá zpráva: každá odpověď se dá dohledat za pár minut, takže doplňovat můžete začít rovnou podle klíče výše.`},
+{min:4,max:6,t:`Pod laťkou sedmi bodů. Lehčí otázky nejspíš vyšly, ale v rozhledu zůstaly díry, o kterých mluví titulek. Nejčastěji to bývá prostřední pětice: portugalský převrat, tokajské víno, Ústavní soud, město z Perníkového táty a Kostarika. Podívejte se, jestli se chyby sešly v jednom oboru, nebo jsou rozeseté napříč.`},
+{min:7,max:9,t:`Laťku jste přeskočili a mezery doplňovat nemusíte, jen tu a tam něco oprášit. Pokud chybí jeden bod, nejspíš padl na roce první SMS, kde stály vedle sebe čtyři věrohodné letopočty. Za chybou ve víně nebo v ústavě bývá druhá možnost, která zněla stejně přesvědčivě.`},
+{min:10,max:10,t:`Plný počet, na který dosáhne jen menšina. Není co doplňovat. Zvládli jste všech deset oborů, od lesní zvěře a vinných sklepů přes Ústavní soud až po rok první textové zprávy.`}
+];
+const L=[`a`,`b`,`c`,`d`];
+let ans=new Array(Q.length).fill(null),done=false;
+const quiz=document.getElementById(`quiz`),ev=document.getElementById(`eval`),hint=document.getElementById(`hint`);
+function build(){
+  quiz.innerHTML=``;
+  Q.forEach((q,i)=>{
+    const b=document.createElement(`div`);b.className=`box`;
+    const p=document.createElement(`p`);p.className=`qtext`;p.textContent=(i+1)+`. `+q.q;b.appendChild(p);
+    q.o.forEach((o,j)=>{
+      const bt=document.createElement(`button`);bt.type=`button`;bt.className=`opt`;bt.textContent=L[j]+`) `+o;
+      bt.addEventListener(`click`,()=>{if(done)return;ans[i]=j;b.querySelectorAll(`.opt`).forEach(x=>x.classList.remove(`sel`));bt.classList.add(`sel`);upd();});
+      b.appendChild(bt);
+    });
+    const fb=document.createElement(`div`);fb.className=`fb`;b.appendChild(fb);
+    quiz.appendChild(b);
+  });
+}
+function upd(){const all=ans.every(a=>a!==null);ev.disabled=!all;hint.style.display=all?`none`:`block`;}
+ev.addEventListener(`click`,()=>{
+  if(ans.some(a=>a===null))return;
+  done=true;let s=0;
+  quiz.querySelectorAll(`.box`).forEach((b,i)=>{
+    const opts=b.querySelectorAll(`.opt`),k=Q[i].k,fb=b.querySelector(`.fb`);
+    opts.forEach(o=>{o.disabled=true;o.classList.remove(`sel`);});
+    opts[k].classList.add(`ok`);
+    if(ans[i]===k){s++;fb.className=`fb ok`;fb.textContent=`Správně`;}
+    else{opts[ans[i]].classList.add(`bad`);fb.className=`fb bad`;fb.textContent=`Špatně. Správná odpověď: `+L[k]+`) `+Q[i].o[k];}
+  });
+  document.getElementById(`score`).textContent=s+` z `+Q.length;
+  const e=EV.find(x=>s>=x.min&&s<=x.max);
+  document.getElementById(`evtext`).textContent=e?e.t:``;
+  ev.style.display=`none`;hint.style.display=`none`;
+  const r=document.getElementById(`result`);r.style.display=`block`;r.scrollIntoView({behavior:`smooth`});
+});
+document.getElementById(`retry`).addEventListener(`click`,()=>{
+  ans=new Array(Q.length).fill(null);done=false;build();
+  document.getElementById(`result`).style.display=`none`;ev.style.display=`block`;upd();
+  window.scrollTo({top:0,behavior:`smooth`});
+});
+build();upd();
+</script>
+</body>
+</html>
