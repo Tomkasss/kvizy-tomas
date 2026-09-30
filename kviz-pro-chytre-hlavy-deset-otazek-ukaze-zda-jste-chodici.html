@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro chytré hlavy: deset otázek ukáže, zda jste chodící encyklopedie</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px;color:#2c2c2c}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:hover:not(:disabled){background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin-top:6px;font-size:.95rem}
+.fb.ok{color:#1e5631}.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover:not(:disabled){background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a7f73;font-size:.95rem;margin-top:12px}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#again{background:#8c7b6b}
+#again:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro chytré hlavy: deset otázek ukáže, zda jste chodící encyklopedie</h1>
+<p class="perex">Encyklopedie si nevybírá, co si zapamatuje. Stejně ochotně pojme botaniku jako hokej, dávné dějiny i dopravu. Zkuste, jestli má váš přehled podobně široký hřbet.</p>
+<div id="quiz"></div>
+<button class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result"><p class="score" id="score"></p><p class="rtext" id="rtext"></p><button class="btn" id="again">Zkusit znovu</button></div>
+</div>
+<script>
+const Q=[
+{q:`Jaké zvíře je maskotem operačního systému Linux?`,o:[`liška`,`delfín`,`tučňák`,`slon`],c:2},
+{q:`Ke kterému italskému regionu patří město Parma?`,o:[`Emilia-Romagna`,`Lombardie`,`Friuli-Venezia Giulia`,`Toskánsko`],c:0},
+{q:`Proti britskému monopolu na které zboží zorganizoval Gándhí v roce 1930 protestní pochod?`,o:[`čaj`,`sůl`,`bavlna`,`opium`],c:1},
+{q:`Která rostlina má největší jednotlivý květ na světě?`,o:[`zmijovec`,`viktorie`,`lotos`,`raflézie`],c:3},
+{q:`Kolik minut hraje hokejový tým v oslabení, když jeho hráč dostane větší trest?`,o:[`dvě`,`čtyři`,`pět`,`deset`],c:2},
+{q:`Ze kterého francouzského kraje pocházel d'Artagnan z Dumasových Tří mušketýrů?`,o:[`Normandie`,`Provence`,`Gaskoňsko`,`Burgundsko`],c:2},
+{q:`Jakou barvu má na plánu pražského metra linka B?`,o:[`zelenou`,`žlutou`,`červenou`,`modrou`],c:1},
+{q:`Kdo jako první popsal a pojmenoval buňky?`,o:[`Antoni van Leeuwenhoek`,`Jan Evangelista Purkyně`,`Matthias Jacob Schleiden`,`Robert Hooke`],c:3},
+{q:`Který čínský císař si nechal do hrobky vytvořit Terakotovou armádu?`,o:[`Čchin Š'-chuang-ti`,`Chan Wu-ti`,`Suej Jang-ti`,`Tchang Tchaj-cung`],c:0},
+{q:`Který stát jako první na světě přijal křesťanství za státní náboženství?`,o:[`Gruzie`,`Arménie`,`Etiopie`,`Římská říše`],c:1}
+];
+const E=[
+{min:0,max:3,t:`Tentokrát spíš brožurka než encyklopedie. Deset oborů, které spolu nijak nesouvisí, je náročná kombinace, a na většině z nich vás zatím nic nepodrželo. Dobrá zpráva je, že každá z těch odpovědí se dá snadno dohledat a zapamatovat.`},
+{min:4,max:6,t:`Solidní kapesní průvodce. V několika oborech se cítíte doma, jinde jste museli sáhnout po odhadu. Na chodící encyklopedii vám zatím chybí pár dalších kapitol.`},
+{min:7,max:9,t:`Tady už se o encyklopedii mluvit dá, jen má pár nedopsaných hesel. Obstáli jste v oborech, které spolu nemají nic společného, a právě o takovou šíři tu šlo.`},
+{min:10,max:10,t:`Všech deset. Rostliny, hokej, starověk i pražské metro vám leží stejně blízko a na žádném poli jste nezakolísali. Titul chodící encyklopedie je váš a zasloužíte si ho.`}
+];
+const L=[`a`,`b`,`c`,`d`];
+let ans=new Array(Q.length).fill(null),locked=false;
+const quiz=document.getElementById(`quiz`),ev=document.getElementById(`eval`),hint=document.getElementById(`hint`);
+function render(){
+quiz.innerHTML=``;
+Q.forEach((q,i)=>{
+const b=document.createElement(`div`);b.className=`box`;
+const p=document.createElement(`p`);p.className=`qt`;p.textContent=(i+1)+`. `+q.q;b.appendChild(p);
+q.o.forEach((o,j)=>{
+const x=document.createElement(`button`);x.className=`opt`;x.type=`button`;x.textContent=L[j]+`) `+o;
+x.addEventListener(`click`,()=>{if(locked)return;ans[i]=j;b.querySelectorAll(`.opt`).forEach(e=>e.classList.remove(`sel`));x.classList.add(`sel`);upd();});
+b.appendChild(x);});
+const f=document.createElement(`div`);f.className=`fb`;b.appendChild(f);
+quiz.appendChild(b);});
+}
+function upd(){const all=ans.every(a=>a!==null);ev.disabled=!all;hint.style.display=all?`none`:`block`;}
+ev.addEventListener(`click`,()=>{
+if(ev.disabled)return;locked=true;let s=0;
+quiz.querySelectorAll(`.box`).forEach((b,i)=>{
+const bs=b.querySelectorAll(`.opt`),f=b.querySelector(`.fb`);
+bs.forEach(x=>x.disabled=true);
+if(ans[i]===Q[i].c){s++;bs[ans[i]].classList.add(`ok`);f.className=`fb ok`;f.textContent=`Správně`;}
+else{bs[ans[i]].classList.add(`bad`);bs[Q[i].c].classList.add(`ok`);f.className=`fb bad`;f.textContent=`Správná odpověď: `+L[Q[i].c]+`) `+Q[i].o[Q[i].c];}
+});
+ev.style.display=`none`;hint.style.display=`none`;
+document.getElementById(`score`).textContent=s+` z `+Q.length;
+const e=E.find(e=>s>=e.min&&s<=e.max);document.getElementById(`rtext`).textContent=e?e.t:``;
+const r=document.getElementById(`result`);r.style.display=`block`;r.scrollIntoView({behavior:`smooth`});
+});
+document.getElementById(`again`).addEventListener(`click`,()=>{
+ans=new Array(Q.length).fill(null);locked=false;render();upd();
+document.getElementById(`result`).style.display=`none`;ev.style.display=`block`;window.scrollTo({top:0,behavior:`smooth`});
+});
+render();upd();
+</script>
+</body>
+</html>
