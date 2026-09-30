@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test pro sečtělé Čechy: kdo získá 10/10, patří mezi vědomostní elitu</title>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; padding: 32px 20px; background: #f5f0eb; font-family: Georgia, "Times New Roman", serif; color: #2c2c2c; line-height: 1.5; }
+.wrap { max-width: 720px; margin: 0 auto; }
+h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 16px; color: #2c2c2c; }
+.perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+.box { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 28px; margin-bottom: 24px; }
+.q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+.opt { display: block; width: 100%; text-align: left; padding: 14px 18px; margin: 0 0 10px; background: #f7f4f0; border: 1px solid #d9d2c9; border-radius: 8px; font-family: inherit; font-size: 1rem; color: #3a3a3a; cursor: pointer; }
+.opt:last-child { margin-bottom: 0; }
+.opt:hover { background: #ede8e1; }
+.opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.opt.correct { background: #d4edda; border-color: #7cb987; color: #1e5631; }
+.opt.wrong { background: #f8d7da; border-color: #d4848a; color: #721c24; }
+.locked .opt { cursor: default; }
+.locked .opt:hover { background: #f7f4f0; }
+.locked .opt.selected:hover { background: #dcd3c7; }
+.locked .opt.correct:hover { background: #d4edda; }
+.locked .opt.wrong:hover { background: #f8d7da; }
+.feedback { margin-top: 14px; font-size: 0.98rem; }
+.feedback.ok { color: #1e5631; }
+.feedback.bad { color: #721c24; }
+.btn { display: block; margin: 40px auto 0; background: #5b7e5f; color: #fff; padding: 16px 40px; border: none; border-radius: 8px; font-family: inherit; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
+.btn:hover { background: #4a6b4e; }
+.btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hint { text-align: center; color: #8a8a8a; margin-top: 12px; font-size: 0.95rem; }
+#result { display: none; background: #fefcf9; border-top: 4px solid #5b7e5f; margin-top: 40px; }
+.score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+.verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+#retry { background: #8c7b6b; margin-top: 28px; }
+#retry:hover { background: #756658; }
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  .box { padding: 20px 16px; }
+  h1 { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test pro sečtělé Čechy: kdo získá 10/10, patří mezi vědomostní elitu</h1>
+<p class="perex">Knihy, opera i dějiny Prahy: v tom všem by měl být sečtělý Čech doma. Otázky ale zabrousí i do antiky, zeměpisu, jazyků, sportu a fyziky, kde se ukáže, jak široký rozhled opravdu máte.</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="evaluate" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="verdict" id="verdict"></p>
+<button type="button" class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+(function () {
+  const questions = [
+    { q: `1. Jak se jmenoval římský bůh války?`, o: [`a) Mars`, `b) Merkur`, `c) Vulkán`, `d) Janus`], c: 0 },
+    { q: `2. Kde se nachází pravěká kamenná svatyně Stonehenge?`, o: [`a) v Irsku`, `b) ve Francii`, `c) ve Skotsku`, `d) v Anglii`], c: 3 },
+    { q: `3. Který řecký vojevůdce padl při obraně průsmyku u Thermopyl?`, o: [`a) Themistoklés`, `b) Miltiadés`, `c) Leónidás`, `d) Pausaniás`], c: 2 },
+    { q: `4. V jakém jazyce psal Franz Kafka svá literární díla?`, o: [`a) v češtině`, `b) v němčině`, `c) v jidiš`, `d) v hebrejštině`], c: 1 },
+    { q: `5. Z čí skladby pochází melodie hymny Evropské unie?`, o: [`a) Wolfganga Amadea Mozarta`, `b) Josepha Haydna`, `c) Georga Friedricha Händela`, `d) Ludwiga van Beethovena`], c: 3 },
+    { q: `6. Ve kterém sportu získala Štěpánka Hilgertová olympijské zlato?`, o: [`a) ve vodním slalomu`, `b) v rychlostní kanoistice`, `c) ve veslování`, `d) v jachtingu`], c: 0 },
+    { q: `7. Ve které opeře vystupuje Královna noci?`, o: [`a) Don Giovanni`, `b) Figarova svatba`, `c) Kouzelná flétna`, `d) Únos ze serailu`], c: 2 },
+    { q: `8. Ze které budovy byli při první pražské defenestraci vyhozeni konšelé?`, o: [`a) ze Staroměstské radnice`, `b) z Pražského hradu`, `c) z Karolina`, `d) z Novoměstské radnice`], c: 3 },
+    { q: `9. Ve které zemi se jako první začaly používat papírové peníze?`, o: [`a) v Číně`, `b) v Japonsku`, `c) ve Švédsku`, `d) v Anglii`], c: 0 },
+    { q: `10. Kterou částici objevil James Chadwick?`, o: [`a) proton`, `b) neutron`, `c) elektron`, `d) pozitron`], c: 1 }
+  ];
+
+  const verdicts = [
+    { min: 0, max: 3, text: `Tentokrát to nevyšlo. Otázky přeskakovaly od antiky přes operu až k fyzice a paměť se na mnoha místech zasekla. Stačí ale pár večerů s dobrou knihou a příště bude výsledek jinde.` },
+    { min: 4, max: 6, text: `Solidní základ. Školní látku máte v hlavě, jenže tam, kde šlo o operu, husitskou Prahu nebo sport, vám body utekly. Mezi sečtělé Čechy patříte, k elitě vám ale ještě kousek chybí.` },
+    { min: 7, max: 9, text: `Výborný výkon. Umíte se pohybovat mezi literaturou, dějinami, hudbou i vědou a nenachytaly vás ani podobně znějící možnosti. Od vědomostní elity vás dělí jen drobnost.` },
+    { min: 10, max: 10, text: `Plný počet, a ten zvládne jen menšina. Bez chyby jste prošli antickou mytologií, Thermopylami, Mozartem, husitskou Prahou i objevem z jaderné fyziky. Podle slibu z titulku patříte mezi vědomostní elitu.` }
+  ];
+
+  const quizEl = document.getElementById(`quiz`);
+  const evalBtn = document.getElementById(`evaluate`);
+  const hint = document.getElementById(`hint`);
+  const result = document.getElementById(`result`);
+  const scoreEl = document.getElementById(`score`);
+  const verdictEl = document.getElementById(`verdict`);
+  const retryBtn = document.getElementById(`retry`);
+  let answers = [];
+  let locked = false;
+
+  function render() {
+    quizEl.innerHTML = ``;
+    answers = new Array(questions.length).fill(null);
+    locked = false;
+    questions.forEach(function (item, qi) {
+      const box = document.createElement(`div`);
+      box.className = `box`;
+      const p = document.createElement(`p`);
+      p.className = `q-text`;
+      p.textContent = item.q;
+      box.appendChild(p);
+      item.o.forEach(function (label, oi) {
+        const b = document.createElement(`button`);
+        b.type = `button`;
+        b.className = `opt`;
+        b.textContent = label;
+        b.addEventListener(`click`, function () {
+          if (locked) return;
+          answers[qi] = oi;
+          box.querySelectorAll(`.opt`).forEach(function (x) { x.classList.remove(`selected`); });
+          b.classList.add(`selected`);
+          updateState();
+        });
+        box.appendChild(b);
+      });
+      const fb = document.createElement(`div`);
+      fb.className = `feedback`;
+      box.appendChild(fb);
+      quizEl.appendChild(box);
+    });
+    quizEl.classList.remove(`locked`);
+    result.style.display = `none`;
+    evalBtn.style.display = `block`;
+    updateState();
+  }
+
+  function updateState() {
+    const done = answers.every(function (a) { return a !== null; });
+    evalBtn.disabled = !done;
+    hint.style.display = done ? `none` : `block`;
+  }
+
+  evalBtn.addEventListener(`click`, function () {
+    if (evalBtn.disabled) return;
+    locked = true;
+    quizEl.classList.add(`locked`);
+    let score = 0;
+    const boxes = quizEl.querySelectorAll(`.box`);
+    questions.forEach(function (item, qi) {
+      const opts = boxes[qi].querySelectorAll(`.opt`);
+      const fb = boxes[qi].querySelector(`.feedback`);
+      opts[item.c].classList.add(`correct`);
+      if (answers[qi] === item.c) {
+        score++;
+        fb.className = `feedback ok`;
+        fb.textContent = `Správně.`;
+      } else {
+        opts[answers[qi]].classList.add(`wrong`);
+        fb.className = `feedback bad`;
+        fb.textContent = `Špatně. Správná odpověď: ` + item.o[item.c];
+      }
+    });
+    scoreEl.textContent = score + ` z ` + questions.length;
+    const v = verdicts.find(function (x) { return score >= x.min && score <= x.max; });
+    verdictEl.textContent = v ? v.text : ``;
+    evalBtn.style.display = `none`;
+    hint.style.display = `none`;
+    result.style.display = `block`;
+    result.scrollIntoView({ behavior: `smooth`, block: `start` });
+  });
+
+  retryBtn.addEventListener(`click`, function () {
+    render();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
