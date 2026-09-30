@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Těžký kvíz pro milovníky vědomostí: 10/10 získají jen ti nejlepší</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin-top:6px;font-size:.95rem}
+.fb.ok{color:#1e5631}.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#4a4a4a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.etext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:16px}.box{padding:20px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Těžký kvíz pro milovníky vědomostí: 10/10 získají jen ti nejlepší</h1>
+<p class="perex">Deset z deseti tu nikdo nedá jen s tím, co si pamatuje ze školy. Otázky vedou od hinduistických bohů přes nález v alpském ledovci a první mobil až k programování. Troufáte si mezi ty nejlepší?</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="etext" id="etext"></p>
+<button type="button" class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q=[
+{q:`Který hinduistický bůh bývá zobrazován se sloní hlavou?`,o:[`Ganéša`,`Šiva`,`Višnu`,`Hanuman`],a:0},
+{q:`Která země jako třetí na světě vyslala člověka do vesmíru vlastní raketou?`,o:[`Japonsko`,`Indie`,`Čína`,`Francie`],a:2},
+{q:`Kdo spolu s Francisem Crickem popsal dvojšroubovici DNA?`,o:[`Linus Pauling`,`James Watson`,`Maurice Wilkins`,`Erwin Chargaff`],a:1},
+{q:`Který z těchto primátů je člověku geneticky nejbližší?`,o:[`gorila`,`orangutan`,`gibon`,`šimpanz`],a:3},
+{q:`Co podle vědců zabilo ledovcového muže Ötziho?`,o:[`umrzl ve sněhové bouři`,`spadl do ledovcové trhliny`,`zavalila ho lavina`,`zasáhl ho šíp z luku`],a:3},
+{q:`Která firma začala jako první prodávat mobilní telefon do ruky?`,o:[`Motorola`,`Nokia`,`Ericsson`,`Siemens`],a:0},
+{q:`Odkud se japonský císařský dvůr v roce 1869 přestěhoval do Tokia?`,o:[`z Kjóta`,`z Nary`,`z Ósaky`,`z Kamakury`],a:0},
+{q:`Pro který jazyk bylo vytvořeno písmo hangul?`,o:[`pro japonštinu`,`pro mongolštinu`,`pro korejštinu`,`pro vietnamštinu`],a:2},
+{q:`Jakou barvu mají hvězdy s nejvyšší povrchovou teplotou?`,o:[`červenou`,`modrou`,`žlutou`,`oranžovou`],a:1},
+{q:`Který programovací jazyk vytvořil Guido van Rossum?`,o:[`Ruby`,`Python`,`Perl`,`Java`],a:1}
+];
+const E=[
+{min:0,max:3,t:`Dnes zůstaly body spíš na straně otázek. Záběr byl široký, od indických bohů po barvy hvězd, a pár šťastnějších tipů by skóre snadno otočilo.`},
+{min:4,max:6,t:`Rozhled napříč obory máte solidní. Body vám vzaly hlavně otázky, u kterých vedle správné odpovědi stála stejně přesvědčivá sousední možnost.`},
+{min:7,max:9,t:`Tady jste na úrovni zkušeného kvízaře i nad ní. Od plného počtu, který titulek vyhrazuje nejlepším, vás dělil jen kousek, o kterém rozhodl detail.`},
+{min:10,max:10,t:`Deset správných odpovědí, a tím patříte přesně k těm nejlepším, kterým titulek plný počet vyhrazoval. Ötzi, první mobil, barvy hvězd ani programovací jazyky vás nezaskočily.`}
+];
+const L=[`a`,`b`,`c`,`d`];
+let sel=new Array(Q.length).fill(null);let done=false;
+const quiz=document.getElementById(`quiz`),ev=document.getElementById(`eval`),hint=document.getElementById(`hint`),res=document.getElementById(`result`);
+function render(){
+quiz.innerHTML=``;
+Q.forEach((q,i)=>{
+const b=document.createElement(`div`);b.className=`box`;
+const t=document.createElement(`p`);t.className=`qt`;t.textContent=(i+1)+`. `+q.q;b.appendChild(t);
+q.o.forEach((o,j)=>{
+const x=document.createElement(`button`);x.type=`button`;x.className=`opt`;x.textContent=L[j]+`) `+o;
+x.addEventListener(`click`,()=>{if(done)return;sel[i]=j;b.querySelectorAll(`.opt`).forEach((y,k)=>y.classList.toggle(`sel`,k===j));check();});
+b.appendChild(x);});
+const f=document.createElement(`div`);f.className=`fb`;b.appendChild(f);
+quiz.appendChild(b);});
+}
+function check(){const all=sel.every(v=>v!==null);ev.disabled=!all;hint.style.display=all?`none`:`block`;}
+ev.addEventListener(`click`,()=>{
+if(ev.disabled||done)return;done=true;let s=0;
+quiz.querySelectorAll(`.box`).forEach((b,i)=>{
+const os=b.querySelectorAll(`.opt`);const f=b.querySelector(`.fb`);
+os.forEach((y,k)=>{y.disabled=true;if(k===Q[i].a)y.classList.add(`ok`);else if(k===sel[i])y.classList.add(`bad`);});
+if(sel[i]===Q[i].a){s++;f.className=`fb ok`;f.textContent=`Správně`;}
+else{f.className=`fb bad`;f.textContent=`Špatně. Správná odpověď: `+L[Q[i].a]+`) `+Q[i].o[Q[i].a];}
+});
+document.getElementById(`score`).textContent=s+` z `+Q.length;
+const e=E.find(r=>s>=r.min&&s<=r.max);document.getElementById(`etext`).textContent=e?e.t:``;
+ev.style.display=`none`;hint.style.display=`none`;res.style.display=`block`;
+res.scrollIntoView({behavior:`smooth`,block:`start`});
+});
+document.getElementById(`retry`).addEventListener(`click`,()=>{
+sel=new Array(Q.length).fill(null);done=false;res.style.display=`none`;ev.style.display=`block`;render();check();window.scrollTo({top:0,behavior:`smooth`});
+});
+render();check();
+</script>
+</body>
+</html>
