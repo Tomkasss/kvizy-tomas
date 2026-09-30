@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz, který prověří váš přehled: bez jediné chyby ho dokončí jen málokdo</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px;color:#2c2c2c}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-family:inherit;font-size:1rem;color:#3a3a3a;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover:not(.ok):not(.bad):not(.sel){background:#f7f4f0}
+.fb{margin-top:8px;font-size:.95rem}
+.fb.ok{color:#1e5631}
+.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.evtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#again{background:#8c7b6b;margin-top:28px}
+#again:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz, který prověří váš přehled: bez jediné chyby ho dokončí jen málokdo</h1>
+<p class="perex">Přehled není to, co jste se učili ve svém oboru. Je to všechno, co se vám usadilo mimochodem: z večerních zpráv, z dovolené, z filmů, na které jste se dívali znovu, nebo z hovoru u vedlejšího stolu.</p>
+<div id="quiz"></div>
+<button id="eval" class="btn" disabled>Vyhodnotit</button>
+<p id="hint" class="hint">Odpovězte prosím na všechny otázky</p>
+<div id="result" class="box">
+<p id="score" class="score"></p>
+<p id="evtext" class="evtext"></p>
+<button id="again" class="btn">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  {q: `Kam se v české abecedě řadí písmeno CH?`, o: [`mezi C a Č`, `mezi Č a D`, `mezi H a I`, `až úplně na konec, za Ž`], a: 2},
+  {q: `Ve které zemi vznikla počítačová hra Tetris?`, o: [`Japonsko`, `Spojené státy`, `Sovětský svaz`, `Maďarsko`], a: 2},
+  {q: `Na které planetě vyrůstal Luke Skywalker?`, o: [`Tatooine`, `Naboo`, `Hoth`, `Dagobah`], a: 0},
+  {q: `U kterého amerického města leží ostrov se slavnou věznicí Alcatraz?`, o: [`New York`, `Miami`, `Los Angeles`, `San Francisco`], a: 3},
+  {q: `Na které české bankovce je vyobrazen Karel IV.?`, o: [`100 Kč`, `200 Kč`, `500 Kč`, `1000 Kč`], a: 0},
+  {q: `Který stát vstoupil do Evropské unie jako dosud poslední?`, o: [`Rakousko`, `Slovinsko`, `Bulharsko`, `Chorvatsko`], a: 3},
+  {q: `Čím je dána růžová barva peří plameňáků?`, o: [`pigmentem, který si pták sám vytváří v kůži`, `lomem světla ve stavbě peří`, `minerály z vody slaných jezer, ve kterých brodí`, `barvivy z potravy, kterou přijímá`], a: 3},
+  {q: `Který klub dnes hraje domácí zápasy na stadionu Anfield?`, o: [`Everton`, `Liverpool`, `Manchester United`, `Arsenal`], a: 1},
+  {q: `Který den v týdnu se muslimové scházejí v mešitě ke společné týdenní modlitbě?`, o: [`čtvrtek`, `pátek`, `sobota`, `neděle`], a: 1},
+  {q: `Jak se jmenoval první univerzální počítač sestrojený v Československu?`, o: [`EPOS`, `SAPO`, `IQ 151`, `Ondra`], a: 1}
+];
+const evaluations = [
+  {min: 0, max: 3, t: `Tentokrát přehled drhne a body utekly i tam, kde jste je možná čekali. Nic ztraceného, rozhled se dá dohnat snáz, než se zdá. Zkuste to za pár dní znovu, druhý pokus bývá znatelně lepší.`},
+  {min: 4, max: 6, t: `Přehled máte, jen v něm zůstávají mezery. Kde si věc pamatujete, tam jste jistí, jinde jste volili mezi dvěma možnostmi a ne vždy vyšla ta pravá. Na široký rozhled chybí jen pár bodů.`},
+  {min: 7, max: 9, t: `Tohle je opravdu široký přehled. Jedna až tři chyby jsou výsledek, za který se nemusíte stydět, a patříte k těm, kdo se neztratí skoro v žádném hovoru. K čistému stolu přesto kousek chyběl.`},
+  {min: 10, max: 10, t: `Bez jediné chyby, a to se tady povede jen málokomu. Stačilo jediné zaváhání a plný počet by byl pryč, vy jste ale nezaváhali ani jednou. Takový přehled se nedá natipovat, ten se sbírá léta.`}
+];
+const letters = [`a`, `b`, `c`, `d`];
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+function render() {
+  quiz.innerHTML = ``;
+  questions.forEach((q, i) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (i + 1) + `. ` + q.q;
+    box.appendChild(p);
+    q.o.forEach((o, j) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = letters[j] + `) ` + o;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[i] = j;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`sel`));
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`div`);
+    fb.className = `fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+}
+function update() {
+  const all = answers.every(a => a !== null);
+  evalBtn.disabled = !all || locked;
+  hint.style.display = all || locked ? `none` : `block`;
+}
+evalBtn.addEventListener(`click`, () => {
+  if (evalBtn.disabled) return;
+  locked = true;
+  quiz.classList.add(`locked`);
+  let score = 0;
+  const boxes = quiz.querySelectorAll(`.box`);
+  questions.forEach((q, i) => {
+    const opts = boxes[i].querySelectorAll(`.opt`);
+    const fb = boxes[i].querySelector(`.fb`);
+    opts[q.a].classList.add(`ok`);
+    if (answers[i] === q.a) {
+      score++;
+      fb.className = `fb ok`;
+      fb.textContent = `Správně.`;
+    } else {
+      opts[answers[i]].classList.add(`bad`);
+      fb.className = `fb bad`;
+      fb.textContent = `Správná odpověď: ` + letters[q.a] + `) ` + q.o[q.a];
+    }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  const ev = evaluations.find(e => score >= e.min && score <= e.max);
+  document.getElementById(`evtext`).textContent = ev ? ev.t : ``;
+  result.style.display = `block`;
+  update();
+  result.scrollIntoView({behavior: `smooth`, block: `start`});
+});
+document.getElementById(`again`).addEventListener(`click`, () => {
+  answers.fill(null);
+  locked = false;
+  quiz.classList.remove(`locked`);
+  result.style.display = `none`;
+  render();
+  update();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+render();
+update();
+</script>
+</body>
+</html>
