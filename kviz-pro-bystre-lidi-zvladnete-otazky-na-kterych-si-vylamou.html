@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro bystré lidi: zvládnete otázky, na kterých si vylámou zuby i vysokoškoláci?</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.08rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.correct{margin-top:8px;font-size:.95rem;color:#1e5631;display:none}
+.btn{display:block;margin:40px auto 0;background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;font-family:inherit;cursor:pointer}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a5a5a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.evtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#again{background:#8c7b6b}
+#again:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro bystré lidi: zvládnete otázky, na kterých si vylámou zuby i vysokoškoláci?</h1>
+<p class="perex">Zvíře ze zahrady, kámen pražského mostu, puška z mayovek i měna jednoho balkánského státu. Na takových otázkách klopýtají i absolventi vysokých škol. Kolik jich zodpovíte vy?</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="submit" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="evtext" id="evtext"></p>
+<button type="button" class="btn" id="again">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q = [
+  {q: `Do které skupiny živočichů patří slepýš křehký?`, o: [`mezi užovkovité hady`, `mezi ještěry`, `mezi ocasaté obojživelníky`, `mezi zmijovité hady`], a: 1},
+  {q: `Komu v románech Karla Maye patřila Stříbrná puška?`, o: [`Old Shatterhandovi`, `Samu Hawkensovi`, `Vinnetouovi`, `Old Firehandovi`], a: 2},
+  {q: `Z jakého kamene jsou vystavěny oblouky Karlova mostu v Praze?`, o: [`ze žuly`, `z mramoru`, `z vápence`, `z pískovce`], a: 3},
+  {q: `Který z těchto mužů nepatří mezi čtyři evangelisty?`, o: [`Petr`, `Marek`, `Lukáš`, `Jan`], a: 0},
+  {q: `Do které skupiny rostlin patří bambus?`, o: [`k palmám`, `ke stromovitým kapradinám`, `k trávám`, `k přesličkám`], a: 2},
+  {q: `Na území kterého dnešního státu se odehrála bitva u Waterloo?`, o: [`Francie`, `Belgie`, `Nizozemsko`, `Německo`], a: 1},
+  {q: `Která z těchto zemí používá jako jedinou zákonnou měnu euro, přestože není členem Evropské unie?`, o: [`Srbsko`, `Albánie`, `Bosna a Hercegovina`, `Černá Hora`], a: 3},
+  {q: `Který z těchto kovů přitáhne běžný magnet?`, o: [`nikl`, `měď`, `hliník`, `cín`], a: 0},
+  {q: `Jakou barvu má vedle zelené a bílé třetí pruh irské vlajky?`, o: [`červenou`, `oranžovou`, `žlutou`, `modrou`], a: 1},
+  {q: `Ve kterém státě leží nejjižnější bod evropské pevniny?`, o: [`ve Španělsku`, `v Řecku`, `v Itálii`, `v Portugalsku`], a: 0}
+];
+const E = [
+  {min: 0, max: 3, t: `Tentokrát zvítězily věrohodně znějící omyly. Nejste v tom sami, přesně tyhle chyby se opakují i v posluchárnách a na firemních poradách. Omyl, který jednou odhalíte, už vás podruhé nenachytá.`},
+  {min: 4, max: 6, t: `Půlka otázek padla na vaši stranu, jinde vás přelstil první dojem. Několik nabídek zní logicky, a právě takové svedou i absolventy vysokých škol. Kdo si zvykne před odpovědí chvilku zaváhat, přidá si body.`},
+  {min: 7, max: 9, t: `Tady už je znát ostré myšlení. Nachytat jste se nechali nanejvýš u pár otázek, kde nepomůže odhad a rozhoduje přesná vzpomínka. S takovým výsledkem byste obstáli i v partě inženýrů a doktorů.`},
+  {min: 10, max: 10, t: `Deset z deseti a žádný omyl nepřeklouzl. Rozlišili jste přesnou znalost od věrohodného dojmu u všech otázek, a to se nepovede ani každému, kdo má za sebou státnice.`}
+];
+const quiz = document.getElementById(`quiz`);
+const submit = document.getElementById(`submit`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+let chosen = [];
+let locked = false;
+function render() {
+  quiz.innerHTML = ``;
+  chosen = Q.map(() => null);
+  locked = false;
+  Q.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(p);
+    item.o.forEach((opt, oi) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = `abcd`[oi] + `) ` + opt;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        chosen[qi] = oi;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`sel`));
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const c = document.createElement(`p`);
+    c.className = `correct`;
+    c.textContent = `Správná odpověď: ` + `abcd`[item.a] + `) ` + item.o[item.a];
+    box.appendChild(c);
+    quiz.appendChild(box);
+  });
+  update();
+}
+function update() {
+  const all = chosen.every(x => x !== null);
+  submit.disabled = !all;
+  hint.style.display = all ? `none` : `block`;
+}
+submit.addEventListener(`click`, () => {
+  if (chosen.some(x => x === null)) return;
+  locked = true;
+  let score = 0;
+  const boxes = quiz.querySelectorAll(`.box`);
+  Q.forEach((item, qi) => {
+    const btns = boxes[qi].querySelectorAll(`.opt`);
+    btns.forEach(b => { b.disabled = true; });
+    btns[item.a].classList.add(`ok`);
+    if (chosen[qi] === item.a) { score++; }
+    else {
+      btns[chosen[qi]].classList.remove(`sel`);
+      btns[chosen[qi]].classList.add(`bad`);
+      boxes[qi].querySelector(`.correct`).style.display = `block`;
+    }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + Q.length;
+  const ev = E.find(e => score >= e.min && score <= e.max);
+  document.getElementById(`evtext`).textContent = ev ? ev.t : ``;
+  submit.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior: `smooth`});
+});
+document.getElementById(`again`).addEventListener(`click`, () => {
+  result.style.display = `none`;
+  submit.style.display = `block`;
+  render();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+render();
+</script>
+</body>
+</html>
