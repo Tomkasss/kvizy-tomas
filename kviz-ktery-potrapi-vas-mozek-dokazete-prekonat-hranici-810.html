@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz, který potrápí váš mozek: dokážete překonat hranici 8/10?</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 32px 20px; background: #f5f0eb; font-family: Georgia, "Times New Roman", serif; color: #2c2c2c; line-height: 1.5; }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 16px; color: #2c2c2c; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+  .box { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 28px; margin-bottom: 24px; }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .opt { display: block; width: 100%; text-align: left; padding: 14px 18px; margin: 0 0 10px; background: #f7f4f0; border: 1px solid #d9d2c9; border-radius: 8px; font-family: inherit; font-size: 1rem; color: #3a3a3a; cursor: pointer; }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border-color: #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border-color: #d4848a; color: #721c24; }
+  .locked .opt { cursor: default; }
+  .locked .opt:hover { background: #f7f4f0; }
+  .locked .opt.selected:hover { background: #dcd3c7; }
+  .locked .opt.correct:hover { background: #d4edda; }
+  .locked .opt.wrong:hover { background: #f8d7da; }
+  .feedback { margin-top: 14px; font-size: 0.98rem; display: none; }
+  .feedback.ok { color: #1e5631; }
+  .feedback.bad { color: #721c24; }
+  .btn { display: block; margin: 40px auto 0; padding: 16px 40px; border: none; border-radius: 8px; font-family: inherit; font-size: 1.1rem; font-weight: bold; color: #fff; background: #5b7e5f; cursor: pointer; }
+  .btn:hover { background: #4a6b4e; }
+  .btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint { text-align: center; color: #8a8a8a; font-size: 0.95rem; margin-top: 12px; }
+  #result { display: none; background: #fefcf9; border-top: 4px solid #5b7e5f; margin-top: 40px; text-align: center; }
+  .score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  .verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #retry { background: #8c7b6b; margin-top: 28px; }
+  #retry:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    .box { padding: 20px 16px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="title"></h1>
+  <p class="perex" id="perex"></p>
+  <div id="quiz"></div>
+  <button class="btn" id="evaluate" type="button" disabled>Vyhodnotit</button>
+  <p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+  <div class="box" id="result">
+    <p class="score" id="score"></p>
+    <p class="verdict" id="verdict"></p>
+    <button class="btn" id="retry" type="button">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+(function () {
+  const TITLE = `Kvíz, který potrápí váš mozek: dokážete překonat hranici 8/10?`;
+  const PEREX = `Hranice 8/10 vypadá nevinně, jenže na devátý bod už je potřeba opravdový rozhled. Otázky vás proženou od jazzových klubů přes fotbalové stadiony a burzovní zprávy až k Shakespearovi, starověkým palácům a klenotnickým skvostům.`;
+  const QUESTIONS = [
+    { q: `1. Ve kterém americkém městě se zrodil jazz?`, o: [`v Chicagu`, `v New Orleansu`, `v Memphisu`, `v Nashvillu`], a: 1 },
+    { q: `2. Který pták je národním symbolem Nového Zélandu?`, o: [`kivi`, `emu`, `kakadu`, `albatros`], a: 0 },
+    { q: `3. Pro panovníky které země vyráběl klenotník Carl Fabergé svá proslulá velikonoční vejce?`, o: [`Francie`, `Ruska`, `Rakouska`, `Švédska`], a: 1 },
+    { q: `4. Které zvíře má ve znaku ochranářská organizace WWF?`, o: [`lední medvěd`, `tygr`, `koala`, `panda velká`], a: 3 },
+    { q: `5. Kdo napsal lyrickoepickou skladbu Romance pro křídlovku?`, o: [`Vítězslav Nezval`, `František Hrubín`, `Jan Skácel`, `Jaroslav Seifert`], a: 1 },
+    { q: `6. Ve kterém městě stojí fotbalový stadion Maracanã?`, o: [`v Rio de Janeiru`, `v São Paulu`, `v Brasílii`, `v Belo Horizonte`], a: 0 },
+    { q: `7. Na burze které země se počítá akciový index DAX?`, o: [`Německo`, `Rakousko`, `Švýcarsko`, `Nizozemsko`], a: 0 },
+    { q: `8. Který prvek tvoří spolu se železem základ každé oceli?`, o: [`chrom`, `nikl`, `cín`, `uhlík`], a: 3 },
+    { q: `9. Na kterém ostrově leží palác Knóssos?`, o: [`na Rhodu`, `na Kypru`, `na Krétě`, `na Sicílii`], a: 2 },
+    { q: `10. Který dánský hrad je podle tradice dějištěm Shakespearova Hamleta?`, o: [`Rosenborg`, `Frederiksborg`, `Kronborg`, `Egeskov`], a: 2 }
+  ];
+  const LETTERS = [`a`, `b`, `c`, `d`];
+  const RESULTS = [
+    { min: 0, max: 3, text: `Tentokrát mozek zůstal daleko od hranice. Těsně položené varianty vás svedly i tam, kde odpověď znáte z doslechu. Zkuste to znovu s čerstvou hlavou, napodruhé se body sbírají snáz.` },
+    { min: 4, max: 6, text: `Polovina kvízu je vaše, ale hranice 8/10 je zatím mimo dosah. Většinou vás potrápila místa, kde stálo vedle sebe několik věrohodných možností. Chybí vám ještě kus jistoty.` },
+    { min: 7, max: 9, text: `Tady se rozhoduje. Pokud máte 9, hranici 8/10 jste překonali a máte rozhled, jaký mají jen někteří. Se 7 nebo 8 body jste těsně pod ní, k překonání vám chyběla jedna nebo dvě správné odpovědi.` },
+    { min: 10, max: 10, text: `Plný počet, hranici jste překonali s rezervou. Nezaskočily vás ani burzovní indexy, ani složení oceli, ani hrad, na kterém bloudí duch dánského krále. Tohle dokáže jen malá skupina řešitelů.` }
+  ];
+
+  document.getElementById(`title`).textContent = TITLE;
+  document.getElementById(`perex`).textContent = PEREX;
+
+  const quizEl = document.getElementById(`quiz`);
+  const evalBtn = document.getElementById(`evaluate`);
+  const hint = document.getElementById(`hint`);
+  const resultEl = document.getElementById(`result`);
+  const scoreEl = document.getElementById(`score`);
+  const verdictEl = document.getElementById(`verdict`);
+  const retryBtn = document.getElementById(`retry`);
+
+  let answers = new Array(QUESTIONS.length).fill(null);
+  let locked = false;
+
+  function build() {
+    quizEl.innerHTML = ``;
+    QUESTIONS.forEach(function (item, qi) {
+      const box = document.createElement(`div`);
+      box.className = `box`;
+      const p = document.createElement(`p`);
+      p.className = `q-text`;
+      p.textContent = item.q;
+      box.appendChild(p);
+      item.o.forEach(function (opt, oi) {
+        const b = document.createElement(`button`);
+        b.type = `button`;
+        b.className = `opt`;
+        b.textContent = LETTERS[oi] + `) ` + opt;
+        b.dataset.q = qi;
+        b.dataset.o = oi;
+        b.addEventListener(`click`, function () { choose(qi, oi); });
+        box.appendChild(b);
+      });
+      const fb = document.createElement(`div`);
+      fb.className = `feedback`;
+      fb.id = `fb-` + qi;
+      box.appendChild(fb);
+      quizEl.appendChild(box);
+    });
+  }
+
+  function choose(qi, oi) {
+    if (locked) return;
+    answers[qi] = oi;
+    const btns = quizEl.querySelectorAll(`.opt[data-q="` + qi + `"]`);
+    btns.forEach(function (b) {
+      b.classList.toggle(`selected`, Number(b.dataset.o) === oi);
+    });
+    updateState();
+  }
+
+  function updateState() {
+    const all = answers.every(function (a) { return a !== null; });
+    evalBtn.disabled = !all;
+    hint.style.display = all ? `none` : `block`;
+  }
+
+  function evaluate() {
+    if (locked || answers.some(function (a) { return a === null; })) return;
+    locked = true;
+    quizEl.classList.add(`locked`);
+    let score = 0;
+    QUESTIONS.forEach(function (item, qi) {
+      const btns = quizEl.querySelectorAll(`.opt[data-q="` + qi + `"]`);
+      btns.forEach(function (b) {
+        const oi = Number(b.dataset.o);
+        if (oi === item.a) b.classList.add(`correct`);
+        else if (oi === answers[qi]) b.classList.add(`wrong`);
+      });
+      const fb = document.getElementById(`fb-` + qi);
+      fb.style.display = `block`;
+      if (answers[qi] === item.a) {
+        score++;
+        fb.className = `feedback ok`;
+        fb.textContent = `Správně.`;
+      } else {
+        fb.className = `feedback bad`;
+        fb.textContent = `Špatně. Správná odpověď: ` + LETTERS[item.a] + `) ` + item.o[item.a];
+      }
+    });
+    scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+    const r = RESULTS.find(function (x) { return score >= x.min && score <= x.max; });
+    verdictEl.textContent = r ? r.text : ``;
+    evalBtn.style.display = `none`;
+    hint.style.display = `none`;
+    resultEl.style.display = `block`;
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function reset() {
+    answers = new Array(QUESTIONS.length).fill(null);
+    locked = false;
+    quizEl.classList.remove(`locked`);
+    build();
+    resultEl.style.display = `none`;
+    evalBtn.style.display = `block`;
+    updateState();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evalBtn.addEventListener(`click`, evaluate);
+  retryBtn.addEventListener(`click`, reset);
+  build();
+  updateState();
+})();
+</script>
+</body>
+</html>
