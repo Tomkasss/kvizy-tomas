@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Všeobecný vědomostní test: plný počet zvládne bez tipování jen opravdový znalec</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 32px 20px; background: #f5f0eb; font-family: Georgia, "Times New Roman", serif; color: #2c2c2c; line-height: 1.5; }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 16px; color: #2c2c2c; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+  .box { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 28px; margin-bottom: 24px; }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .opt { display: block; width: 100%; text-align: left; padding: 14px 18px; margin: 0 0 10px; background: #f7f4f0; border: 1px solid #d9d2c9; border-radius: 8px; font-family: inherit; font-size: 1rem; color: #3a3a3a; cursor: pointer; }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border-color: #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border-color: #d4848a; color: #721c24; }
+  .locked .opt { cursor: default; }
+  .locked .opt:hover { background: #f7f4f0; }
+  .locked .opt.selected:hover { background: #dcd3c7; }
+  .locked .opt.correct:hover { background: #d4edda; }
+  .locked .opt.wrong:hover { background: #f8d7da; }
+  .feedback { margin-top: 14px; font-size: 0.98rem; display: none; }
+  .feedback.ok { color: #1e5631; }
+  .feedback.bad { color: #721c24; }
+  .btn { display: block; margin: 40px auto 0; padding: 16px 40px; border: none; border-radius: 8px; font-family: inherit; font-size: 1.1rem; font-weight: bold; color: #fff; background: #5b7e5f; cursor: pointer; }
+  .btn:hover { background: #4a6b4e; }
+  .btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint { text-align: center; color: #8a8a8a; font-size: 0.95rem; margin-top: 12px; }
+  #result { display: none; background: #fefcf9; border-top: 4px solid #5b7e5f; margin-top: 40px; text-align: center; }
+  .score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  .verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #retry { background: #8c7b6b; margin-top: 28px; }
+  #retry:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    .box { padding: 20px 16px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="title"></h1>
+  <p class="perex" id="perex"></p>
+  <div id="quiz"></div>
+  <button class="btn" id="evaluate" type="button" disabled>Vyhodnotit</button>
+  <p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+  <div class="box" id="result">
+    <p class="score" id="score"></p>
+    <p class="verdict" id="verdict"></p>
+    <button class="btn" id="retry" type="button">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+(function () {
+  const TITLE = `Všeobecný vědomostní test: plný počet zvládne bez tipování jen opravdový znalec`;
+  const PEREX = `Habsburský dvůr, pařížské hrobky, polská literatura i Sluneční soustava. Kdo se v takové směsi vyzná bez zaváhání, má rozhled, jakým se může pochlubit jen málokdo.`;
+  const QUESTIONS = [
+    { q: `1. Ve kterém městě se narodil Wolfgang Amadeus Mozart?`, o: [`Vídeň`, `Salcburk`, `Linec`, `Innsbruck`], a: 1 },
+    { q: `2. Která panovnice byla matkou císaře Josefa II.?`, o: [`Marie Terezie`, `Alžběta Kristýna Brunšvická`, `Marie Luisa`, `Alžběta Bavorská`], a: 0 },
+    { q: `3. Která planeta je největší ve Sluneční soustavě?`, o: [`Saturn`, `Uran`, `Neptun`, `Jupiter`], a: 3 },
+    { q: `4. Ve které zemi žije ve volné přírodě okapi?`, o: [`Keňa`, `Tanzanie`, `Demokratická republika Kongo`, `Etiopie`], a: 2 },
+    { q: `5. Ve které pařížské stavbě je pohřben Napoleon Bonaparte?`, o: [`Invalidovna`, `Panthéon`, `bazilika Saint-Denis`, `katedrála Notre-Dame`], a: 0 },
+    { q: `6. Ve kterém státě leží oblast Algarve?`, o: [`Španělsko`, `Itálie`, `Portugalsko`, `Řecko`], a: 2 },
+    { q: `7. Který fyzik objevil elektron?`, o: [`Ernest Rutherford`, `James Chadwick`, `Max Planck`, `Joseph John Thomson`], a: 3 },
+    { q: `8. Kdo namaloval obraz Stavba babylonské věže?`, o: [`Hieronymus Bosch`, `Pieter Bruegel starší`, `Jan van Eyck`, `Albrecht Dürer`], a: 1 },
+    { q: `9. Ve kterém městě sídlí Světová banka?`, o: [`Washington`, `New York`, `Ženeva`, `Londýn`], a: 0 },
+    { q: `10. Kdo napsal epos Pan Tadeáš?`, o: [`Henryk Sienkiewicz`, `Juliusz Słowacki`, `Adam Mickiewicz`, `Bolesław Prus`], a: 2 }
+  ];
+  const LETTERS = [`a`, `b`, `c`, `d`];
+  const RESULTS = [
+    { min: 0, max: 3, text: `Tentokrát to nevyšlo. Většinu odpovědí jste spíš tipovali, než věděli, a k opravdovému znalci máte zatím daleko. Rozhled se dá rozšířit a příště to může dopadnout úplně jinak.` },
+    { min: 4, max: 6, text: `Slušný základ. Spoustu věcí víte, ale jakmile otázka zamířila do oboru, který vám není blízký, museli jste hádat. Na titul opravdového znalce to ještě nestačí.` },
+    { min: 7, max: 9, text: `Výborný výsledek. Máte široký přehled napříč obory a tipovat jste museli jen výjimečně. K opravdovému znalci vám chybí opravdu kousek.` },
+    { min: 10, max: 10, text: `Plný počet. Prošli jste hudbou, zeměpisem, přírodou, dějinami, vědou, malířstvím i literaturou bez jediného zaváhání. Jste opravdový znalec.` }
+  ];
+
+  document.getElementById(`title`).textContent = TITLE;
+  document.getElementById(`perex`).textContent = PEREX;
+
+  const quizEl = document.getElementById(`quiz`);
+  const evalBtn = document.getElementById(`evaluate`);
+  const hint = document.getElementById(`hint`);
+  const resultEl = document.getElementById(`result`);
+  const scoreEl = document.getElementById(`score`);
+  const verdictEl = document.getElementById(`verdict`);
+  const retryBtn = document.getElementById(`retry`);
+
+  let answers = new Array(QUESTIONS.length).fill(null);
+  let locked = false;
+
+  function build() {
+    quizEl.innerHTML = ``;
+    QUESTIONS.forEach(function (item, qi) {
+      const box = document.createElement(`div`);
+      box.className = `box`;
+      const p = document.createElement(`p`);
+      p.className = `q-text`;
+      p.textContent = item.q;
+      box.appendChild(p);
+      item.o.forEach(function (opt, oi) {
+        const b = document.createElement(`button`);
+        b.type = `button`;
+        b.className = `opt`;
+        b.textContent = LETTERS[oi] + `) ` + opt;
+        b.dataset.q = qi;
+        b.dataset.o = oi;
+        b.addEventListener(`click`, function () { choose(qi, oi); });
+        box.appendChild(b);
+      });
+      const fb = document.createElement(`div`);
+      fb.className = `feedback`;
+      fb.id = `fb-` + qi;
+      box.appendChild(fb);
+      quizEl.appendChild(box);
+    });
+  }
+
+  function choose(qi, oi) {
+    if (locked) return;
+    answers[qi] = oi;
+    const btns = quizEl.querySelectorAll(`.opt[data-q="` + qi + `"]`);
+    btns.forEach(function (b) {
+      b.classList.toggle(`selected`, Number(b.dataset.o) === oi);
+    });
+    updateState();
+  }
+
+  function updateState() {
+    const all = answers.every(function (a) { return a !== null; });
+    evalBtn.disabled = !all;
+    hint.style.display = all ? `none` : `block`;
+  }
+
+  function evaluate() {
+    if (locked || answers.some(function (a) { return a === null; })) return;
+    locked = true;
+    quizEl.classList.add(`locked`);
+    let score = 0;
+    QUESTIONS.forEach(function (item, qi) {
+      const btns = quizEl.querySelectorAll(`.opt[data-q="` + qi + `"]`);
+      btns.forEach(function (b) {
+        const oi = Number(b.dataset.o);
+        if (oi === item.a) b.classList.add(`correct`);
+        else if (oi === answers[qi]) b.classList.add(`wrong`);
+      });
+      const fb = document.getElementById(`fb-` + qi);
+      fb.style.display = `block`;
+      if (answers[qi] === item.a) {
+        score++;
+        fb.className = `feedback ok`;
+        fb.textContent = `Správně.`;
+      } else {
+        fb.className = `feedback bad`;
+        fb.textContent = `Špatně. Správná odpověď: ` + LETTERS[item.a] + `) ` + item.o[item.a];
+      }
+    });
+    scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+    const r = RESULTS.find(function (x) { return score >= x.min && score <= x.max; });
+    verdictEl.textContent = r ? r.text : ``;
+    evalBtn.style.display = `none`;
+    hint.style.display = `none`;
+    resultEl.style.display = `block`;
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function reset() {
+    answers = new Array(QUESTIONS.length).fill(null);
+    locked = false;
+    quizEl.classList.remove(`locked`);
+    build();
+    resultEl.style.display = `none`;
+    evalBtn.style.display = `block`;
+    updateState();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evalBtn.addEventListener(`click`, evaluate);
+  retryBtn.addEventListener(`click`, reset);
+  build();
+  updateState();
+})();
+</script>
+</body>
+</html>
