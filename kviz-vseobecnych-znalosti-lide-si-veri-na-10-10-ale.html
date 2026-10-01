@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz všeobecných znalostí: lidé si věří na 10/10, ale výsledek je často překvapí</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px;color:#2c2c2c}
+.perex{font-size:1.05rem;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer;margin-bottom:10px}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover:not(.ok):not(.bad):not(.sel){background:#f7f4f0}
+.note{margin-top:12px;font-size:.95rem}
+.note.ok{color:#1e5631}.note.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;margin:0}
+.retry{background:#8c7b6b}
+.retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz všeobecných znalostí: lidé si věří na 10/10, ale výsledek je často překvapí</h1>
+<p class="perex">Tohle jsou věci, o kterých by skoro každý řekl, že je ví. Jenže právě u nich si lidé nejčastěji pamatují verzi, kterou kdysi zaslechli, a ne tu skutečnou. Než odpovíte, zkuste si tipnout, kolik bodů čekáte.</p>
+<div id="quiz"></div>
+<button class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="rtext" id="rtext"></p>
+<button class="btn retry" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q = [
+{q:`Čemu sloužila šikmá věž v Pise?`,o:[`jako hvězdárna`,`jako strážní věž`,`jako zvonice`,`jako maják`],c:2},
+{q:`Co původně označovalo jméno Big Ben?`,o:[`hodinovou věž Westminsterského paláce`,`velký zvon v hodinové věži`,`věžní hodiny s ciferníky`,`velkou minutovou ručičku ciferníku`],c:1},
+{q:`Kdo je Frankenstein v románu Mary Shelleyové?`,o:[`mladý student přírodních věd`,`stvůra oživená ze sešitých těl`,`hrbatý sluha z laboratoře`,`šlechtic, na jehož hradě se pokusy konají`],c:0},
+{q:`Čím je banánovník z botanického hlediska?`,o:[`stromem`,`palmou`,`keřem`,`bylinou`],c:3},
+{q:`Za co dostal Albert Einstein Nobelovu cenu za fyziku?`,o:[`za teorii relativity`,`za vysvětlení fotoelektrického jevu`,`za vysvětlení Brownova pohybu`,`za objev ekvivalence hmotnosti a energie`],c:1},
+{q:`Ve které zemi vznikla pizza se šunkou a ananasem známá jako Hawaii?`,o:[`v Kanadě`,`v USA`,`v Austrálii`,`v Itálii`],c:0},
+{q:`Jakého původu byla dynastie egyptské královny Kleopatry?`,o:[`egyptského`,`římského`,`makedonsko-řeckého`,`perského`],c:2},
+{q:`Ve které zemi mají původ panamské klobouky?`,o:[`v Panamě`,`v Kolumbii`,`na Kubě`,`v Ekvádoru`],c:3},
+{q:`Čí početí má na mysli katolické dogma o neposkvrněném početí?`,o:[`Ježíše Krista`,`Panny Marie`,`Jana Křtitele`,`svaté Anny`],c:1},
+{q:`Která z těchto zemí má na svém území nejvíce starověkých pyramid?`,o:[`Súdán`,`Egypt`,`Libye`,`Čad`],c:0}
+];
+const E = [{min:0,max:3,t:`Tady se sebedůvěra s výsledkem minula nejvíc. Neznamená to, že máte malý přehled. Spíš jste zjistili, kolik „jasných“ věcí jste převzali, aniž by vás napadlo si je ověřit. Dobrá zpráva je, že po přečtení klíče už si tyhle věci pamatujete správně.`},{min:4,max:6,t:`Zhruba polovina toho, co jste brali za jisté, se ukázala jako omyl. Je to pod průměrem, ale ne o moc, a rozdíl mezi „vím“ a „myslím si, že vím“ jste teď poznali na vlastní kůži.`},{min:7,max:9,t:`Většina chytáků na vás neplatila a odhad, se kterým jste šli do kvízu, byl nejspíš oprávněný. Několik odpovědí vás ale stejně zaskočilo, a to je přesně ten rozdíl, o kterém mluví titulek.`},{min:10,max:10,t:`Věřili jste si na deset a deset máte. Patříte k menšině, které se odhad s výsledkem opravdu sešel, protože jste nenaletěli ani jedné z rozšířených verzí.`}];
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+const L = [`a`, `b`, `c`, `d`];
+let answers = [];
+let locked = false;
+
+function render() {
+  quiz.innerHTML = ``;
+  answers = new Array(Q.length).fill(null);
+  locked = false;
+  Q.forEach(function (item, i) {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (i + 1) + `. ` + item.q;
+    box.appendChild(p);
+    item.o.forEach(function (opt, j) {
+      const b = document.createElement(`button`);
+      b.className = `opt`;
+      b.type = `button`;
+      b.textContent = L[j] + `) ` + opt;
+      b.addEventListener(`click`, function () {
+        if (locked) return;
+        answers[i] = j;
+        box.querySelectorAll(`.opt`).forEach(function (x) { x.classList.remove(`sel`); });
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    quiz.appendChild(box);
+  });
+  evalBtn.style.display = `block`;
+  hint.style.display = `block`;
+  result.style.display = `none`;
+  update();
+}
+
+function update() {
+  const done = answers.every(function (a) { return a !== null; });
+  evalBtn.disabled = !done;
+  hint.style.display = done ? `none` : `block`;
+}
+
+evalBtn.addEventListener(`click`, function () {
+  if (locked) return;
+  locked = true;
+  let score = 0;
+  const boxes = quiz.querySelectorAll(`.box`);
+  Q.forEach(function (item, i) {
+    const box = boxes[i];
+    box.classList.add(`locked`);
+    const btns = box.querySelectorAll(`.opt`);
+    btns.forEach(function (x) { x.classList.remove(`sel`); });
+    btns[item.c].classList.add(`ok`);
+    const note = document.createElement(`p`);
+    if (answers[i] === item.c) {
+      score++;
+      note.className = `note ok`;
+      note.textContent = `Správně.`;
+    } else {
+      btns[answers[i]].classList.add(`bad`);
+      note.className = `note bad`;
+      note.textContent = `Správná odpověď: ` + L[item.c] + `) ` + item.o[item.c];
+    }
+    box.appendChild(note);
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + Q.length;
+  const e = E.find(function (x) { return score >= x.min && score <= x.max; });
+  document.getElementById(`rtext`).textContent = e ? e.t : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+
+document.getElementById(`retry`).addEventListener(`click`, function () {
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+render();
+</script>
+</body>
+</html>
