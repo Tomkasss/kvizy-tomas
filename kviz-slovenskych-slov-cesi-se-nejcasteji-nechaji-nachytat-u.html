@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz slovenských slov: Češi se nejčastěji nechají nachytat u otázky číslo 7</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.1rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin-top:8px;font-size:.95rem;display:none}
+.fb.show{display:block}
+.fb.good{color:#1e5631} .fb.wrong{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+.result{background:#fefcf9;border-top:4px solid #5b7e5f;display:none;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+.retry{background:#8c7b6b}
+.retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:16px}.box{padding:20px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz slovenských slov: Češi se nejčastěji nechají nachytat u otázky číslo 7</h1>
+<p class="perex">Slovenštinu znáte z televize, od příbuzných i z dovolené a většině slov rozumíte bez přemýšlení. Pak přijde sedmička, na které Češi chybují nejčastěji. Nachytá i vás?</p>
+<div id="quiz"></div>
+<button class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box result" id="result">
+<p class="score" id="score"></p>
+<p class="rtext" id="rtext"></p>
+<button class="btn retry" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q=[
+{q:`Pro co se slovenská teta vrací od dveří, když zjistí, že si zapomněla dáždnik?`,o:[`pro brýle`,`pro deštník`,`pro hůl`,`pro kapesník`],a:1},
+{q:`Co dostane na talíř Slovák, který si v jídelně objednal rezeň?`,o:[`bramborák`,`jelito`,`zelňačku`,`řízek`],a:3},
+{q:`Co tvrdí Slovák o svém otci, když říká, že ešte dobre počuje?`,o:[`že ještě dobře slyší`,`že ještě dobře vypadá`,`že ještě dobře poslouchá`,`že ještě dobře mluví`],a:0},
+{q:`Co si slovenská holčička přeje od Ježíška, když v dopise prosí o novú bábiku?`,o:[`brusle`,`loutku`,`panenku`,`míč`],a:2},
+{q:`Co chce slovenský dědeček najít, když po ránu shání své traky?`,o:[`pásek`,`šle`,`kalhoty`,`bačkory`],a:1},
+{q:`Kterého ptáka má na fotce slovenský ornitolog, když se chlubí snímkem škovránka?`,o:[`pěnkavu`,`konipasa`,`špačka`,`skřivana`],a:3},
+{q:`Co Slovák myslí slovem „stávka“?`,o:[`stávku, při které zaměstnanci přestanou pracovat`,`nádraží, na kterém zastavují vlaky`,`sázku, ve které jde o peníze nebo o čest`,`nabídku, se kterou přijde obchodník`],a:2},
+{q:`Co roste u plotu slovenského souseda, který si pochvaluje svou bazu?`,o:[`bez černý`,`šeřík`,`modřín`,`švestka`],a:0},
+{q:`O čem Slováka informuje úřad, když mu v dopise píše o lehote?`,o:[`o prominutí`,`o prodlení`,`o vyřízení`,`o lhůtě`],a:3},
+{q:`Co vytýkají Slováci kolegovi, o kterém říkají, že je ťarbavý?`,o:[`že je zapomnětlivý`,`že je upovídaný`,`že je nemotorný`,`že je vlezlý`],a:2}
+];
+const E=[
+{lo:0,hi:3,t:`Slovenštinu slyšíte rádi, jenže v hlavě vám z ní zůstala spíš melodie než slova. Česká podobnost vás posílala na špatnou stopu častěji, než by se zdálo. Pár večerů se slovenským filmem a půlka těchhle slov vám zůstane natrvalo.`},
+{lo:4,hi:6,t:`Slova z běžné řeči a z televize jste poznali. Na kuchyni, šatník nebo úřední dopis vám ale paměť nestačila a musel rozhodnout odhad. Vaše slovenština dobře funguje v hovoru, jen jí ještě trochu chybí slovník.`},
+{lo:7,hi:9,t:`Tady končí většina těch, kdo slovenštinu poslouchají pravidelně. Rozuměli jste i slovům, která česky nic nepřipomínají. Pokud vám chybí bod, nejspíš jste ho nechali právě u sedmičky, kde česká podoba slova láká ke špatné odpovědi.`},
+{lo:10,hi:10,t:`Bez jediné chyby, a to se povede jen menšině. Nenechali jste se zmást ani slovem, které vypadá úplně česky. Ve slovenštině se pohybujete jako doma a do Bratislavy můžete vyrazit bez slovníku.`}
+];
+const quiz=document.getElementById(`quiz`),ev=document.getElementById(`eval`),hint=document.getElementById(`hint`),res=document.getElementById(`result`);
+let sel=[],locked=false;
+function render(){
+quiz.innerHTML=``;sel=Q.map(()=>null);locked=false;
+Q.forEach((q,i)=>{
+const box=document.createElement(`div`);box.className=`box`;
+const t=document.createElement(`p`);t.className=`qt`;t.textContent=(i+1)+`. `+q.q;box.appendChild(t);
+q.o.forEach((o,j)=>{const b=document.createElement(`button`);b.type=`button`;b.className=`opt`;b.textContent=`abcd`[j]+`) `+o;
+b.addEventListener(`click`,()=>{if(locked)return;sel[i]=j;box.querySelectorAll(`.opt`).forEach((x,k)=>x.classList.toggle(`sel`,k===j));upd();});box.appendChild(b);});
+const fb=document.createElement(`p`);fb.className=`fb`;box.appendChild(fb);
+quiz.appendChild(box);});
+res.style.display=`none`;ev.style.display=`block`;upd();}
+function upd(){const all=sel.every(x=>x!==null);ev.disabled=!all;hint.style.display=all?`none`:`block`;}
+ev.addEventListener(`click`,()=>{
+if(ev.disabled)return;locked=true;let s=0;
+quiz.querySelectorAll(`.box`).forEach((box,i)=>{const q=Q[i];const bs=box.querySelectorAll(`.opt`);
+bs.forEach((b,k)=>{b.disabled=true;b.classList.remove(`sel`);if(k===q.a)b.classList.add(`ok`);else if(k===sel[i])b.classList.add(`bad`);});
+const fb=box.querySelector(`.fb`);fb.classList.add(`show`);
+if(sel[i]===q.a){s++;fb.className=`fb show good`;fb.textContent=`Správně.`;}else{fb.className=`fb show wrong`;fb.textContent=`Špatně. Správná odpověď: `+`abcd`[q.a]+`) `+q.o[q.a];}});
+document.getElementById(`score`).textContent=s+` z `+Q.length;
+const e=E.find(x=>s>=x.lo&&s<=x.hi);document.getElementById(`rtext`).textContent=e?e.t:``;
+ev.style.display=`none`;hint.style.display=`none`;res.style.display=`block`;res.scrollIntoView({behavior:`smooth`});});
+document.getElementById(`retry`).addEventListener(`click`,()=>{render();window.scrollTo({top:0,behavior:`smooth`});});
+render();
+</script>
+</body>
+</html>
