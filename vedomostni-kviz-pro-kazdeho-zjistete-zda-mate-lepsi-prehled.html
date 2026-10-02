@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vědomostní kvíz pro každého: zjistěte, zda máte lepší přehled než většina Čechů</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px;color:#2c2c2c}
+.perex{font-size:1.1rem;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-family:inherit;font-size:1rem;color:#3a3a3a;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover{background:#f7f4f0}
+.locked .opt.sel:hover{background:#dcd3c7}
+.locked .opt.correct:hover{background:#d4edda}
+.locked .opt.wrong:hover{background:#f8d7da}
+.fb{margin-top:14px;font-size:.95rem;display:none}
+.fb.ok{color:#1e5631;display:block}
+.fb.bad{color:#721c24;display:block}
+.btn{display:block;margin:40px auto 0;background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;font-family:inherit;cursor:pointer}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;margin:0}
+#retry{background:#8c7b6b;margin-top:24px}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Vědomostní kvíz pro každého: zjistěte, zda máte lepší přehled než většina Čechů</h1>
+<p class="perex">Většina Čechů si o sobě myslí, že má slušný rozhled. Jestli patříte mezi ty, kdo ho mají opravdu lepší, ukáže mix otázek od politiky přes kuchyni a přírodu až po chemii, techniku a módu.</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="submit" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="rtext" id="rtext"></p>
+<button type="button" class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions=[
+{q:`Kterou součást počítače označuje zkratka RAM?`,o:[`pevný disk`,`operační paměť`,`paměťová karta`,`flash disk`],c:1},
+{q:`Která řeka se vlévá do Labe v Hradci Králové?`,o:[`Úpa`,`Metuje`,`Cidlina`,`Orlice`],c:3},
+{q:`Která sova je největší v Evropě?`,o:[`puštík`,`kalous`,`výr`,`sýc`],c:2},
+{q:`Který úřad v Česku rozhoduje o stížnostech firem na to, jak stát nebo obec zadali veřejnou zakázku?`,o:[`Nejvyšší kontrolní úřad`,`Úřad pro ochranu hospodářské soutěže`,`Ministerstvo pro místní rozvoj`,`Ministerstvo financí`],c:1},
+{q:`Která ryba se tradičně smaží v britském pokrmu fish and chips?`,o:[`losos`,`makrela`,`sleď`,`treska`],c:3},
+{q:`Jaké pH má chemicky čistá voda při pokojové teplotě?`,o:[`7`,`5`,`8`,`6`],c:0},
+{q:`Co prozrazuje, když adresa webové stránky začíná https, a ne jen http?`,o:[`spojení se stránkou je šifrované`,`stránka prošla ověřením u státního úřadu`,`stránka neobsahuje žádnou reklamu`,`stránka je upravená pro mobilní telefony`],c:0},
+{q:`Který módní dům má v logu hlavu Medúzy?`,o:[`Gucci`,`Prada`,`Versace`,`Armani`],c:2},
+{q:`Který chrám má nejvyšší kostelní věž v Česku?`,o:[`katedrála sv. Víta v Praze`,`katedrála sv. Bartoloměje v Plzni`,`katedrála sv. Václava v Olomouci`,`katedrála sv. Petra a Pavla v Brně`],c:1},
+{q:`Kdo byl prvním předsedou Senátu Parlamentu České republiky?`,o:[`Libuše Benešová`,`Přemysl Sobotka`,`Milan Štěch`,`Petr Pithart`],c:3}
+];
+const evaluations=[
+{min:0,max:3,t:`Tentokrát vás většina Čechů předběhla. Uteklo vám i několik otázek, na které stačí běžná zkušenost z domova, ze zpráv nebo z obrazovky. Rozhled si můžete rozšířit snadno: všímejte si víc toho, co kolem vás běží každý den.`},
+{min:4,max:6,t:`Těsně pod úrovní většiny. Část věcí znáte jistě, jinde jste spíš tipovali. Většina Čechů tu dá zhruba sedm otázek, vám k ní chybí jedna až tři.`},
+{min:7,max:9,t:`Sedm správných odpovědí je přesně tolik, kolik dá většina Čechů, takže se sedmičkou máte běžný přehled. Osm nebo devět už znamená přehled lepší, než má většina, a slib titulku pro vás platí.`},
+{min:10,max:10,t:`Bez jediné chyby, a to dokáže jen menšina. Neoklamaly vás varianty, které zněly stejně přesvědčivě jako ta správná. Váš přehled je jasně nad úrovní většiny Čechů.`}
+];
+const letters=[`a`,`b`,`c`,`d`];
+const quiz=document.getElementById(`quiz`);
+const submit=document.getElementById(`submit`);
+const hint=document.getElementById(`hint`);
+const result=document.getElementById(`result`);
+let answers=[];
+let locked=false;
+function render(){
+  quiz.innerHTML=``;
+  answers=new Array(questions.length).fill(null);
+  locked=false;
+  quiz.classList.remove(`locked`);
+  questions.forEach(function(q,qi){
+    const box=document.createElement(`div`);
+    box.className=`box`;
+    const p=document.createElement(`p`);
+    p.className=`qtext`;
+    p.textContent=(qi+1)+`. `+q.q;
+    box.appendChild(p);
+    q.o.forEach(function(opt,oi){
+      const b=document.createElement(`button`);
+      b.type=`button`;
+      b.className=`opt`;
+      b.textContent=letters[oi]+`) `+opt;
+      b.addEventListener(`click`,function(){
+        if(locked)return;
+        answers[qi]=oi;
+        box.querySelectorAll(`.opt`).forEach(function(x){x.classList.remove(`sel`);});
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb=document.createElement(`div`);
+    fb.className=`fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  update();
+}
+function update(){
+  const done=answers.every(function(a){return a!==null;});
+  submit.disabled=!done||locked;
+  hint.style.display=done||locked?`none`:`block`;
+}
+submit.addEventListener(`click`,function(){
+  if(locked)return;
+  locked=true;
+  quiz.classList.add(`locked`);
+  let score=0;
+  const boxes=quiz.querySelectorAll(`.box`);
+  questions.forEach(function(q,qi){
+    const opts=boxes[qi].querySelectorAll(`.opt`);
+    const fb=boxes[qi].querySelector(`.fb`);
+    opts[q.c].classList.add(`correct`);
+    if(answers[qi]===q.c){
+      score++;
+      fb.className=`fb ok`;
+      fb.textContent=`Správně.`;
+    }else{
+      opts[answers[qi]].classList.add(`wrong`);
+      fb.className=`fb bad`;
+      fb.textContent=`Špatně. Správná odpověď: `+letters[q.c]+`) `+q.o[q.c];
+    }
+  });
+  document.getElementById(`score`).textContent=score+` z `+questions.length;
+  const ev=evaluations.find(function(e){return score>=e.min&&score<=e.max;});
+  document.getElementById(`rtext`).textContent=ev?ev.t:``;
+  result.style.display=`block`;
+  update();
+  result.scrollIntoView({behavior:`smooth`,block:`start`});
+});
+document.getElementById(`retry`).addEventListener(`click`,function(){
+  result.style.display=`none`;
+  render();
+  window.scrollTo({top:0,behavior:`smooth`});
+});
+render();
+</script>
+</body>
+</html>
