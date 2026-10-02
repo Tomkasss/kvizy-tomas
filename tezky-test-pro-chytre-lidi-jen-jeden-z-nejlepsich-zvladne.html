@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Těžký test pro chytré lidi: jen jeden z nejlepších zvládne všechno bez chyby</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px;color:#2c2c2c}
+.perex{font-size:1.1rem;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-family:inherit;font-size:1rem;color:#3a3a3a;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover{background:#f7f4f0}
+.locked .opt.sel:hover{background:#dcd3c7}
+.locked .opt.correct:hover{background:#d4edda}
+.locked .opt.wrong:hover{background:#f8d7da}
+.fb{margin-top:14px;font-size:.95rem;display:none}
+.fb.ok{color:#1e5631;display:block}
+.fb.bad{color:#721c24;display:block}
+.btn{display:block;margin:40px auto 0;background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;font-family:inherit;cursor:pointer}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;margin:0}
+#retry{background:#8c7b6b;margin-top:24px}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Těžký test pro chytré lidi: jen jeden z nejlepších zvládne všechno bez chyby</h1>
+<p class="perex">Česká politika, vzdálené měsíce, americké ceny, snooker, fotografie, Shakespeare, počátky programování, Bible, bronzové postavy na Újezdě i osvobození Prahy. Jediné zaváhání v kterémkoli z těch oborů stačí a mezi nejlepší se nedostanete.</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="submit" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="rtext" id="rtext"></p>
+<button type="button" class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions=[
+{q:`Kdo se stal prvním předsedou vlády samostatné České republiky?`,o:[`Petr Pithart`,`Václav Klaus`,`Miloš Zeman`,`Josef Tošovský`],c:1},
+{q:`Který z těchto měsíců má hustou atmosféru?`,o:[`Kallisto`,`Triton`,`Titan`,`Oberon`],c:2},
+{q:`Za jakou tvorbu se uděluje americká cena Emmy?`,o:[`za televizní`,`za divadelní`,`za hudební`,`za filmovou`],c:0},
+{q:`Kolik bodů má ve snookeru černá koule?`,o:[`5`,`6`,`7`,`8`],c:2},
+{q:`Který fotograf proslul snímky z okupace Prahy v srpnu 1968, které na Západě vyšly anonymně?`,o:[`Jan Saudek`,`Josef Koudelka`,`Jindřich Štreit`,`Karel Cudlín`],c:1},
+{q:`Jak se jmenuje Hamletova milá, která se v Shakespearově hře utopí?`,o:[`Desdemona`,`Kordélie`,`Porcie`,`Ofélie`],c:3},
+{q:`Kdo bývá označován za prvního programátora v dějinách?`,o:[`Ada Lovelace`,`Grace Hopper`,`Hedy Lamarr`,`Katherine Johnson`],c:0},
+{q:`Kterého ptáka podle Bible vypustil Noe z archy jako prvního?`,o:[`krkavce`,`holubici`,`vlaštovku`,`orla`],c:0},
+{q:`Který sochař vytvořil postavy Pomníku obětem komunismu na pražském Újezdě?`,o:[`David Černý`,`Olbram Zoubek`,`Kurt Gebauer`,`Jaroslav Róna`],c:1},
+{q:`Kdo velel 1. ukrajinskému frontu při osvobozování Prahy?`,o:[`Georgij Žukov`,`Rodion Malinovskij`,`Konstantin Rokossovskij`,`Ivan Koněv`],c:3}
+];
+const evaluations=[
+{min:0,max:3,t:`Tentokrát vám unikly i otázky, které stačí jednou slyšet, třeba první premiér samostatného Česka nebo první pták vypuštěný z Noemovy archy. Projděte si klíč, tyhle věci se po jednom přečtení vracejí snadno.`},
+{min:4,max:6,t:`Základ máte, ale na jménech, která člověk nepotkává denně, jako je sochař z Újezda nebo maršál osvobozující Prahu, se rozhodlo proti vám.`},
+{min:7,max:9,t:`Na úroveň chytrého a sečtělého člověka to stačí. Plný počet vám vzalo jen pár jmen z okraje, třeba autor bronzových postav pod Petřínem nebo měsíc zahalený hustou atmosférou.`},
+{min:10,max:10,t:`Bez jediné chyby, od snookeru přes počátky programování po rok 1945. Titulek sliboval, že to zvládnou jen ti nejlepší, a vy jste to splnili.`}
+];
+const letters=[`a`,`b`,`c`,`d`];
+const quiz=document.getElementById(`quiz`);
+const submit=document.getElementById(`submit`);
+const hint=document.getElementById(`hint`);
+const result=document.getElementById(`result`);
+let answers=[];
+let locked=false;
+function render(){
+  quiz.innerHTML=``;
+  answers=new Array(questions.length).fill(null);
+  locked=false;
+  quiz.classList.remove(`locked`);
+  questions.forEach(function(q,qi){
+    const box=document.createElement(`div`);
+    box.className=`box`;
+    const p=document.createElement(`p`);
+    p.className=`qtext`;
+    p.textContent=(qi+1)+`. `+q.q;
+    box.appendChild(p);
+    q.o.forEach(function(opt,oi){
+      const b=document.createElement(`button`);
+      b.type=`button`;
+      b.className=`opt`;
+      b.textContent=letters[oi]+`) `+opt;
+      b.addEventListener(`click`,function(){
+        if(locked)return;
+        answers[qi]=oi;
+        box.querySelectorAll(`.opt`).forEach(function(x){x.classList.remove(`sel`);});
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb=document.createElement(`div`);
+    fb.className=`fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  update();
+}
+function update(){
+  const done=answers.every(function(a){return a!==null;});
+  submit.disabled=!done||locked;
+  hint.style.display=done||locked?`none`:`block`;
+}
+submit.addEventListener(`click`,function(){
+  if(locked)return;
+  locked=true;
+  quiz.classList.add(`locked`);
+  let score=0;
+  const boxes=quiz.querySelectorAll(`.box`);
+  questions.forEach(function(q,qi){
+    const opts=boxes[qi].querySelectorAll(`.opt`);
+    const fb=boxes[qi].querySelector(`.fb`);
+    opts[q.c].classList.add(`correct`);
+    if(answers[qi]===q.c){
+      score++;
+      fb.className=`fb ok`;
+      fb.textContent=`Správně.`;
+    }else{
+      opts[answers[qi]].classList.add(`wrong`);
+      fb.className=`fb bad`;
+      fb.textContent=`Špatně. Správná odpověď: `+letters[q.c]+`) `+q.o[q.c];
+    }
+  });
+  document.getElementById(`score`).textContent=score+` z `+questions.length;
+  const ev=evaluations.find(function(e){return score>=e.min&&score<=e.max;});
+  document.getElementById(`rtext`).textContent=ev?ev.t:``;
+  result.style.display=`block`;
+  update();
+  result.scrollIntoView({behavior:`smooth`,block:`start`});
+});
+document.getElementById(`retry`).addEventListener(`click`,function(){
+  result.style.display=`none`;
+  render();
+  window.scrollTo({top:0,behavior:`smooth`});
+});
+render();
+</script>
+</body>
+</html>
