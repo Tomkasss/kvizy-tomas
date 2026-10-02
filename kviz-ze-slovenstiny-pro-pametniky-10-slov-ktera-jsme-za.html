@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz ze slovenštiny pro pamětníky: 10 slov, která jsme za Československa znali všichni</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin:8px 0 0;font-size:.98rem;line-height:1.5}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin:12px 0 0;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#again{background:#8c7b6b}
+#again:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:16px}.box{padding:20px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz ze slovenštiny pro pamětníky: 10 slov, která jsme za Československa znali všichni</h1>
+<p class="perex">Pohádky z Bratislavy, slovenští hlasatelé ve vysílání pro celou republiku, léto u Váhu nebo dvě roky vojny. Slovenštinu jsme tehdy poslouchali každý den, i když jsme jí sami nemluvili. Kolik slov z té doby se vám vybaví ještě dnes?</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result"><p class="score" id="score"></p><p class="rtext" id="rtext"></p><button type="button" class="btn" id="again">Zkusit znovu</button></div>
+</div>
+<script>
+const Q=[
+{q:`Kdo zazvonil u slovenské babičky, když volala do kuchyně, že za dveřmi stojí nějaký „chalan"?`,o:[`stařík`,`muž středních let`,`mladík`,`malé dítě`],a:2},
+{q:`Co šel slovenský soused na chatě natírat, když řekl, že ide natrieť „oblok"?`,o:[`okno`,`plot`,`dveře`,`dřevěné obložení`],a:0},
+{q:`Co si nalíčila slovenská zpěvačka v šatně před vystoupením, když si líčila „pery"?`,o:[`obočí`,`řasy`,`víčka`,`rty`],a:3},
+{q:`Kam vlezl vnuk na pastvině, když mu slovenská babička vyčítala, že zase stúpil do „mláky"?`,o:[`do kravského koláče`,`do mraveniště`,`do louže`,`do kopřiv`],a:2},
+{q:`Na co si měli houbaři na pasece nad vesnicí dávat pozor, když je slovenský hajný varoval před „vretenicami"?`,o:[`na klíšťata`,`na zmije`,`na sršně`,`na divoká prasata`],a:1},
+{q:`Kdy mohl Čech zavolat svým slovenským známým, když mu do telefonu řekli „volaj hocikedy"?`,o:[`kdykoli`,`co nejdřív`,`až večer`,`nejdřív zítra`],a:0},
+{q:`Jaký nástroj chtěl soused půjčit, když na chatě u Slováků sháněl „kosák"?`,o:[`kosu`,`srp`,`sekeru`,`motyku`],a:1},
+{q:`Co dělal celou dobu slovenský kolega na schůzi, když o něm ostatní říkali, že „šomral"?`,o:[`dřímal`,`čmáral si do bloku`,`přikyvoval`,`reptal`],a:3},
+{q:`Co dělala babička o slovenských prázdninách s jablky, když je „šúpala"?`,o:[`loupala je`,`krájela je`,`strouhala je`,`sušila je`],a:0},
+{q:`Co si kamarád prohlížel na dlani po celodenním kopání na brigádě, když ukazoval „pľuzgier"?`,o:[`mozol`,`odřeninu`,`puchýř`,`třísku`],a:2}
+];
+const EV=[
+{min:0,max:3,t:`Slovenština k vám tehdy doléhala spíš jako zvuk z vedlejší místnosti. Melodii si vybavíte, jednotlivá slova se ale do paměti neuložila.`},
+{min:4,max:6,t:`Polovinu slov jste poznali hned, u ostatních vás popletla čeština, která napovídala něco jiného. Stačí jeden slovenský film z archivu a vrátí se vám rychle.`},
+{min:7,max:9,t:`Vysílání z Bratislavy jste opravdu poslouchali. Slova z obrazovky, z rádia i z cest máte pořád v hlavě, jen několik se jich mezitím ztratilo.`},
+{min:10,max:10,t:`Ani jedno slovo vás nezaskočilo. Slovenštinu jste kdysi nejen slyšeli, ale pochopili ji tak důkladně, že vám vydržela dodnes.`}
+];
+const L=[`a`,`b`,`c`,`d`];
+const quiz=document.getElementById(`quiz`),evalBtn=document.getElementById(`eval`),hint=document.getElementById(`hint`);
+let ans=[],done=false;
+function render(){
+  quiz.innerHTML=``;ans=new Array(Q.length).fill(null);done=false;
+  Q.forEach((q,i)=>{
+    const box=document.createElement(`div`);box.className=`box`;
+    const p=document.createElement(`p`);p.className=`qt`;p.textContent=(i+1)+`. `+q.q;box.appendChild(p);
+    q.o.forEach((o,j)=>{
+      const b=document.createElement(`button`);b.type=`button`;b.className=`opt`;b.textContent=L[j]+`) `+o;
+      b.addEventListener(`click`,()=>{if(done)return;ans[i]=j;box.querySelectorAll(`.opt`).forEach(x=>x.classList.remove(`sel`));b.classList.add(`sel`);check();});
+      box.appendChild(b);
+    });
+    const fb=document.createElement(`p`);fb.className=`fb`;box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  check();
+  document.getElementById(`result`).style.display=`none`;
+  evalBtn.style.display=`block`;
+}
+function check(){const all=ans.every(a=>a!==null);evalBtn.disabled=!all;hint.style.display=all?`none`:`block`;}
+evalBtn.addEventListener(`click`,()=>{
+  if(done||ans.some(a=>a===null))return;done=true;let s=0;
+  quiz.querySelectorAll(`.box`).forEach((box,i)=>{
+    const bs=box.querySelectorAll(`.opt`);bs.forEach(b=>b.disabled=true);
+    const fb=box.querySelector(`.fb`);
+    if(ans[i]===Q[i].a){s++;bs[ans[i]].classList.add(`ok`);fb.textContent=`Správně.`;fb.style.color=`#1e5631`;}
+    else{bs[ans[i]].classList.add(`bad`);bs[Q[i].a].classList.add(`ok`);fb.textContent=`Správná odpověď: `+L[Q[i].a]+`) `+Q[i].o[Q[i].a];fb.style.color=`#721c24`;}
+  });
+  document.getElementById(`score`).textContent=s+` z `+Q.length;
+  const e=EV.find(x=>s>=x.min&&s<=x.max);document.getElementById(`rtext`).textContent=e?e.t:``;
+  const r=document.getElementById(`result`);r.style.display=`block`;evalBtn.style.display=`none`;hint.style.display=`none`;
+  r.scrollIntoView({behavior:`smooth`,block:`start`});
+});
+document.getElementById(`again`).addEventListener(`click`,()=>{render();window.scrollTo({top:0,behavior:`smooth`});});
+render();
+</script>
+</body>
+</html>
