@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test: myslíte si, že máte dobrou slovní zásobu? Zkuste, jestli poznáte význam 10 běžných výrazů v češtině</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.1rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin-bottom:10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover{background:inherit}
+.locked .opt.correct:hover{background:#d4edda}
+.locked .opt.wrong:hover{background:#f8d7da}
+.locked .opt:not(.correct):not(.wrong):hover{background:#f7f4f0}
+.fb{margin-top:8px;font-size:.95rem}
+.fb.ok{color:#1e5631}.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a6d3b;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#again{background:#8c7b6b}
+#again:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test: myslíte si, že máte dobrou slovní zásobu? Zkuste, jestli poznáte význam 10 běžných výrazů v češtině</h1>
+<p class="perex">Některá slova potkáváme v novinách, v úředních dopisech i v receptech tak často, že máme pocit, že jim rozumíme. Stačí ale podobně znějící slovo a význam je rázem jinde. Kolik z deseti výrazů vysvětlíte správně?</p>
+<div id="quiz"></div>
+<button class="btn" id="submit" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="rtext" id="rtext"></p>
+<button class="btn" id="again">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q=[
+{q:`Co je vernisáž?`,o:[`první uvedení divadelní hry`,`slavnostní zahájení výstavy`,`veřejná dražba uměleckých děl`,`poslední představení inscenace`],a:1},
+{q:`Co znamená příslovce eventuálně?`,o:[`případně`,`nakonec`,`rozhodně`,`obvykle`],a:0},
+{q:`Co dělá člověk, který problém bagatelizuje?`,o:[`rozpitvává ho`,`odkládá ho`,`zlehčuje ho`,`zatajuje ho`],a:2},
+{q:`Co kuchař udělá s pokrmem, který flambuje?`,o:[`krátce ho spaří vroucí vodou`,`obalí ho v mouce, vejci a strouhance`,`zapeče ho pod vrstvou sýra`,`polije ho lihovinou a zapálí`],a:3},
+{q:`Co je demise?`,o:[`odstoupení z funkce`,`odvolání z funkce nadřízeným`,`vyslovení nedůvěry vládě`,`jmenování do vysoké funkce`],a:0},
+{q:`Co je u půjčky jistina?`,o:[`majetek, kterým je půjčka zajištěna`,`celková dlužná částka včetně úroků`,`půjčená částka bez úroků a poplatků`,`poplatek za předčasné splacení`],a:2},
+{q:`Jaký je laxní člověk?`,o:[`nedůtklivý a urážlivý`,`nedbalý a lhostejný`,`váhavý a nerozhodný`,`tvrdohlavý a neústupný`],a:1},
+{q:`Jaký je patetický projev?`,o:[`strohý a úsečný`,`jízlivý a posměšný`,`nudný a rozvláčný`,`vzletný a citově vypjatý`],a:3},
+{q:`Co je v krajině remízek?`,o:[`lesík či houština uprostřed polí`,`neoraný travnatý pruh mezi poli`,`mělká tůňka zarostlá rákosím`,`oplocený výběh pro chov zvěře`],a:0},
+{q:`Co znamená, že smlouva něco obsahuje implicitně?`,o:[`podmíněně, jen za určitých okolností`,`dočasně, na omezenou dobu`,`nepřímo, bez výslovné zmínky`,`dodatečně, až v příloze`],a:2}
+];
+const E=[
+{min:0,max:3,t:`Přesný význam těchto slov vám zatím často uniká, i když mnohá z nich znáte od vidění. Pomůže víc číst a u neznámého slova si občas otevřít slovník.`},
+{min:4,max:6,t:`Máte průměrnou slovní zásobu. V běžné řeči se neztratíte, jen se vám občas spletou slova, která znějí podobně. Pár přesnějších významů a budete o třídu výš.`},
+{min:7,max:9,t:`Máte dobrou slovní zásobu. Rozumíte jazyku novin, úřadů i kuchyně a na podobně znějící slova se nachytáte jen výjimečně.`},
+{min:10,max:10,t:`Máte výbornou slovní zásobu. Poznali jste všechny výrazy, včetně těch, u kterých se nabízí podobně znějící, ale jiný význam. Slovům rozumíte opravdu přesně.`}
+];
+const quiz=document.getElementById(`quiz`);
+const submit=document.getElementById(`submit`);
+const hint=document.getElementById(`hint`);
+let ans=[],locked=false;
+function render(){
+  quiz.innerHTML=``;ans=new Array(Q.length).fill(null);locked=false;
+  Q.forEach((q,i)=>{
+    const box=document.createElement(`div`);box.className=`box`;
+    const p=document.createElement(`p`);p.className=`qtext`;p.textContent=(i+1)+`. `+q.q;box.appendChild(p);
+    q.o.forEach((o,j)=>{
+      const b=document.createElement(`button`);b.className=`opt`;b.type=`button`;
+      b.textContent=`abcd`[j]+`) `+o;
+      b.addEventListener(`click`,()=>{
+        if(locked)return;ans[i]=j;
+        box.querySelectorAll(`.opt`).forEach(x=>x.classList.remove(`sel`));
+        b.classList.add(`sel`);update();
+      });
+      box.appendChild(b);
+    });
+    const fb=document.createElement(`div`);fb.className=`fb`;box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  update();
+}
+function update(){
+  const all=ans.every(a=>a!==null);
+  submit.disabled=!all;hint.style.display=all?`none`:`block`;
+}
+submit.addEventListener(`click`,()=>{
+  if(locked||ans.some(a=>a===null))return;
+  locked=true;let s=0;
+  quiz.querySelectorAll(`.box`).forEach((box,i)=>{
+    box.classList.add(`locked`);
+    const opts=box.querySelectorAll(`.opt`);const fb=box.querySelector(`.fb`);
+    opts[Q[i].a].classList.add(`correct`);
+    if(ans[i]===Q[i].a){s++;fb.className=`fb ok`;fb.textContent=`Správně`;}
+    else{opts[ans[i]].classList.add(`wrong`);fb.className=`fb bad`;fb.textContent=`Špatně. Správná odpověď: `+`abcd`[Q[i].a]+`) `+Q[i].o[Q[i].a];}
+  });
+  document.getElementById(`score`).textContent=s+` z `+Q.length;
+  const e=E.find(x=>s>=x.min&&s<=x.max);
+  document.getElementById(`rtext`).textContent=e?e.t:``;
+  submit.style.display=`none`;hint.style.display=`none`;
+  const r=document.getElementById(`result`);r.style.display=`block`;
+  r.scrollIntoView({behavior:`smooth`});
+});
+document.getElementById(`again`).addEventListener(`click`,()=>{
+  document.getElementById(`result`).style.display=`none`;
+  submit.style.display=`block`;render();window.scrollTo({top:0,behavior:`smooth`});
+});
+render();
+</script>
+</body>
+</html>
