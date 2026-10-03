@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz z matematiky: Žáci osmé třídy v něm překonají 60 % dospělých</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.q{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.inp{width:100%;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit}
+.inp.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.inp.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.fb{margin-top:12px;font-size:.98rem;display:none}
+.fb.show{display:block}
+.fb.ok{color:#1e5631}
+.fb.bad{color:#721c24}
+.btn{display:block;margin:40px auto 0;background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+.res{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-top:40px}
+.res.show{display:block}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 14px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+.again{background:#8c7b6b}
+.again:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.q{padding:16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz z matematiky: Žáci osmé třídy v něm překonají 60 % dospělých</h1>
+<p class="perex">Osmáci tyhle úlohy počítají právě teď, vy jste je naposledy viděli v lavici před lety. Mocniny, kružnice, válec, slovní úlohy i trocha algebry. Vezměte tužku, papír a zjistěte, jestli byste mezi dospělými patřili k těm, které osmáci nepřeskočí.</p>
+<div id="quiz"></div>
+<button id="eval" class="btn" disabled>Vyhodnotit</button>
+<p id="hint" class="hint">Odpovězte prosím na všechny otázky</p>
+<div id="res" class="res">
+<p id="score" class="score"></p>
+<p id="rtext" class="rtext"></p>
+<button id="again" class="btn again">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q = [
+  {t:`Kolik procent všech domácností v obci chová psa i kočku, jestliže psa má 45 % domácností a z domácností se psem jich 60 % chová také kočku?`, open:true, a:[`27`], show:`27`},
+  {t:`Mezi kterými dvěma po sobě jdoucími přirozenými čísly leží druhá odmocnina ze 190?`, o:[`12 a 13`,`13 a 14`,`14 a 15`,`15 a 16`], c:1},
+  {t:`Kolik je 2¹⁰ : 2⁷ · 5³?`, open:true, a:[`1000`], show:`1000`},
+  {t:`Kolik centimetrů měří strana kosočtverce, jehož úhlopříčky měří 24 cm a 10 cm?`, open:true, a:[`13`], show:`13`},
+  {t:`Který výraz vznikne, když z výrazu 12a²b − 18ab² vytknete co největší společný činitel?`, o:[`6ab(2a − 3b)`,`6a(2ab − 3b²)`,`3ab(4a − 6b)`,`6ab(2a − 3b²)`], c:0},
+  {t:`Kolik kilometrů měřila celá trasa, kterou turista ušel tak, že první den zvládl dvě pětiny trasy, druhý den polovinu zbývající části a třetí den posledních 18 km?`, open:true, a:[`60`], show:`60`},
+  {t:`Kolik centimetrů čtverečních měří obsah mezikruží, které ohraničují dvě soustředné kružnice o poloměrech 7 cm a 3 cm, počítáte-li π ≈ 3,14?`, open:true, a:[`125,6`,`125,60`], show:`125,6`},
+  {t:`Kolik centimetrů musí být od sebe vzdáleny středy dvou kružnic o poloměrech 8 cm a 5 cm, aby se kružnice dotýkaly zevnitř?`, open:true, a:[`3`], show:`3`},
+  {t:`Za kolik minut se potkají auto a autobus, které současně vyjedou proti sobě z měst vzdálených 238 km, auto průměrnou rychlostí 72 km/h a autobus 64 km/h?`, open:true, a:[`105`], show:`105`},
+  {t:`Kolik litrů vody se vejde do hrnce tvaru válce s vnitřním průměrem dna 20 cm a vnitřní výškou 25 cm, počítáte-li π ≈ 3,14?`, o:[`6,28`,`7,5`,`7,85`,`15,7`], c:2}
+];
+const R = [
+  {min:0,max:3,t:`Tady by vás osmáci přeskočili s rezervou. Mocniny, kružnice i slovní úlohy mají čerstvě v hlavě, zatímco vám se postupy za ta léta rozplynuly. S tímhle výsledkem jste hluboko pod průměrem dospělých. Stačí si ale připomenout pár vzorců a body naskočí rychle.`},
+  {min:4,max:6,t:`Kus učiva vám zůstal, ale se žákem, který látku právě probírá, byste prohráli. Úlohy na jeden krok zvládáte, ztrácíte tam, kde je potřeba si vybavit vzorec nebo spojit dva výpočty za sebou. Jste pod průměrem dospělých a patříte k těm 60 %, které osmák v tomhle kvízu předčí.`},
+  {min:7,max:9,t:`Tady leží průměr dospělých, takže se mezi nimi neztratíte. Se 7 body jste přesně v průměru a dobrý osmák vás ještě přeskočí, s 8 nebo 9 body držíte krok s osmáky, kteří látku právě probírají. Body jste nejspíš ztratili v úloze, kde stačil drobný omyl v jednotkách nebo v polovině průměru.`},
+  {min:10,max:10,t:`Plný počet, na který dosáhne jen menšina. Odmocninu, kosočtverec, mezikruží i hrnec v litrech jste spočítali bez chyby. Předčíte i většinu osmáků, kteří tuhle látku mají právě v lavici, a do těch 60 % dospělých z titulku rozhodně nepatříte.`}
+];
+const letters = [`a`,`b`,`c`,`d`];
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+const res = document.getElementById(`res`);
+let ans = [];
+let locked = false;
+
+function norm(s){
+  return s.normalize(`NFD`).replace(/[̀-ͯ]/g,``).toLowerCase().replace(/\s+/g,``).replace(/\./g,`,`).replace(/%$/,``).replace(/(km|minut|min|cm2|cm²|cm|l)$/,``);
+}
+
+function build(){
+  quiz.innerHTML = ``;
+  ans = Q.map(() => null);
+  locked = false;
+  Q.forEach((q, i) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const p = document.createElement(`p`);
+    p.className = `qt`;
+    p.textContent = `${i + 1}. ${q.t}`;
+    box.appendChild(p);
+    if (q.open) {
+      const inp = document.createElement(`input`);
+      inp.type = `text`;
+      inp.className = `inp`;
+      inp.placeholder = `Napište číslo`;
+      inp.setAttribute(`inputmode`, `decimal`);
+      inp.addEventListener(`input`, () => {
+        if (locked) return;
+        ans[i] = inp.value.trim() === `` ? null : inp.value;
+        check();
+      });
+      box.appendChild(inp);
+    } else {
+      q.o.forEach((o, j) => {
+        const b = document.createElement(`button`);
+        b.type = `button`;
+        b.className = `opt`;
+        b.textContent = `${letters[j]}) ${o}`;
+        b.addEventListener(`click`, () => {
+          if (locked) return;
+          ans[i] = j;
+          box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`sel`));
+          b.classList.add(`sel`);
+          check();
+        });
+        box.appendChild(b);
+      });
+    }
+    const fb = document.createElement(`div`);
+    fb.className = `fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  res.classList.remove(`show`);
+  evalBtn.style.display = `block`;
+  check();
+}
+
+function check(){
+  const all = ans.every(a => a !== null);
+  evalBtn.disabled = !all;
+  hint.style.display = all ? `none` : `block`;
+}
+
+evalBtn.addEventListener(`click`, () => {
+  if (ans.some(a => a === null)) return;
+  locked = true;
+  let score = 0;
+  const boxes = quiz.querySelectorAll(`.q`);
+  Q.forEach((q, i) => {
+    const box = boxes[i];
+    const fb = box.querySelector(`.fb`);
+    let right;
+    if (q.open) {
+      const inp = box.querySelector(`.inp`);
+      right = q.a.some(x => norm(x) === norm(ans[i]));
+      inp.disabled = true;
+      inp.classList.add(right ? `ok` : `bad`);
+      fb.textContent = right ? `Správně.` : `Špatně. Správná odpověď: ${q.show}`;
+    } else {
+      right = ans[i] === q.c;
+      const opts = box.querySelectorAll(`.opt`);
+      opts.forEach((b, j) => {
+        b.disabled = true;
+        if (j === q.c) b.classList.add(`ok`);
+        else if (j === ans[i]) b.classList.add(`bad`);
+      });
+      fb.textContent = right ? `Správně.` : `Špatně. Správná odpověď: ${letters[q.c]}) ${q.o[q.c]}`;
+    }
+    fb.classList.add(`show`, right ? `ok` : `bad`);
+    if (right) score++;
+  });
+  document.getElementById(`score`).textContent = `${score} z ${Q.length}`;
+  const r = R.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`rtext`).textContent = r ? r.t : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  res.classList.add(`show`);
+  res.scrollIntoView({behavior:`smooth`, block:`start`});
+});
+
+document.getElementById(`again`).addEventListener(`click`, () => {
+  build();
+  window.scrollTo({top:0, behavior:`smooth`});
+});
+
+build();
+</script>
+</body>
+</html>
