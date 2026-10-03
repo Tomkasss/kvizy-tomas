@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro skutečně vzdělané: Kdo nedá 9/10, rozhodně nepatří mezi nejchytřejší</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 16px 48px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border:1px solid #7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border:1px solid #d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover:not(.ok):not(.bad):not(.sel){background:#f7f4f0}
+.fb{margin-top:6px;font-size:.95rem}
+.fb.good{color:#1e5631}
+.fb.wrong{color:#721c24}
+.btn{display:block;margin:40px auto 0;background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:32px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.evaltext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b;margin-top:24px}
+#retry:hover{background:#756658}
+@media (max-width:600px){.box{padding:20px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro skutečně vzdělané: Kdo nedá 9/10, rozhodně nepatří mezi nejchytřejší</h1>
+<p class="perex">Kdo o sobě tvrdí, že je vzdělaný, by tu neměl zaváhat víc než jednou. Otázky vedou od dětské klasiky přes šlechtická sídla, antické sochy a sopky až k atomovému věku a ekonomii. Devět bodů je minimum, pod ním mezi nejchytřejší nepatříte.</p>
+<div id="quiz"></div>
+<button class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="evaltext" id="evaltext"></p>
+<button class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q=[
+{q:`Kdo je autorkou knihy Pipi Dlouhá punčocha?`,o:[`Tove Janssonová`,`Selma Lagerlöfová`,`Astrid Lindgrenová`,`Sigrid Undsetová`],a:2},
+{q:`Kdo napsal spolu s Karlem Marxem Komunistický manifest?`,o:[`Friedrich Engels`,`Ferdinand Lassalle`,`Michail Bakunin`,`Pierre-Joseph Proudhon`],a:0},
+{q:`Kdo roku 1887 koupil zámek Konopiště?`,o:[`Emil Škoda`,`Bohuslav Chotek`,`Max Egon Fürstenberg`,`František Ferdinand d'Este`],a:3},
+{q:`Na jakém kříži byl podle tradice ukřižován apoštol Ondřej?`,o:[`na kříži ve tvaru písmene T`,`na kříži ve tvaru písmene X`,`na obráceném kříži hlavou dolů`,`na dvojramenném kříži`],a:1},
+{q:`Čím se do dějin atletiky zapsal Dick Fosbury?`,o:[`zavedl nový styl skoku do výšky`,`jako první uběhl míli pod čtyři minuty`,`jako první skočil do dálky přes 8,90 metru`,`zavedl rotační techniku ve vrhu koulí`],a:0},
+{q:`Mezi kterými dvěma ostrovy leží sopka Krakatoa?`,o:[`mezi Luzonem a Mindorem`,`mezi Jávou a Sumatrou`,`mezi Kjúšú a Šikoku`,`mezi Bali a Lombokem`],a:1},
+{q:`Kdo vedl tým, který postavil první jaderný reaktor?`,o:[`Enrico Fermi`,`Robert Oppenheimer`,`Niels Bohr`,`Edward Teller`],a:0},
+{q:`Co vyjadřuje Giniho koeficient?`,o:[`tempo růstu cen`,`nerovnost v rozdělení příjmů`,`míru nezaměstnanosti`,`zadluženost státu`],a:1},
+{q:`Kterou sochu vytvořil antický sochař Myrón?`,o:[`Doryfora`,`Venuši Mélskou`,`Diskobola`,`Nike Samothráckou`],a:2},
+{q:`Ve kterém městě prožil Immanuel Kant téměř celý život?`,o:[`v Berlíně`,`v Lipsku`,`v Gdaňsku`,`v Královci`],a:3}
+];
+const E=[
+{min:0,max:3,t:`0 až 3 body: Tentokrát se pověst vzdělance nepotvrdila. Většina odpovědí skončila vedle a k laťce z titulku vede ještě dlouhá cesta. Tyhle mezery ale nezaplní talent, zaplní je četba a zvědavost.`},
+{min:4,max:6,t:`4 až 6 bodů: Základ máte pevný, mezi nejchytřejší to ale zatím nestačí. Část otázek jste zvládli s jistotou, u ostatních chyběl ten kousek navíc, kterým se sečtělý člověk liší od průměru.`},
+{min:7,max:9,t:`7 až 9 bodů: Tady už je vidět široký rozhled. Se sedmi nebo osmi body jste nad průměrem, slib titulku vám ale ještě o kousek utekl. Kdo má devět, laťku přeskočil a mezi skutečně vzdělané patří právem. O dokonalý výsledek ho připravila jediná otázka.`},
+{min:10,max:10,t:`10 bodů: Plný počet. Dějiny, umění, věda i sport bez jediného zaváhání, a podle měřítka tohoto kvízu tak patříte k těm úplně nejchytřejším. Takový výsledek se nedá vytipovat, ten se prostě musí vědět.`}
+];
+const quiz=document.getElementById(`quiz`);
+const evalBtn=document.getElementById(`eval`);
+const hint=document.getElementById(`hint`);
+const result=document.getElementById(`result`);
+let answers=[];let locked=false;
+function render(){
+  quiz.innerHTML=``;answers=new Array(Q.length).fill(null);locked=false;
+  Q.forEach((q,i)=>{
+    const box=document.createElement(`div`);box.className=`box`;
+    const p=document.createElement(`p`);p.className=`qtext`;p.textContent=(i+1)+`. `+q.q;box.appendChild(p);
+    q.o.forEach((o,j)=>{
+      const b=document.createElement(`button`);b.type=`button`;b.className=`opt`;
+      b.textContent=`abcd`[j]+`) `+o;
+      b.addEventListener(`click`,()=>{
+        if(locked)return;
+        answers[i]=j;
+        box.querySelectorAll(`.opt`).forEach(x=>x.classList.remove(`sel`));
+        b.classList.add(`sel`);update();
+      });
+      box.appendChild(b);
+    });
+    const fb=document.createElement(`div`);fb.className=`fb`;box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  result.style.display=`none`;update();
+}
+function update(){
+  const all=answers.every(a=>a!==null);
+  evalBtn.disabled=!all||locked;
+  hint.style.display=(all||locked)?`none`:`block`;
+}
+evalBtn.addEventListener(`click`,()=>{
+  if(locked)return;locked=true;let sc=0;
+  const boxes=quiz.querySelectorAll(`.box`);
+  Q.forEach((q,i)=>{
+    const box=boxes[i];box.classList.add(`locked`);
+    const opts=box.querySelectorAll(`.opt`);const fb=box.querySelector(`.fb`);
+    opts.forEach(x=>x.classList.remove(`sel`));
+    opts[q.a].classList.add(`ok`);
+    if(answers[i]===q.a){sc++;fb.className=`fb good`;fb.textContent=`Správně.`;}
+    else{opts[answers[i]].classList.add(`bad`);fb.className=`fb wrong`;fb.textContent=`Špatně. Správná odpověď: `+`abcd`[q.a]+`) `+q.o[q.a];}
+  });
+  document.getElementById(`score`).textContent=sc+` z `+Q.length;
+  const e=E.find(x=>sc>=x.min&&sc<=x.max);
+  document.getElementById(`evaltext`).textContent=e?e.t:``;
+  result.style.display=`block`;update();
+  result.scrollIntoView({behavior:`smooth`,block:`start`});
+});
+document.getElementById(`retry`).addEventListener(`click`,()=>{render();window.scrollTo({top:0,behavior:`smooth`});});
+render();
+</script>
+</body>
+</html>
