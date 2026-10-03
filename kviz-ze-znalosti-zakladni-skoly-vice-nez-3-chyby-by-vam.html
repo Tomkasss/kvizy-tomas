@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz ze znalostí základní školy: Více než 3 chyby by vám měly být trapné</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover{background:#f7f4f0}
+.locked .opt.sel:hover{background:#dcd3c7}
+.locked .opt.ok:hover{background:#d4edda}
+.locked .opt.bad:hover{background:#f8d7da}
+.fb{margin-top:14px;font-size:.98rem}
+.fb.ok{color:#1e5631}
+.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;font-family:inherit;cursor:pointer}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 14px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz ze znalostí základní školy: Více než 3 chyby by vám měly být trapné</h1>
+<p class="perex">Dějepis, zeměpis, přírodopis, matematika, fyzika, chemie, literatura i občanka. Všechno jste kdysi měli v sešitě a nejspíš i v písemce. Titulek je přísný: kdo udělá víc než tři chyby, měl by se nad svým vysvědčením zpětně začervenat.</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="rtext" id="rtext"></p>
+<button type="button" class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q = [
+{q:`Do které národopisné oblasti patří Prostějov?`,o:[`Slovácko`,`Haná`,`Valašsko`,`Horácko`],a:1},
+{q:`Nájezdy kterého národa přispěly na počátku 10. století k zániku Velkomoravské říše?`,o:[`Avarů`,`Franků`,`Bulharů`,`Maďarů`],a:3},
+{q:`Která z těchto rostlin patří mezi jednoděložné?`,o:[`slunečnice`,`hrách`,`cibule`,`brambor`],a:2},
+{q:`Které těleso vznikne otáčením pravoúhlého trojúhelníku kolem jeho odvěsny?`,o:[`válec`,`komolý kužel`,`kužel`,`koule`],a:2},
+{q:`Jakou barvu dostaneme sloučením červeného a zeleného světla?`,o:[`žlutou`,`hnědou`,`bílou`,`purpurovou`],a:0},
+{q:`Který plyn se uvolňuje, když zinek reaguje se zředěnou kyselinou sírovou?`,o:[`kyslík`,`dusík`,`oxid uhličitý`,`vodík`],a:3},
+{q:`Do které dívky se v Dykově Krysaři zamiluje hlavní hrdina?`,o:[`Markéty`,`Agnes`,`Gertrudy`,`Uršuly`],a:1},
+{q:`Kdo schvaluje rozpočet obce?`,o:[`starosta`,`rada obce`,`zastupitelstvo obce`,`obecní úřad`],a:2},
+{q:`Který rod vládl v době renesance ve Florencii?`,o:[`Medicejové`,`Sforzové`,`Borgiové`,`Gonzagové`],a:0},
+{q:`Kterou část Sixtinské kaple zaujímá Michelangelova freska Poslední soud?`,o:[`strop`,`oltářní stěnu`,`vstupní stěnu`,`boční stěnu`],a:1}
+];
+const E = [
+{min:0,max:3,t:`Tři a méně správných odpovědí. Tady už nejde o pár zapomenutých detailů, ze školní látky vám zůstaly spíš názvy předmětů než to, co se v nich probíralo. Podle titulku je to výsledek, o kterém se v práci raději nemluví.`},
+{min:4,max:6,t:`Chyb bylo víc než tři, takže vás titulek bohužel řadí mezi ty, kdo by se měli trochu stydět. Základ máte, jen se v polovině otázek ukázalo, kde vám škola vyprchala nejvíc.`},
+{min:7,max:9,t:`Hranice z titulku je splněná. Nejvýš tři chyby si po letech od poslední vyučovací hodiny může dovolit každý, rudnout nemusíte.`},
+{min:10,max:10,t:`Plný počet bez jediného zaváhání, od tělesa vzniklého otáčením trojúhelníku až po malbu ve Vatikánu. Tohle zvládne jen menšina a vy mezi ni patříte.`}
+];
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+let answers = [];
+let locked = false;
+function render() {
+  quiz.innerHTML = ``;
+  answers = new Array(Q.length).fill(null);
+  locked = false;
+  Q.forEach((q, i) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (i + 1) + `. ` + q.q;
+    box.appendChild(p);
+    q.o.forEach((o, j) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = `abcd`[j] + `) ` + o;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[i] = j;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`sel`));
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    quiz.appendChild(box);
+  });
+  update();
+}
+function update() {
+  const done = answers.every(a => a !== null);
+  evalBtn.disabled = !done;
+  hint.style.display = done ? `none` : `block`;
+}
+evalBtn.addEventListener(`click`, () => {
+  if (locked || answers.some(a => a === null)) return;
+  locked = true;
+  let score = 0;
+  quiz.querySelectorAll(`.box`).forEach((box, i) => {
+    box.classList.add(`locked`);
+    const opts = box.querySelectorAll(`.opt`);
+    const ok = answers[i] === Q[i].a;
+    if (ok) score++;
+    opts[Q[i].a].classList.add(`ok`);
+    if (!ok) opts[answers[i]].classList.add(`bad`);
+    const fb = document.createElement(`p`);
+    fb.className = `fb ` + (ok ? `ok` : `bad`);
+    fb.textContent = ok ? `Správně.` : `Špatně. Správná odpověď: ` + `abcd`[Q[i].a] + `) ` + Q[i].o[Q[i].a];
+    box.appendChild(fb);
+  });
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  document.getElementById(`score`).textContent = score + ` z ` + Q.length;
+  const e = E.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`rtext`).textContent = e ? e.t : ``;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior: `smooth`, block: `start`});
+});
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  result.style.display = `none`;
+  evalBtn.style.display = `block`;
+  render();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+render();
+</script>
+</body>
+</html>
