@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz z logiky: Pokud nedáte 8/10, váš mozek není tak bystrý, jak si myslíte</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 32px 20px; background: #f5f0eb; font-family: Georgia, "Times New Roman", serif; color: #2c2c2c; line-height: 1.5; }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 16px; color: #2c2c2c; }
+  .perex { font-size: 1.05rem; color: #4a4a4a; margin: 0 0 32px; }
+  .box { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 28px; margin-bottom: 24px; }
+  .q-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin: 0 0 18px; }
+  .opt { display: block; width: 100%; text-align: left; padding: 14px 18px; margin: 0 0 10px; background: #f7f4f0; border: 1px solid #d9d2c9; border-radius: 8px; font-family: inherit; font-size: 1rem; color: #3a3a3a; cursor: pointer; }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+  .opt.correct { background: #d4edda; border-color: #7cb987; color: #1e5631; }
+  .opt.wrong { background: #f8d7da; border-color: #d4848a; color: #721c24; }
+  .locked .opt { cursor: default; }
+  .locked .opt:hover { background: #f7f4f0; }
+  .locked .opt.selected:hover { background: #dcd3c7; }
+  .locked .opt.correct:hover { background: #d4edda; }
+  .locked .opt.wrong:hover { background: #f8d7da; }
+  .feedback { margin-top: 14px; font-size: 0.98rem; display: none; }
+  .feedback.ok { color: #1e5631; }
+  .feedback.bad { color: #721c24; }
+  .btn { display: block; margin: 40px auto 0; padding: 16px 40px; border: none; border-radius: 8px; font-family: inherit; font-size: 1.1rem; font-weight: bold; color: #fff; background: #5b7e5f; cursor: pointer; }
+  .btn:hover { background: #4a6b4e; }
+  .btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint { text-align: center; color: #8a8a8a; font-size: 0.95rem; margin-top: 12px; }
+  #result { display: none; background: #fefcf9; border-top: 4px solid #5b7e5f; margin-top: 40px; text-align: center; }
+  .score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin: 0 0 12px; }
+  .verdict { font-size: 1rem; color: #4a4a4a; text-align: center; margin: 0; }
+  #retry { background: #8c7b6b; margin-top: 28px; }
+  #retry:hover { background: #756658; }
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    .box { padding: 20px 16px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="title"></h1>
+  <p class="perex" id="perex"></p>
+  <div id="quiz"></div>
+  <button class="btn" id="evaluate" type="button" disabled>Vyhodnotit</button>
+  <p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+  <div class="box" id="result">
+    <p class="score" id="score"></p>
+    <p class="verdict" id="verdict"></p>
+    <button class="btn" id="retry" type="button">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+(function () {
+  const TITLE = `Kvíz z logiky: Pokud nedáte 8/10, váš mozek není tak bystrý, jak si myslíte`;
+  const PEREX = `Osm z deseti zní jako pohodlná laťka. Kouřící lékařka, žebřík na boku lodi a kostka, která se třikrát převalí po stole: kolik z deseti úloh ustojíte?`;
+  const QUESTIONS = [
+    { q: `1. Lékařka, která sama kouří, radí pacientovi, aby kouření nechal. Pacient odpoví: „Proč bych vás měl poslouchat, když sama kouříte?“ Kde je v jeho úvaze chyba?`, o: [`Lékařka o škodlivosti kouření ví víc než on, takže ji poslechnout musí.`, `Z toho, co dělá sama lékařka, nijak neplyne, zda je její rada správná.`, `Chyba tam není: kdo sám kouří, nemá druhým kouření rozmlouvat.`, `Námitka je věcně v pořádku, jen ji neměl lékařce říkat tak příkře.`], a: 1 },
+    { q: `2. Trenér po tréninku řekl: „Dokonce i Marek dnes uběhl deset kilometrů.“ Co tím o Markovi naznačil?`, o: [`Marek byl jediný z týmu, kdo dnes deset kilometrů uběhl.`, `Marek dnes běžel rychleji než všichni ostatní v týmu.`, `Marek uběhne deset kilometrů na každém tréninku.`, `Od Marka se takový výkon čekal méně než od ostatních.`], a: 3 },
+    { q: `3. Ve třídách, kde učitel často napomíná, bývají děti neposlušnější, a proto prý napomínání dělá děti neposlušnými. Která námitka míří přesně na slabinu této úvahy?`, o: [`Učitel může napomínat častěji právě proto, že děti v té třídě zlobí.`, `I ve třídách, kde se napomíná málo, se najdou neposlušné děti.`, `Z toho, že napomínání nepomáhá, ještě neplyne, že děti zhoršuje.`, `Napomínání má smysl, i když děti hned neposlechnou, protože jim ukazuje hranice.`], a: 0 },
+    { q: `4. Letadlo vzlétne v 9:00 pražského času a za 3 hodiny přistane ve městě, kde mají hodiny o 2 hodiny méně než v Praze. Kolik ukazují místní hodiny při přistání?`, o: [`12:00`, `14:00`, `10:00`, `7:00`], a: 2 },
+    { q: `5. Na stole leží kartička s malým tiskacím písmenem b. Které písmeno na ní uvidíte, když ji po stole otočíte o půl otáčky, aniž byste ji obrátili rubem nahoru?`, o: [`b`, `p`, `d`, `q`], a: 3 },
+    { q: `6. Loď kotví v přístavu a volně se pohupuje na vodě. Z jejího boku visí do vody provazový žebřík, pevně uvázaný k zábradlí paluby. Pod hladinou jsou teď dvě příčky a příčky jsou od sebe 25 centimetrů. Kolik příček bude pod vodou, až příliv zvedne hladinu o půl metru?`, o: [`čtyři`, `dvě`, `tři`, `podle toho, jak je loď těžká`], a: 1 },
+    { q: `7. Ze 30 účastníků zájezdu umí 21 lyžovat a 17 bruslit. Kolik z nich nejméně umí obojí?`, o: [`0`, `4`, `8`, `17`], a: 2 },
+    { q: `8. Čtvercový papír přeložíte napůl a pak ještě jednou napůl, kolmo k prvnímu přehybu. Kolik otvorů bude v papíru po rozložení, když v přeloženém stavu ustřihnete roh, ve kterém se oba přehyby stýkají?`, o: [`jeden`, `dva`, `čtyři`, `žádný, jen budou zastřižené rohy`], a: 0 },
+    { q: `9. Ke každému zámku v domě pasuje aspoň jeden klíč ze svazku. Co z toho jistě plyne?`, o: [`Každý klíč ze svazku pasuje aspoň k jednomu zámku v domě.`, `Ve svazku je klíč, který pasuje ke všem zámkům v domě.`, `Pokud je v domě jen jeden zámek, pasují k němu všechny klíče ze svazku.`, `Pokud je ve svazku jen jeden klíč, pasuje ke všem zámkům v domě.`], a: 3 },
+    { q: `10. Kostka leží na stole a na její stěně přivrácené k vám je červená tečka. Kde bude tečka, když kostku překlopíte přes hranu jednou směrem od sebe a pak dvakrát po sobě doprava?`, o: [`dole, na stole`, `na pravé stěně`, `nahoře`, `na stěně přivrácené k vám`], a: 0 }
+  ];
+  const LETTERS = [`a`, `b`, `c`, `d`];
+  const RESULTS = [
+    { min: 0, max: 3, text: `Titulek tentokrát udeřil hřebík na hlavičku: od osmi bodů jste daleko a bystrost, kterou si přisuzujete, se v tomhle kvízu neukázala. Body utekly už u úloh na jediný krok, třeba u kouřící lékařky, u letadla a místního času nebo u trenérova „dokonce i“. Projděte si řešení a zkuste to znovu, tyhle úvahy se dají natrénovat.` },
+    { min: 4, max: 6, text: `Pod hranicí z titulku, takže s bystrostí to podle něj zatím není tak slavné, jak si myslíte. Úlohy na začátku vám nejspíš vyšly a body se ztratily až v prostřední části: u otočené kartičky, u žebříku na lodi, u přeloženého papíru nebo u svazku klíčů, kde první nápad vede jinam než úvaha.` },
+    { min: 7, max: 9, text: `S pouhými sedmi body vám k osmičce chyběla jediná úloha, a výrok titulku o bystrosti tak na vás zatím platí. S osmi nebo devíti body jste osmibodovou laťku splnili a bystrost, kterou si přisuzujete, máte podloženou výsledkem. O zbylé body vás nejspíš připravila kostka překlápěná třikrát za sebou a pasti v prostřední části.` },
+    { min: 10, max: 10, text: `Deset z deseti, žádná úloha vás nepřelstila. Neoklamala vás kartička ani žebřík a kostku jste v hlavě převalili správně až do konce. Bystrost, kterou si přisuzujete, tu máte potvrzenou bez výhrad.` }
+  ];
+
+  document.getElementById(`title`).textContent = TITLE;
+  document.getElementById(`perex`).textContent = PEREX;
+
+  const quizEl = document.getElementById(`quiz`);
+  const evalBtn = document.getElementById(`evaluate`);
+  const hint = document.getElementById(`hint`);
+  const resultEl = document.getElementById(`result`);
+  const scoreEl = document.getElementById(`score`);
+  const verdictEl = document.getElementById(`verdict`);
+  const retryBtn = document.getElementById(`retry`);
+
+  let answers = new Array(QUESTIONS.length).fill(null);
+  let locked = false;
+
+  function build() {
+    quizEl.innerHTML = ``;
+    QUESTIONS.forEach(function (item, qi) {
+      const box = document.createElement(`div`);
+      box.className = `box`;
+      const p = document.createElement(`p`);
+      p.className = `q-text`;
+      p.textContent = item.q;
+      box.appendChild(p);
+      item.o.forEach(function (opt, oi) {
+        const b = document.createElement(`button`);
+        b.type = `button`;
+        b.className = `opt`;
+        b.textContent = LETTERS[oi] + `) ` + opt;
+        b.dataset.q = qi;
+        b.dataset.o = oi;
+        b.addEventListener(`click`, function () { choose(qi, oi); });
+        box.appendChild(b);
+      });
+      const fb = document.createElement(`div`);
+      fb.className = `feedback`;
+      fb.id = `fb-` + qi;
+      box.appendChild(fb);
+      quizEl.appendChild(box);
+    });
+  }
+
+  function choose(qi, oi) {
+    if (locked) return;
+    answers[qi] = oi;
+    const btns = quizEl.querySelectorAll(`.opt[data-q="` + qi + `"]`);
+    btns.forEach(function (b) {
+      b.classList.toggle(`selected`, Number(b.dataset.o) === oi);
+    });
+    updateState();
+  }
+
+  function updateState() {
+    const all = answers.every(function (a) { return a !== null; });
+    evalBtn.disabled = !all;
+    hint.style.display = all ? `none` : `block`;
+  }
+
+  function evaluate() {
+    if (locked || answers.some(function (a) { return a === null; })) return;
+    locked = true;
+    quizEl.classList.add(`locked`);
+    let score = 0;
+    QUESTIONS.forEach(function (item, qi) {
+      const btns = quizEl.querySelectorAll(`.opt[data-q="` + qi + `"]`);
+      btns.forEach(function (b) {
+        const oi = Number(b.dataset.o);
+        if (oi === item.a) b.classList.add(`correct`);
+        else if (oi === answers[qi]) b.classList.add(`wrong`);
+      });
+      const fb = document.getElementById(`fb-` + qi);
+      fb.style.display = `block`;
+      if (answers[qi] === item.a) {
+        score++;
+        fb.className = `feedback ok`;
+        fb.textContent = `Správně.`;
+      } else {
+        fb.className = `feedback bad`;
+        fb.textContent = `Špatně. Správná odpověď: ` + LETTERS[item.a] + `) ` + item.o[item.a];
+      }
+    });
+    scoreEl.textContent = score + ` z ` + QUESTIONS.length;
+    const r = RESULTS.find(function (x) { return score >= x.min && score <= x.max; });
+    verdictEl.textContent = r ? r.text : ``;
+    evalBtn.style.display = `none`;
+    hint.style.display = `none`;
+    resultEl.style.display = `block`;
+    resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+  }
+
+  function reset() {
+    answers = new Array(QUESTIONS.length).fill(null);
+    locked = false;
+    quizEl.classList.remove(`locked`);
+    build();
+    resultEl.style.display = `none`;
+    evalBtn.style.display = `block`;
+    updateState();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  }
+
+  evalBtn.addEventListener(`click`, evaluate);
+  retryBtn.addEventListener(`click`, reset);
+  build();
+  updateState();
+})();
+</script>
+</body>
+</html>
