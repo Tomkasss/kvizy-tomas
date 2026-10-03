@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz: 90 % Čechů přecení své schopnosti. Tipněte si skóre a pak zkuste pravdu</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px}
+.perex{font-size:1.08rem;line-height:1.6;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-top:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover:not(.ok):not(.bad):not(.sel){background:#f7f4f0}
+.fb{margin-top:12px;font-size:.98rem}
+.fb.ok{color:#1e5631} .fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#again{background:#8c7b6b}
+#again:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz: 90 % Čechů přecení své schopnosti. Tipněte si skóre a pak zkuste pravdu</h1>
+<p class="perex">Než začnete, napište si na papír číslo: kolik z deseti otázek podle vás zodpovíte správně. Sebevědomí nic nestojí, body ano. Na konci tip porovnejte s výsledkem a uvidíte, jestli patříte k většině, která se přecení, nebo k menšině, která ne.</p>
+<div id="quiz"></div>
+<button id="eval" class="btn" disabled>Vyhodnotit</button>
+<p id="hint" class="hint">Odpovězte prosím na všechny otázky</p>
+<div id="result" class="box"><p class="score" id="score"></p><p class="rtext" id="rtext"></p><button id="again" class="btn">Zkusit znovu</button></div>
+</div>
+<script>
+const Q=[
+{q:`Která řeka tvoří část státní hranice Česka se Slovenskem?`,o:[`Dyje`,`Morava`,`Olše`,`Opava`],a:1},
+{q:`Kdo pronesl v Berlíně větu „Ich bin ein Berliner“?`,o:[`Ronald Reagan`,`Richard Nixon`,`Harry Truman`,`John F. Kennedy`],a:3},
+{q:`Jak podle hasičů správně uhasit pánev, na které chytil olej?`,o:[`přikrýt ji pokličkou`,`zalít ji studenou vodou`,`odnést ji k dřezu`,`zapnout naplno digestoř`],a:0},
+{q:`Kdo je autorem knižní ságy o zaklínači Geraltovi z Rivie?`,o:[`Stanisław Lem`,`Andrzej Sapkowski`,`Dmitrij Gluchovskij`,`George R. R. Martin`],a:1},
+{q:`Které těleso je největší v hlavním pásu planetek?`,o:[`Ceres`,`Vesta`,`Pallas`,`Eros`],a:0},
+{q:`Kdo byla druhou manželkou Napoleona Bonaparta?`,o:[`Josefína de Beauharnais`,`Marie Luisa`,`Désirée Clary`,`Marie Walewská`],a:1},
+{q:`Který šlechtický rod vybudoval Lednicko-valtický areál?`,o:[`Schwarzenberkové`,`Dietrichsteinové`,`Kounicové`,`Lichtenštejnové`],a:3},
+{q:`Který klub vyhrál Stanleyův pohár nejvíckrát?`,o:[`Toronto Maple Leafs`,`Detroit Red Wings`,`Montreal Canadiens`,`Boston Bruins`],a:2},
+{q:`Čím se živil muž, jehož příjmení dalo vzniknout slovu bojkot?`,o:[`spravoval statky v Irsku`,`sloužil jako důstojník britského námořnictva`,`vlastnil přádelny v Lancashiru`,`vedl stávku přístavních dělníků`],a:0},
+{q:`S jakou písní vyhrála skupina ABBA soutěž Eurovize?`,o:[`Mamma Mia`,`Dancing Queen`,`Waterloo`,`Ring Ring`],a:2}
+];
+const EV=[{min:0,max:3,t:`Tohle skóre je hluboko pod průměrem a ztratili jste body i na otázkách, které zná většina dospělých. Jestli jste si tipli víc než tři body, přecenili jste se. Pokud jste čekali víc než pět, šlo o pořádný rozdíl. S nízkým tipem jste se odhadli dobře, jen výsledek zatím není důvod k hrdosti.`},{min:4,max:6,t:`Jste pod hranicí, kterou tenhle kvíz čeká od průměrného dospělého, protože kromě snadných otázek vám utekla i část středně těžkých. Pokud jste si tipli sedm a víc, patříte k té většině, která se přeceňuje. S tipem do šesti jste se odhadli poctivě, ale znalosti máte zatím spíš průměrné.`},{min:7,max:9,t:`Víc než solidní výsledek. Sedm bodů je průměr, který kvíz čeká od dospělého, osm nebo devět je nad ním. Porovnejte tip se skutečností. Pokud jste si tipli víc, než jste získali, patříte k většině, která se přeceňuje, i když jen o bod nebo dva. Pokud jste tipli přesně nebo méně, odhadli jste se poctivě, nebo dokonce skromně.`},{min:10,max:10,t:`Plný počet, na který dosáhne jen menšina řešitelů. Neshodil vás zeměpis, dějiny, bezpečnost v domácnosti, vesmír, šlechtické památky, hokej, literatura, populární hudba ani původ slov. Jestli jste si předem tipli deset, odhadli jste se přesně. Pokud jste tipovali méně, podcenili jste se a máte víc důvodů k sebevědomí, než jste si připouštěli.`}];
+const L=[`a`,`b`,`c`,`d`];
+const quiz=document.getElementById(`quiz`),ev=document.getElementById(`eval`),hint=document.getElementById(`hint`),res=document.getElementById(`result`);
+let sel=[],locked=false;
+function render(){
+ quiz.innerHTML=``;sel=Q.map(()=>-1);locked=false;quiz.classList.remove(`locked`);
+ Q.forEach((q,i)=>{
+  const b=document.createElement(`div`);b.className=`box`;
+  const t=document.createElement(`p`);t.className=`qt`;t.textContent=(i+1)+`. `+q.q;b.appendChild(t);
+  q.o.forEach((o,j)=>{const x=document.createElement(`button`);x.type=`button`;x.className=`opt`;x.textContent=L[j]+`) `+o;
+   x.addEventListener(`click`,()=>{if(locked)return;sel[i]=j;b.querySelectorAll(`.opt`).forEach((y,k)=>y.classList.toggle(`sel`,k===j));upd();});b.appendChild(x);});
+  const f=document.createElement(`p`);f.className=`fb`;b.appendChild(f);
+  quiz.appendChild(b);
+ });
+ res.style.display=`none`;ev.style.display=`block`;upd();
+}
+function upd(){const all=sel.every(v=>v>=0);ev.disabled=!all;hint.style.display=all?`none`:`block`;}
+ev.addEventListener(`click`,()=>{
+ if(ev.disabled)return;locked=true;quiz.classList.add(`locked`);let sc=0;
+ quiz.querySelectorAll(`.box`).forEach((b,i)=>{const os=b.querySelectorAll(`.opt`),f=b.querySelector(`.fb`),a=Q[i].a;
+  os.forEach(o=>o.classList.remove(`sel`));os[a].classList.add(`ok`);
+  if(sel[i]===a){sc++;f.className=`fb ok`;f.textContent=`Správně.`;}else{os[sel[i]].classList.add(`bad`);f.className=`fb bad`;f.textContent=`Špatně. Správná odpověď: `+L[a]+`) `+Q[i].o[a];}});
+ document.getElementById(`score`).textContent=sc+` z `+Q.length;
+ const e=EV.find(x=>sc>=x.min&&sc<=x.max);document.getElementById(`rtext`).textContent=e?e.t:``;
+ ev.style.display=`none`;hint.style.display=`none`;res.style.display=`block`;res.scrollIntoView({behavior:`smooth`});
+});
+document.getElementById(`again`).addEventListener(`click`,()=>{render();window.scrollTo({top:0,behavior:`smooth`});});
+render();
+</script>
+</body>
+</html>
