@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test těžkých slov, které používá jen málokdo. 10/10 dají jen mistři</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px;color:#2c2c2c}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border:1px solid #7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border:1px solid #d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover:not(.correct):not(.wrong):not(.sel){background:#f7f4f0}
+.fb{margin-top:14px;font-size:.95rem;color:#4a4a4a;display:none}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a6d3b;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.evtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test těžkých slov, které používá jen málokdo. 10/10 dají jen mistři</h1>
+<p class="perex">Některá slova přežila hlavně v knihách a starých textech. Kdekdo je někdy slyšel, ale přesně je vysvětlí málokdo. Ověřte si, jestli patříte k té menšině, která jim opravdu rozumí.</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="submit" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="evtext" id="evtext"></p>
+<button type="button" class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q=[
+{q:`Co je to rubáš?`,o:[`sváteční zástěra ke kroji`,`kožich podšitý kožešinou na rubu`,`roucho, do kterého se oblékal zemřelý`,`kněžský plášť nošený při mši`],c:2},
+{q:`Co označuje slovo cimbuří?`,o:[`zubaté zakončení hradeb a hradních věží`,`padací most přes hradní příkop`,`strážní věžičku na rohu hradby`,`hradní sklep sloužící jako vězení`],c:0},
+{q:`Co znamená slovo pukrle?`,o:[`dívčí účes ze dvou copů`,`zdvořilou úklonu s pokrčením kolen`,`vyšívaný sváteční čepeček`,`malý koláček z kynutého těsta`],c:1},
+{q:`K čemu sloužil pranýř?`,o:[`k vážení zboží na tržišti`,`k ohlašování požárů zvoněním`,`k vybírání mýta u městské brány`,`k veřejnému vystavení provinilců potupě`],c:3},
+{q:`Co je pelest?`,o:[`postranní nebo čelní prkno postele`,`lavice kolem kachlových kamen`,`peřina plněná husím peřím`,`polička zavěšená nad lůžkem`],c:0},
+{q:`Co je ouvertura?`,o:[`přestávka mezi dějstvími opery`,`závěrečný sborový zpěv`,`orchestrální předehra`,`sólový přídavek na konci koncertu`],c:2},
+{q:`Co je žinčice?`,o:[`jalovcová pálenka`,`kyselá zelná polévka`,`placka z bramborového těsta`,`syrovátka z ovčího mléka`],c:3},
+{q:`Co označuje slovo chvojí?`,o:[`spadané suché listí`,`ulámané jehličnaté větve`,`lesní mech na podestýlku`,`suchá stébla trávy`],c:1},
+{q:`Jaká kniha se nazývá kancionál?`,o:[`sborník církevních písní`,`kniha zápisů o křtech a sňatcích`,`sbírka nedělních kázání`,`seznam kanovníků katedrály`],c:0},
+{q:`Čím se živil platnéř?`,o:[`tkal lněné plátno`,`vybíral platy a poddanské dávky`,`vyráběl kovovou zbroj`,`pokrýval střechy plechem`],c:2}
+];
+const E=[
+{min:0,max:3,t:`Tato slova vám zatím nic neříkají. Stačí ale pár starších knížek a příště to bude lepší.`},
+{min:4,max:6,t:`Některá stará slova znáte, u jiných jste hádali. Je to slušný základ, k mistrovství ale ještě kus chybí.`},
+{min:7,max:9,t:`Výborný výsledek. Málo používaným slovům rozumíte dobře a k mistrovské desítce vám chybělo jen málo.`},
+{min:10,max:10,t:`Jste mistr. Rozumíte všem deseti slovům včetně těch, která se dnes už skoro neužívají.`}
+];
+const answers=new Array(Q.length).fill(null);
+let locked=false;
+const quiz=document.getElementById(`quiz`);
+const submit=document.getElementById(`submit`);
+const hint=document.getElementById(`hint`);
+const result=document.getElementById(`result`);
+function render(){
+  quiz.innerHTML=``;
+  Q.forEach((item,i)=>{
+    const box=document.createElement(`div`);box.className=`box`;
+    const p=document.createElement(`p`);p.className=`qtext`;p.textContent=(i+1)+`. `+item.q;box.appendChild(p);
+    item.o.forEach((o,j)=>{
+      const b=document.createElement(`button`);b.type=`button`;b.className=`opt`;
+      b.textContent=`abcd`[j]+`) `+o;b.dataset.q=i;b.dataset.o=j;
+      b.addEventListener(`click`,()=>choose(i,j));
+      box.appendChild(b);
+    });
+    const fb=document.createElement(`div`);fb.className=`fb`;box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+}
+function choose(i,j){
+  if(locked)return;
+  answers[i]=j;
+  quiz.children[i].querySelectorAll(`.opt`).forEach((b,k)=>b.classList.toggle(`sel`,k===j));
+  update();
+}
+function update(){
+  const done=answers.every(a=>a!==null);
+  submit.disabled=!done;hint.style.display=done?`none`:`block`;
+}
+submit.addEventListener(`click`,()=>{
+  if(locked||answers.some(a=>a===null))return;
+  locked=true;let score=0;
+  Q.forEach((item,i)=>{
+    const box=quiz.children[i];box.classList.add(`locked`);
+    const btns=box.querySelectorAll(`.opt`);
+    btns[item.c].classList.add(`correct`);
+    const fb=box.querySelector(`.fb`);
+    if(answers[i]===item.c){score++;fb.textContent=`Správně.`;}
+    else{btns[answers[i]].classList.add(`wrong`);fb.textContent=`Správná odpověď: `+`abcd`[item.c]+`) `+item.o[item.c];}
+    fb.style.display=`block`;
+  });
+  document.getElementById(`score`).textContent=score+` z `+Q.length;
+  const e=E.find(x=>score>=x.min&&score<=x.max);
+  document.getElementById(`evtext`).textContent=e?e.t:``;
+  submit.style.display=`none`;hint.style.display=`none`;
+  result.style.display=`block`;
+  result.scrollIntoView({behavior:`smooth`,block:`start`});
+});
+document.getElementById(`retry`).addEventListener(`click`,()=>{
+  locked=false;answers.fill(null);render();
+  result.style.display=`none`;submit.style.display=`block`;update();
+  window.scrollTo({top:0,behavior:`smooth`});
+});
+render();update();
+</script>
+</body>
+</html>
