@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KVÍZ: Máte lepší všeobecný přehled než většina Čechů? 10 otázek ukáže pravdu</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px}
+.perex{font-size:1.08rem;line-height:1.6;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-top:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover:not(.ok):not(.bad):not(.sel){background:#f7f4f0}
+.fb{margin-top:12px;font-size:.98rem}
+.fb.ok{color:#1e5631} .fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#again{background:#8c7b6b}
+#again:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>KVÍZ: Máte lepší všeobecný přehled než většina Čechů? 10 otázek ukáže pravdu</h1>
+<p class="perex">Přehled se nepozná podle toho, kolik letopočtů umíte odříkat, ale podle toho, jestli rozumíte světu kolem sebe: úřadům, technice, přírodě i vesmíru. Běžný dospělý Čech tu dá sedm bodů. Dostanete se výš?</p>
+<div id="quiz"></div>
+<button id="eval" class="btn" disabled>Vyhodnotit</button>
+<p id="hint" class="hint">Odpovězte prosím na všechny otázky</p>
+<div id="result" class="box"><p class="score" id="score"></p><p class="rtext" id="rtext"></p><button id="again" class="btn">Zkusit znovu</button></div>
+</div>
+<script>
+const Q=[
+{q:`Komu se v Česku platí poplatek ze psů?`,o:[`krajskému úřadu`,`finančnímu úřadu`,`obci`,`krajské veterinární správě`],a:2},
+{q:`Čí fenka byla předlohou hrdinky knížky Dášeňka čili život štěněte?`,o:[`Josefa Lady`,`Karla Čapka`,`Eduarda Basse`,`Ferdinanda Peroutky`],a:1},
+{q:`K čemu slouží regenerační sůl, která se sype do myčky na nádobí?`,o:[`rozpouští mastnotu na nádobí`,`dezinfikuje vnitřek myčky`,`změkčuje vodu`,`urychluje sušení nádobí`],a:2},
+{q:`Nejpozději do kolika let od první registrace musí nové osobní auto v Česku poprvé na pravidelnou technickou kontrolu?`,o:[`do 3 let`,`do 4 let`,`do 5 let`,`do 6 let`],a:1},
+{q:`Jakým kvašením vzniká klasický český ležák?`,o:[`spodním`,`svrchním`,`spontánním`,`smíšeným`],a:0},
+{q:`Co platí, když e-mail pošlete kolegům zadaným v poli Komu a adresu šéfa vložíte do pole Skrytá kopie?`,o:[`Kolegové nepoznají, že zprávu dostal i šéf.`,`Šéf neuvidí, komu dalšímu byla zpráva poslána.`,`Když šéf klikne na Odpovědět všem, jeho odpověď dostanete jen vy.`,`Kolegové uvidí jen šéfovo jméno, ne celou e-mailovou adresu.`],a:0},
+{q:`Kolikrát se biatlonista ve vytrvalostním závodě zastaví na střelnici?`,o:[`dvakrát`,`třikrát`,`čtyřikrát`,`pětkrát`],a:2},
+{q:`Kdy přicházejí na svět mláďata medvěda hnědého?`,o:[`na jaře, krátce po probuzení matky`,`v létě`,`na podzim, před ulehnutím k zimnímu spánku`,`v zimě, v brlohu`],a:3},
+{q:`Kdo v akciové společnosti schvaluje rozdělení zisku, a tedy i výplatu dividend?`,o:[`představenstvo`,`dozorčí rada`,`generální ředitel`,`valná hromada`],a:3},
+{q:`Kterým směrem míří ohon komety?`,o:[`vždy dozadu za kometou, proti směru jejího letu`,`vždy zhruba směrem od Slunce`,`vždy směrem ke Slunci`,`vždy k nejbližší velké planetě, která ho přitahuje`],a:1}
+];
+const EV=[{min:0,max:3,t:`Tentokrát jste za většinou Čechů zůstali dost daleko. Průměrný řešitel má o čtyři a více bodů navíc, takže tvrzení o lepším přehledu by zatím neobstálo.`},{min:4,max:6,t:`Těsně pod průměrem. Většina Čechů by vás tu předběhla o jeden až tři body, rozdíl ale není velký a pár správných odpovědí navíc by vás s nimi srovnalo.`},{min:7,max:9,t:`Jste na úrovni většiny, nebo nad ní. Sedm bodů je přesně to, co dá běžný dospělý Čech, každý bod navíc už znamená, že přehled máte o kus širší než ostatní.`},{min:10,max:10,t:`Bez jediné chyby jste nechali většinu Čechů jasně za sebou. Plný počet z tohohle kvízu má jen menšina, takže lepší přehled než průměr vám nikdo neupře.`}];
+const L=[`a`,`b`,`c`,`d`];
+const quiz=document.getElementById(`quiz`),ev=document.getElementById(`eval`),hint=document.getElementById(`hint`),res=document.getElementById(`result`);
+let sel=[],locked=false;
+function render(){
+ quiz.innerHTML=``;sel=Q.map(()=>-1);locked=false;quiz.classList.remove(`locked`);
+ Q.forEach((q,i)=>{
+  const b=document.createElement(`div`);b.className=`box`;
+  const t=document.createElement(`p`);t.className=`qt`;t.textContent=(i+1)+`. `+q.q;b.appendChild(t);
+  q.o.forEach((o,j)=>{const x=document.createElement(`button`);x.type=`button`;x.className=`opt`;x.textContent=L[j]+`) `+o;
+   x.addEventListener(`click`,()=>{if(locked)return;sel[i]=j;b.querySelectorAll(`.opt`).forEach((y,k)=>y.classList.toggle(`sel`,k===j));upd();});b.appendChild(x);});
+  const f=document.createElement(`p`);f.className=`fb`;b.appendChild(f);
+  quiz.appendChild(b);
+ });
+ res.style.display=`none`;ev.style.display=`block`;upd();
+}
+function upd(){const all=sel.every(v=>v>=0);ev.disabled=!all;hint.style.display=all?`none`:`block`;}
+ev.addEventListener(`click`,()=>{
+ if(ev.disabled)return;locked=true;quiz.classList.add(`locked`);let sc=0;
+ quiz.querySelectorAll(`.box`).forEach((b,i)=>{const os=b.querySelectorAll(`.opt`),f=b.querySelector(`.fb`),a=Q[i].a;
+  os.forEach(o=>o.classList.remove(`sel`));os[a].classList.add(`ok`);
+  if(sel[i]===a){sc++;f.className=`fb ok`;f.textContent=`Správně.`;}else{os[sel[i]].classList.add(`bad`);f.className=`fb bad`;f.textContent=`Špatně. Správná odpověď: `+L[a]+`) `+Q[i].o[a];}});
+ document.getElementById(`score`).textContent=sc+` z `+Q.length;
+ const e=EV.find(x=>sc>=x.min&&sc<=x.max);document.getElementById(`rtext`).textContent=e?e.t:``;
+ ev.style.display=`none`;hint.style.display=`none`;res.style.display=`block`;res.scrollIntoView({behavior:`smooth`});
+});
+document.getElementById(`again`).addEventListener(`click`,()=>{render();window.scrollTo({top:0,behavior:`smooth`});});
+render();
+</script>
+</body>
+</html>
