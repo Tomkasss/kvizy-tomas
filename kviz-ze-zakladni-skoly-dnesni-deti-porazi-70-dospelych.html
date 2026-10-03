@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz ze základní školy: Dnešní děti porazí 70 % dospělých. Nenecháte se zahanbit?</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px}
+.perex{font-size:1.08rem;line-height:1.6;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-top:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover:not(.ok):not(.bad):not(.sel){background:#f7f4f0}
+.fb{margin-top:12px;font-size:.98rem}
+.fb.ok{color:#1e5631} .fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#again{background:#8c7b6b}
+#again:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz ze základní školy: Dnešní děti porazí 70 % dospělých. Nenecháte se zahanbit?</h1>
+<p class="perex">Dnešní školák tuhle látku probírá právě teď, vy jste ji naposledy otevřeli v sešitě před mnoha lety. Kukla, zrcadlo i tulipán prozradí, kolik z ní ve vás zůstalo a jestli byste se vedle dnešních dětí museli červenat.</p>
+<div id="quiz"></div>
+<button id="eval" class="btn" disabled>Vyhodnotit</button>
+<p id="hint" class="hint">Odpovězte prosím na všechny otázky</p>
+<div id="result" class="box"><p class="score" id="score"></p><p class="rtext" id="rtext"></p><button id="again" class="btn">Zkusit znovu</button></div>
+</div>
+<script>
+const Q=[
+{q:`Která z těchto řek pramení mimo území Česka?`,o:[`Ohře`,`Odra`,`Lužická Nisa`,`Bečva`],a:0},
+{q:`Který z těchto druhů hmyzu prochází při vývoji stadiem kukly?`,o:[`kobylka`,`včela`,`vážka`,`šváb`],a:1},
+{q:`Ve které z těchto vět je slovo „ráno“ podstatným jménem?`,o:[`Ráno jsem vstal brzy.`,`Ráno bylo chladné a mlhavé.`,`Dnes ráno mrzlo.`,`Vrátil se až ráno.`],a:1},
+{q:`Ve kterém moravském městě zasedal v letech 1848–1849 rakouský říšský sněm?`,o:[`Olomouc`,`Brno`,`Kroměříž`,`Znojmo`],a:2},
+{q:`Která látka tvoří kostkový cukr?`,o:[`glukóza`,`sacharóza`,`fruktóza`,`laktóza`],a:1},
+{q:`Jak končí balada Polednice z Erbenovy Kytice?`,o:[`dítě zemře matce v náručí`,`Polednice dítě odnese a matka ho už nikdy nenajde`,`dítě i matka zmizí s Polednicí`,`matka zemře a dítě zůstane naživu`],a:0},
+{q:`Který z těchto afrických států leží celým územím na jižní polokouli?`,o:[`Keňa`,`Uganda`,`Gabon`,`Tanzanie`],a:3},
+{q:`Jak daleko za rovinným zrcadlem vidíme obraz předmětu?`,o:[`přímo na ploše zrcadla`,`v polovině vzdálenosti, v jaké je předmět před zrcadlem`,`stejně daleko, jako je předmět před zrcadlem`,`dvakrát dál, než je předmět před zrcadlem`],a:2},
+{q:`Které z těchto práv patří podle Listiny základních práv a svobod mezi politická práva?`,o:[`právo na ochranu osobních údajů`,`listovní tajemství`,`svoboda myšlení a svědomí`,`právo na informace`],a:3},
+{q:`Kolik okvětních lístků má jednoduchý květ tulipánu?`,o:[`čtyři`,`pět`,`šest`,`osm`],a:2}
+];
+const EV=[{min:0,max:3,t:`Tentokrát by si vítězství odnesli školáci. Většina učiva, které jste kdysi psali do sešitů, se mezitím vytratila. Dítě s učebnicí v aktovce by vás v tomhle souboji přehrálo. Zahanbit se ale nemusíte navždy, protože u spousty otázek se vám po přečtení správné odpovědi všechno vybaví.`},{min:4,max:6,t:`Remíza s hořkou příchutí. Polovinu zápasu jste udrželi, druhou si odnesly děti. Kde jste museli tipovat, má dnešní žák navrch, protože to probíral nedávno. S tímhle výsledkem se nejspíš řadíte mezi těch sedmdesát procent dospělých, o kterých mluví titulek.`},{min:7,max:9,t:`Nezahanbili jste se. Se sedmi a více správnými odpověďmi vás školák jen tak nepřeskočí a ze školních let vám zůstalo víc, než by se dalo čekat. Jedna až tři chyby na těžších otázkách jsou přesně to, co dospělého odlišuje od dítěte, které tu látku mělo minulý týden.`},{min:10,max:10,t:`Plný počet. Děti by s vámi nanejvýš srovnaly krok, ale porazit by vás nedokázaly. Přírodopisem, dějepisem, fyzikou i mluvnicí jste prošli bez jediné chyby a patříte k menšině dospělých, na kterou dnešní školáci nestačí.`}];
+const L=[`a`,`b`,`c`,`d`];
+const quiz=document.getElementById(`quiz`),ev=document.getElementById(`eval`),hint=document.getElementById(`hint`),res=document.getElementById(`result`);
+let sel=[],locked=false;
+function render(){
+ quiz.innerHTML=``;sel=Q.map(()=>-1);locked=false;quiz.classList.remove(`locked`);
+ Q.forEach((q,i)=>{
+  const b=document.createElement(`div`);b.className=`box`;
+  const t=document.createElement(`p`);t.className=`qt`;t.textContent=(i+1)+`. `+q.q;b.appendChild(t);
+  q.o.forEach((o,j)=>{const x=document.createElement(`button`);x.type=`button`;x.className=`opt`;x.textContent=L[j]+`) `+o;
+   x.addEventListener(`click`,()=>{if(locked)return;sel[i]=j;b.querySelectorAll(`.opt`).forEach((y,k)=>y.classList.toggle(`sel`,k===j));upd();});b.appendChild(x);});
+  const f=document.createElement(`p`);f.className=`fb`;b.appendChild(f);
+  quiz.appendChild(b);
+ });
+ res.style.display=`none`;ev.style.display=`block`;upd();
+}
+function upd(){const all=sel.every(v=>v>=0);ev.disabled=!all;hint.style.display=all?`none`:`block`;}
+ev.addEventListener(`click`,()=>{
+ if(ev.disabled)return;locked=true;quiz.classList.add(`locked`);let sc=0;
+ quiz.querySelectorAll(`.box`).forEach((b,i)=>{const os=b.querySelectorAll(`.opt`),f=b.querySelector(`.fb`),a=Q[i].a;
+  os.forEach(o=>o.classList.remove(`sel`));os[a].classList.add(`ok`);
+  if(sel[i]===a){sc++;f.className=`fb ok`;f.textContent=`Správně.`;}else{os[sel[i]].classList.add(`bad`);f.className=`fb bad`;f.textContent=`Špatně. Správná odpověď: `+L[a]+`) `+Q[i].o[a];}});
+ document.getElementById(`score`).textContent=sc+` z `+Q.length;
+ const e=EV.find(x=>sc>=x.min&&sc<=x.max);document.getElementById(`rtext`).textContent=e?e.t:``;
+ ev.style.display=`none`;hint.style.display=`none`;res.style.display=`block`;res.scrollIntoView({behavior:`smooth`});
+});
+document.getElementById(`again`).addEventListener(`click`,()=>{render();window.scrollTo({top:0,behavior:`smooth`});});
+render();
+</script>
+</body>
+</html>
