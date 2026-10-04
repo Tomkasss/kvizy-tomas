@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz z logiky: Průměrné skóre je jen 5 bodu. Dostanete se alespoň na 8?</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.q{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.q-text{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px;line-height:1.5}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer;line-height:1.4}
+.opt:hover{background:#ede8e1}
+.opt.selected{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border:1px solid #7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border:1px solid #d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin-top:8px;font-size:.95rem;color:#4a4a4a;display:none}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;font-size:.95rem;margin-top:12px}
+.result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.eval{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+.btn-retry{background:#8c7b6b}
+.btn-retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.q{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz z logiky: Průměrné skóre je jen 5 bodu. Dostanete se alespoň na 8?</h1>
+<p class="perex">Průměrný řešitel tu skončí na pěti bodech. Na osmičku musíte odhadnout hladinu v nakloněné sklenici, přečíst hodiny v zrcadle, představit si stín krychle, vyznat se na šachovnici a nenechat se nachytat tam, kde se odpověď zdánlivě nabízí sama.</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="evaluate" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="result" id="result">
+<p class="score" id="score"></p>
+<p class="eval" id="evalText"></p>
+<button type="button" class="btn btn-retry" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  {text: `Sklenici do poloviny naplněnou vodou pomalu nakloníte tak, aby voda nevytekla, a v nakloněné poloze ji chvíli podržíte v klidu. Jak leží hladina vody, když se na sklenici díváte z boku?`, options: [`zůstane rovnoběžná se dnem sklenice`, `skloní se opačně než dno sklenice`, `zůstane rovnoběžná s deskou stolu`, `skloní se víc než dno sklenice`], correct: 2},
+  {text: `Šachový střelec smí táhnout jen šikmo, po úhlopříčkách, a to o libovolný počet polí. Střelec stojí na bílém poli. Na kterých polích se může ocitnout po libovolném počtu tahů?`, options: [`střídavě na bílých a černých`, `na libovolných, bílých i černých`, `na černých po tahu o lichý počet polí`, `jen na bílých`], correct: 3},
+  {text: `Hodíte šestkrát po sobě obyčejnou nepoškozenou mincí a výsledky zapisujete: O pro orla, P pro pannu. Která z řad OOOOOO a OPPOPO má větší šanci, že padne přesně v tomto pořadí?`, options: [`obě řady mají stejnou šanci`, `řada OPPOPO má větší šanci`, `řada OOOOOO má větší šanci`, `to se předem určit nedá`], correct: 0},
+  {text: `Máte koženou rukavici ušitou na levou ruku. Celou ji obrátíte naruby, i s prsty. Na kterou ruku teď tvarem pasuje?`, options: [`na levou ruku`, `na pravou ruku`, `na obě ruce stejně`, `na žádnou ruku`], correct: 1},
+  {text: `Na stěně za vámi visí ručičkové hodiny. Ciferník nemá číslice, jen rysku nahoře u dvanáctky. V zrcadle před sebou vidíte, že hodiny vypadají, jako by ukazovaly 3:15. Kolik je ve skutečnosti hodin?`, options: [`9:45`, `9:15`, `8:15`, `8:45`], correct: 3},
+  {text: `Krychli zavěsíte za slunečného dne na tenké niti nad rovnou zem a můžete ji natočit, jak chcete. Jaký tvar může mít stín, který krychle vrhá na zem?`, options: [`trojúhelník`, `pětiúhelník`, `šestiúhelník`, `osmiúhelník`], correct: 2},
+  {text: `Hostinský musí dodržet pravidlo: kdo pije pivo, musí mít aspoň 18 let. U stolu sedí čtyři hosté. O prvním ví jen to, že pije pivo. O druhém jen to, že pije limonádu. O třetím jen to, že mu je 30 let, a o čtvrtém jen to, že mu je 16 let. U kterých hostů musí hostinský zjistit, co o nich zatím neví, aby měl jistotu, že pravidlo nikdo neporušuje?`, options: [`jen u prvního`, `u prvního a čtvrtého`, `u prvního a třetího`, `u prvního, třetího i čtvrtého`], correct: 1},
+  {text: `Soused prochází starou čtvrtí plnou domů postavených před více než sto lety a říká: „Vidíš, dřív se stavělo pořádně, dnešní domy tak dlouho nevydrží.“ Co soused ve své úvaze přehlíží?`, options: [`že domy z té doby, které byly postavené hůř, už dávno zmizely`, `že staré domy mají obvykle silnější obvodové zdi než dnešní novostavby`, `že se dnes staví z úplně jiných materiálů než před sto lety`, `že se staré domy stavěly ručně, bez dnešní stavební techniky`], correct: 0},
+  {text: `Ve sklepě jsou tři vypínače. Jen jeden z nich rozsvěcí obyčejnou žárovku s vláknem v podkroví a ze sklepa na ni není vidět. S vypínači smíte zacházet libovolně, ale do podkroví smíte vyjít jen jednou. Který postup vám zaručí, že správný vypínač poznáte?`, options: [`zapnout první a druhý vypínač a hned vyjít nahoru`, `zapnout první, hned ho vypnout, zapnout druhý a vyjít nahoru`, `zapnout všechny tři, chvíli počkat, vypnout první a vyjít nahoru`, `zapnout první, chvíli počkat, vypnout ho, zapnout druhý a vyjít nahoru`], correct: 3},
+  {text: `Čtyři družstva A, B, C a D sehrála turnaj, v němž se každé utkalo s každým právě jednou. Remíza nebyla možná. Družstvo A vyhrálo všechna svá utkání a družstva B a C vyhrála stejný počet utkání. Kolik utkání vyhrálo družstvo D?`, options: [`žádné`, `jedno`, `dvě`, `nelze určit`], correct: 1}
+];
+const evaluations = [
+  {min: 0, max: 3, text: `Na průměrnou pětku vám chybí dva až pět bodů a k laťce osmi bodů je to daleko. Většina úloh tu vypadá jednodušeji, než ve skutečnosti je, a vás chytily hned ty první odpovědi, které se nabízely. Zkuste kvíz znovu a u každé úlohy se zastavte o vteřinu déle.`},
+  {min: 4, max: 6, text: `Jste kolem průměru, o kterém mluví titulek. Ti, kdo mají pět, jsou přesně na něm, čtyřka je těsně pod ním a šestka už nad ním. Laťku osmi bodů jste ale nepřekonali. Úlohy na jeden krok vám šly, ale tam, kde byla schovaná past nebo bylo potřeba udělat ještě jeden krok navíc, jste body ztráceli.`},
+  {min: 7, max: 9, text: `Jste nad průměrem, ale o laťce titulku rozhoduje každý bod. Sedm bodů je o dva lepší než průměr, k osmičce vám ale jedna úloha chyběla. S osmi nebo devíti body jste laťku splnili a průměrnou pětku jste nechali hluboko pod sebou.`},
+  {min: 10, max: 10, text: `Plný počet, o pět bodů víc, než je průměr, a laťku z titulku jste přeskočili s rezervou. Nespadli jste ani do jedné z pastí, včetně těžké úlohy z turnaje na konci. Takový výsledek má jen menšina řešitelů.`}
+];
+const letters = [`a`, `b`, `c`, `d`];
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+const quizEl = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`evaluate`);
+const hint = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+function render() {
+  quizEl.innerHTML = ``;
+  questions.forEach((q, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const p = document.createElement(`p`);
+    p.className = `q-text`;
+    p.textContent = (qi + 1) + `. ` + q.text;
+    box.appendChild(p);
+    q.options.forEach((o, oi) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = letters[oi] + `) ` + o;
+      b.dataset.q = qi;
+      b.dataset.o = oi;
+      b.addEventListener(`click`, onPick);
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`p`);
+    fb.className = `fb`;
+    box.appendChild(fb);
+    quizEl.appendChild(box);
+  });
+}
+function onPick(e) {
+  if (locked) return;
+  const qi = +e.currentTarget.dataset.q, oi = +e.currentTarget.dataset.o;
+  answers[qi] = oi;
+  const box = quizEl.children[qi];
+  box.querySelectorAll(`.opt`).forEach(b => b.classList.toggle(`selected`, +b.dataset.o === oi));
+  updateBtn();
+}
+function updateBtn() {
+  const all = answers.every(a => a !== null);
+  evalBtn.disabled = !all;
+  hint.style.display = all ? `none` : `block`;
+}
+evalBtn.addEventListener(`click`, () => {
+  if (locked || answers.some(a => a === null)) return;
+  locked = true;
+  let score = 0;
+  questions.forEach((q, qi) => {
+    const box = quizEl.children[qi];
+    const fb = box.querySelector(`.fb`);
+    box.querySelectorAll(`.opt`).forEach(b => {
+      const oi = +b.dataset.o;
+      b.disabled = true;
+      b.classList.remove(`selected`);
+      if (oi === q.correct) b.classList.add(`correct`);
+      else if (oi === answers[qi]) b.classList.add(`wrong`);
+    });
+    if (answers[qi] === q.correct) { score++; }
+    else { fb.textContent = `Správná odpověď: ` + letters[q.correct] + `) ` + q.options[q.correct]; fb.style.display = `block`; }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  const ev = evaluations.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`evalText`).textContent = ev ? ev.text : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({behavior: `smooth`, block: `start`});
+});
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  answers.fill(null);
+  locked = false;
+  resultEl.style.display = `none`;
+  evalBtn.style.display = `block`;
+  render();
+  updateBtn();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+render();
+updateBtn();
+</script>
+</body>
+</html>
