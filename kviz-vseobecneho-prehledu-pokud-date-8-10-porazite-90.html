@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz všeobecného přehledu: Pokud dáte 8/10, porazíte 90 % ostatních</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover{background:#f7f4f0}
+.locked .opt.sel:hover{background:#dcd3c7}
+.locked .opt.ok:hover{background:#d4edda}
+.locked .opt.bad:hover{background:#f8d7da}
+.fb{margin-top:8px;font-size:.95rem}
+.fb.good{color:#1e5631}
+.fb.wrong{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#721c24;margin-top:12px;font-size:.95rem}
+.result{background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px;display:none}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+.retry{background:#8c7b6b}
+.retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz všeobecného přehledu: Pokud dáte 8/10, porazíte 90 % ostatních</h1>
+<p class="perex">Osm bodů z deseti je hranice, za kterou se dostane jen každý desátý. Čekají vás reformace, zlatá horečka, formule 1, hudební streaming, filmové festivaly, americká literatura i komiksoví hrdinové. Kde skončíte vy?</p>
+<div id="quiz"></div>
+<button id="eval" class="btn" type="button" disabled>Vyhodnotit</button>
+<p id="hint" class="hint">Odpovězte prosím na všechny otázky</p>
+<div id="result" class="box result">
+<p id="score" class="score"></p>
+<p id="rtext" class="rtext"></p>
+<button id="retry" class="btn retry" type="button">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q=[
+{q:`Kde byla založena hudební streamovací služba Spotify?`,o:[`v USA`,`ve Švédsku`,`ve Velké Británii`,`v Izraeli`],a:1},
+{q:`Který pták je národním symbolem USA?`,o:[`orel skalní`,`orel mořský`,`káně rudochvostá`,`orel bělohlavý`],a:3},
+{q:`Ve kterém městě začala Lutherova reformace?`,o:[`Wittenberg`,`Worms`,`Erfurt`,`Augsburg`],a:0},
+{q:`Jakou hlavní cenu uděluje filmový festival v Benátkách?`,o:[`Zlatou palmu`,`Zlatého medvěda`,`Zlatého lva`,`Křišťálový glóbus`],a:2},
+{q:`Ve které zemi leží oblast Klondike?`,o:[`USA`,`Kanada`,`Austrálie`,`Jihoafrická republika`],a:1},
+{q:`Na kterém ostrově leží americká základna Guantánamo?`,o:[`Kuba`,`Portoriko`,`Jamajka`,`Hispaniola`],a:0},
+{q:`Které látky jsou hlavním viníkem ozonové díry?`,o:[`oxid uhličitý`,`metan`,`oxid siřičitý`,`freony`],a:3},
+{q:`Ve kterém desetiletí se odehrává román Velký Gatsby?`,o:[`v 90. letech 19. století`,`ve 30. letech 20. století`,`ve 20. letech 20. století`,`v 50. letech 20. století`],a:2},
+{q:`Ve které zemi vládne komiksový hrdina Black Panther?`,o:[`Zamunda`,`Wakanda`,`Sokovie`,`Genovie`],a:1},
+{q:`Se kterou stájí získal Ayrton Senna všechny své tituly mistra světa formule 1?`,o:[`McLaren`,`Williams`,`Ferrari`,`Lotus`],a:0}
+];
+const E=[
+{min:0,max:3,t:`Tentokrát to nevyšlo. Většina otázek vás zaskočila a body přišly spíš náhodou. Nevadí, příště může být desítka úplně jiná.`},
+{min:4,max:6,t:`Solidní základ. Zhruba polovinu jste zvládli, ale k hranici osmi bodů, za kterou se dostane jen každý desátý, vám chybí dvě až čtyři správné odpovědi.`},
+{min:7,max:9,t:`Se 7 body jste těsně pod hranicí, k slibu z titulku vám chyběla jediná odpověď. S 8 nebo 9 body jste ji překročili a porazili jste 90 % ostatních.`},
+{min:10,max:10,t:`Plný počet. Porazili jste 90 % ostatních s rezervou a bez jediné chyby, což se povede jen menšině i mezi těmi nejlepšími.`}
+];
+const quiz=document.getElementById(`quiz`);
+const evalBtn=document.getElementById(`eval`);
+const hint=document.getElementById(`hint`);
+const result=document.getElementById(`result`);
+let answers=new Array(Q.length).fill(null);
+let locked=false;
+function render(){
+quiz.innerHTML=``;
+Q.forEach((q,i)=>{
+const box=document.createElement(`div`);
+box.className=`box`;
+const t=document.createElement(`p`);
+t.className=`qt`;
+t.textContent=(i+1)+`. `+q.q;
+box.appendChild(t);
+q.o.forEach((o,j)=>{
+const b=document.createElement(`button`);
+b.type=`button`;
+b.className=`opt`;
+b.textContent=`abcd`[j]+`) `+o;
+b.addEventListener(`click`,()=>{
+if(locked)return;
+answers[i]=j;
+box.querySelectorAll(`.opt`).forEach(x=>x.classList.remove(`sel`));
+b.classList.add(`sel`);
+update();
+});
+box.appendChild(b);
+});
+const fb=document.createElement(`div`);
+fb.className=`fb`;
+box.appendChild(fb);
+quiz.appendChild(box);
+});
+}
+function update(){
+const all=answers.every(a=>a!==null);
+evalBtn.disabled=!all||locked;
+hint.style.display=all||locked?`none`:`block`;
+}
+evalBtn.addEventListener(`click`,()=>{
+if(answers.some(a=>a===null))return;
+locked=true;
+quiz.classList.add(`locked`);
+let score=0;
+const boxes=quiz.querySelectorAll(`.box`);
+Q.forEach((q,i)=>{
+const opts=boxes[i].querySelectorAll(`.opt`);
+const fb=boxes[i].querySelector(`.fb`);
+opts[q.a].classList.add(`ok`);
+if(answers[i]===q.a){score++;fb.className=`fb good`;fb.textContent=`Správně`;}
+else{opts[answers[i]].classList.add(`bad`);fb.className=`fb wrong`;fb.textContent=`Špatně. Správná odpověď: `+`abcd`[q.a]+`) `+q.o[q.a];}
+});
+document.getElementById(`score`).textContent=score+` z `+Q.length;
+const e=E.find(x=>score>=x.min&&score<=x.max);
+document.getElementById(`rtext`).textContent=e?e.t:``;
+result.style.display=`block`;
+update();
+result.scrollIntoView({behavior:`smooth`,block:`start`});
+});
+document.getElementById(`retry`).addEventListener(`click`,()=>{
+answers=new Array(Q.length).fill(null);
+locked=false;
+quiz.classList.remove(`locked`);
+result.style.display=`none`;
+render();update();
+window.scrollTo({top:0,behavior:`smooth`});
+});
+render();update();
+</script>
+</body>
+</html>
