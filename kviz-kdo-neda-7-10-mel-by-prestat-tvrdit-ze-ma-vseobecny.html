@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz: Kdo nedá 7/10, měl by přestat tvrdit, že má všeobecný přehled</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:1.8rem;line-height:1.3;margin:0 0 16px;color:#2c2c2c}
+.perex{font-size:1.05rem;color:#4a4a4a;margin:0 0 32px}
+.q{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-family:inherit;font-size:1rem;color:#3a3a3a;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.opt:disabled:hover{background:inherit}
+.opt.ok:disabled:hover{background:#d4edda}
+.opt.bad:disabled:hover{background:#f8d7da}
+.opt.sel:disabled:hover{background:#dcd3c7}
+.fb{margin-top:14px;font-size:.95rem;display:none}
+.fb.show{display:block}
+.fb.good{color:#1e5631}
+.fb.wrong{color:#721c24}
+.btn{display:block;margin:40px auto 0;background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;font-family:inherit;cursor:pointer}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a7f74;font-size:.95rem;margin-top:12px}
+.res{display:none;background:#fefcf9;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-top:40px;border-top:4px solid #5b7e5f}
+.res.show{display:block}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.verdict{font-size:1rem;color:#4a4a4a;text-align:center;margin:0}
+.again{background:#8c7b6b;margin-top:28px}
+.again:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}h1{font-size:1.5rem}.q{padding:20px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz: Kdo nedá 7/10, měl by přestat tvrdit, že má všeobecný přehled</h1>
+<p class="perex">Všeobecný přehled se tvrdí snadno, hůř se obhajuje. Tady ho prověří zeměpis doma i v cizině, kuchyně, sport, světci, technika, česká televize, dávná minulost Země, světová politika i starověký Řím.</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="res" id="res">
+<p class="score" id="score"></p>
+<p class="verdict" id="verdict"></p>
+<button type="button" class="btn again" id="again">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q = [
+{q:`Ve které zemi leží mys Nordkapp?`, o:[`Švédsko`,`Norsko`,`Finsko`,`Island`], a:1},
+{q:`Co se kromě jogurtu a česneku přidává do řecké omáčky tzatziki?`, o:[`sýr feta`,`olivy`,`mrkev`,`okurka`], a:3},
+{q:`S kým vybojovala Kateřina Siniaková na olympijských hrách v Paříži 2024 zlato ve smíšené čtyřhře?`, o:[`Tomáš Macháč`,`Jiří Lehečka`,`Jakub Menšík`,`Adam Pavlásek`], a:0},
+{q:`Který světec je patronem Irska?`, o:[`svatý Jiří`,`svatý Ondřej`,`svatý Patrik`,`svatý David`], a:2},
+{q:`Na které řece leží Třebíč?`, o:[`Jihlava`,`Svratka`,`Oslava`,`Dyje`], a:0},
+{q:`Ve kterém roce představila firma Apple první iPhone?`, o:[`2005`,`2006`,`2007`,`2009`], a:2},
+{q:`Kdo hrál Saturnina v televizním seriálu Saturnin?`, o:[`Ondřej Havelka`,`Oldřich Vízner`,`Josef Abrhám`,`Pavel Zedníček`], a:1},
+{q:`Jak se jmenoval prakontinent, který kdysi spojoval všechny dnešní světadíly?`, o:[`Gondwana`,`Laurasie`,`Tethys`,`Pangea`], a:3},
+{q:`Kdo v současnosti zastává funkci generálního tajemníka NATO?`, o:[`Jens Stoltenberg`,`Anders Fogh Rasmussen`,`Javier Solana`,`Mark Rutte`], a:3},
+{q:`Za vlády kterého římského císaře se začalo stavět Koloseum?`, o:[`Nero`,`Titus`,`Vespasián`,`Domitián`], a:2}
+];
+const R = [
+{min:0,max:3,t:`Tohle se s všeobecným přehledem nepotkalo. Zakopli jste už u otázek, které má člověk s rozhledem v malíčku. Až příště budete o svém přehledu mluvit, raději ubírejte.`},
+{min:4,max:6,t:`Těsně pod laťkou, ale pod ní. Základ máte, jenže u otázek, které chtěly víc než školní paměť, body utíkaly. Na sedm vám chyběl bod nebo tři, a tak to s tvrzením o všeobecném přehledu zatím nepůjde.`},
+{min:7,max:9,t:`Laťku jste přeskočili a o svém přehledu mluvit smíte. Tu a tam vám něco uteklo, ale tvrdit to smíte s čistým svědomím.`},
+{min:10,max:10,t:`Plný počet, a ten zvládne jen menšina. Nespletl vás Titus u Kolosea ani Stoltenberg u NATO. Svůj všeobecný přehled tvrdit můžete a nikdo vám to nevyvrátí.`}
+];
+const L = [`a`,`b`,`c`,`d`];
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+const res = document.getElementById(`res`);
+let ans = [], locked = false;
+function build(){
+  quiz.innerHTML = ``;
+  ans = new Array(Q.length).fill(null);
+  locked = false;
+  Q.forEach((item, i) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const t = document.createElement(`p`);
+    t.className = `qt`;
+    t.textContent = (i + 1) + `. ` + item.q;
+    box.appendChild(t);
+    item.o.forEach((opt, j) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = L[j] + `) ` + opt;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        ans[i] = j;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`sel`));
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`p`);
+    fb.className = `fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  res.classList.remove(`show`);
+  evalBtn.style.display = `block`;
+  update();
+}
+function update(){
+  const all = ans.every(a => a !== null);
+  evalBtn.disabled = !all;
+  hint.style.display = all ? `none` : `block`;
+}
+evalBtn.addEventListener(`click`, () => {
+  if (ans.some(a => a === null)) return;
+  locked = true;
+  let s = 0;
+  quiz.querySelectorAll(`.q`).forEach((box, i) => {
+    const btns = box.querySelectorAll(`.opt`);
+    const c = Q[i].a;
+    btns.forEach((b, j) => {
+      b.disabled = true;
+      b.classList.remove(`sel`);
+      if (j === c) b.classList.add(`ok`);
+      else if (j === ans[i]) b.classList.add(`bad`);
+    });
+    const fb = box.querySelector(`.fb`);
+    if (ans[i] === c) { s++; fb.textContent = `Správně.`; fb.className = `fb show good`; }
+    else { fb.textContent = `Špatně. Správná odpověď: ` + L[c] + `) ` + Q[i].o[c]; fb.className = `fb show wrong`; }
+  });
+  document.getElementById(`score`).textContent = s + ` z ` + Q.length;
+  const r = R.find(x => s >= x.min && s <= x.max);
+  document.getElementById(`verdict`).textContent = r ? r.t : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  res.classList.add(`show`);
+  res.scrollIntoView({behavior:`smooth`, block:`start`});
+});
+document.getElementById(`again`).addEventListener(`click`, () => {
+  build();
+  window.scrollTo({top:0, behavior:`smooth`});
+});
+build();
+</script>
+</body>
+</html>
