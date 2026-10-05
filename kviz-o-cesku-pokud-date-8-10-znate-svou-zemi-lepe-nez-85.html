@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz o Česku: Pokud dáte 8/10, znáte svou zemi lépe než 85 % lidí</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px;color:#2c2c2c}
+.perex{font-size:1.05rem;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border:1px solid #7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border:1px solid #d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin-top:12px;font-size:.95rem}
+.fb.okt{color:#1e5631} .fb.badt{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#721c24;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:16px}.box{padding:20px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz o Česku: Pokud dáte 8/10, znáte svou zemi lépe než 85 % lidí</h1>
+<p class="perex">Od hřbitovních svíček přes zámeckou knihovnu a ušlechtilé koně až po senátní palác a horskou elektrárnu: deset otázek prověří, jak dobře znáte Česko za hranicí učebnicových samozřejmostí.</p>
+<div id="quiz"></div>
+<button class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result"><p class="score" id="score"></p><p class="rtext" id="rtext"></p><button class="btn" id="retry">Zkusit znovu</button></div>
+</div>
+<script>
+const Q=[
+{q:`Na který den připadá Památka zesnulých, lidově zvaná dušičky?`,o:[`31. října`,`1. listopadu`,`2. listopadu`,`3. listopadu`],a:2},
+{q:`Na kterém zámku strávil Giacomo Casanova poslední roky života jako knihovník?`,o:[`v Lednici`,`na Konopišti`,`na Hluboké`,`na Duchcově`],a:3},
+{q:`Které dva barevné rázy se dnes chovají u starokladrubského koně?`,o:[`bělouši a vraníci`,`bělouši a hnědáci`,`ryzáci a hnědáci`,`vraníci a ryzáci`],a:0},
+{q:`Které místo v Česku pravidelně hostí Světový pohár v biatlonu?`,o:[`Harrachov`,`Bedřichov`,`Nové Město na Moravě`,`Špindlerův Mlýn`],a:2},
+{q:`Které město proslavily oplatkové trubičky?`,o:[`Pardubice`,`Hořice`,`Štramberk`,`Karlovy Vary`],a:1},
+{q:`Které pohoří leží na česko-rakouské hranici?`,o:[`Novohradské hory`,`Krušné hory`,`Jizerské hory`,`Lužické hory`],a:0},
+{q:`Ve kterém paláci sídlí Senát Parlamentu České republiky?`,o:[`v Thunovském paláci`,`v Černínském paláci`,`v Lichtenštejnském paláci`,`ve Valdštejnském paláci`],a:3},
+{q:`Kde je pohřben Edvard Beneš?`,o:[`v Lánech`,`na Vyšehradě`,`v Sezimově Ústí`,`v Kožlanech`],a:2},
+{q:`Ve kterém pohoří stojí přečerpávací vodní elektrárna Dlouhé stráně?`,o:[`v Hrubém Jeseníku`,`v Krkonoších`,`na Šumavě`,`v Orlických horách`],a:0},
+{q:`Ve kterém městě se narodil Alfons Mucha?`,o:[`v Moravském Krumlově`,`v Ivančicích`,`v Kroměříži`,`v Mikulově`],a:1}
+];
+const B=[
+{min:0,max:3,t:`Tímhle výsledkem patříte k té části lidí, která má Česko spíš za kulisu všedních dnů než za téma. Většina řešitelů skončí výš, takže je co dohánět. Dobrá zpráva je, že tyhle věci se nejlépe učí na výletech, ne z učebnic.`},
+{min:4,max:6,t:`Tady se schází velká část lidí. Základ máte, ale u věcí, které člověk jednou slyšel a pak zapomněl, vás předběhli ti, kdo se po zemi víc pohybují nebo sledují zprávy. Do slibované osmičky vám chybí dva až čtyři zásahy.`},
+{min:7,max:9,t:`Se sedmičkou jste přesně na úrovni, kam míří průměrný dospělý, a nad 85 % lidí vás to ještě nestaví. Osm nebo devět bodů už ano: tady vás titulek bere za slovo a v rozhledu po vlastní zemi necháváte většinu ostatních za sebou.`},
+{min:10,max:10,t:`Bez chyby to zvládne jen malá menšina i z těch, kdo osmičku přeskočí. Spojili jste dušičky, Casanovův zámek, kladrubské koně, biatlon, cukrářskou tradici, hory na hranici, palác na Malé Straně, prezidentský hrob, vodní elektrárnu i rodné město secesního malíře. Česko znáte do hloubky, jakou má jen málokdo.`}
+];
+const quiz=document.getElementById(`quiz`),evalBtn=document.getElementById(`eval`),hint=document.getElementById(`hint`),res=document.getElementById(`result`);
+let ans=[],done=false;
+function render(){
+  quiz.innerHTML=``;ans=new Array(Q.length).fill(null);done=false;
+  Q.forEach((q,i)=>{
+    const box=document.createElement(`div`);box.className=`box`;
+    const p=document.createElement(`p`);p.className=`qtext`;p.textContent=(i+1)+`. `+q.q;box.appendChild(p);
+    q.o.forEach((o,j)=>{
+      const b=document.createElement(`button`);b.type=`button`;b.className=`opt`;b.textContent=`abcd`[j]+`) `+o;
+      b.addEventListener(`click`,()=>{if(done)return;ans[i]=j;box.querySelectorAll(`.opt`).forEach(x=>x.classList.remove(`sel`));b.classList.add(`sel`);check();});
+      box.appendChild(b);
+    });
+    const fb=document.createElement(`p`);fb.className=`fb`;box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  res.style.display=`none`;check();
+}
+function check(){const all=ans.every(a=>a!==null);evalBtn.disabled=!all;hint.style.display=all?`none`:`block`;}
+evalBtn.addEventListener(`click`,()=>{
+  if(ans.some(a=>a===null))return;
+  done=true;let s=0;
+  quiz.querySelectorAll(`.box`).forEach((box,i)=>{
+    const opts=box.querySelectorAll(`.opt`),fb=box.querySelector(`.fb`),c=Q[i].a;
+    opts.forEach((b,j)=>{b.disabled=true;b.classList.remove(`sel`);if(j===c)b.classList.add(`ok`);else if(j===ans[i])b.classList.add(`bad`);});
+    if(ans[i]===c){s++;fb.className=`fb okt`;fb.textContent=`Správně.`;}
+    else{fb.className=`fb badt`;fb.textContent=`Špatně. Správná odpověď: `+`abcd`[c]+`) `+Q[i].o[c];}
+  });
+  document.getElementById(`score`).textContent=s+` z `+Q.length;
+  const b=B.find(x=>s>=x.min&&s<=x.max);document.getElementById(`rtext`).textContent=b?b.t:``;
+  evalBtn.disabled=true;evalBtn.style.display=`none`;hint.style.display=`none`;res.style.display=`block`;
+  res.scrollIntoView({behavior:`smooth`});
+});
+document.getElementById(`retry`).addEventListener(`click`,()=>{evalBtn.style.display=`block`;render();window.scrollTo({top:0,behavior:`smooth`});});
+render();
+</script>
+</body>
+</html>
