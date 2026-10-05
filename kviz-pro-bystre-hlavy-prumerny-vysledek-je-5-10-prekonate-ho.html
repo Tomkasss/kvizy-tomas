@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro bystré hlavy: Průměrný výsledek je 5/10. Překonáte ho alespoň o tři body?</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.1rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin-top:8px;font-size:.98rem}
+.fb.ok{color:#1e5631}.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro bystré hlavy: Průměrný výsledek je 5/10. Překonáte ho alespoň o tři body?</h1>
+<p class="perex">Průměrný řešitel tu skončí na pěti bodech, vaše laťka je o tři výš. Čeká vás studená válka, italská kuchyně, design, dějiny Země, film, česká literatura, sport, světové finance i podnikání. Kolik z toho ustojíte bez zaváhání?</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="evaluate" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="rtext" id="rtext"></p>
+<button type="button" class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const QUESTIONS = [
+{q:`Do kterého města dopravovali západní spojenci v letech 1948–1949 zásoby leteckým mostem kvůli sovětské blokádě?`,o:[`Vídeň`,`Terst`,`Lipsko`,`Berlín`],a:3},
+{q:`Které italské těstoviny mají tvar motýlků neboli mašliček?`,o:[`penne`,`fusilli`,`farfalle`,`rigatoni`],a:2},
+{q:`Kde otevřela firma Gebrüder Thonet roku 1856 svou první továrnu na ohýbaný nábytek mimo Vídeň?`,o:[`Koryčany`,`Bystřice pod Hostýnem`,`Vsetín`,`Halenkov`],a:0},
+{q:`Jak stará je přibližně Země?`,o:[`450 milionů let`,`1,2 miliardy let`,`4,5 miliardy let`,`13,8 miliardy let`],a:2},
+{q:`Kolik políček za sekundu se standardně promítá u zvukového filmu v kině?`,o:[`18`,`24`,`25`,`30`],a:1},
+{q:`Ve které Hrabalově knize vypráví svůj příběh Haňťa?`,o:[`Příliš hlučná samota`,`Obsluhoval jsem anglického krále`,`Taneční hodiny pro starší a pokročilé`,`Městečko, kde se zastavil čas`],a:0},
+{q:`Ve kterém roce byla dokončena Eiffelova věž?`,o:[`1871`,`1878`,`1889`,`1900`],a:2},
+{q:`Který grandslamový turnaj Ivan Lendl ve dvouhře nikdy nevyhrál?`,o:[`Australian Open`,`French Open`,`US Open`,`Wimbledon`],a:3},
+{q:`Kterou mezinárodní instituci vedla Christine Lagardeová, než se v roce 2019 stala prezidentkou Evropské centrální banky?`,o:[`Světovou banku`,`Mezinárodní měnový fond`,`Světovou obchodní organizaci`,`OECD`],a:1},
+{q:`Kdo se po smrti Tomáše Bati v roce 1932 stal jediným majitelem Baťových závodů?`,o:[`Tomáš Baťa mladší`,`Jan Antonín Baťa`,`Dominik Čipera`,`Hugo Vavrečka`],a:1}
+];
+const RANGES = [{min:0,max:3,t:`Tentokrát jste zůstali pod průměrem, který titulek uvádí. Na pět bodů vám chybí jen pár otázek a na osm o něco víc. Studená válka, italská kuchyně i dějiny filmu se dají snadno dohnat. Příště to může dopadnout úplně jinak.`},{min:4,max:6,t:`Jste tam, kde končí většina řešitelů. Se čtyřmi body zůstáváte těsně pod průměrem, pět ho přesně srovnává a šest ho o bod předbíhá. K osmičce, kterou titulek staví jako skutečný test, vám ale ještě chybějí dva až čtyři body.`},{min:7,max:9,t:`Průměr jste nechali za sebou. Se sedmi body vám k cíli schází jediná odpověď. Osm nebo devět bodů znamená, že jste průměr překonali o tři body a víc, tedy přesně tolik, kolik titulek žádal.`},{min:10,max:10,t:`Nemáte ani jednu chybu. Průměr jste překonali o celých pět bodů a laťku osmi bodů o dva. Od poválečné Evropy přes světové finance až po Baťovy závody jste odpověděli všechno správně.`}];
+const L = [`a`,`b`,`c`,`d`];
+let answers = new Array(QUESTIONS.length).fill(null);
+let locked = false;
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`evaluate`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+function render() {
+  quiz.innerHTML = ``;
+  QUESTIONS.forEach((q, i) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (i + 1) + `. ` + q.q;
+    box.appendChild(p);
+    q.o.forEach((o, j) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = L[j] + `) ` + o;
+      b.dataset.q = i; b.dataset.o = j;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[i] = j;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`sel`));
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`div`);
+    fb.className = `fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+}
+function update() {
+  const all = answers.every(a => a !== null);
+  evalBtn.disabled = !all;
+  hint.style.display = all ? `none` : `block`;
+}
+evalBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) return;
+  locked = true;
+  let score = 0;
+  quiz.querySelectorAll(`.box`).forEach((box, i) => {
+    const q = QUESTIONS[i];
+    const ok = answers[i] === q.a;
+    if (ok) score++;
+    box.querySelectorAll(`.opt`).forEach((b, j) => {
+      b.disabled = true;
+      if (j === q.a) b.classList.add(`correct`);
+      else if (j === answers[i]) b.classList.add(`wrong`);
+    });
+    const fb = box.querySelector(`.fb`);
+    fb.className = `fb ` + (ok ? `ok` : `bad`);
+    fb.textContent = ok ? `Správně` : `Špatně. Správná odpověď: ` + L[q.a] + `) ` + q.o[q.a];
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + QUESTIONS.length;
+  const r = RANGES.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`rtext`).textContent = r ? r.t : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior: `smooth`});
+});
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  answers = new Array(QUESTIONS.length).fill(null);
+  locked = false;
+  result.style.display = `none`;
+  evalBtn.style.display = `block`;
+  render(); update();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+render(); update();
+</script>
+</body>
+</html>
