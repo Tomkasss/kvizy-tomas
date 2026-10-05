@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz: 8 z 10 lidí udělá alespoň tři chyby. Zvládnete ho lépe?</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:24px;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto}
+h1{font-size:1.8rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border:1px solid #7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border:1px solid #d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin-top:8px;font-size:.95rem}
+.fb.ok{color:#1e5631}.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#721c24;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:32px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.etext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){body{padding:16px}.box{padding:20px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz: 8 z 10 lidí udělá alespoň tři chyby. Zvládnete ho lépe?</h1>
+<p class="perex">Osm lidí z deseti tu nechá aspoň tři body. Deset otázek vede od dějin a latiny přes techniku v mobilu, cestování po Evropě, pálivé omáčky a auta až k citrusům, cizím jazykům, písmu pro nevidomé a formuli 1. Patříte k té většině, nebo ji předběhnete?</p>
+<div id="quiz"></div>
+<button class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result"><p class="score" id="score"></p><p class="etext" id="etext"></p><button class="btn" id="retry">Zkusit znovu</button></div>
+</div>
+<script>
+const Q=[
+{q:`Které říši vládl Sulejman I. Nádherný?`,o:[`Perské říši`,`Mughalské říši`,`Osmanské říši`,`Mamlúcké říši`],a:2},
+{q:`Co v překladu znamená latinské rčení carpe diem?`,o:[`pamatuj na smrt`,`užívej dne`,`v jednotě je síla`,`pomalu, ale jistě`],a:1},
+{q:`Ve které zemi vznikl QR kód?`,o:[`v Jižní Koreji`,`v Číně`,`ve Spojených státech`,`v Japonsku`],a:3},
+{q:`Co mezi zúčastněnými státy zrušila Schengenská dohoda?`,o:[`cla na zboží`,`kontroly osob na společných hranicích`,`národní měny`,`poplatky za roaming`],a:1},
+{q:`Ve které zemi vznikla omáčka Tabasco?`,o:[`v Mexiku`,`ve Spojených státech`,`ve Španělsku`,`na Kubě`],a:1},
+{q:`K čemu slouží v autě systém ABS?`,o:[`udržuje bezpečný odstup od vozidla jedoucího vpředu`,`brání protáčení kol při rozjíždění na kluzké silnici`,`samo zabrzdí, když řidič nestihne zareagovat na překážku`,`brání zablokování kol při prudkém brzdění`],a:3},
+{q:`Kterými dvěma citrusy vznikl grapefruit?`,o:[`pomelem a pomerančem`,`pomelem a citronem`,`mandarinkou a pomerančem`,`mandarinkou a citronem`],a:0},
+{q:`Ve které zemi se mluví tagalštinou?`,o:[`v Indonésii`,`v Malajsii`,`na Filipínách`,`v Thajsku`],a:2},
+{q:`Z kolika bodů se skládá jeden znak Braillova písma?`,o:[`ze šesti`,`z pěti`,`ze čtyř`,`z devíti`],a:0},
+{q:`Na kterém okruhu se jel vůbec první závod mistrovství světa formule 1?`,o:[`Silverstone`,`Monza`,`Spa-Francorchamps`,`Monte Carlo`],a:0}
+];
+const E=[
+{min:0,max:3,t:`Patříte mezi těch osm z deseti, a to s velkou rezervou. Chyb máte sedm a víc, takže vám většina otázek utekla. Body jste nejspíš sebrali tam, kde jste odpověď měli pevně v hlavě, a jinde jste museli tipovat.`},
+{min:4,max:6,t:`Pořád patříte mezi těch osm z deseti. Se čtyřmi až šesti chybami jste hranici tří chyb překročili jasně. Základ držíte, jenže kde se dvě varianty podobaly, vybrali jste častěji tu horší.`},
+{min:7,max:9,t:`Tady se to láme. Se sedmi body máte přesně tři chyby, takže mezi osm z deseti ještě patříte, jen o jediný bod. S osmi nebo devíti body jste většinu předběhli a patříte k menšině, která udělala nanejvýš dvě chyby.`},
+{min:10,max:10,t:`Ani jedna chyba. Prošli jste dějinami, latinou, technikou, Evropou, kuchyní, auty, citrusy, jazyky, písmem i sportem bez zaváhání. Mezi těmi osmi z deseti rozhodně nejste. Plný počet zvládne jen malá menšina.`}
+];
+const quiz=document.getElementById(`quiz`),ev=document.getElementById(`eval`),hint=document.getElementById(`hint`),res=document.getElementById(`result`);
+let sel=[],locked=false;
+function render(){
+quiz.innerHTML=``;sel=Q.map(()=>null);locked=false;
+Q.forEach((q,i)=>{
+const b=document.createElement(`div`);b.className=`box`;
+const t=document.createElement(`p`);t.className=`qt`;t.textContent=(i+1)+`. `+q.q;b.appendChild(t);
+q.o.forEach((o,j)=>{
+const btn=document.createElement(`button`);btn.className=`opt`;btn.type=`button`;btn.textContent=`abcd`[j]+`) `+o;
+btn.addEventListener(`click`,()=>{if(locked)return;sel[i]=j;b.querySelectorAll(`.opt`).forEach((x,k)=>x.classList.toggle(`sel`,k===j));upd();});
+b.appendChild(btn);});
+const fb=document.createElement(`div`);fb.className=`fb`;b.appendChild(fb);
+quiz.appendChild(b);});
+res.style.display=`none`;ev.style.display=`block`;upd();}
+function upd(){const all=sel.every(x=>x!==null);ev.disabled=!all;hint.style.display=all?`none`:`block`;}
+ev.addEventListener(`click`,()=>{
+if(ev.disabled)return;locked=true;let s=0;
+quiz.querySelectorAll(`.box`).forEach((b,i)=>{
+const opts=b.querySelectorAll(`.opt`),q=Q[i],fb=b.querySelector(`.fb`);
+opts.forEach((x,k)=>{x.disabled=true;x.classList.remove(`sel`);if(k===q.a)x.classList.add(`ok`);else if(k===sel[i])x.classList.add(`bad`);});
+if(sel[i]===q.a){s++;fb.className=`fb ok`;fb.textContent=`Správně`;}
+else{fb.className=`fb bad`;fb.textContent=`Špatně. Správná odpověď: `+`abcd`[q.a]+`) `+q.o[q.a];}});
+document.getElementById(`score`).textContent=s+` z `+Q.length;
+document.getElementById(`etext`).textContent=E.find(e=>s>=e.min&&s<=e.max).t;
+ev.style.display=`none`;hint.style.display=`none`;res.style.display=`block`;res.scrollIntoView({behavior:`smooth`});});
+document.getElementById(`retry`).addEventListener(`click`,()=>{render();window.scrollTo({top:0,behavior:`smooth`});});
+render();
+</script>
+</body>
+</html>
