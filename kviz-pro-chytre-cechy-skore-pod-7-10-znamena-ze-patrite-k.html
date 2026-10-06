@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro chytré Čechy: Skóre pod 7/10 znamená, že patříte k horší polovině</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.1rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin-top:8px;font-size:.98rem}
+.fb.ok{color:#1e5631}.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro chytré Čechy: Skóre pod 7/10 znamená, že patříte k horší polovině</h1>
+<p class="perex">Chytří Češi rádi tvrdí, že mají přehled. Tady se to ukáže jedním číslem: sedm správných odpovědí je hranice mezi lepší a horší polovinou. Kdo zůstane pod ní, má co dohánět.</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="evaluate" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="rtext" id="rtext"></p>
+<button type="button" class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const QUESTIONS = [
+{q:`Který kov tvoří většinu zemského jádra?`,o:[`nikl`,`železo`,`měď`,`kobalt`],a:1},
+{q:`Kde se ve starověku stavěly zikkuraty?`,o:[`v Egyptě`,`na Krétě`,`v Mezopotámii`,`v Řecku`],a:2},
+{q:`V jakém oboru má v seriálu Přátelé doktorát Ross Geller?`,o:[`v archeologii`,`v paleontologii`,`v geologii`,`v antropologii`],a:1},
+{q:`Kolik metrů měří jedno kolo standardního atletického oválu?`,o:[`300 m`,`350 m`,`400 m`,`500 m`],a:2},
+{q:`Kdo napsal knihu Medvídek Pú?`,o:[`K. Grahame`,`R. Dahl`,`L. Carroll`,`A. A. Milne`],a:3},
+{q:`Kterou část rostliny tvoří zázvor používaný v kuchyni?`,o:[`oddenek`,`kořen`,`hlíza`,`cibule`],a:0},
+{q:`Proti komu byla namířena Bartolomějská noc roku 1572?`,o:[`proti valdenským`,`proti jezuitům`,`proti novokřtěncům`,`proti hugenotům`],a:3},
+{q:`Přes kterou řeku vede florentský most Ponte Vecchio?`,o:[`Adiže`,`Tibera`,`Brenta`,`Arno`],a:3},
+{q:`Čím se v klasickém italském affogatu přelévá zmrzlina?`,o:[`espressem`,`horkou čokoládou`,`likérem amaretto`,`vaječným likérem`],a:0},
+{q:`Jak se původně jmenoval vyhledávač Google?`,o:[`Googol`,`BackRub`,`PageRank`,`WebCrawler`],a:1},
+];
+const RANGES = [{min:0,max:3,t:`S tímhle skóre patříte k horší polovině, a to s velkou rezervou. K hranici sedmi bodů vám chybějí nejméně čtyři správné odpovědi. Ty nejsnazší šlo přitom znát ze základní školy.`},{min:4,max:6,t:`Pořád jste v horší polovině, i když hranici už máte na dosah. Na lepší polovinu vám chyběla jedna až tři odpovědi a ty se nejspíš ztratily v prostřední, nejširší části kvízu.`},{min:7,max:9,t:`Jste v lepší polovině. Hranici sedmi bodů jste překročili a zaváhali jste jen u několika otázek, které jdou za běžný školní přehled.`},{min:10,max:10,t:`Plný počet, horní polovina bez jediného zaváhání. Zvládli jste i poslední otázku, kterou zná jen ten, kdo se o obor zajímá víc než ostatní.`}];
+const L = [`a`,`b`,`c`,`d`];
+let answers = new Array(QUESTIONS.length).fill(null);
+let locked = false;
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`evaluate`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+function render() {
+  quiz.innerHTML = ``;
+  QUESTIONS.forEach((q, i) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (i + 1) + `. ` + q.q;
+    box.appendChild(p);
+    q.o.forEach((o, j) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = L[j] + `) ` + o;
+      b.dataset.q = i; b.dataset.o = j;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[i] = j;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`sel`));
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`div`);
+    fb.className = `fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+}
+function update() {
+  const all = answers.every(a => a !== null);
+  evalBtn.disabled = !all;
+  hint.style.display = all ? `none` : `block`;
+}
+evalBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) return;
+  locked = true;
+  let score = 0;
+  quiz.querySelectorAll(`.box`).forEach((box, i) => {
+    const q = QUESTIONS[i];
+    const ok = answers[i] === q.a;
+    if (ok) score++;
+    box.querySelectorAll(`.opt`).forEach((b, j) => {
+      b.disabled = true;
+      if (j === q.a) b.classList.add(`correct`);
+      else if (j === answers[i]) b.classList.add(`wrong`);
+    });
+    const fb = box.querySelector(`.fb`);
+    fb.className = `fb ` + (ok ? `ok` : `bad`);
+    fb.textContent = ok ? `Správně` : `Špatně. Správná odpověď: ` + L[q.a] + `) ` + q.o[q.a];
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + QUESTIONS.length;
+  const r = RANGES.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`rtext`).textContent = r ? r.t : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior: `smooth`});
+});
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  answers = new Array(QUESTIONS.length).fill(null);
+  locked = false;
+  result.style.display = `none`;
+  evalBtn.style.display = `block`;
+  render(); update();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+render(); update();
+</script>
+</body>
+</html>
