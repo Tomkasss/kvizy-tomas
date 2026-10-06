@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KVÍZ: Zvládli byste dnes závěrečný test ze základní školy? Prověří vás 10 otázek</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px}
+.perex{font-size:1.1rem;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover:not(.sel):not(.correct):not(.wrong){background:#f7f4f0}
+.fb{margin-top:6px;font-size:.95rem}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a7f73;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>KVÍZ: Zvládli byste dnes závěrečný test ze základní školy? Prověří vás 10 otázek</h1>
+<p class="perex">Vzory skloňování, povinná četba, habsburští panovníci, úmoří řek, jarní jehnědy, elektrické obvody, chemické látky, stavební slohy, Ústava i angličtina. Z každého předmětu osmé a deváté třídy jedna otázka. Prošli byste dnes?</p>
+<div id="quiz"></div>
+<button class="btn" id="check" type="button" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="rtext" id="rtext"></p>
+<button class="btn" id="retry" type="button">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q = [
+{q:`Které z těchto podstatných jmen se skloňuje podle vzoru píseň?`,o:[`věc`,`řeč`,`klec`,`část`],a:2},
+{q:`Do čeho nasype Maryša na konci dramatu bratří Mrštíků jed svému muži Vávrovi?`,o:[`do slivovice`,`do polévky`,`do vína`,`do kávy`],a:3},
+{q:`Který panovník se stal prvním rakouským císařem?`,o:[`Josef II.`,`František Josef I.`,`František I.`,`Ferdinand I.`],a:2},
+{q:`Do úmoří kterého moře patří řeka Bečva?`,o:[`Černého moře`,`Baltského moře`,`Severního moře`,`Jaderského moře`],a:0},
+{q:`Který z těchto stromů nese samčí a samičí květy na různých jedincích?`,o:[`líska obecná`,`olše lepkavá`,`vrba jíva`,`bříza bělokorá`],a:2},
+{q:`Co se stane s celkovým odporem obvodu, když k rezistoru připojíme paralelně další rezistor?`,o:[`zvětší se`,`zmenší se`,`nezmění se`,`zmenší se, jen pokud má nový rezistor menší odpor než původní`],a:1},
+{q:`Která z těchto látek je chemická sloučenina?`,o:[`kuchyňská sůl`,`mosaz`,`vzduch`,`síra`],a:0},
+{q:`Která z těchto pražských staveb je románská?`,o:[`Týnský chrám`,`letohrádek královny Anny`,`kostel sv. Mikuláše na Malé Straně`,`rotunda sv. Martina na Vyšehradě`],a:3},
+{q:`Ke které moci řadí Ústava České republiky prezidenta republiky?`,o:[`k moci zákonodárné`,`k moci výkonné`,`k moci soudní`,`k moci kontrolní`],a:1},
+{q:`Které z těchto anglických podstatných jmen má v množném čísle stejný tvar jako v jednotném?`,o:[`sheep`,`goose`,`mouse`,`ox`],a:0}
+];
+const E = [
+{lo:0,hi:3,t:`Závěrečným testem byste dnes neprošli. Ze školní látky vám zůstaly jen útržky a body jste spíš trefili, než věděli. Nevadí, učivo deváté třídy se dá oprášit rychleji, než by se zdálo.`},
+{lo:4,hi:6,t:`Prošli byste, ale jen těsně a s trojkou. Základ v hlavě máte, jenže vzory, slohy a zapojení obvodů už se vám slévají dohromady. Učitel by vás pustil dál, nadšený by ale nebyl.`},
+{lo:7,hi:9,t:`Test byste zvládli s dobrou známkou. Když se v lavici vykládalo, opravdu jste poslouchali, a většina toho vám vydržela dodnes. Body vám vzaly jen jemnější detaily.`},
+{lo:10,hi:10,t:`Za jedna. Úmoří, vzory i dělba moci, nic z toho vás nezaskočilo. Tohle se povede jen menšině lidí, kteří tenhle test vyplní.`}
+];
+const quiz = document.getElementById(`quiz`);
+const check = document.getElementById(`check`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+let sel = [];
+let locked = false;
+function render() {
+  quiz.innerHTML = ``;
+  quiz.classList.remove(`locked`);
+  sel = new Array(Q.length).fill(null);
+  locked = false;
+  Q.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(p);
+    item.o.forEach((opt, oi) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = `abcd`[oi] + `) ` + opt;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        sel[qi] = oi;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`sel`));
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`div`);
+    fb.className = `fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  update();
+}
+function update() {
+  const all = sel.every(v => v !== null);
+  check.disabled = !all;
+  hint.style.display = all ? `none` : `block`;
+}
+check.addEventListener(`click`, () => {
+  if (locked || sel.some(v => v === null)) return;
+  locked = true;
+  quiz.classList.add(`locked`);
+  let score = 0;
+  const boxes = quiz.querySelectorAll(`.box`);
+  Q.forEach((item, qi) => {
+    const opts = boxes[qi].querySelectorAll(`.opt`);
+    opts[item.a].classList.add(`correct`);
+    if (sel[qi] === item.a) { score++; }
+    else {
+      opts[sel[qi]].classList.add(`wrong`);
+      boxes[qi].querySelector(`.fb`).textContent = `Správná odpověď: ` + `abcd`[item.a] + `) ` + item.o[item.a];
+    }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + Q.length;
+  const e = E.find(x => score >= x.lo && score <= x.hi);
+  document.getElementById(`rtext`).textContent = e ? e.t : ``;
+  check.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior: `smooth`});
+});
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  result.style.display = `none`;
+  check.style.display = `block`;
+  render();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+render();
+</script>
+</body>
+</html>
