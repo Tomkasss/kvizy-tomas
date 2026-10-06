@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz inteligence: 10 jednoduchých otázek, které dokážou pořádně zmást</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px;color:#2c2c2c}
+.perex{font-size:1.05rem;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt.correct:hover{background:#d4edda}
+.locked .opt.wrong:hover{background:#f8d7da}
+.locked .opt:not(.correct):not(.wrong):hover{background:#f7f4f0}
+.fb{margin-top:12px;font-size:.95rem;color:#4a4a4a}
+.btn{display:block;margin:40px auto 0;background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;font-family:inherit;cursor:pointer}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#721c24;font-size:.95rem;margin-top:12px;min-height:1.2em}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.etext{font-size:1rem;color:#4a4a4a;text-align:center;margin:0}
+#retry{background:#8c7b6b;margin-top:24px}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:16px}.box{padding:16px}h1{font-size:1.5rem}.btn{width:100%;padding:16px 20px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz inteligence: 10 jednoduchých otázek, které dokážou pořádně zmást</h1>
+<p class="perex">Astronomie, fyzika, dějiny, mytologie i sport v otázkách jako pro školáka, a přesto se na nich plete i leckterý vzdělaný dospělý. Kolik jich zodpovíte bez zaváhání?</p>
+<div id="quiz"></div>
+<button id="eval" class="btn" type="button" disabled>Vyhodnotit</button>
+<div id="hint" class="hint">Odpovězte prosím na všechny otázky</div>
+<div id="result" class="box">
+<p class="score" id="score"></p>
+<p class="etext" id="etext"></p>
+<button id="retry" class="btn" type="button">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q = [
+{q:`Kdy může nastat zatmění Měsíce?`,o:[`jen při úplňku`,`jen při novu`,`v kterékoli fázi Měsíce`,`jen když je Měsíc nejblíže Zemi`],a:0},
+{q:`Ve které z těchto zemí nežijí ve volné přírodě žádní tučňáci?`,o:[`Austrálie`,`Island`,`Chile`,`Nový Zéland`],a:1},
+{q:`Jakou barvu mají květy čekanky obecné nejčastěji?`,o:[`žlutou`,`bílou`,`modrou`,`růžovou`],a:2},
+{q:`Který český král byl korunován také polským králem?`,o:[`Jan Lucemburský`,`Vladislav Jagellonský`,`Václav II.`,`Jiří z Poděbrad`],a:2},
+{q:`Které náboženství vyznává většina obyvatel Indonésie?`,o:[`hinduismus`,`buddhismus`,`křesťanství`,`islám`],a:3},
+{q:`Co se stane s hladinou vody ve sklenici, když v ní roztají plovoucí kostky ledu?`,o:[`stoupne`,`nezmění se`,`klesne`,`záleží na velikosti kostek`],a:1},
+{q:`Která z těchto pohádek není od Hanse Christiana Andersena?`,o:[`Sněhová královna`,`Princezna na hrášku`,`Šípková Růženka`,`Císařovy nové šaty`],a:2},
+{q:`Která z dnes používaných měn je nejstarší?`,o:[`britská libra`,`ruský rubl`,`švýcarský frank`,`americký dolar`],a:0},
+{q:`Na kterých olympijských hrách získala samostatná Česká republika první zlatou medaili?`,o:[`Lillehammer 1994`,`Atlanta 1996`,`Nagano 1998`,`Sydney 2000`],a:1},
+{q:`Která zvířata táhnou vůz boha Thóra?`,o:[`koně`,`vlci`,`kočky`,`kozli`],a:3}
+];
+const E = [
+{min:0,max:3,t:`Tentokrát vyhrávaly první nápady. Do bodů se nepromítl přehled, ale rychlost, se kterou jste sáhli po variantě, která zněla nejjistěji. Zkuste kvíz znovu a u každé otázky se na vteřinu zastavte. Právě tahle vteřina tu dělá rozdíl.`},
+{min:4,max:6,t:`Základ máte pevný, past vás ale chytila víckrát, než byste čekali. Nejčastěji to bývají otázky, kde lákavá odpověď vypadá logicky, třeba spojení novu se zatměním nebo jistota, že tající led musí vodu zvednout.`},
+{min:7,max:9,t:`Dobrý výsledek, na úrovni průměru nebo nad ním. Lákavé varianty jste většinou prokoukli a body jste nejspíš ztratili až u okrajových věcí, jako je stáří měn nebo severská mytologie.`},
+{min:10,max:10,t:`Plný počet, a ten zvládne jen menšina. Nenechali jste se nachytat ani jednou, ani u fyziky ve sklenici, ani u Andersenových pohádek, ani u Thórova spřežení. Takhle vypadá člověk, který si první nápad vždycky ještě jednou ověří.`}
+];
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+let sel = [];
+let locked = false;
+const L = [`a`,`b`,`c`,`d`];
+function render() {
+  quiz.innerHTML = ``;
+  sel = Q.map(() => null);
+  locked = false;
+  Q.forEach((q, i) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (i + 1) + `. ` + q.q;
+    box.appendChild(p);
+    q.o.forEach((o, j) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = L[j] + `) ` + o;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        sel[i] = j;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`sel`));
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`div`);
+    fb.className = `fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  result.style.display = `none`;
+  evalBtn.style.display = `block`;
+  update();
+}
+function update() {
+  const all = sel.every(x => x !== null);
+  evalBtn.disabled = !all;
+  hint.textContent = all ? `` : `Odpovězte prosím na všechny otázky`;
+}
+evalBtn.addEventListener(`click`, () => {
+  if (sel.some(x => x === null)) return;
+  locked = true;
+  let score = 0;
+  const boxes = quiz.querySelectorAll(`.box`);
+  Q.forEach((q, i) => {
+    const box = boxes[i];
+    box.classList.add(`locked`);
+    const opts = box.querySelectorAll(`.opt`);
+    opts.forEach(o => o.classList.remove(`sel`));
+    opts[q.a].classList.add(`correct`);
+    const fb = box.querySelector(`.fb`);
+    if (sel[i] === q.a) {
+      score++;
+      fb.textContent = `Správně.`;
+    } else {
+      opts[sel[i]].classList.add(`wrong`);
+      fb.textContent = `Správná odpověď: ` + L[q.a] + `) ` + q.o[q.a];
+    }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + Q.length;
+  const e = E.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`etext`).textContent = e ? e.t : ``;
+  evalBtn.style.display = `none`;
+  hint.textContent = ``;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior: `smooth`, block: `start`});
+});
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  render();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+render();
+</script>
+</body>
+</html>
