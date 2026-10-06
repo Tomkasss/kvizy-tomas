@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KVÍZ: Základní otázky, na kterých překvapivě chybuje mnoho lidí. Dáte 10/10?</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.08rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer;line-height:1.4}
+.opt:hover{background:#ede8e1}
+.opt.selected{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover:not(.correct):not(.wrong):not(.selected){background:#f7f4f0}
+.fb{margin-top:8px;font-size:.98rem;line-height:1.5}
+.fb.ok{color:#1e5631}
+.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a7f74;margin-top:12px;font-size:.95rem}
+.result{background:#fefcf9;border-top:4px solid #5b7e5f;display:none;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+.retry{background:#8c7b6b}
+.retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>KVÍZ: Základní otázky, na kterých překvapivě chybuje mnoho lidí. Dáte 10/10?</h1>
+<p class="perex">Olympijský oheň, fáze Měsíce, kontejner na sklo, tečka za zkratkou, časová pásma v Evropě, Michelangelův David, wasabi k suši, mudrci z Východu, tvar Země a stáří vynálezů. Dáte deset z deseti?</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="evalBtn" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box result" id="result">
+<p class="score" id="score"></p>
+<p class="rtext" id="rtext"></p>
+<button type="button" class="btn retry" id="retryBtn">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+{q:`Kde se zapaluje olympijský oheň pro novodobé olympijské hry?`,opts:[`na hoře Olymp`,`v Olympii`,`na stadionu Panathinaiko v Athénách`,`v Delfách`],correct:1},
+{q:`Co způsobuje střídání měsíčních fází?`,opts:[`stín Země, který postupně dopadá na Měsíc`,`otáčení Měsíce, který nám ukazuje střídavě svou tmavou a světlou stranu`,`měnící se poloha Měsíce vůči Slunci a Zemi během jeho oběhu`,`měnící se vzdálenost Měsíce od Země během jeho oběhu`],correct:2},
+{q:`Co z toho nepatří do kontejneru na sklo?`,opts:[`zrcadlo`,`tabulové sklo z okna`,`nevymytá sklenice od kečupu i s víčkem`,`prázdná skleněná lahev od oleje`],correct:0},
+{q:`Za kterou z těchto zkratek se v češtině nepíše tečka?`,opts:[`tzv`,`atd`,`např`,`cca`],correct:3},
+{q:`Ve které z těchto zemí platí na pevnině stejný čas jako v Česku?`,opts:[`v Portugalsku`,`ve Velké Británii`,`ve Španělsku`,`v Řecku`],correct:2},
+{q:`Kde dnes stojí originál Michelangelova Davida?`,opts:[`na náměstí Piazza della Signoria ve Florencii`,`v galerii Uffizi ve Florencii`,`ve Vatikánských muzeích`,`v Galleria dell'Accademia ve Florencii`],correct:3},
+{q:`Z čeho je většinou vyrobená zelená pasta wasabi, kterou v Česku dostanete k suši?`,opts:[`z mletého zeleného čaje`,`z křenu`,`z oddenku japonské rostliny wasabi`,`ze zelených chilli papriček`],correct:1},
+{q:`Co o mudrcích z Východu výslovně uvádí Matoušovo evangelium?`,opts:[`že byli tři`,`že byli králové`,`že přinesli zlato, kadidlo a myrhu`,`že se jmenovali Kašpar, Melichar a Baltazar`],correct:2},
+{q:`Odkdy mezi evropskými vzdělanci převládá představa, že Země je koule?`,opts:[`od Kolumbovy plavby do Ameriky`,`od starověkého Řecka`,`od Magalhãesova obeplutí světa`,`od Koperníkova učení`],correct:1},
+{q:`Který z těchto vynálezů je nejstarší?`,opts:[`fax`,`telefon`,`fonograf`,`kinematograf`],correct:0}
+];
+const evaluations = [
+{min:0,max:3,text:`Na deset z deseti to tentokrát nebylo ani zdaleka. Skoro všude zvítězila verze, kterou člověk slyší odmalička. Teď ale víte, kde se chytáky schovávají, a příště na ně nenaletíte.`},
+{min:4,max:6,text:`Deset z deseti ne, ale jste zhruba v polovině. Kde jste fakt opravdu znali, tam jste se trefili. Kde jste se spolehli na to, jak se to obvykle říká, tam body utekly.`},
+{min:7,max:9,text:`Deset z deseti těsně uteklo, ale tohle je výborný výsledek. Většinu rozšířených omylů jste prokoukli a podrazila vás nanejvýš jedna nebo dvě otázky. To se většině lidí nepovede.`},
+{min:10,max:10,text:`Ano, dali jste deset z deseti. Neopili vás rohlíkem ani věci, které „ví každý“, ani nabídka, ve které se správná odpověď schovává vedle té nejznámější. Tohle zvládne jen menšina.`}
+];
+const letters = [`a`,`b`,`c`,`d`];
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`evalBtn`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+function render() {
+  quiz.innerHTML = ``;
+  questions.forEach((q, i) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    box.id = `q` + i;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (i + 1) + `. ` + q.q;
+    box.appendChild(p);
+    q.opts.forEach((o, j) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = letters[j] + `) ` + o;
+      b.addEventListener(`click`, () => select(i, j));
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`div`);
+    fb.className = `fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+}
+function select(i, j) {
+  if (locked) return;
+  answers[i] = j;
+  const btns = document.querySelectorAll(`#q` + i + ` .opt`);
+  btns.forEach((b, k) => b.classList.toggle(`selected`, k === j));
+  const all = answers.every(a => a !== null);
+  evalBtn.disabled = !all;
+  hint.style.display = all ? `none` : `block`;
+}
+function evaluate() {
+  if (locked || answers.some(a => a === null)) return;
+  locked = true;
+  quiz.classList.add(`locked`);
+  let score = 0;
+  questions.forEach((q, i) => {
+    const btns = document.querySelectorAll(`#q` + i + ` .opt`);
+    const fb = document.querySelector(`#q` + i + ` .fb`);
+    btns.forEach(b => b.classList.remove(`selected`));
+    btns[q.correct].classList.add(`correct`);
+    if (answers[i] === q.correct) {
+      score++;
+      fb.className = `fb ok`;
+      fb.textContent = `Správně.`;
+    } else {
+      btns[answers[i]].classList.add(`wrong`);
+      fb.className = `fb bad`;
+      fb.textContent = `Špatně. Správná odpověď: ` + letters[q.correct] + `) ` + q.opts[q.correct];
+    }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  const ev = evaluations.find(e => score >= e.min && score <= e.max);
+  document.getElementById(`rtext`).textContent = ev ? ev.text : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior: `smooth`, block: `start`});
+}
+function reset() {
+  answers.fill(null);
+  locked = false;
+  quiz.classList.remove(`locked`);
+  render();
+  evalBtn.disabled = true;
+  evalBtn.style.display = `block`;
+  hint.style.display = `block`;
+  result.style.display = `none`;
+  window.scrollTo({top: 0, behavior: `smooth`});
+}
+evalBtn.addEventListener(`click`, evaluate);
+document.getElementById(`retryBtn`).addEventListener(`click`, reset);
+render();
+</script>
+</body>
+</html>
