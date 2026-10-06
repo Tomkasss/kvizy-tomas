@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KVÍZ: Učivo páté třídy v 10 otázkách. Dospělí by měli získat alespoň 8 bodů</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.1rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin-top:8px;font-size:.98rem}
+.fb.ok{color:#1e5631}.fb.bad{color:#721c24}
+#eval,#retry{display:block;margin:40px auto 0;padding:16px 40px;border:none;border-radius:8px;font-size:1.1rem;font-weight:bold;color:#fff;font-family:inherit;cursor:pointer}
+#eval{background:#5b7e5f}#eval:hover{background:#4a6b4e}
+#eval:disabled{background:#b5b5b5;cursor:not-allowed}
+#retry{background:#8c7b6b}#retry:hover{background:#756658}
+#hint{text-align:center;color:#721c24;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+#score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+#rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>KVÍZ: Učivo páté třídy v 10 otázkách. Dospělí by měli získat alespoň 8 bodů</h1>
+<p class="perex">Páťák má tohle učivo čerstvě v hlavě, dospělý ho v ní nosí desítky let a mezitím z něj leccos vyprchalo. Osm bodů z deseti je laťka, pod kterou by dospělý neměl spadnout. Dvě chyby si dovolit můžete, třetí už ne.</p>
+<div id="quiz"></div>
+<button id="eval" type="button" disabled>Vyhodnotit</button>
+<p id="hint">Odpovězte prosím na všechny otázky</p>
+<div id="result" class="box">
+<p id="score"></p>
+<p id="rtext"></p>
+<button id="retry" type="button">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q=[
+{q:`Který den v týdnu znamená anglické slovo Thursday?`,o:[`úterý`,`čtvrtek`,`středa`,`pátek`],a:1},
+{q:`Ve kterém z těchto slov se po l píše měkké i?`,o:[`l_tko`,`pl_nout`,`sl_šet`,`l_dový`],a:3},
+{q:`Které z těchto měst není krajským městem?`,o:[`Kladno`,`Zlín`,`Liberec`,`Pardubice`],a:0},
+{q:`Který prvek slouží jako palivo v českých jaderných elektrárnách?`,o:[`radium`,`polonium`,`uran`,`kobalt`],a:2},
+{q:`Která z těchto vět je podle postoje mluvčího přací?`,o:[`Kdyby tak už byly prázdniny!`,`Zítra začínají prázdniny!`,`Ukliďte si před prázdninami pokoj!`,`To byly ale prázdniny!`],a:0},
+{q:`Které z těchto slov není příbuzné se slovem voda?`,o:[`vodník`,`vodítko`,`vodnatý`,`podvodní`],a:1},
+{q:`Které z těchto pohoří leží celé na území Česka?`,o:[`Krušné hory`,`Šumava`,`Jizerské hory`,`Brdy`],a:3},
+{q:`Které z těchto zvířat patří mezi šelmy?`,o:[`ježek západní`,`krtek obecný`,`jezevec lesní`,`bobr evropský`],a:2},
+{q:`Který rod vládl Velké Moravě?`,o:[`Mojmírovci`,`Přemyslovci`,`Slavníkovci`,`Vršovci`],a:0},
+{q:`Které město si Albrecht z Valdštejna zvolil za hlavní sídlo svého vévodství?`,o:[`Frýdlant`,`Jičín`,`Liberec`,`Hradec Králové`],a:1}
+];
+const R=[
+{min:0,max:3,t:`Z páté třídy toho moc nezůstalo. Vyjmenovaná slova, dějiny i příroda se vám vykouřily z hlavy. Nejde ale o nic, co by se nedalo dohnat, třeba s učebnicí vlastního dítěte nebo vnoučete.`},
+{min:4,max:6,t:`Základ tam je, ale laťka osmi bodů zůstala daleko. Něco jste si pamatovali, u zbytku jste spíš hádali. Páťák s čerstvě naučenou látkou by vás nejspíš porazil.`},
+{min:7,max:9,t:`Sedm bodů je těsně pod laťkou a chybí vám jedna jediná odpověď. Osm a devět bodů znamená, že jste laťku přeskočili a učivo páté třídy máte v hlavě i po letech.`},
+{min:10,max:10,t:`Plný počet, který zvládne jen menšina. Neshodil vás anglický den v týdnu, příbuzná slova, krajská města ani Valdštejnovo vévodské sídlo. Pátou třídu byste klidně mohli učit.`}
+];
+const quiz=document.getElementById(`quiz`),ev=document.getElementById(`eval`),hint=document.getElementById(`hint`),res=document.getElementById(`result`);
+let sel=[],done=false;
+function render(){
+  quiz.innerHTML=``;sel=Q.map(()=>null);done=false;
+  Q.forEach((q,i)=>{
+    const box=document.createElement(`div`);box.className=`box`;
+    const p=document.createElement(`p`);p.className=`qtext`;p.textContent=(i+1)+`. `+q.q;box.appendChild(p);
+    q.o.forEach((o,j)=>{
+      const b=document.createElement(`button`);b.type=`button`;b.className=`opt`;b.textContent=`abcd`[j]+`) `+o;
+      b.addEventListener(`click`,()=>{if(done)return;sel[i]=j;box.querySelectorAll(`.opt`).forEach((x,k)=>x.classList.toggle(`sel`,k===j));update();});
+      box.appendChild(b);
+    });
+    const fb=document.createElement(`div`);fb.className=`fb`;box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  res.style.display=`none`;ev.style.display=`block`;update();
+}
+function update(){const all=sel.every(x=>x!==null);ev.disabled=!all;hint.style.display=all||done?`none`:`block`;}
+ev.addEventListener(`click`,()=>{
+  if(sel.some(x=>x===null))return;
+  done=true;let s=0;
+  quiz.querySelectorAll(`.box`).forEach((box,i)=>{
+    const bs=box.querySelectorAll(`.opt`),fb=box.querySelector(`.fb`),a=Q[i].a;
+    bs.forEach(b=>b.disabled=true);
+    bs[a].classList.remove(`sel`);bs[a].classList.add(`ok`);
+    if(sel[i]===a){s++;fb.className=`fb ok`;fb.textContent=`Správně!`;}
+    else{bs[sel[i]].classList.remove(`sel`);bs[sel[i]].classList.add(`bad`);fb.className=`fb bad`;fb.textContent=`Špatně. Správná odpověď: `+`abcd`[a]+`) `+Q[i].o[a];}
+  });
+  document.getElementById(`score`).textContent=s+` z `+Q.length;
+  const r=R.find(x=>s>=x.min&&s<=x.max);document.getElementById(`rtext`).textContent=r?r.t:``;
+  ev.style.display=`none`;hint.style.display=`none`;res.style.display=`block`;
+  res.scrollIntoView({behavior:`smooth`,block:`start`});
+});
+document.getElementById(`retry`).addEventListener(`click`,()=>{render();window.scrollTo({top:0,behavior:`smooth`});});
+render();
+</script>
+</body>
+</html>
