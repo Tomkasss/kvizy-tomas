@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KVÍZ: Co všechno si pamatujete ze školy? Méně než 7/10 není žádná sláva</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer;margin-bottom:10px}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border:1px solid #7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border:1px solid #d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin-top:14px;font-size:.98rem}
+.fb.ok{color:#1e5631}.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a7f74;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.etext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:16px}.box{padding:20px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>KVÍZ: Co všechno si pamatujete ze školy? Méně než 7/10 není žádná sláva</h1>
+<p class="perex">Školní lavice máte dávno za sebou, ale něco v hlavě zůstat mělo. Míchá se tu mluvnice, cizí jazyk, dějepis, zeměpis i přírodní vědy a laťka stojí na sedmi bodech. Kolik z toho vám vydrželo od maturity nebo výučního listu?</p>
+<div id="quiz"></div>
+<button class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="etext" id="etext"></p>
+<button class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q = [
+{q:`Který z těchto slovních druhů je neohebný?`,o:[`zájmeno`,`příslovce`,`číslovka`,`přídavné jméno`],a:1},
+{q:`Který z těchto organismů patří v ekosystému mezi producenty?`,o:[`sinice`,`hřib`,`podbílek`,`kvasinka`],a:0},
+{q:`Který stát je celkovou rozlohou druhý největší na světě?`,o:[`Spojené státy americké`,`Čína`,`Kanada`,`Brazílie`],a:2},
+{q:`Které z těchto záření sahá v elektromagnetickém spektru k nejvyšším frekvencím?`,o:[`rentgenové`,`ultrafialové`,`gama`,`infračervené`],a:2},
+{q:`Jak zní minulý čas anglického slovesa bring?`,o:[`brang`,`bought`,`bringed`,`brought`],a:3},
+{q:`Které z těchto čísel je iracionální?`,o:[`0,5`,`22/7`,`√2`,`1,333…`],a:2},
+{q:`Který z těchto dokumentů je vedle Ústavy součástí ústavního pořádku České republiky?`,o:[`Všeobecná deklarace lidských práv`,`Ústavní listina Československé republiky`,`zákon o Ústavním soudu`,`Listina základních práv a svobod`],a:3},
+{q:`Jaká vazba drží pohromadě kuchyňskou sůl?`,o:[`iontová`,`kovová`,`kovalentní nepolární`,`kovalentní polární`],a:0},
+{q:`Kdo provází Danta peklem v Božské komedii?`,o:[`Beatrice`,`Vergilius`,`Homér`,`Ovidius`],a:1},
+{q:`Ve kterém městě byla podepsána Charta Organizace spojených národů?`,o:[`San Francisco`,`New York`,`Jalta`,`Londýn`],a:0}
+];
+const E = [
+{min:0,max:3,t:`Ze školy vám v hlavě zbylo hlavně zvonění na přestávku. Učivo se za ta léta rozplynulo a k sedmičce máte daleko. Ostuda to není, jen důvod si pár věcí zase oprášit.`},
+{min:4,max:6,t:`Něco vám zůstalo, ale na sedm bodů to nestačí, takže tohle opravdu žádná sláva není. Pár předmětů vám zjevně sedělo, jiné se vytratily. Moc nechybělo, jenže laťka platí pro všechny stejně.`},
+{min:7,max:9,t:`Obstáli jste. Učivo nezmizelo s posledním vysvědčením a umíte si ho vybavit i po letech. Někde se vloudila chybka, ale ostudu jste si neudělali.`},
+{min:10,max:10,t:`Plný počet. Mluvnice, čísla, mapy i dějiny máte v hlavě srovnané, jako byste odevzdávali učebnice teprve včera. Takový výsledek má jen menšina.`}
+];
+const L = [`a`,`b`,`c`,`d`];
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+let picks = [], locked = false;
+function render() {
+  quiz.innerHTML = ``;
+  picks = Q.map(() => null);
+  locked = false;
+  Q.forEach((q, i) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (i + 1) + `. ` + q.q;
+    box.appendChild(p);
+    q.o.forEach((o, j) => {
+      const b = document.createElement(`button`);
+      b.className = `opt`;
+      b.type = `button`;
+      b.textContent = L[j] + `) ` + o;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        picks[i] = j;
+        box.querySelectorAll(`.opt`).forEach((x, k) => x.classList.toggle(`sel`, k === j));
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`p`);
+    fb.className = `fb`;
+    fb.style.display = `none`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  result.style.display = `none`;
+  evalBtn.style.display = `block`;
+  update();
+}
+function update() {
+  const all = picks.every(x => x !== null);
+  evalBtn.disabled = !all;
+  hint.style.display = all ? `none` : `block`;
+}
+evalBtn.addEventListener(`click`, () => {
+  if (picks.some(x => x === null)) return;
+  locked = true;
+  let score = 0;
+  quiz.querySelectorAll(`.box`).forEach((box, i) => {
+    const opts = box.querySelectorAll(`.opt`);
+    const fb = box.querySelector(`.fb`);
+    opts.forEach((b, k) => {
+      b.disabled = true;
+      b.classList.remove(`sel`);
+      if (k === Q[i].a) b.classList.add(`ok`);
+      else if (k === picks[i]) b.classList.add(`bad`);
+    });
+    fb.style.display = `block`;
+    if (picks[i] === Q[i].a) { score++; fb.className = `fb ok`; fb.textContent = `Správně.`; }
+    else { fb.className = `fb bad`; fb.textContent = `Špatně. Správná odpověď: ` + L[Q[i].a] + `) ` + Q[i].o[Q[i].a]; }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + Q.length;
+  const e = E.find(r => score >= r.min && score <= r.max);
+  document.getElementById(`etext`).textContent = e ? e.t : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior: `smooth`, block: `start`});
+});
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  render();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+render();
+</script>
+</body>
+</html>
