@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz: Rozumíte všem českým slovům? Některá používáme špatně celý život</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.1rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer;line-height:1.4}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin-top:8px;font-size:.98rem;line-height:1.5}
+.fb.ok{color:#1e5631}
+.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+.result{background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px;display:none}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+.again{background:#8c7b6b}
+.again:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz: Rozumíte všem českým slovům? Některá používáme špatně celý život</h1>
+<p class="perex">Některá slova říkáme tak často, že nás ani nenapadne ověřit si, co vlastně znamenají. Slovník je ale u řady z nich přísnější než běžná řeč. Jak dobře znáte slova, která slyšíte v práci, u lékaře nebo ve zprávách?</p>
+<div id="quiz"></div>
+<button id="eval" class="btn" type="button" disabled>Vyhodnotit</button>
+<p id="hint" class="hint">Odpovězte prosím na všechny otázky</p>
+<div id="result" class="box result">
+<p id="score" class="score"></p>
+<p id="rtext" class="rtext"></p>
+<button id="again" class="btn again" type="button">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  {q: `Kdy je podle slovníku správné říct, že před někým stojí dilema?`, o: [`když ho čeká nepříjemná povinnost, které se nemůže vyhnout`, `když řeší potíž, na kterou zatím nikdo nenašel řešení`, `když musí volit mezi dvěma možnostmi, které se navzájem vylučují`, `když neví, komu z lidí kolem sebe může doopravdy věřit`], a: 2},
+  {q: `Jaký postup lze podle slovníku nazvat efektivním?`, o: [`takový, který spolehlivě vede k žádanému výsledku`, `takový, který na přihlížející udělá velký dojem`, `takový, který je postavený na nejmodernější technice`, `takový, který je jednoduchý a zvládne ho každý`], a: 0},
+  {q: `Kdo je podle slovníku nájemce bytu?`, o: [`ten, komu byt patří a kdo ho dává do nájmu`, `ten, kdo byt užívá na základě smlouvy o výpůjčce`, `ten, kdo byt za majitele pronajímá a vybírá nájemné`, `ten, kdo byt užívá a platí za něj nájemné`], a: 3},
+  {q: `Co je podle slovníku kontraindikace u léku?`, o: [`nežádoucí účinek, který se po užití léku může objevit`, `stav či okolnost, kvůli kterým se lék nemá podávat`, `dávka, kterou není dovoleno bez lékaře překročit`, `účinek opačný, než jaký lék pacientovi slibuje`], a: 1},
+  {q: `Jaký postoj k Bohu podle slovníku zastává agnostik?`, o: [`existenci Boha rozhodně popírá a náboženství odmítá`, `má za to, že o existenci Boha nelze nic jistého poznat`, `v Boha věří, ale odmítá jakoukoli církev a obřady`, `věří ve vyšší sílu, nikoli však v osobního Boha`], a: 1},
+  {q: `Jaký pozemek je podle slovníku lukrativní?`, o: [`takový, na kterém se dá dobře vydělat`, `takový, který leží v oblíbené a pěkné čtvrti`, `takový, který je rozlehlý a má velkou výměru`, `takový, který je luxusně upravený a reprezentativní`], a: 0},
+  {q: `Kterým výrazem lze ve spisovné češtině nahradit slovo respektive?`, o: [`s ohledem na to`, `a k tomu ještě`, `naproti tomu`, `přesněji řečeno`], a: 3},
+  {q: `Jak se chová člověk, který vystupuje furiantsky?`, o: [`zuřivě a bez sebekontroly`, `bujaře a rozjařeně`, `pyšně a vychloubačně`, `lstivě a úskočně`], a: 2},
+  {q: `Čím se v českém právu liší amnestie od milosti?`, o: [`amnestie se týká celé skupiny lidí, milost jen jednotlivce`, `amnestie se vztahuje jen na přestupky, milost i na trestné činy`, `amnestie trest pouze zkracuje, kdežto milost ho promíjí celý`, `amnestie se uděluje jen před odsouzením, milost až po něm`], a: 0},
+  {q: `Ve které větě je slovo jakožto použito správně?`, o: [`Na trh přivezli zeleninu jakožto mrkev, celer a pórek.`, `Na schůzi promluvil jakožto předseda celého spolku.`, `Utíkal přes louku rychle jakožto splašený zajíc.`, `Snažil se to udělat přesně jakožto jeho otec.`], a: 1}
+];
+const evaluations = [
+  {min: 0, max: 3, t: `Slova používáte hlavně tak, jak je slyšíte kolem sebe, a tentokrát se to nevyplatilo. Stačí si pár z nich jednou vyhledat ve slovníku a příště to dopadne úplně jinak.`},
+  {min: 4, max: 6, t: `Základ máte pevný, ale u několika slov jste sáhli po významu, který se ujal v hovoru, a ne po tom slovníkovém. Takových zaváhání je v běžné řeči plno a dají se snadno spravit.`},
+  {min: 7, max: 9, t: `Slova volíte s rozmyslem a víte, co znamenají. Jedno nebo dvě zaváhání nic nemění na tom, že si jazyka všímáte pozorněji než většina lidí kolem vás.`},
+  {min: 10, max: 10, t: `Ani jedna chyba. Žádný posunutý význam vás nenachytal a slovníkem byste klidně mohli opravovat ostatní.`}
+];
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+let answers = new Array(questions.length).fill(null);
+let locked = false;
+function render() {
+  quiz.innerHTML = ``;
+  questions.forEach((q, i) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (i + 1) + `. ` + q.q;
+    box.appendChild(p);
+    q.o.forEach((o, j) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = `abcd`[j] + `) ` + o;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[i] = j;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`sel`));
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`div`);
+    fb.className = `fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+}
+function update() {
+  const all = answers.every(a => a !== null);
+  evalBtn.disabled = !all;
+  hint.style.display = all ? `none` : `block`;
+}
+evalBtn.addEventListener(`click`, () => {
+  if (locked || answers.some(a => a === null)) return;
+  locked = true;
+  let score = 0;
+  quiz.querySelectorAll(`.box`).forEach((box, i) => {
+    const q = questions[i];
+    const btns = box.querySelectorAll(`.opt`);
+    btns.forEach((b, j) => {
+      b.disabled = true;
+      if (j === q.a) b.classList.add(`correct`);
+      if (j === answers[i] && j !== q.a) b.classList.add(`wrong`);
+    });
+    const fb = box.querySelector(`.fb`);
+    if (answers[i] === q.a) {
+      score++;
+      fb.className = `fb ok`;
+      fb.textContent = `Správně.`;
+    } else {
+      fb.className = `fb bad`;
+      fb.textContent = `Špatně. Správná odpověď: ` + `abcd`[q.a] + `) ` + q.o[q.a];
+    }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  const e = evaluations.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`rtext`).textContent = e ? e.t : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior: `smooth`, block: `start`});
+});
+document.getElementById(`again`).addEventListener(`click`, () => {
+  answers = new Array(questions.length).fill(null);
+  locked = false;
+  result.style.display = `none`;
+  evalBtn.style.display = `block`;
+  render();
+  update();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+render();
+update();
+</script>
+</body>
+</html>
