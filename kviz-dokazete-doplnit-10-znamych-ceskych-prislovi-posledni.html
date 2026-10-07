@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KVÍZ: Dokážete doplnit 10 známých českých přísloví? Poslední tři pořádně potrápí paměť</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin-bottom:10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.selected{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.feedback{margin-top:14px;font-size:.98rem;line-height:1.5}
+.feedback.ok{color:#1e5631}
+.feedback.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a7f74;font-size:.95rem;margin-top:12px}
+.result{background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px;display:none}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.evaltext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+.btn.retry{background:#8c7b6b;margin-top:28px}
+.btn.retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 36px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>KVÍZ: Dokážete doplnit 10 známých českých přísloví? Poslední tři pořádně potrápí paměť</h1>
+<p class="perex">Lidová moudrost se kdysi předávala u kamen, na poli i při draní peří. Do pár slov se v ní vešla zkušenost celých generací a mnohé z těch vět sedí dodnes, i když je slýcháme mnohem méně než naše babičky.</p>
+<div id="quiz"></div>
+<button class="btn" id="evalBtn" type="button" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box result" id="result">
+<p class="score" id="score"></p>
+<p class="evaltext" id="evaltext"></p>
+<button class="btn retry" id="retryBtn" type="button">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  { q: `Jak pokračuje přísloví „Host a ryba …“?`, opts: [`druhý den smrdí`, `pátý den smrdí`, `třetí den smrdí`, `sedmý den smrdí`], correct: 2 },
+  { q: `Čím končí přísloví „Sliby se slibují, …“?`, opts: [`děti se radují`, `chudáci se radují`, `dlužníci se radují`, `blázni se radují`], correct: 3 },
+  { q: `Které slovo chybí v přísloví „Mráz ___ nespálí“?`, opts: [`bodlák`, `pýr`, `kopřivu`, `trní`], correct: 2 },
+  { q: `Jak pokračuje přísloví „Vrána k vráně sedá, …“?`, opts: [`chudý chudého si hledá`, `rovný rovného si hledá`, `hloupý hloupého si hledá`, `starý starého si hledá`], correct: 1 },
+  { q: `Které slovo chybí v přísloví „Ševče, drž se svého ___“?`, opts: [`šídla`, `kopyta`, `verpánku`, `kladívka`], correct: 1 },
+  { q: `Které slovo chybí v přísloví „Každá liška svůj ___ chválí“?`, opts: [`ocas`, `kožich`, `čenich`, `doupě`], correct: 0 },
+  { q: `Čím končí přísloví „S čím kdo zachází, …“?`, opts: [`tím také schází`, `tím také vychází`, `tím také přichází`, `tím také odchází`], correct: 0 },
+  { q: `Jak pokračuje přísloví „Čiň čertu dobře, …“?`, opts: [`sírou se ti odmění`, `ohněm se ti odmění`, `kopytem se ti odmění`, `peklem se ti odmění`], correct: 3 },
+  { q: `Které slovo chybí v přísloví „Čí chleba jíš, toho ___ zpívej“?`, opts: [`chválu`, `žalm`, `slávu`, `píseň`], correct: 3 },
+  { q: `Které slovo chybí v přísloví „Pivo mladé ___ vyráží“?`, opts: [`čep`, `dno`, `zátku`, `obruče`], correct: 0 }
+];
+const evaluations = [
+  { min: 0, max: 3, text: `0–3 body: Tentokrát se lidová moudrost spíš schovala. Začátky přísloví znáte, ale konce se vám zatoulaly. Stačí je párkrát zaslechnout a zase se vrátí.` },
+  { min: 4, max: 6, text: `4–6 bodů: Solidní základ. Ta přísloví, která se dodnes říkají běžně, máte v malíčku. U těch, co dnes slýchá málokdo, jste ale už museli tipovat.` },
+  { min: 7, max: 9, text: `7–9 bodů: Výborně, lidovou slovesnost máte v uchu. Zvládli jste i přísloví, která se dnes skoro neříkají, a k plnému počtu vám chybělo jen pár zrádných konců.` },
+  { min: 10, max: 10, text: `10 bodů: Plný počet, a ten se tady nedává zadarmo. Doplnili jste i přísloví, která dnes znají hlavně sběratelé starých rčení. Babičky by na vás byly pyšné.` }
+];
+const letters = [`a)`, `b)`, `c)`, `d)`];
+const quizEl = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`evalBtn`);
+const hint = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+let answers = [];
+let locked = false;
+function render() {
+  quizEl.innerHTML = ``;
+  answers = new Array(questions.length).fill(null);
+  locked = false;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(p);
+    item.opts.forEach((o, oi) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = letters[oi] + ` ` + o;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`selected`));
+        b.classList.add(`selected`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`div`);
+    fb.className = `feedback`;
+    box.appendChild(fb);
+    quizEl.appendChild(box);
+  });
+  resultEl.style.display = `none`;
+  evalBtn.style.display = `block`;
+  update();
+}
+function update() {
+  const done = answers.every(a => a !== null);
+  evalBtn.disabled = !done;
+  hint.style.display = done ? `none` : `block`;
+}
+evalBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) return;
+  locked = true;
+  let score = 0;
+  const boxes = quizEl.querySelectorAll(`.box`);
+  questions.forEach((item, qi) => {
+    const opts = boxes[qi].querySelectorAll(`.opt`);
+    opts.forEach(o => { o.disabled = true; });
+    const fb = boxes[qi].querySelector(`.feedback`);
+    opts[item.correct].classList.add(`correct`);
+    if (answers[qi] === item.correct) {
+      score++;
+      fb.className = `feedback ok`;
+      fb.textContent = `Správně.`;
+    } else {
+      opts[answers[qi]].classList.add(`wrong`);
+      fb.className = `feedback bad`;
+      fb.textContent = `Špatně. Správná odpověď: ` + letters[item.correct] + ` ` + item.opts[item.correct];
+    }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  const ev = evaluations.find(e => score >= e.min && score <= e.max);
+  document.getElementById(`evaltext`).textContent = ev ? ev.text : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth`, block: `start` });
+});
+document.getElementById(`retryBtn`).addEventListener(`click`, () => {
+  render();
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+render();
+</script>
+</body>
+</html>
