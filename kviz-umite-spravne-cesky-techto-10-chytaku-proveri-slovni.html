@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KVÍZ: Umíte správně česky? Těchto 10 chytáků prověří slovní zásobu</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.1rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer;line-height:1.4}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin-top:8px;font-size:.98rem;line-height:1.5}
+.fb.ok{color:#1e5631}
+.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+.result{background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px;display:none}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+.again{background:#8c7b6b}
+.again:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>KVÍZ: Umíte správně česky? Těchto 10 chytáků prověří slovní zásobu</h1>
+<p class="perex">Některá slova používáme denně, jiná známe spíš od vidění. Co ale doopravdy znamenají, nerozhoduje dojem z hovoru, nýbrž slovník. Zkuste, kolik z deseti výrazů vyložíte přesně a kolik chytáků vás nachytá.</p>
+<div id="quiz"></div>
+<button id="eval" class="btn" type="button" disabled>Vyhodnotit</button>
+<p id="hint" class="hint">Odpovězte prosím na všechny otázky</p>
+<div id="result" class="box result">
+<p id="score" class="score"></p>
+<p id="rtext" class="rtext"></p>
+<button id="again" class="btn again" type="button">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  {q: `Jaký je člověk, kterého slovník označí za rozverného?`, o: [`rozvážný a uvážlivý`, `roztržitý a zapomnětlivý`, `veselý a dovádivý`, `vzdorovitý a umíněný`], a: 2},
+  {q: `Jak se dá jinými slovy říct, že je něco eklatantní?`, o: [`je to zjevné a nápadné`, `je to elegantní a vkusné`, `je to výbušné a vznětlivé`, `je to okrajové a nepodstatné`], a: 0},
+  {q: `Co je v lese paseka?`, o: [`přirozená travnatá louka mezi stromy`, `úzká stezka vyšlapaná lesní zvěří`, `prohlubeň, ve které se po dešti drží voda`, `místo, kde byly vykáceny stromy`], a: 3},
+  {q: `Kdo je hromotluk?`, o: [`věčně nespokojený bručoun`, `statný, neohrabaný silák`, `člověk, který rád a hodně jí`, `lenoch, který se vyhýbá práci`], a: 1},
+  {q: `Co zaplatíte jako akontaci?`, o: [`poplatek za předčasné splacení úvěru`, `pravidelnou měsíční splátku stejné výše`, `první, navýšenou splátku placenou předem`, `úrok z prodlení za opožděnou platbu`], a: 2},
+  {q: `Co je kombiné?`, o: [`dámský kalhotový oděv z jednoho kusu`, `dámské spodní prádlo nošené pod šaty`, `dámský kostým ze saka a sukně`, `dámský přehoz s kapucí bez rukávů`], a: 1},
+  {q: `Jak se cítí člověk, který je konsternovaný?`, o: [`nepříjemně překvapený a zaražený`, `zahanbený a ponížený`, `uražený a dotčený`, `rozzlobený a podrážděný`], a: 0},
+  {q: `Ve které větě je slovo indisponovaný použito ve správném významu?`, o: [`Šéf je dnes indisponovaný, celý den sedí na poradách a nebere telefon.`, `Ten přístroj je indisponovaný, chybějí k němu náhradní díly.`, `Byt zůstal indisponovaný, protože ho majitel nechtěl pronajmout.`, `Tenor byl indisponovaný, a tak za něj árii zazpíval kolega.`], a: 3},
+  {q: `Co znamená slovo profánní?`, o: [`světský, nenáboženský`, `sprostý, vulgární`, `odborný, profesionální`, `okázalý, honosný`], a: 0},
+  {q: `Čeho se dopustil ten, kdo byl odsouzen za defraudaci?`, o: [`padělání úředních listin`, `zpronevěry svěřeného majetku`, `podvodu na pojišťovně`, `křivé výpovědi před soudem`], a: 1}
+];
+const evaluations = [
+  {min: 0, max: 3, t: `Tentokrát vám slova spíš proklouzla mezi prsty. Často jste se nechali vést tím, jak slovo zní, ne tím, co doopravdy znamená. Dobrá zpráva je, že slovní zásoba roste čtením. Kdo se u neznámého slova zastaví a podívá se do slovníku, má za pár týdnů úplně jiný výsledek.`},
+  {min: 4, max: 6, t: `Solidní základ s několika slepými místy. Běžná slova máte v malíčku, ale u těch, která se v hovoru používají volněji, než je zapsal slovník, jste občas sáhli vedle. Jste na tom stejně jako spousta rodilých mluvčích. Jen vám chybí kousek k jistotě.`},
+  {min: 7, max: 9, t: `Vaše čeština je přesná a spolehlivá. Rozeznáte slovo, které jen připomíná jiné, a víte, kdy se běžné použití rozchází se slovníkem. Jeden nebo dva chytáky vás nachytaly, ale do této skupiny se dostane jen ten, kdo slovům opravdu rozumí.`},
+  {min: 10, max: 10, t: `Bez jediné chyby. Slova používáte tak, jak je vykládají jazykovědci, a nenecháte se zmást podobou ani zvykem. Kdyby se v rodině nebo v práci řešilo, co které slovo znamená, poslední slovo byste měli vy.`}
+];
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+let answers = new Array(questions.length).fill(null);
+let locked = false;
+function render() {
+  quiz.innerHTML = ``;
+  questions.forEach((q, i) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (i + 1) + `. ` + q.q;
+    box.appendChild(p);
+    q.o.forEach((o, j) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = `abcd`[j] + `) ` + o;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[i] = j;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`sel`));
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`div`);
+    fb.className = `fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+}
+function update() {
+  const all = answers.every(a => a !== null);
+  evalBtn.disabled = !all;
+  hint.style.display = all ? `none` : `block`;
+}
+evalBtn.addEventListener(`click`, () => {
+  if (locked || answers.some(a => a === null)) return;
+  locked = true;
+  let score = 0;
+  quiz.querySelectorAll(`.box`).forEach((box, i) => {
+    const q = questions[i];
+    const btns = box.querySelectorAll(`.opt`);
+    btns.forEach((b, j) => {
+      b.disabled = true;
+      if (j === q.a) b.classList.add(`correct`);
+      if (j === answers[i] && j !== q.a) b.classList.add(`wrong`);
+    });
+    const fb = box.querySelector(`.fb`);
+    if (answers[i] === q.a) {
+      score++;
+      fb.className = `fb ok`;
+      fb.textContent = `Správně.`;
+    } else {
+      fb.className = `fb bad`;
+      fb.textContent = `Špatně. Správná odpověď: ` + `abcd`[q.a] + `) ` + q.o[q.a];
+    }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  const e = evaluations.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`rtext`).textContent = e ? e.t : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior: `smooth`, block: `start`});
+});
+document.getElementById(`again`).addEventListener(`click`, () => {
+  answers = new Array(questions.length).fill(null);
+  locked = false;
+  result.style.display = `none`;
+  evalBtn.style.display = `block`;
+  render();
+  update();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+render();
+update();
+</script>
+</body>
+</html>
