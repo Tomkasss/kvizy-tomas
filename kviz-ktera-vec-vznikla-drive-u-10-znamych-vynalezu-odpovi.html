@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KVÍZ: Která věc vznikla dříve? U 10 známých vynálezů odpoví správně málokdo</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer;margin-bottom:10px;line-height:1.4}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin-top:14px;font-size:.98rem;display:none}
+.fb.ok{color:#1e5631}
+.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a7f74;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>KVÍZ: Která věc vznikla dříve? U 10 známých vynálezů odpoví správně málokdo</h1>
+<p class="perex">Co bylo na světě dřív? Věci z kuchyně, koupelny, ulice i sportovišť známe odmalička, a přesto si jejich stáří v hlavě skládáme po svém. Kalendář vynálezců má ale vlastní pořadí a s pocitem, co je staré a co nové, se shoduje jen občas.</p>
+<div id="quiz"></div>
+<button class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="rtext" id="rtext"></p>
+<button class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q = [
+{q:`Která z těchto věcí vznikla nejdříve?`,o:[`metro`,`osobní výtah`,`eskalátor`,`mrakodrap`],a:1},
+{q:`Která z těchto věcí vznikla nejdříve?`,o:[`webkamera`,`USB flash disk`,`Bluetooth`,`počítačová myš`],a:3},
+{q:`Která z těchto věcí vznikla nejdříve?`,o:[`zip`,`nylonové punčochy`,`elastan`,`Gore-Tex`],a:0},
+{q:`Která z těchto her vznikla nejdříve?`,o:[`Monopoly`,`Scrabble`,`puzzle`,`Rubikova kostka`],a:2},
+{q:`Která z těchto sportovních soutěží se poprvé konala nejdříve?`,o:[`Wimbledon`,`novodobé olympijské hry`,`Stanleyův pohár`,`Tour de France`],a:0},
+{q:`Která z těchto věcí vznikla nejdříve?`,o:[`kávovar na espresso`,`termoska`,`tlakový hrnec`,`mikrovlnná trouba`],a:2},
+{q:`Která z těchto věcí vznikla nejdříve?`,o:[`jízdní kolo`,`kolečkové brusle`,`motocykl`,`skateboard`],a:1},
+{q:`Který z těchto nápojů se začal prodávat nejdříve?`,o:[`Coca-Cola`,`Fernet Stock`,`Kofola`,`Becherovka`],a:3},
+{q:`Která z těchto věcí vznikla nejdříve?`,o:[`kuličkový deodorant`,`vatové tyčinky do uší`,`žiletka`,`jednorázové pleny`],a:2},
+{q:`Která z těchto věcí vznikla nejdříve?`,o:[`rentgenový snímek`,`inzulin`,`penicilin`,`vakcína proti dětské obrně`],a:0}
+];
+const E = [
+{lo:0,hi:3,t:`Pořadí vynálezů vám tentokrát nesedlo. Zkuste kvíz projít znovu a u každé otázky si připomeňte, že i věc, která působí moderně, může být o celá staletí starší.`},
+{lo:4,hi:6,t:`Solidní základ s několika zaváháními. Zhruba polovinu otázek máte správně a k sedmi bodům a výš vám chybí jen pár odpovědí.`},
+{lo:7,hi:9,t:`Takový výsledek ukazuje dobrý přehled o tom, kdy se věci kolem nás objevily. Od plného počtu vás dělilo jen pár otázek.`},
+{lo:10,hi:10,t:`Všech deset správně. Seřadit vynálezy z kuchyně, sportu, dopravy i lékařství bez jediného omylu dokáže opravdu málokdo.`}
+];
+const L = [`a`,`b`,`c`,`d`];
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+let sel = [];
+let locked = false;
+function render() {
+  quiz.innerHTML = ``;
+  sel = Q.map(() => null);
+  locked = false;
+  Q.forEach((q, i) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (i + 1) + `. ` + q.q;
+    box.appendChild(p);
+    q.o.forEach((o, j) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = L[j] + `) ` + o;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        sel[i] = j;
+        box.querySelectorAll(`.opt`).forEach((x, k) => x.classList.toggle(`sel`, k === j));
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`p`);
+    fb.className = `fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  result.style.display = `none`;
+  evalBtn.style.display = `block`;
+  update();
+}
+function update() {
+  const all = sel.every(x => x !== null);
+  evalBtn.disabled = !all;
+  hint.style.display = all ? `none` : `block`;
+}
+evalBtn.addEventListener(`click`, () => {
+  if (sel.some(x => x === null)) return;
+  locked = true;
+  let score = 0;
+  const boxes = quiz.querySelectorAll(`.box`);
+  Q.forEach((q, i) => {
+    const opts = boxes[i].querySelectorAll(`.opt`);
+    opts.forEach((b, j) => {
+      b.disabled = true;
+      b.classList.remove(`sel`);
+      if (j === q.a) b.classList.add(`correct`);
+      else if (j === sel[i]) b.classList.add(`wrong`);
+    });
+    const fb = boxes[i].querySelector(`.fb`);
+    fb.style.display = `block`;
+    if (sel[i] === q.a) { score++; fb.className = `fb ok`; fb.textContent = `Správně.`; }
+    else { fb.className = `fb bad`; fb.textContent = `Špatně. Správná odpověď: ` + L[q.a] + `) ` + q.o[q.a]; }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + Q.length;
+  const e = E.find(x => score >= x.lo && score <= x.hi);
+  document.getElementById(`rtext`).textContent = e ? e.t : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior: `smooth`, block: `start`});
+});
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  render();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+render();
+</script>
+</body>
+</html>
