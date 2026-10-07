@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro pamětníky: Poznáte sladkosti a nápoje, které jsme milovali jako děti?</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:24px;font-family:Georgia,"Times New Roman",serif;background:#f5f0eb;color:#2c2c2c;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px;color:#2c2c2c}
+.perex{font-size:1.05rem;color:#4a4a4a;margin:0 0 32px}
+.q{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.q-text{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-family:inherit;font-size:1rem;color:#3a3a3a;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.selected{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border:1px solid #7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border:1px solid #d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.opt.locked:hover{background:inherit}
+.answer-note{margin-top:12px;font-size:.95rem;color:#1e5631}
+.btn{display:block;margin:40px auto 0;background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;font-family:inherit;cursor:pointer}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#721c24;margin-top:12px;font-size:.95rem}
+.result{background:#fefcf9;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-top:40px;border-top:4px solid #5b7e5f;display:none}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.eval{font-size:1rem;color:#4a4a4a;text-align:center;margin:0}
+.btn.retry{background:#8c7b6b;margin-top:24px}
+.btn.retry:hover{background:#756658}
+@media (max-width:600px){body{padding:16px}.q{padding:20px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro pamětníky: Poznáte sladkosti a nápoje, které jsme milovali jako děti?</h1>
+<p class="perex">Kornout zmrzliny z okénka, odměna za vysvědčení, pouť na návsi a nedělní výlet do cukrárny. Pamětníci, víte ještě, co jste jako děti mlsali a pili, kdo to vyráběl a jak to vypadalo?</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="evalBtn" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="result" id="result">
+<p class="score" id="score"></p>
+<p class="eval" id="evalText"></p>
+<button type="button" class="btn retry" id="retryBtn">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  {q: `1. Čím se plní rakvička z cukrárny?`, o: [`vanilkovým pudinkem`, `tvarohovým krémem`, `šlehačkou`, `žloutkovým krémem`], a: 2},
+  {q: `2. Co tvoří křupavé kousky v tureckém medu z poutí?`, o: [`sekané oříšky`, `kousky oplatek`, `pražená rýže`, `drcený karamel`], a: 0},
+  {q: `3. Z čeho se pečou dvě placky, mezi kterými je u laskonky z cukrárny krém?`, o: [`z lineckého těsta`, `z piškotového těsta`, `z ušlehaných bílků s cukrem`, `z oplatkového těsta`], a: 2},
+  {q: `4. Čím se prosycuje piškot v cukrárenském řezu s růžovou polevou?`, o: [`griotkou`, `vaječným likérem`, `kávou`, `punčem`], a: 3},
+  {q: `5. Jako jaká tyčinka se Margot označuje na obalu?`, o: [`sójová`, `ovesná`, `pšeničná`, `pohanková`], a: 0},
+  {q: `6. Co bylo na prvním obalu Granka?`, o: [`fotografie malého chlapce`, `kreslený zajíček`, `kreslený medvídek`, `fotografie malé holčičky`], a: 3},
+  {q: `7. Ze kterého města pocházejí Lentilky?`, o: [`z Olomouce`, `z Holešova`, `z Kroměříže`, `z Kolína`], a: 1},
+  {q: `8. Ve kterém městě se vyrábí Piknik v tubě?`, o: [`v Kuníně`, `v Přibyslavi`, `v Bohušovicích nad Ohří`, `v Hlinsku`], a: 3},
+  {q: `9. Co ukrývají Banány v čokoládě pod čokoládovou polevou?`, o: [`želé s banánovou příchutí`, `sušené plátky banánu`, `banánový nugát`, `karamel s banánovou příchutí`], a: 0},
+  {q: `10. Po kom nebo po čem dostala jméno zmrzlina Polárka?`, o: [`po Polárce, hvězdě ukazující k severu`, `po prvním odchovaném mláděti ledního medvěda v pražské zoo`, `po lodi slavné polární výpravy`, `po hrdince oblíbené dětské knížky`], a: 1}
+];
+const evals = [
+  {min: 0, max: 3, t: `Na mlsání z dětství vám zůstala spíš chuť než podrobnosti. Dobroty si vybavíte, ale z čeho byly, jak vypadal obal a kde se vyráběly, vám už splývá.`},
+  {min: 4, max: 6, t: `Solidní výsledek. Co jste znali z cukrárny, z pouti a ze spíže, většinou sedí. Potrápily vás hlavně detaily o výrobcích, obalech a výrobních místech.`},
+  {min: 7, max: 9, t: `Výborně. Pamatujete si nejen chuť, ale i obaly, výrobce a místa, odkud dobroty pocházely. Takhle si dětské mlsání vybaví jen ten, kdo tehdy opravdu nakupoval.`},
+  {min: 10, max: 10, t: `Plný počet. Nezaskočil vás ani nejzáludnější příběh za jménem známé dobroty. O sladkostech a nápojích svého dětství toho víte opravdu hodně.`}
+];
+const letters = [`a`, `b`, `c`, `d`];
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`evalBtn`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+let answers = [];
+let locked = false;
+
+function render() {
+  quiz.innerHTML = ``;
+  answers = new Array(questions.length).fill(null);
+  locked = false;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const p = document.createElement(`p`);
+    p.className = `q-text`;
+    p.textContent = item.q;
+    box.appendChild(p);
+    item.o.forEach((opt, oi) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = letters[oi] + `) ` + opt;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`selected`));
+        b.classList.add(`selected`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    quiz.appendChild(box);
+  });
+  result.style.display = `none`;
+  evalBtn.style.display = `block`;
+  update();
+}
+
+function update() {
+  const done = answers.every(x => x !== null);
+  evalBtn.disabled = !done;
+  hint.style.display = done ? `none` : `block`;
+}
+
+evalBtn.addEventListener(`click`, () => {
+  if (answers.some(x => x === null)) return;
+  locked = true;
+  let score = 0;
+  const boxes = quiz.querySelectorAll(`.q`);
+  questions.forEach((item, qi) => {
+    const btns = boxes[qi].querySelectorAll(`.opt`);
+    btns.forEach(b => { b.disabled = true; b.classList.add(`locked`); b.classList.remove(`selected`); });
+    btns[item.a].classList.add(`correct`);
+    if (answers[qi] === item.a) {
+      score++;
+    } else {
+      btns[answers[qi]].classList.add(`wrong`);
+      const note = document.createElement(`p`);
+      note.className = `answer-note`;
+      note.textContent = `Správná odpověď: ` + letters[item.a] + `) ` + item.o[item.a];
+      boxes[qi].appendChild(note);
+    }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  const e = evals.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`evalText`).textContent = e ? e.t : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior: `smooth`, block: `start`});
+});
+
+document.getElementById(`retryBtn`).addEventListener(`click`, () => {
+  render();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+
+render();
+</script>
+</body>
+</html>
