@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro Čechy: Jestli nedáte aspoň 7/10, o své zemi toho moc nevíte</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+  background: #f5f0eb;
+  color: #2c2c2c;
+  line-height: 1.6;
+}
+h1 { font-size: 1.7rem; line-height: 1.3; margin-bottom: 8px; }
+.perex { font-size: 1.1rem; margin-bottom: 28px; color: #3a3a3a; }
+.question-box {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.question-text { font-weight: bold; font-size: 1.15rem; color: #2c2c2c; margin-bottom: 18px; }
+.option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  background: #f7f4f0;
+  border: 1px solid #d9d2c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #3a3a3a;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .15s;
+}
+.option:last-child { margin-bottom: 0; }
+.option:hover:not(.locked) { background: #ede8e1; }
+.option.selected { background: #dcd3c7; border: 1px solid #a89e92; font-weight: bold; }
+.option.correct { background: #d4edda; border: 1px solid #7cb987; color: #1e5631; }
+.option.wrong { background: #f8d7da; border: 1px solid #d4848a; color: #721c24; }
+.option.locked { cursor: default; }
+#submit-btn {
+  display: block;
+  margin: 40px auto 0;
+  padding: 16px 40px;
+  background: #5b7e5f;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+#submit-btn:hover:not(:disabled) { background: #4a6b4e; }
+#submit-btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+.hint { text-align: center; color: #8c5a5a; margin-top: 14px; min-height: 1.2em; }
+#result {
+  display: none;
+  background: #fefcf9;
+  border-top: 4px solid #5b7e5f;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  padding: 28px;
+  margin-top: 40px;
+}
+#score { font-size: 2.5rem; font-weight: bold; color: #5b7e5f; text-align: center; margin-bottom: 12px; }
+#verdict { font-size: 1rem; color: #4a4a4a; text-align: center; }
+#retry-btn {
+  display: block;
+  margin: 28px auto 0;
+  padding: 16px 40px;
+  background: #8c7b6b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+}
+#retry-btn:hover { background: #756658; }
+</style>
+</head>
+<body>
+<h1></h1>
+<p class="perex"></p>
+<div id="quiz"></div>
+<button id="submit-btn" disabled>Vyhodnotit</button>
+<p class="hint" id="hint"></p>
+<div id="result">
+  <div id="score"></div>
+  <div id="verdict"></div>
+  <button id="retry-btn">Zkusit znovu</button>
+</div>
+<script>
+const TITLE = `Kvíz pro Čechy: Jestli nedáte aspoň 7/10, o své zemi toho moc nevíte`;
+const PEREX = `Víte, kde se rodí atletické rekordy, co dělá krkonošskou polévku kyselou nebo jaký chrám nosíte v peněžence? Na sedm správných odpovědí z deseti by měl dosáhnout každý, kdo o sobě říká, že Česko zná.`;
+const QUESTIONS = [
+  { q: `Ve kterém městě se koná atletický mítink Zlatá tretra?`, options: [`v Praze`, `v Brně`, `v Ostravě`, `v Olomouci`], correct: 2 },
+  { q: `Do kterého města byl internován Karel Havlíček Borovský?`, options: [`do Brixenu`, `do Salcburku`, `do Innsbrucku`, `do Štýrského Hradce`], correct: 0 },
+  { q: `Co dává krkonošskému kyselu jeho kyselou chuť?`, options: [`kysané zelí`, `šťovík`, `syrovátka`, `žitný kvásek`], correct: 3 },
+  { q: `Ve kterých lázních se léčí radonovou vodou?`, options: [`v Luhačovicích`, `v Jáchymově`, `v Teplicích`, `v Třeboni`], correct: 1 },
+  { q: `Která stavba je vyobrazena na české desetikorunové minci?`, options: [`katedrála sv. Víta v Praze`, `chrám sv. Barbory v Kutné Hoře`, `katedrála sv. Petra a Pavla v Brně`, `bazilika sv. Prokopa v Třebíči`], correct: 2 },
+  { q: `Která univerzita je po Univerzitě Karlově druhá nejstarší v Česku?`, options: [`Masarykova univerzita`, `Univerzita Palackého`, `České vysoké učení technické`, `Mendelova univerzita`], correct: 1 },
+  { q: `Masopustní obchůzky ze které oblasti jsou zapsané na seznamu nehmotného kulturního dědictví UNESCO?`, options: [`z Hlinecka`, `z Chodska`, `z Valašska`, `z Hané`], correct: 0 },
+  { q: `Kterým z těchto měst prochází 15. poledník východní délky?`, options: [`Táborem`, `Pelhřimovem`, `Kutnou Horou`, `Jindřichovým Hradcem`], correct: 3 },
+  { q: `Ve kterém pivovaru se natáčely Postřižiny?`, options: [`v Nymburce`, `v Dalešicích`, `v Polné`, `v Krušovicích`], correct: 1 },
+  { q: `Kdo spravuje českou internetovou doménu .cz?`, options: [`CESNET`, `Český telekomunikační úřad`, `CZ.NIC`, `NIX.CZ`], correct: 2 }
+];
+const EVAL = [
+  { min: 0, max: 3, text: `Na sedmičku z titulku vám chybí hodně. Odpovědi si projděte a zkuste kvíz za pár dní znovu. Spoustu z nich budete mít v hlavě po prvním přečtení.` },
+  { min: 4, max: 6, text: `Základ máte, ale sedm bodů z titulku jste nedali. Chyběly vám jedna až tři odpovědi, takže vám ke spokojenosti stačí doplnit pár věcí. Podívejte se, kde jste chybovali, a příště sedmičku dáte.` },
+  { min: 7, max: 9, text: `Sedmičku jste dali, takže tvrzení z titulku se vás netýká. O své zemi víte víc než jen to, co se učí ve škole. Do plného počtu vám chybělo nanejvýš pár odpovědí.` },
+  { min: 10, max: 10, text: `Plný počet, a ten dá jen menšina. Laťku z titulku jste přeskočili o tři body. Česko znáte do hloubky.` }
+];
+
+const LETTERS = [`a`, `b`, `c`, `d`];
+let answers = new Array(QUESTIONS.length).fill(null);
+let locked = false;
+
+document.querySelector(`h1`).textContent = TITLE;
+document.querySelector(`.perex`).textContent = PEREX;
+
+const quizEl = document.getElementById(`quiz`);
+const submitBtn = document.getElementById(`submit-btn`);
+const hintEl = document.getElementById(`hint`);
+const resultEl = document.getElementById(`result`);
+
+function render() {
+  quizEl.innerHTML = ``;
+  QUESTIONS.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `question-box`;
+    const qt = document.createElement(`div`);
+    qt.className = `question-text`;
+    qt.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(qt);
+    item.options.forEach((opt, oi) => {
+      const btn = document.createElement(`button`);
+      btn.className = `option`;
+      btn.textContent = LETTERS[oi] + `) ` + opt;
+      btn.addEventListener(`click`, () => selectOption(qi, oi));
+      btn.dataset.qi = qi;
+      btn.dataset.oi = oi;
+      box.appendChild(btn);
+    });
+    quizEl.appendChild(box);
+  });
+}
+
+function selectOption(qi, oi) {
+  if (locked) return;
+  answers[qi] = oi;
+  const boxes = quizEl.children[qi].querySelectorAll(`.option`);
+  boxes.forEach((b, i) => b.classList.toggle(`selected`, i === oi));
+  updateSubmit();
+}
+
+function updateSubmit() {
+  const allAnswered = answers.every(a => a !== null);
+  submitBtn.disabled = !allAnswered;
+  if (allAnswered) hintEl.textContent = ``;
+}
+
+submitBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) {
+    hintEl.textContent = `Odpovězte prosím na všechny otázky`;
+    return;
+  }
+  locked = true;
+  let score = 0;
+  QUESTIONS.forEach((item, qi) => {
+    const boxes = quizEl.children[qi].querySelectorAll(`.option`);
+    boxes.forEach((b, i) => {
+      b.classList.add(`locked`);
+      b.classList.remove(`selected`);
+      if (i === item.correct) b.classList.add(`correct`);
+      else if (i === answers[qi]) b.classList.add(`wrong`);
+    });
+    if (answers[qi] === item.correct) score++;
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + QUESTIONS.length;
+  const ev = EVAL.find(e => score >= e.min && score <= e.max);
+  document.getElementById(`verdict`).textContent = ev ? ev.text : ``;
+  submitBtn.style.display = `none`;
+  hintEl.textContent = ``;
+  resultEl.style.display = `block`;
+  resultEl.scrollIntoView({ behavior: `smooth` });
+});
+
+document.getElementById(`retry-btn`).addEventListener(`click`, () => {
+  answers = new Array(QUESTIONS.length).fill(null);
+  locked = false;
+  render();
+  submitBtn.style.display = `block`;
+  submitBtn.disabled = true;
+  resultEl.style.display = `none`;
+  hintEl.textContent = ``;
+  window.scrollTo({ top: 0, behavior: `smooth` });
+});
+
+render();
+</script>
+</body>
+</html>
