@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz z češtiny: Průměrný Čech získá jen 5 bodů z 10. Překonáte ho?</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin-top:8px;font-size:.95rem}
+.fb.ok{color:#1e5631}
+.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#721c24;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:16px}.box{padding:20px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz z češtiny: Průměrný Čech získá jen 5 bodů z 10. Překonáte ho?</h1>
+<p class="perex">Mluvíme jí každý den, a přesto nás umí potrápit. Průměrného Čecha zastaví vlastní mateřština zhruba v půlce. Patříte k těm, kdo ji zvládají i v drobnostech, od výslovnosti přes čárky až po původ slov?</p>
+<div id="quiz"></div>
+<button class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result"><p class="score" id="score"></p><p class="rtext" id="rtext"></p><button class="btn" id="retry">Zkusit znovu</button></div>
+</div>
+<script>
+const Q=[
+{q:`Jak zní rozkazovací způsob slovesa vyjmout?`,o:[`vyjmi`,`vyjmy`,`vyjmuj`,`vyjmej`],a:0},
+{q:`Jak se spisovně vyslovuje slovo kresba?`,o:[`[kresba]`,`[krespa]`,`[krezba]`,`[krezpa]`],a:2},
+{q:`Které z těchto přídavných jmen je přivlastňovací?`,o:[`sesterský`,`sestřin`,`vlastní`,`rodinný`],a:1},
+{q:`Ve které větě je spojení „na stole" přívlastkem?`,o:[`Na stole stála váza s růžemi.`,`Kočka spala na stole.`,`Váza stála na stole u okna.`,`Váza na stole patřila babičce.`],a:3},
+{q:`Kdy se o někom řekne, že dělá drahoty?`,o:[`když se nechává dlouho prosit`,`když zdražuje zboží, protože vidí zájem kupců`,`když utrácí za zbytečně drahé věci`,`když předstírá chudobu, aby vzbudil soucit`],a:0},
+{q:`Ve které větě se před slovem jako píše čárka?`,o:[`Pracuje jako zedník.`,`Je mazaný jako liška.`,`Tvářil se jako by o ničem nevěděl.`,`Běhá stejně rychle jako jeho otec.`],a:2},
+{q:`Jak se správně píše zkratka spojení „to jest"?`,o:[`t. j.`,`tj.`,`t.j.`,`tj`],a:1},
+{q:`Od čeho je odvozen český název brambory?`,o:[`od názvu Brabantska`,`od názvu Brém`,`od názvu Bamberku`,`od názvu Braniborska`],a:3},
+{q:`Co znamená přídavné jméno markantní?`,o:[`výrazný, na první pohled patrný`,`týkající se trhu a obchodu`,`okrajový, vedlejší`,`dočasný, přechodný`],a:0},
+{q:`Ve kterých nářečích leží přízvuk vždy na předposlední slabice?`,o:[`v chodských`,`v lašských`,`v hanáckých`,`v podkrkonošských`],a:1}
+];
+const E=[
+{min:0,max:3,t:`Tentokrát vás průměrný Čech se svými pěti body předběhl. Čeština vám v praxi slouží dobře, jen pravidla ze školních lavic už vybledla. Dají se ale oprášit rychle.`},
+{min:4,max:6,t:`Pohybujete se kolem průměrného Čecha: se čtyřmi body těsně pod ním, s pěti vedle něj, se šesti už o krok před ním. Základ máte pevný, k jasnému vítězství vám chybí jen pár drobností.`},
+{min:7,max:9,t:`Průměrného Čecha jste nechali za sebou. Rozumíte nejen tomu, jak se česky mluví, ale i tomu, proč se to tak dělá. Takový výsledek se nevidí často.`},
+{min:10,max:10,t:`Čistých deset, tedy dvakrát víc než průměr. Pravopis, mluvnici, nářečí i původ slov máte zvládnuté a uprostřed věty by vás nepřekvapila ani zkratka, ani čárka.`}
+];
+const L=[`a`,`b`,`c`,`d`];
+const quiz=document.getElementById(`quiz`),evalBtn=document.getElementById(`eval`),hint=document.getElementById(`hint`),result=document.getElementById(`result`);
+let ans=[],locked=false;
+function render(){
+quiz.innerHTML=``;ans=new Array(Q.length).fill(null);locked=false;
+Q.forEach((q,i)=>{
+const box=document.createElement(`div`);box.className=`box`;
+const p=document.createElement(`p`);p.className=`qtext`;p.textContent=(i+1)+`. `+q.q;box.appendChild(p);
+q.o.forEach((o,j)=>{
+const b=document.createElement(`button`);b.type=`button`;b.className=`opt`;b.textContent=L[j]+`) `+o;
+b.addEventListener(`click`,()=>{if(locked)return;ans[i]=j;box.querySelectorAll(`.opt`).forEach(x=>x.classList.remove(`sel`));b.classList.add(`sel`);check();});
+box.appendChild(b);});
+const fb=document.createElement(`div`);fb.className=`fb`;box.appendChild(fb);
+quiz.appendChild(box);});
+result.style.display=`none`;evalBtn.style.display=`block`;check();}
+function check(){const all=ans.every(a=>a!==null);evalBtn.disabled=!all;hint.style.display=all?`none`:`block`;}
+evalBtn.addEventListener(`click`,()=>{
+if(evalBtn.disabled)return;locked=true;let s=0;
+quiz.querySelectorAll(`.box`).forEach((box,i)=>{
+const btns=box.querySelectorAll(`.opt`),fb=box.querySelector(`.fb`);
+btns.forEach(b=>{b.disabled=true;b.classList.remove(`sel`);});
+btns[Q[i].a].classList.add(`correct`);
+if(ans[i]===Q[i].a){s++;fb.className=`fb ok`;fb.textContent=`Správně`;}
+else{btns[ans[i]].classList.add(`wrong`);fb.className=`fb bad`;fb.textContent=`Špatně. Správná odpověď: `+L[Q[i].a]+`) `+Q[i].o[Q[i].a];}
+});
+document.getElementById(`score`).textContent=s+` z `+Q.length;
+const e=E.find(x=>s>=x.min&&s<=x.max);document.getElementById(`rtext`).textContent=e?e.t:``;
+evalBtn.style.display=`none`;hint.style.display=`none`;result.style.display=`block`;
+result.scrollIntoView({behavior:`smooth`});});
+document.getElementById(`retry`).addEventListener(`click`,()=>{render();window.scrollTo({top:0,behavior:`smooth`});});
+render();
+</script>
+</body>
+</html>
