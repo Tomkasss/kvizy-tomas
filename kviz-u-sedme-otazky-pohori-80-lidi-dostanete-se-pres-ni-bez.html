@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz: U sedmé otázky pohoří 80 % lidí. Dostanete se přes ni bez chyby?</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #f5f0eb;
+    font-family: Georgia, "Times New Roman", serif;
+    color: #2c2c2c;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+  }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.3;
+    color: #2c2c2c;
+    margin: 0 0 16px;
+  }
+  .perex {
+    font-size: 1.08rem;
+    line-height: 1.6;
+    color: #4a4a4a;
+    margin: 0 0 32px;
+  }
+  .box {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .q-text {
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #2c2c2c;
+    margin: 0 0 18px;
+    line-height: 1.45;
+  }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: #f7f4f0;
+    border: 1px solid #d9d2c9;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #3a3a3a;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .opt:last-child { margin-bottom: 0; }
+  .opt:hover { background: #ede8e1; }
+  .opt.selected {
+    background: #dcd3c7;
+    border: 1px solid #a89e92;
+    font-weight: bold;
+  }
+  .locked .opt { cursor: default; }
+  .locked .opt:hover { background: #f7f4f0; }
+  .locked .opt.selected:hover { background: #dcd3c7; }
+  .opt.correct, .locked .opt.correct:hover {
+    background: #d4edda;
+    border: 1px solid #7cb987;
+    color: #1e5631;
+  }
+  .opt.wrong, .locked .opt.wrong:hover {
+    background: #f8d7da;
+    border: 1px solid #d4848a;
+    color: #721c24;
+  }
+  .feedback {
+    margin-top: 14px;
+    font-size: .98rem;
+    line-height: 1.5;
+    display: none;
+  }
+  .feedback.ok { color: #1e5631; }
+  .feedback.bad { color: #721c24; }
+  .btn {
+    background: #5b7e5f;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    display: block;
+    margin: 40px auto 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn:hover { background: #4a6b4e; }
+  .btn:disabled { background: #b5b5b5; cursor: not-allowed; }
+  .hint {
+    text-align: center;
+    color: #8a7f74;
+    font-size: .95rem;
+    margin-top: 12px;
+  }
+  #result {
+    display: none;
+    background: #fefcf9;
+    border-top: 4px solid #5b7e5f;
+    margin-top: 40px;
+  }
+  .score {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5b7e5f;
+    text-align: center;
+    margin: 0 0 14px;
+  }
+  .verdict {
+    font-size: 1rem;
+    color: #4a4a4a;
+    text-align: center;
+    line-height: 1.6;
+    margin: 0;
+  }
+  #retry { background: #8c7b6b; }
+  #retry:hover { background: #756658; }
+  @media (max-width: 600px) {
+    .wrap { padding: 20px 16px 40px; }
+    h1 { font-size: 1.5rem; }
+    .box { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kvíz: U sedmé otázky pohoří 80 % lidí. Dostanete se přes ni bez chyby?</h1>
+  <p class="perex">Sedmá otázka vypadá jako ta nejjednodušší v celém kvízu, a právě proto u ní většina lidí sebejistě sáhne po špatné odpovědi. Projdete jí bez ztráty bodu a zvládnete i zbylých devět?</p>
+  <div id="quiz"></div>
+  <button class="btn" id="evaluate" type="button" disabled>Vyhodnotit</button>
+  <p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+  <div class="box" id="result">
+    <p class="score" id="score"></p>
+    <p class="verdict" id="verdict"></p>
+    <button class="btn" id="retry" type="button">Zkusit znovu</button>
+  </div>
+</div>
+<script>
+(function () {
+  const questions = [
+    { q: `Kdo se každou zimu kolem Nového roku utkává v seriálu Tour de Ski?`,
+      o: [`biatlonisti`, `běžci na lyžích`, `sjezdaři`, `sdruženáři`], c: 1 },
+    { q: `Jakou zkratkou se označuje mezinárodní číslo, které dostává každé vydání knihy?`,
+      o: [`ISSN`, `EAN`, `ISRC`, `ISBN`], c: 3 },
+    { q: `Čím se podle Nintenda živí Mario, hrdina herní série Super Mario?`,
+      o: [`je kominík`, `je elektrikář`, `je instalatér`, `je zámečník`], c: 2 },
+    { q: `Ve kterém měsíci slaví Američané Den díkůvzdání?`,
+      o: [`v září`, `v říjnu`, `v listopadu`, `v prosinci`], c: 2 },
+    { q: `Kdo spoluzaložil internetovou encyklopedii Wikipedie?`,
+      o: [`Sergey Brin`, `Jack Dorsey`, `Jimmy Wales`, `Larry Ellison`], c: 2 },
+    { q: `Kterou klávesou se ve webovém prohlížeči na počítači s Windows znovu načte otevřená stránka?`,
+      o: [`F5`, `F1`, `F11`, `F12`], c: 0 },
+    { q: `Který americký prezident jako první bydlel v Bílém domě?`,
+      o: [`George Washington`, `John Adams`, `Thomas Jefferson`, `James Madison`], c: 1 },
+    { q: `Pro kterou instituci navrhl architekt Jan Kaplický budovu na pražské Letné, které se přezdívá chobotnice?`,
+      o: [`pro Národní galerii`, `pro Národní divadlo`, `pro Národní muzeum`, `pro Národní knihovnu`], c: 3 },
+    { q: `Jak se jmenovala manželka Františka Ferdinanda d'Este?`,
+      o: [`Žofie Chotková`, `Berta Kinská`, `Zita Bourbonsko-Parmská`, `Štěpánka Belgická`], c: 0 },
+    { q: `Kde byla naměřena nejnižší oficiálně uznaná teplota vzduchu na Zemi?`,
+      o: [`na stanici Vostok`, `na jižním pólu`, `v Ojmjakonu`, `ve Verchojansku`], c: 0 }
+  ];
+
+  const verdicts = [
+    { min: 0, max: 3, text: `Tentokrát to nevyšlo. Sedmička nebyla jediný zádrhel, body se ztrácely skoro všude. Zkuste kvíz za pár dní znovu a podívejte se, které otázky vám utekly podruhé.` },
+    { min: 4, max: 6, text: `Zhruba polovina. Pokud jste u sedmé otázky vzali první jméno, které vás napadlo, nejste sami, právě tam padá nejvíc bodů. Zbytek ztrát je rozházený po různých oborech.` },
+    { min: 7, max: 9, text: `Pěkný výsledek. Jestli vám chybí bod právě za sedmou otázku, past udělala, co měla. Jestli jste ji prošli, body jste nechali jinde a na tu nejzrádnější jste si dali pozor.` },
+    { min: 10, max: 10, text: `Deset z deseti. Sedmou otázkou jste prošli bez zaváhání a nenechali jste se nachytat ani jinde. S čistým listem odsud odchází málokdo.` }
+  ];
+
+  const letters = [`a`, `b`, `c`, `d`];
+  const quizEl = document.getElementById(`quiz`);
+  const evalBtn = document.getElementById(`evaluate`);
+  const hint = document.getElementById(`hint`);
+  const result = document.getElementById(`result`);
+  const scoreEl = document.getElementById(`score`);
+  const verdictEl = document.getElementById(`verdict`);
+  const retryBtn = document.getElementById(`retry`);
+
+  let answers = [];
+  let locked = false;
+
+  function render() {
+    quizEl.innerHTML = ``;
+    answers = new Array(questions.length).fill(null);
+    locked = false;
+    questions.forEach(function (item, qi) {
+      const box = document.createElement(`div`);
+      box.className = `box`;
+      const p = document.createElement(`p`);
+      p.className = `q-text`;
+      p.textContent = (qi + 1) + `. ` + item.q;
+      box.appendChild(p);
+      item.o.forEach(function (opt, oi) {
+        const b = document.createElement(`button`);
+        b.type = `button`;
+        b.className = `opt`;
+        b.textContent = letters[oi] + `) ` + opt;
+        b.addEventListener(`click`, function () {
+          if (locked) return;
+          answers[qi] = oi;
+          box.querySelectorAll(`.opt`).forEach(function (el) { el.classList.remove(`selected`); });
+          b.classList.add(`selected`);
+          updateButton();
+        });
+        box.appendChild(b);
+      });
+      const fb = document.createElement(`div`);
+      fb.className = `feedback`;
+      box.appendChild(fb);
+      quizEl.appendChild(box);
+    });
+    result.style.display = `none`;
+    evalBtn.style.display = `block`;
+    updateButton();
+  }
+
+  function updateButton() {
+    const done = answers.every(function (a) { return a !== null; });
+    evalBtn.disabled = !done;
+    hint.style.display = done ? `none` : `block`;
+  }
+
+  evalBtn.addEventListener(`click`, function () {
+    if (locked) return;
+    if (!answers.every(function (a) { return a !== null; })) return;
+    locked = true;
+    quizEl.classList.add(`locked`);
+    let score = 0;
+    const boxes = quizEl.querySelectorAll(`.box`);
+    questions.forEach(function (item, qi) {
+      const box = boxes[qi];
+      const opts = box.querySelectorAll(`.opt`);
+      const fb = box.querySelector(`.feedback`);
+      opts[item.c].classList.add(`correct`);
+      if (answers[qi] === item.c) {
+        score++;
+        fb.className = `feedback ok`;
+        fb.textContent = `Správně.`;
+      } else {
+        opts[answers[qi]].classList.add(`wrong`);
+        fb.className = `feedback bad`;
+        fb.textContent = `Špatně. Správná odpověď: ` + letters[item.c] + `) ` + item.o[item.c];
+      }
+      fb.style.display = `block`;
+    });
+    scoreEl.textContent = score + ` z ` + questions.length;
+    const v = verdicts.find(function (x) { return score >= x.min && score <= x.max; });
+    verdictEl.textContent = v ? v.text : ``;
+    evalBtn.style.display = `none`;
+    hint.style.display = `none`;
+    result.style.display = `block`;
+    result.scrollIntoView({ behavior: `smooth`, block: `start` });
+  });
+
+  retryBtn.addEventListener(`click`, function () {
+    quizEl.classList.remove(`locked`);
+    render();
+    window.scrollTo({ top: 0, behavior: `smooth` });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
