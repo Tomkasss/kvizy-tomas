@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz: Průměrný Čech získá aspoň 6 bodů. Cokoliv méně je malér</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px;color:#2c2c2c}
+.perex{font-size:1.05rem;color:#4a4a4a;margin:0 0 32px}
+.q{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.q-text{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-family:inherit;font-size:1rem;color:#3a3a3a;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.selected{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border:1px solid #7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border:1px solid #d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover{background:inherit}
+.locked .opt:not(.correct):not(.wrong):not(.selected):hover{background:#f7f4f0}
+.fb{margin-top:14px;font-size:.98rem}
+.fb.ok{color:#1e5631}
+.fb.bad{color:#721c24}
+.btn{display:block;margin:40px auto 0;background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;font-family:inherit;cursor:pointer}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.eval{font-size:1rem;color:#4a4a4a;text-align:center;margin:0}
+#retry{background:#8c7b6b;margin-top:28px}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.q{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz: Průměrný Čech získá aspoň 6 bodů. Cokoliv méně je malér</h1>
+<p class="perex">Šestka je hranice mezi slušným přehledem a ostudou. Kdo pod ni spadne, nemůže to svádět na smůlu, protože otázky sahají od filmu a cestování přes přírodu a odívání až k českým dějinám a slavnostem, tedy k věcem, které člověk za život potká.</p>
+<div id="quiz"></div>
+<button class="btn" id="submit" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div id="result">
+<p class="score" id="score"></p>
+<p class="eval" id="eval"></p>
+<button class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  {q: `Ve kterém filmu zazní věta „Here's Johnny!"?`, o: [`Osvícení`, `Psycho`, `Misery nechce zemřít`, `To`], a: 0},
+  {q: `Na které londýnské ulici bydlel Sherlock Holmes?`, o: [`Harley Street`, `Wimpole Street`, `Gower Street`, `Baker Street`], a: 3},
+  {q: `Ve kterém městě se konají Slavnosti pětilisté růže?`, o: [`Český Krumlov`, `Třeboň`, `Kutná Hora`, `Telč`], a: 0},
+  {q: `Kdo v komiksu o Asterixovi vaří kouzelný lektvar?`, o: [`Majestatix`, `Panoramix`, `Trubadix`, `Obelix`], a: 1},
+  {q: `Ve kterém americkém městě dodnes jezdí historické lanové tramvaje?`, o: [`v San Francisku`, `v Seattlu`, `v Los Angeles`, `v Bostonu`], a: 0},
+  {q: `Podle kterého města dostaly jméno džíny?`, o: [`Nîmes`, `Marseille`, `Benátky`, `Janov`], a: 3},
+  {q: `Kterého města je symbolem socha Malé mořské víly?`, o: [`Oslo`, `Stockholm`, `Kodaň`, `Amsterdam`], a: 2},
+  {q: `Který pražský most zničila roku 1342 povodeň, takže ho později nahradil Karlův most?`, o: [`Ludmilin most`, `Kunhutin most`, `Juditin most`, `Eliščin most`], a: 2},
+  {q: `U kterého živočicha rodí mláďata samec?`, o: [`tučňák císařský`, `mořský koník`, `klokan rudý`, `murena`], a: 1},
+  {q: `Který sládek uvařil první várku plzeňského ležáku?`, o: [`Josef Groll`, `František Ondřej Poupě`, `Martin Stelzer`, `Václav Berka`], a: 0}
+];
+const evals = [
+  {min: 0, max: 3, t: `Tohle je malér. Od šestky vás dělí nejméně tři body. Otázky, na kterých jste zaklopýtli, si dohledejte a za pár dní to zkuste znovu.`},
+  {min: 4, max: 5, t: `Pořád malér, i když těsný. Do laťky chyběl bod nebo dva, takže často stačilo jednou netipnout špatně mezi dvěma možnostmi, které vypadaly stejně pravděpodobně.`},
+  {min: 6, max: 9, t: `Laťka je pokořená. Šestku máte jistou a každý bod navíc ukazuje, že se v tolika oborech neztratíte. Body vám utekly jen u pár otázek.`},
+  {min: 10, max: 10, t: `Deset z deseti, bez jediné chyby. Laťku jste nepřeskočili, ale přelétli o čtyři body.`}
+];
+const letters = [`a`, `b`, `c`, `d`];
+const quiz = document.getElementById(`quiz`);
+const submit = document.getElementById(`submit`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+let answers = [];
+let locked = false;
+
+function render() {
+  quiz.innerHTML = ``;
+  answers = new Array(questions.length).fill(null);
+  locked = false;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const p = document.createElement(`p`);
+    p.className = `q-text`;
+    p.textContent = `${qi + 1}. ${item.q}`;
+    box.appendChild(p);
+    item.o.forEach((opt, oi) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = `${letters[oi]}) ${opt}`;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`selected`));
+        b.classList.add(`selected`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`p`);
+    fb.className = `fb`;
+    fb.style.display = `none`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  result.style.display = `none`;
+  submit.style.display = `block`;
+  update();
+}
+
+function update() {
+  const all = answers.every(a => a !== null);
+  submit.disabled = !all;
+  hint.style.display = all ? `none` : `block`;
+}
+
+submit.addEventListener(`click`, () => {
+  if (locked || answers.some(a => a === null)) return;
+  locked = true;
+  let score = 0;
+  const boxes = quiz.querySelectorAll(`.q`);
+  questions.forEach((item, qi) => {
+    const box = boxes[qi];
+    box.classList.add(`locked`);
+    const opts = box.querySelectorAll(`.opt`);
+    opts[item.a].classList.add(`correct`);
+    const fb = box.querySelector(`.fb`);
+    fb.style.display = `block`;
+    if (answers[qi] === item.a) {
+      score++;
+      fb.className = `fb ok`;
+      fb.textContent = `Správně.`;
+    } else {
+      opts[answers[qi]].classList.remove(`selected`);
+      opts[answers[qi]].classList.add(`wrong`);
+      fb.className = `fb bad`;
+      fb.textContent = `Špatně. Správná odpověď: ${letters[item.a]}) ${item.o[item.a]}`;
+    }
+  });
+  document.getElementById(`score`).textContent = `${score} z ${questions.length}`;
+  const e = evals.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`eval`).textContent = e ? e.t : ``;
+  submit.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior: `smooth`, block: `start`});
+});
+
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  render();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+
+render();
+</script>
+</body>
+</html>
