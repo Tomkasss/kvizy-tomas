@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro chytré hlavy: Skóre 6/10 je průměr, 8/10 skvělé a 10/10 skoro nikdo nedá</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:2rem;line-height:1.25;color:#2c2c2c;margin:0 0 16px}
+.perex{font-size:1.1rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border:1px solid #7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border:1px solid #d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover:not(.correct):not(.wrong):not(.sel){background:#f7f4f0}
+.fb{margin-top:8px;font-size:1rem}
+.fb.ok{color:#1e5631}.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#4a4a4a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.evtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:16px}.box{padding:20px}h1{font-size:1.6rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro chytré hlavy: Skóre 6/10 je průměr, 8/10 skvělé a 10/10 skoro nikdo nedá</h1>
+<p class="perex">Otázky vedou od chemie, přírody a architektury přes kuchyni, starověk, železnice a videohry až k umění, politice a výzkumu vesmíru. Čeká vás berlínská památka, jeden ze sedmi divů světa, aukce s nečekaným koncem i dlouhý let za kometou.</p>
+<div id="quiz"></div>
+<button class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="evtext" id="evtext"></p>
+<button class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q=[
+{q:`Která látka vzniká hořením vodíku?`,o:[`voda`,`oxid uhličitý`,`peroxid vodíku`,`ozon`],a:0},
+{q:`Kteří volně žijící savci jsou známou atrakcí Gibraltarské skály?`,o:[`mufloni`,`kamzíci`,`makakové`,`svišti`],a:2},
+{q:`Co stojí na vrcholu Braniborské brány v Berlíně?`,o:[`jezdecká socha`,`kvadriga`,`socha Germanie`,`sousoší lvů`],a:1},
+{q:`Ve které zemi je sýrové fondue národním jídlem?`,o:[`v Rakousku`,`ve Švýcarsku`,`v Belgii`,`v Dánsku`],a:1},
+{q:`Kterého boha zpodobňoval Rhodský kolos?`,o:[`Poseidóna`,`Hélia`,`Apollóna`,`Dia`],a:1},
+{q:`Pod jakým názvem jezdí vysokorychlostní vlaky z Londýna do Paříže?`,o:[`Eurostar`,`EuroCity`,`LeShuttle`,`Railjet`],a:0},
+{q:`Za koho hráč hraje ve většině her série The Legend of Zelda?`,o:[`Ganondorf`,`Epona`,`Link`,`Zelda`],a:2},
+{q:`Čí obraz se v roce 2018 hned po vydražení sám rozřezal skartovačkou ukrytou v rámu?`,o:[`Damiena Hirsta`,`Jeffa Koonse`,`Aj Wej-weje`,`Banksyho`],a:3},
+{q:`Kterou zemi vedla jako premiérka Golda Meirová?`,o:[`Izrael`,`Indii`,`Srí Lanku`,`Pákistán`],a:0},
+{q:`Která sonda dopravila ke kometě přistávací modul Philae?`,o:[`Giotto`,`Cassini`,`Rosetta`,`New Horizons`],a:2}
+];
+const E=[
+{min:0,max:3,t:`Tentokrát to nevyšlo. Většina otázek vás zaskočila už na začátku, kde se ostatní obvykle rozjedou. Zkuste to znovu za pár dní, napodruhé se to často zlomí.`},
+{min:4,max:6,t:`Tady skončí většina řešitelů. Úvodní otázky jste nejspíš zvládli a body jste ztratili ve střední části, kde jsou varianty k sobě nejblíž. Šestka je přesně ten průměr, o kterém mluví titulek.`},
+{min:7,max:9,t:`Výborné. Od osmi bodů výš jde o skvělý výsledek, protože jste se nenechali nachytat ani tam, kde nabídka svádí k nejznámějšímu jménu. Do plného počtu vám chybělo jen pár drobností.`},
+{min:10,max:10,t:`Bez jediné chyby, a to se skoro nikomu nepovede. Dokázali jste určit i sondu, o které slyšel jen málokdo, takže máte opravdu široký přehled.`}
+];
+const quiz=document.getElementById(`quiz`),evalBtn=document.getElementById(`eval`),hint=document.getElementById(`hint`);
+let sel=[],locked=false;
+function render(){
+quiz.innerHTML=``;sel=new Array(Q.length).fill(null);locked=false;quiz.classList.remove(`locked`);
+Q.forEach((q,i)=>{
+const box=document.createElement(`div`);box.className=`box`;
+const p=document.createElement(`p`);p.className=`qtext`;p.textContent=(i+1)+`. `+q.q;box.appendChild(p);
+q.o.forEach((o,j)=>{
+const b=document.createElement(`button`);b.type=`button`;b.className=`opt`;b.textContent=`abcd`[j]+`) `+o;
+b.addEventListener(`click`,()=>{if(locked)return;sel[i]=j;box.querySelectorAll(`.opt`).forEach((x,k)=>x.classList.toggle(`sel`,k===j));update();});
+box.appendChild(b);
+});
+const fb=document.createElement(`div`);fb.className=`fb`;box.appendChild(fb);
+quiz.appendChild(box);
+});
+document.getElementById(`result`).style.display=`none`;evalBtn.style.display=`block`;update();
+}
+function update(){const all=sel.every(x=>x!==null);evalBtn.disabled=!all;hint.style.display=all?`none`:`block`;}
+evalBtn.addEventListener(`click`,()=>{
+if(sel.some(x=>x===null))return;
+locked=true;quiz.classList.add(`locked`);let s=0;
+quiz.querySelectorAll(`.box`).forEach((box,i)=>{
+const opts=box.querySelectorAll(`.opt`),fb=box.querySelector(`.fb`),a=Q[i].a;
+opts.forEach(o=>o.classList.remove(`sel`));
+opts[a].classList.add(`correct`);
+if(sel[i]===a){s++;fb.className=`fb ok`;fb.textContent=`Správně`;}
+else{opts[sel[i]].classList.add(`wrong`);fb.className=`fb bad`;fb.textContent=`Špatně, správná odpověď: `+`abcd`[a]+`) `+Q[i].o[a];}
+});
+const e=E.find(x=>s>=x.min&&s<=x.max);
+document.getElementById(`score`).textContent=s+` z `+Q.length;
+document.getElementById(`evtext`).textContent=e?e.t:``;
+evalBtn.style.display=`none`;hint.style.display=`none`;
+const r=document.getElementById(`result`);r.style.display=`block`;r.scrollIntoView({behavior:`smooth`});
+});
+document.getElementById(`retry`).addEventListener(`click`,()=>{render();window.scrollTo({top:0,behavior:`smooth`});});
+render();
+</script>
+</body>
+</html>
