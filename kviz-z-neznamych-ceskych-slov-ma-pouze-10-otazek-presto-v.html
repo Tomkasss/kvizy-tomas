@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz z neznámých českých slov: Má pouze 10 otázek, přesto v něm lidé udělají průměrně 6 chyb</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:24px;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto}
+h1{font-size:1.9rem;line-height:1.3;margin:16px 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin-top:8px;font-size:.98rem}
+.fb.ok{color:#1e5631}.fb.bad{color:#721c24}
+.btn{display:block;margin:40px auto 0;background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;font-family:inherit;cursor:pointer}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:32px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.evtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#again{background:#8c7b6b;margin-top:24px}
+#again:hover{background:#756658}
+@media (max-width:600px){body{padding:16px}.box{padding:20px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz z neznámých českých slov: Má pouze 10 otázek, přesto v něm lidé udělají průměrně 6 chyb</h1>
+<p class="perex">Slova z pohádek, ze starších románů i z vyprávění na návsi. Všechna jsou ryze česká a před sto lety by jim rozuměl každý. Dnes je mnozí znají jen od vidění a jejich význam si spíš domýšlejí, než aby ho opravdu znali.</p>
+<div id="quiz"></div>
+<button class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result"><p class="score" id="score"></p><p class="evtext" id="evtext"></p><button class="btn" id="again">Zkusit znovu</button></div>
+</div>
+<script>
+const Q = [{q:`Co je krčma?`,o:[`hostinec horšího řádu`,`chatrč obecního pastýře`,`dílna vesnického kováře`,`útulek pro pocestné žebráky`],a:0},
+{q:`Co je jalovice?`,o:[`mladá ovce, která ještě neměla jehně`,`mladá kobyla, která ještě neměla hříbě`,`mladá kráva, která ještě neměla tele`,`mladá koza, která ještě neměla kůzle`],a:2},
+{q:`Co dělá člověk, který kvapí?`,o:[`hlasitě naříká a kvílí`,`váhá a otálí`,`šetří a skrblí`,`spěchá a chvátá`],a:3},
+{q:`Co znamená někoho uhranout?`,o:[`vykázat ho za hranice obce`,`pohledem či kouzlem mu ublížit`,`před všemi ho ostře vyplísnit`,`srazit ho ranou k zemi`],a:1},
+{q:`Jaký je neduživý člověk?`,o:[`nedůvěřivý ke všemu novému`,`churavý a často nemocný`,`nedbalý a lajdácký v práci`,`nedočkavý a věčně netrpělivý`],a:1},
+{q:`Co znamená zastaralé slovo pročež?`,o:[`a proto, a tudíž`,`protože, neboť`,`přestože, ačkoli`,`zatímco, kdežto`],a:0},
+{q:`Co znamená, když někdo něco udělá bezděky?`,o:[`bez poděkování a uznání`,`beze slova a mlčky`,`bez cizí pomoci a sám`,`nechtěně a bez vlastní vůle`],a:3},
+{q:`Co znamená, že se něco děje ponenáhlu?`,o:[`nečekaně a zčistajasna`,`bezodkladně a hned`,`postupně a pozvolna`,`občas a nepravidelně`],a:2},
+{q:`Co znamená přídavné jméno mátožný?`,o:[`malátný a nejistý v pohybech`,`mlsný a vybíravý v jídle`,`potměšilý a zlomyslný k lidem`,`mazlivý a přítulný k lidem`],a:0},
+{q:`Co je okřín?`,o:[`dřevěná okenice na venkovském stavení`,`mělká široká mísa na těsto či ovoce`,`železná obruč stahující dužiny sudu`,`proutěný koš na nošení dříví na zádech`],a:1}];
+const E = [{min:0,max:3,t:`Tahle slova se z běžné řeči vytratila a vy jste se s nimi zatím moc nepotkali. Stačí sáhnout po Němcové nebo Jiráskovi a mnohá z nich tam najdete.`},{min:4,max:6,t:`Jste mezi většinou. Kvíz slibuje průměrně 6 chyb, a právě tady končí většina lidí. Některá slova znáte, u jiných vás svedla podoba se slovy dnešními.`},{min:7,max:9,t:`Starší češtinu čtete s porozuměním a nenachytá vás ani slovo, které zní jako něco úplně jiného. To se podaří menšině.`},{min:10,max:10,t:`Plný počet. Slova, nad kterými dnes většina tápe, pro vás nejsou žádná záhada.`}];
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+let picks = [];
+let locked = false;
+function render() {
+  quiz.innerHTML = ``;
+  picks = Q.map(() => null);
+  locked = false;
+  Q.forEach((item, i) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (i + 1) + `. ` + item.q;
+    box.appendChild(p);
+    item.o.forEach((opt, j) => {
+      const b = document.createElement(`button`);
+      b.className = `opt`;
+      b.type = `button`;
+      b.textContent = `abcd`[j] + `) ` + opt;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        picks[i] = j;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`sel`));
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`div`);
+    fb.className = `fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  result.style.display = `none`;
+  evalBtn.style.display = `block`;
+  update();
+}
+function update() {
+  const done = picks.every(p => p !== null);
+  evalBtn.disabled = !done;
+  hint.style.display = done ? `none` : `block`;
+}
+evalBtn.addEventListener(`click`, () => {
+  if (picks.some(p => p === null)) return;
+  locked = true;
+  let score = 0;
+  const boxes = quiz.querySelectorAll(`.box`);
+  Q.forEach((item, i) => {
+    const btns = boxes[i].querySelectorAll(`.opt`);
+    btns.forEach(b => { b.disabled = true; b.classList.remove(`sel`); });
+    btns[item.a].classList.add(`correct`);
+    const fb = boxes[i].querySelector(`.fb`);
+    if (picks[i] === item.a) {
+      score++;
+      fb.className = `fb ok`;
+      fb.textContent = `Správně.`;
+    } else {
+      btns[picks[i]].classList.add(`wrong`);
+      fb.className = `fb bad`;
+      fb.textContent = `Špatně. Správná odpověď: ` + `abcd`[item.a] + `) ` + item.o[item.a];
+    }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + Q.length;
+  const e = E.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`evtext`).textContent = e ? e.t : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior: `smooth`});
+});
+document.getElementById(`again`).addEventListener(`click`, () => {
+  render();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+render();
+</script>
+</body>
+</html>
