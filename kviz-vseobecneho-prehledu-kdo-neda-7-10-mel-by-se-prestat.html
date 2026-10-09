@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz všeobecného přehledu: Kdo nedá 7/10, měl by se přestat považovat za vzdělaného</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin-top:12px;font-size:.95rem}
+.fb.ok{color:#1e5631}
+.fb.bad{color:#721c24}
+.btn{display:block;margin:40px auto 0;background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;font-family:inherit;cursor:pointer}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a7f73;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.evtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz všeobecného přehledu: Kdo nedá 7/10, měl by se přestat považovat za vzdělaného</h1>
+<p class="perex">Sedm správných odpovědí je hranice, pod kterou by se nikdo neměl chlubit vzděláním. Otázky přeskakují od přírody a sportu přes film, knihy a malířství až k mytologii, rocku a dějinám, takže zaváhat jde kdekoli.</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="evtext" id="evtext"></p>
+<button type="button" class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q = [
+{q:`Na kterém ostrově žijí ve volné přírodě lemuři?`,o:[`na Borneu`,`na Madagaskaru`,`na Sumatře`,`na Nové Guineji`],a:1},
+{q:`Ve kterém sportu se hraje skrumáž?`,o:[`v americkém fotbale`,`v pozemním hokeji`,`ve vodním pólu`,`v ragby`],a:3},
+{q:`Kdo natočil film Diktátor z roku 1940?`,o:[`Charlie Chaplin`,`Buster Keaton`,`Ernst Lubitsch`,`Harold Lloyd`],a:0},
+{q:`Ve kterém městě stojí sloup Nejsvětější Trojice zapsaný na seznam UNESCO?`,o:[`v Brně`,`v Kutné Hoře`,`v Olomouci`,`v Telči`],a:2},
+{q:`Kdo napsal Klapzubovu jedenáctku?`,o:[`Karel Čapek`,`Vladislav Vančura`,`Eduard Bass`,`Jaroslav Foglar`],a:2},
+{q:`Které ovoce ochutnala podle řeckých bájí Persefona v podsvětí, a proto se tam musela každý rok vracet?`,o:[`fík`,`hroznové víno`,`granátové jablko`,`oliva`],a:2},
+{q:`Kdo namaloval obraz Snídaně v trávě z roku 1863?`,o:[`Gustave Courbet`,`Camille Pissarro`,`Jean-François Millet`,`Édouard Manet`],a:3},
+{q:`Ve kterém státě ústí řeka Mekong do moře?`,o:[`v Kambodži`,`ve Vietnamu`,`v Thajsku`,`v Myanmaru`],a:1},
+{q:`Kdo nahrál píseň Smoke on the Water?`,o:[`Deep Purple`,`Uriah Heep`,`Black Sabbath`,`Status Quo`],a:0},
+{q:`Kdo se stal roku 1871 prvním německým císařem?`,o:[`Fridrich III.`,`Vilém I.`,`Vilém II.`,`Fridrich Vilém IV.`],a:1}
+];
+const E = [
+{min:0,max:3,t:`Tady o vzdělanosti mluvit nejde. Do laťky sedmi bodů chybí víc než polovina cesty a výsledek ukazuje mezery napříč obory. Titul vzdělance si zatím nechte v šuplíku.`},
+{min:4,max:6,t:`Laťku sedmi bodů jste nedali. Něco v hlavě je, ale podle pravidel tohohle kvízu se za vzdělaného považovat nemůžete. Hranice je zkrátka hranice.`},
+{min:7,max:9,t:`Laťku jste přeskočili a titul vzdělaného člověka obhájili. Pár bodů někde uteklo, ale přehled napříč obory je vidět.`},
+{min:10,max:10,t:`Plný počet, na který dosáhne jen menšina. Vzdělanost jste nejen obhájili, ale potvrdili ji bez jediné chyby.`}
+];
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+let chosen = [];
+let locked = false;
+function render() {
+  quiz.innerHTML = ``;
+  chosen = Q.map(() => null);
+  locked = false;
+  Q.forEach((q, i) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (i + 1) + `. ` + q.q;
+    box.appendChild(p);
+    q.o.forEach((o, j) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = `abcd`[j] + `) ` + o;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        chosen[i] = j;
+        box.querySelectorAll(`.opt`).forEach((x, k) => x.classList.toggle(`sel`, k === j));
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`div`);
+    fb.className = `fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  result.style.display = `none`;
+  evalBtn.style.display = `block`;
+  update();
+}
+function update() {
+  const all = chosen.every(c => c !== null);
+  evalBtn.disabled = !all;
+  hint.style.display = all ? `none` : `block`;
+}
+evalBtn.addEventListener(`click`, () => {
+  if (chosen.some(c => c === null)) return;
+  locked = true;
+  let score = 0;
+  quiz.querySelectorAll(`.box`).forEach((box, i) => {
+    const q = Q[i];
+    const opts = box.querySelectorAll(`.opt`);
+    opts.forEach((b, k) => {
+      b.disabled = true;
+      b.classList.remove(`sel`);
+      if (k === q.a) b.classList.add(`correct`);
+      else if (k === chosen[i]) b.classList.add(`wrong`);
+    });
+    const fb = box.querySelector(`.fb`);
+    if (chosen[i] === q.a) {
+      score++;
+      fb.className = `fb ok`;
+      fb.textContent = `Správně.`;
+    } else {
+      fb.className = `fb bad`;
+      fb.textContent = `Správná odpověď: ` + `abcd`[q.a] + `) ` + q.o[q.a];
+    }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + Q.length;
+  const ev = E.find(e => score >= e.min && score <= e.max);
+  document.getElementById(`evtext`).textContent = ev ? ev.t : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior: `smooth`, block: `start`});
+});
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  render();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+render();
+</script>
+</body>
+</html>
