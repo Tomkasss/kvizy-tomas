@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz z české historie: Všech 10 odpovědí dá pouze jeden Čech z deseti</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:24px;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto}
+h1{font-size:1.9rem;line-height:1.3;margin:16px 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin-top:8px;font-size:.98rem}
+.fb.ok{color:#1e5631}.fb.bad{color:#721c24}
+.btn{display:block;margin:40px auto 0;background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;font-family:inherit;cursor:pointer}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:32px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.evtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#again{background:#8c7b6b;margin-top:24px}
+#again:hover{background:#756658}
+@media (max-width:600px){body{padding:16px}.box{padding:20px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz z české historie: Všech 10 odpovědí dá pouze jeden Čech z deseti</h1>
+<p class="perex">Od starověku přes husitské kazatele a obrozenecké jazykovědce až po listopad 1989. Školní dějepis tu stačí jen na půlku, zbytek prověří, co vám z hodin zůstalo navíc. Bez jediné chyby to zvládne zhruba každý desátý.</p>
+<div id="quiz"></div>
+<button class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result"><p class="score" id="score"></p><p class="evtext" id="evtext"></p><button class="btn" id="again">Zkusit znovu</button></div>
+</div>
+<script>
+const Q = [{q:`Ke kterému národu patřili Bójové, podle nichž dostaly Čechy latinské jméno?`,o:[`ke Keltům`,`ke Germánům`,`k Ilyrům`,`k Thrákům`],a:0},
+{q:`Kdo byl druhým pražským biskupem?`,o:[`Dětmar`,`Prokop`,`Vojtěch`,`Arnošt z Pardubic`],a:2},
+{q:`Jaké jméno dostal Karel IV. při křtu?`,o:[`Václav`,`Jan`,`Jindřich`,`Přemysl`],a:0},
+{q:`Kdo začal roku 1414 v Praze podávat laikům přijímání podobojí?`,o:[`Jan Hus`,`Jan Želivský`,`Jan Rokycana`,`Jakoubek ze Stříbra`],a:3},
+{q:`Kdo napsal latinské dílo známé jako Obrana jazyka slovanského, zvláště českého?`,o:[`Jan Amos Komenský`,`Bohuslav Balbín`,`Pavel Stránský`,`Václav Hájek z Libočan`],a:1},
+{q:`Kdo je autorem první vědecké mluvnice češtiny, vydané roku 1809?`,o:[`Josef Dobrovský`,`Josef Jungmann`,`Pavel Josef Šafařík`,`Václav Hanka`],a:0},
+{q:`Kdo roku 1848 odmítl dopisem do Frankfurtu pozvání k přípravě všeněmeckého parlamentu?`,o:[`Karel Havlíček Borovský`,`František Palacký`,`František Ladislav Rieger`,`Karel Sladkovský`],a:1},
+{q:`Který student zemřel na následky zranění z protiokupační demonstrace 28. října 1939?`,o:[`Jan Palach`,`Jan Černý`,`Jan Zajíc`,`Jan Opletal`],a:3},
+{q:`Který komunistický funkcionář byl roku 1952 popraven po vykonstruovaném procesu?`,o:[`Josef Smrkovský`,`Antonín Novotný`,`Rudolf Slánský`,`Alexej Čepička`],a:2},
+{q:`Kde se v Praze konala největší demonstrace sametové revoluce?`,o:[`na Václavském náměstí`,`na Staroměstském náměstí`,`na Letenské pláni`,`na Strahovském stadionu`],a:2}];
+const E = [{min:0,max:3,t:`Tentokrát to nevyšlo, ale ze školy si většinou pamatujeme hlavně pár slavných letopočtů. Tyhle otázky šly hlouběji, takže nevěšte hlavu a zkuste to znovu.`},{min:4,max:6,t:`Základ máte a ze školy vám toho zůstalo dost. Jen tam, kde šlo o méně známá jména a podrobnosti, jste zaváhali.`},{min:7,max:9,t:`Výborný výsledek, české dějiny znáte nad rámec povinné látky. Do úplné špičky vám chyběl jen kousek.`},{min:10,max:10,t:`Plný počet. Patříte do té desetiny Čechů, kterou nerozhodí ani kazatelé z doby husitské, ani jezuitští učenci, ani podrobnosti z listopadu 1989. Klobouk dolů.`}];
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+let picks = [];
+let locked = false;
+function render() {
+  quiz.innerHTML = ``;
+  picks = Q.map(() => null);
+  locked = false;
+  Q.forEach((item, i) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (i + 1) + `. ` + item.q;
+    box.appendChild(p);
+    item.o.forEach((opt, j) => {
+      const b = document.createElement(`button`);
+      b.className = `opt`;
+      b.type = `button`;
+      b.textContent = `abcd`[j] + `) ` + opt;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        picks[i] = j;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`sel`));
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`div`);
+    fb.className = `fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  result.style.display = `none`;
+  evalBtn.style.display = `block`;
+  update();
+}
+function update() {
+  const done = picks.every(p => p !== null);
+  evalBtn.disabled = !done;
+  hint.style.display = done ? `none` : `block`;
+}
+evalBtn.addEventListener(`click`, () => {
+  if (picks.some(p => p === null)) return;
+  locked = true;
+  let score = 0;
+  const boxes = quiz.querySelectorAll(`.box`);
+  Q.forEach((item, i) => {
+    const btns = boxes[i].querySelectorAll(`.opt`);
+    btns.forEach(b => { b.disabled = true; b.classList.remove(`sel`); });
+    btns[item.a].classList.add(`correct`);
+    const fb = boxes[i].querySelector(`.fb`);
+    if (picks[i] === item.a) {
+      score++;
+      fb.className = `fb ok`;
+      fb.textContent = `Správně.`;
+    } else {
+      btns[picks[i]].classList.add(`wrong`);
+      fb.className = `fb bad`;
+      fb.textContent = `Špatně. Správná odpověď: ` + `abcd`[item.a] + `) ` + item.o[item.a];
+    }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + Q.length;
+  const e = E.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`evtext`).textContent = e ? e.t : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior: `smooth`});
+});
+document.getElementById(`again`).addEventListener(`click`, () => {
+  render();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+render();
+</script>
+</body>
+</html>
