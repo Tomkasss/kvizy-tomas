@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KVÍZ: Ve kterém státě leží Budapešť, Riga či Sofie? Školáci často porazí vlastní rodiče</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px;color:#2c2c2c}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover{background:#f7f4f0}
+.locked .opt.sel:hover{background:#dcd3c7}
+.locked .opt.ok:hover{background:#d4edda}
+.locked .opt.bad:hover{background:#f8d7da}
+.fb{margin-top:8px;font-size:.95rem}
+.fb.ok{color:#1e5631}.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a7f74;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#again{background:#8c7b6b;margin-top:24px}
+#again:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>KVÍZ: Ve kterém státě leží Budapešť, Riga či Sofie? Školáci často porazí vlastní rodiče</h1>
+<p class="perex">Děti mají hlavní města čerstvě ze zeměpisu a rády s nimi u večeře zkoušejí rodiče. Ti pak s úžasem zjišťují, kolik metropolí jim od školních let vyprchalo. Obstáli byste před vlastním školákem, nebo byste raději rychle změnili téma?</p>
+<div id="quiz"></div>
+<button class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result"><p class="score" id="score"></p><p class="rtext" id="rtext"></p><button class="btn" id="again">Zkusit znovu</button></div>
+</div>
+<script>
+const Q=[
+{q:`Ve kterém státě leží Sofie?`,o:[`Rumunsko`,`Bulharsko`,`Srbsko`,`Moldavsko`],a:1},
+{q:`Hlavním městem kterého státu je Reykjavík?`,o:[`Norsko`,`Dánsko`,`Finsko`,`Island`],a:3},
+{q:`Ve kterém státě leží Záhřeb?`,o:[`Chorvatsko`,`Slovinsko`,`Srbsko`,`Maďarsko`],a:0},
+{q:`Hlavním městem kterého státu je Ulánbátar?`,o:[`Kazachstán`,`Nepál`,`Mongolsko`,`Bhútán`],a:2},
+{q:`Ve kterém státě leží Jerevan?`,o:[`Gruzie`,`Arménie`,`Ázerbájdžán`,`Írán`],a:1},
+{q:`Hlavním městem kterého státu je Damašek?`,o:[`Sýrie`,`Irák`,`Libanon`,`Jordánsko`],a:0},
+{q:`Ve kterém státě leží Caracas?`,o:[`Kolumbie`,`Ekvádor`,`Peru`,`Venezuela`],a:3},
+{q:`Hlavním městem kterého státu je Manila?`,o:[`Indonésie`,`Malajsie`,`Filipíny`,`Thajsko`],a:2},
+{q:`Ve kterém státě leží Addis Abeba?`,o:[`Etiopie`,`Keňa`,`Somálsko`,`Súdán`],a:0},
+{q:`Hlavním městem kterého státu je Dušanbe?`,o:[`Uzbekistán`,`Tádžikistán`,`Kyrgyzstán`,`Turkmenistán`],a:1}
+];
+const E=[
+{min:0,max:3,t:`Tady by vás školák u večeře porazil. Mapa světa se vám od maturity hodně rozmazala a nejvíc to zabolí, když dítě v klidu vyjmenuje, co vy marně lovíte v paměti. Pomůže, když si ho necháte vyzkoušet. Za týden to může dopadnout úplně jinak.`},
+{min:4,max:6,t:`S dítětem, které má zeměpis zrovna v rozvrhu, byste drželi krok jen napůl. Evropu víte docela jistě, ale jakmile se přesunete na Kavkaz, do Ameriky nebo do Afriky, začnete hádat. Na delší cestu po mapě světa by se vyplatilo vzít si dítě s sebou jako navigátora.`},
+{min:7,max:9,t:`Před svým školákem byste se ostudy nebáli. Vybavíte si i metropole, u kterých většina dospělých tápe, a dítě by muselo hodně zabrat, aby vás předběhlo. Jedno nebo dvě zaváhání patří k tomu, že atlas už nemáte v aktovce.`},
+{min:10,max:10,t:`Tady by dítě prohrálo. Všech deset hlavních měst jste přiřadili ke správnému státu a pro něco takového nestačí jen dobře si pamatovat školu. Klidně se nabídněte, že s ním příští písemku z hlavních měst budete opakovat vy.`}
+];
+const quiz=document.getElementById(`quiz`),ev=document.getElementById(`eval`),hint=document.getElementById(`hint`),res=document.getElementById(`result`);
+let sel=[],locked=false;
+function render(){
+quiz.innerHTML=``;sel=Q.map(()=>-1);locked=false;quiz.classList.remove(`locked`);
+Q.forEach((q,i)=>{
+const b=document.createElement(`div`);b.className=`box`;
+const p=document.createElement(`p`);p.className=`qt`;p.textContent=(i+1)+`. `+q.q;b.appendChild(p);
+q.o.forEach((o,j)=>{
+const btn=document.createElement(`button`);btn.type=`button`;btn.className=`opt`;btn.textContent=`abcd`[j]+`) `+o;
+btn.addEventListener(`click`,()=>{if(locked)return;sel[i]=j;b.querySelectorAll(`.opt`).forEach((x,k)=>x.classList.toggle(`sel`,k===j));update();});
+b.appendChild(btn);});
+const fb=document.createElement(`div`);fb.className=`fb`;b.appendChild(fb);
+quiz.appendChild(b);});
+res.style.display=`none`;ev.style.display=`block`;update();}
+function update(){const all=sel.every(s=>s>=0);ev.disabled=!all;hint.style.display=all?`none`:`block`;}
+ev.addEventListener(`click`,()=>{
+if(ev.disabled)return;locked=true;quiz.classList.add(`locked`);let sc=0;
+quiz.querySelectorAll(`.box`).forEach((b,i)=>{
+const opts=b.querySelectorAll(`.opt`),fb=b.querySelector(`.fb`),q=Q[i];
+opts[q.a].classList.add(`ok`);
+if(sel[i]===q.a){sc++;fb.className=`fb ok`;fb.textContent=`Správně`;}
+else{opts[sel[i]].classList.add(`bad`);fb.className=`fb bad`;fb.textContent=`Špatně. Správná odpověď: `+`abcd`[q.a]+`) `+q.o[q.a];}
+});
+const e=E.find(x=>sc>=x.min&&sc<=x.max);
+document.getElementById(`score`).textContent=sc+` z `+Q.length;
+document.getElementById(`rtext`).textContent=e?e.t:``;
+ev.style.display=`none`;hint.style.display=`none`;res.style.display=`block`;
+res.scrollIntoView({behavior:`smooth`});
+});
+document.getElementById(`again`).addEventListener(`click`,()=>{render();window.scrollTo({top:0,behavior:`smooth`});});
+render();
+</script>
+</body>
+</html>
