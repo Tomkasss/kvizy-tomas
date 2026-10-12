@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz pro seniory vrací do školních lavic: Těchto 10 odpovědí jste kdysi znali. Zvládnete 8/10?</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 16px 48px}
+h1{font-size:1.8rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover:not(.ok):not(.bad):not(.sel){background:#f7f4f0}
+.fb{margin:6px 0 0;font-size:.95rem}
+.fb.ok{color:#1e5631}.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#721c24;margin:12px 0 0;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#again{background:#8c7b6b;margin-top:24px}
+#again:hover{background:#756658}
+@media(max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro seniory vrací do školních lavic: Těchto 10 odpovědí jste kdysi znali. Zvládnete 8/10?</h1>
+<p class="perex">Kdysi jste u tabule vysvětlovali lom světla, rýsovali trojúhelníky a v čítance listovali romantiky. Vraťte se po letech do školní lavice a zjistěte, kolik z té látky ve vás zůstalo a jestli dosáhnete na osm bodů.</p>
+<div id="quiz">
+<div class="box q" id="q0"><p class="qt">1. Co udává index lomu látky?</p><div class="opts"><button type="button" class="opt" data-q="0" data-o="0">a) o kolik stupňů se paprsek v látce odchýlí od původního směru</button><button type="button" class="opt" data-q="0" data-o="1">b) kolikrát se světlo v látce šíří pomaleji než ve vakuu</button><button type="button" class="opt" data-q="0" data-o="2">c) jak silně se bílé světlo v látce rozkládá na barvy</button><button type="button" class="opt" data-q="0" data-o="3">d) jakou část dopadajícího světla látka propustí</button></div><p class="fb"></p></div>
+<div class="box q" id="q1"><p class="qt">2. Proč se zahradní záhon na podzim zryje a hroudy se nechají přes zimu nerozbité?</p><div class="opts"><button type="button" class="opt" data-q="1" data-o="0">a) aby se půda přes zimu méně provlhčila deštěm a sněhem</button><button type="button" class="opt" data-q="1" data-o="1">b) aby půda pod hroudami přes zimu tolik nepromrzla</button><button type="button" class="opt" data-q="1" data-o="2">c) aby je přes zimu rozdrobil mráz</button><button type="button" class="opt" data-q="1" data-o="3">d) aby se v nich přes zimu drželo teplo pro půdní organismy</button></div><p class="fb"></p></div>
+<div class="box q" id="q2"><p class="qt">3. Kam vanou pasáty?</p><div class="opts"><button type="button" class="opt" data-q="2" data-o="0">a) od rovníku k obratníkům</button><button type="button" class="opt" data-q="2" data-o="1">b) od pólů k polárním kruhům</button><button type="button" class="opt" data-q="2" data-o="2">c) od obratníků k polárním kruhům</button><button type="button" class="opt" data-q="2" data-o="3">d) od obratníků k rovníku</button></div><p class="fb"></p></div>
+<div class="box q" id="q3"><p class="qt">4. Jakou čarou se na technickém výkresu kreslí neviditelné hrany?</p><div class="opts"><button type="button" class="opt" data-q="3" data-o="0">a) čárkovanou</button><button type="button" class="opt" data-q="3" data-o="1">b) čerchovanou</button><button type="button" class="opt" data-q="3" data-o="2">c) tečkovanou</button><button type="button" class="opt" data-q="3" data-o="3">d) tenkou plnou</button></div><p class="fb"></p></div>
+<div class="box q" id="q4"><p class="qt">5. K čemu slouží rybám plynový měchýř?</p><div class="opts"><button type="button" class="opt" data-q="4" data-o="0">a) k dýchání pod vodou</button><button type="button" class="opt" data-q="4" data-o="1">b) k udržení v potřebné hloubce</button><button type="button" class="opt" data-q="4" data-o="2">c) k ukládání zásob tuku</button><button type="button" class="opt" data-q="4" data-o="3">d) k vylučování přebytečné soli</button></div><p class="fb"></p></div>
+<div class="box q" id="q5"><p class="qt">6. Co je průsečíkem os stran trojúhelníku?</p><div class="opts"><button type="button" class="opt" data-q="5" data-o="0">a) těžiště</button><button type="button" class="opt" data-q="5" data-o="1">b) střed kružnice vepsané</button><button type="button" class="opt" data-q="5" data-o="2">c) střed kružnice opsané</button><button type="button" class="opt" data-q="5" data-o="3">d) průsečík výšek</button></div><p class="fb"></p></div>
+<div class="box q" id="q6"><p class="qt">7. Ve které z těchto grafických technik se barva otiskuje z vyvýšených míst desky?</p><div class="opts"><button type="button" class="opt" data-q="6" data-o="0">a) lept</button><button type="button" class="opt" data-q="6" data-o="1">b) suchá jehla</button><button type="button" class="opt" data-q="6" data-o="2">c) litografie</button><button type="button" class="opt" data-q="6" data-o="3">d) linoryt</button></div><p class="fb"></p></div>
+<div class="box q" id="q7"><p class="qt">8. Kterou surovinu sypou hutníci do vysoké pece vedle železné rudy a koksu?</p><div class="opts"><button type="button" class="opt" data-q="7" data-o="0">a) vápenec</button><button type="button" class="opt" data-q="7" data-o="1">b) sádrovec</button><button type="button" class="opt" data-q="7" data-o="2">c) kamennou sůl</button><button type="button" class="opt" data-q="7" data-o="3">d) živec</button></div><p class="fb"></p></div>
+<div class="box q" id="q8"><p class="qt">9. Které prozaické dílo napsal Karel Hynek Mácha?</p><div class="opts"><button type="button" class="opt" data-q="8" data-o="0">a) Poslední Čech</button><button type="button" class="opt" data-q="8" data-o="1">b) Cikáni</button><button type="button" class="opt" data-q="8" data-o="2">c) Pohorská vesnice</button><button type="button" class="opt" data-q="8" data-o="3">d) Divá Bára</button></div><p class="fb"></p></div>
+<div class="box q" id="q9"><p class="qt">10. Na čí návrh zrušil říšský sněm roku 1848 robotu?</p><div class="opts"><button type="button" class="opt" data-q="9" data-o="0">a) Františka Palackého</button><button type="button" class="opt" data-q="9" data-o="1">b) Karla Havlíčka Borovského</button><button type="button" class="opt" data-q="9" data-o="2">c) Hanse Kudlicha</button><button type="button" class="opt" data-q="9" data-o="3">d) Adolfa Fischhofa</button></div><p class="fb"></p></div>
+</div>
+<button type="button" class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result"><p class="score" id="score"></p><p class="rtext" id="rtext"></p><button type="button" class="btn" id="again">Zkusit znovu</button></div>
+</div>
+<script>
+(function(){
+const opts=[[`o kolik stupňů se paprsek v látce odchýlí od původního směru`,`kolikrát se světlo v látce šíří pomaleji než ve vakuu`,`jak silně se bílé světlo v látce rozkládá na barvy`,`jakou část dopadajícího světla látka propustí`],[`aby se půda přes zimu méně provlhčila deštěm a sněhem`,`aby půda pod hroudami přes zimu tolik nepromrzla`,`aby je přes zimu rozdrobil mráz`,`aby se v nich přes zimu drželo teplo pro půdní organismy`],[`od rovníku k obratníkům`,`od pólů k polárním kruhům`,`od obratníků k polárním kruhům`,`od obratníků k rovníku`],[`čárkovanou`,`čerchovanou`,`tečkovanou`,`tenkou plnou`],[`k dýchání pod vodou`,`k udržení v potřebné hloubce`,`k ukládání zásob tuku`,`k vylučování přebytečné soli`],[`těžiště`,`střed kružnice vepsané`,`střed kružnice opsané`,`průsečík výšek`],[`lept`,`suchá jehla`,`litografie`,`linoryt`],[`vápenec`,`sádrovec`,`kamennou sůl`,`živec`],[`Poslední Čech`,`Cikáni`,`Pohorská vesnice`,`Divá Bára`],[`Františka Palackého`,`Karla Havlíčka Borovského`,`Hanse Kudlicha`,`Adolfa Fischhofa`]];
+const correct=[1, 2, 3, 0, 1, 2, 3, 0, 1, 2];
+const ev=[[0,3,`Školní lavice je od vás zatím daleko. Poučky z fyziky, zeměpisu i dějepisu jsou zasunuté hluboko. Kdo si je jednou osvěží, vybaví si je podruhé mnohem snáz.`],[4,6,`Polovina učiva drží, zbytek po letech vybledl. K osmi bodům z titulku vám chybějí dvě až čtyři odpovědi, takže laťka tentokrát zůstala nepřekonaná.`],[7,9,`Se sedmi body jste jeden krok před cílem, který titulek stanovil. Osm nebo devět bodů už slib z titulku splnilo: školní poučky ve vás po letech pevně drží.`],[10,10,`Všech deset. Učivo z lavic máte pořád pohromadě, od optiky po dějepis, a laťku osmi bodů jste přeskočili s rezervou dvou odpovědí.`]];
+const chosen=new Array(correct.length).fill(null);
+let locked=false;
+const evalBtn=document.getElementById(`eval`),hint=document.getElementById(`hint`),result=document.getElementById(`result`),quiz=document.getElementById(`quiz`);
+function upd(){const all=chosen.every(function(c){return c!==null});evalBtn.disabled=!all;hint.style.display=all?`none`:`block`;}
+document.querySelectorAll(`.opt`).forEach(function(b){b.addEventListener(`click`,function(){
+if(locked)return;const q=+b.dataset.q,o=+b.dataset.o;chosen[q]=o;
+document.querySelectorAll(`.opt[data-q="`+q+`"]`).forEach(function(x){x.classList.toggle(`sel`,+x.dataset.o===o)});upd();})});
+evalBtn.addEventListener(`click`,function(){
+if(evalBtn.disabled)return;locked=true;quiz.classList.add(`locked`);let s=0;
+correct.forEach(function(c,q){const box=document.getElementById(`q`+q),fb=box.querySelector(`.fb`);
+box.querySelectorAll(`.opt`).forEach(function(x){const o=+x.dataset.o;x.classList.remove(`sel`);if(o===c)x.classList.add(`ok`);else if(o===chosen[q])x.classList.add(`bad`);});
+if(chosen[q]===c){s++;fb.className=`fb ok`;fb.textContent=`Správně.`;}else{fb.className=`fb bad`;fb.textContent=`Špatně. Správná odpověď: `+`abcd`[c]+`) `+opts[q][c];}});
+document.getElementById(`score`).textContent=s+` z `+correct.length;
+const r=ev.find(function(e){return s>=e[0]&&s<=e[1]});document.getElementById(`rtext`).textContent=r?r[2]:``;
+evalBtn.style.display=`none`;hint.style.display=`none`;result.style.display=`block`;result.scrollIntoView({behavior:`smooth`});});
+document.getElementById(`again`).addEventListener(`click`,function(){
+locked=false;quiz.classList.remove(`locked`);chosen.fill(null);
+document.querySelectorAll(`.opt`).forEach(function(x){x.classList.remove(`sel`,`ok`,`bad`)});
+document.querySelectorAll(`.fb`).forEach(function(f){f.className=`fb`;f.textContent=``});
+result.style.display=`none`;evalBtn.style.display=`block`;upd();window.scrollTo({top:0,behavior:`smooth`});});
+upd();
+})();
+</script>
+</body>
+</html>
