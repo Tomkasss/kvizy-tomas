@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz z cizích slov: Používáme je každý den, jejich přesný význam ale zná málokdo</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.note{margin-top:8px;font-size:.95rem}
+.note.ok{color:#1e5631}.note.bad{color:#721c24}
+.btn{display:block;margin:40px auto 0;background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;font-family:inherit;cursor:pointer}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+#again{background:#8c7b6b}#again:hover{background:#756658}
+.hint{text-align:center;color:#8a7f74;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+@media (max-width:600px){.wrap{padding:20px 16px 48px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz z cizích slov: Používáme je každý den, jejich přesný význam ale zná málokdo</h1>
+<p class="perex">Slyšíme je ve zprávách, čteme je v novinách a sami je pouštíme do řeči. Většina z nás tuší, kam patří, ale když přijde na přesný výklad, sáhne vedle i leckdo, kdo je běžně používá.</p>
+<div id="quiz"></div>
+<button id="eval" class="btn" disabled>Vyhodnotit</button>
+<p id="hint" class="hint">Odpovězte prosím na všechny otázky</p>
+<div id="result" class="box">
+<p class="score" id="score"></p>
+<p class="rtext" id="rtext"></p>
+<button id="again" class="btn">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q=[
+{q:`Kdy se hostům tradičně podává aperitiv?`,o:[`po hlavním chodu spolu s kávou`,`před jídlem na povzbuzení chuti`,`po jídle jako podpora trávení`,`mezi předkrmem a hlavním chodem`],a:1},
+{q:`Které utkání označují sportovní novináři jako derby?`,o:[`zápas o postup do vyšší soutěže`,`finále rozhodující o titulu mistra`,`souboj dvou nejlepších týmů tabulky`,`utkání tradičních místních soupeřů`],a:3},
+{q:`Co znamená, když je výlet v katalogu cestovní kanceláře označen jako fakultativní?`,o:[`účast na něm je pro klienta nepovinná`,`je vždy zahrnutý v ceně zájezdu`,`pořádá ho místní partnerská agentura`,`vede ho průvodce s odborným výkladem`],a:0},
+{q:`Co znamená zpráva, že státní rozpočet loni skončil deficitem?`,o:[`celkový dluh státu přesáhl hodnotu jeho majetku`,`výdaje státu za rok převýšily jeho příjmy`,`příjmy státu byly nižší, než vláda plánovala`,`stát si musel půjčit u zahraničních bank`],a:1},
+{q:`Čím se vyznačuje člověk, který trpí prokrastinací?`,o:[`neustále přeplánovává a mění své cíle`,`bere na sebe víc úkolů, než zvládne`,`opakovaně odkládá povinnosti na později`,`dělá víc věcí najednou a žádnou nedokončí`],a:2},
+{q:`Kdy má zasedání zastupitelstva kvórum?`,o:[`když je přítomen předepsaný nejnižší počet členů`,`když je pozvánka včas zveřejněna na úřední desce`,`když program jednání schválí většina přítomných`,`když jednání řídí starosta nebo jeho zástupce`],a:0},
+{q:`Jaký cíl má paliativní léčba?`,o:[`zničit původce nemoci přímo v těle`,`předejít vzniku nemoci u ohrožených lidí`,`vyléčit nemoc šetrně a bez operace`,`zmírnit příznaky, ale neodstranit příčinu`],a:3},
+{q:`Jak smí čtenář naložit s knihou, kterou knihovna půjčuje jen prezenčně?`,o:[`vypůjčit si ji domů, ale bez možnosti prodloužení`,`číst ji pouze v elektronické podobě`,`číst ji jen na místě v knihovně`,`vypůjčit si ji až po předchozí rezervaci`],a:2},
+{q:`Co vyčítají novináři politikovi, když jeho postoj označí za alibismus?`,o:[`že se snaží vyhnout odpovědnosti`,`že zamlčuje svůj skutečný majetek`,`že kryje prohřešky svých spolupracovníků`,`že slibuje věci, které nemůže splnit`],a:0},
+{q:`Jak probíhá volba aklamací?`,o:[`tajně, vhozením lístku do volební urny`,`veřejně, zvednutím ruky nebo provoláním`,`nepřímo, hlasy předem zvolených delegátů`,`losem mezi kandidáty se stejným počtem hlasů`],a:1}
+];
+const E=[
+[0,3,`Tato slova k vám doléhají spíš jako kulisa zpráv než jako pojmy s přesným obsahem. Stačí se u nich občas zastavit a nahlédnout do slovníku.`],
+[4,6,`Základní smysl odhadnete, ale u blízkých významů se necháte svést. Typický výsledek člověka, který slova slyší denně, jen je nemá potřebu rozebírat.`],
+[7,9,`Cizí slova z médií a úřadů používáte přesně a nenecháte se nachytat ani podobně znějícím výkladem. Patříte k lepší části čtenářů.`],
+[10,10,`Bez jediné chyby. Rozlišujete i jemné rozdíly, ve kterých tápe většina mluvčích, a tato slova byste mohli klidně vykládat ostatním.`]
+];
+const L=[`a`,`b`,`c`,`d`];
+const quiz=document.getElementById(`quiz`),ev=document.getElementById(`eval`),hint=document.getElementById(`hint`),res=document.getElementById(`result`);
+let ans=[],locked=false;
+function render(){
+  quiz.innerHTML=``;ans=new Array(Q.length).fill(null);locked=false;
+  Q.forEach((q,i)=>{
+    const b=document.createElement(`div`);b.className=`box`;
+    const t=document.createElement(`p`);t.className=`qt`;t.textContent=(i+1)+`. `+q.q;b.appendChild(t);
+    q.o.forEach((o,j)=>{
+      const btn=document.createElement(`button`);btn.className=`opt`;btn.type=`button`;btn.textContent=L[j]+`) `+o;
+      btn.addEventListener(`click`,()=>{if(locked)return;ans[i]=j;b.querySelectorAll(`.opt`).forEach((x,k)=>x.classList.toggle(`sel`,k===j));check();});
+      b.appendChild(btn);
+    });
+    const n=document.createElement(`div`);n.className=`note`;b.appendChild(n);
+    quiz.appendChild(b);
+  });
+  res.style.display=`none`;ev.style.display=`block`;check();
+}
+function check(){const all=ans.every(a=>a!==null);ev.disabled=!all;hint.style.display=all?`none`:`block`;}
+ev.addEventListener(`click`,()=>{
+  if(ev.disabled)return;locked=true;let s=0;
+  quiz.querySelectorAll(`.box`).forEach((b,i)=>{
+    const opts=b.querySelectorAll(`.opt`),c=Q[i].a,n=b.querySelector(`.note`);
+    opts.forEach(x=>{x.disabled=true;x.classList.remove(`sel`);});
+    opts[c].classList.add(`ok`);
+    if(ans[i]===c){s++;n.className=`note ok`;n.textContent=`Správně`;}
+    else{opts[ans[i]].classList.add(`bad`);n.className=`note bad`;n.textContent=`Špatně. Správná odpověď: `+L[c]+`) `+Q[i].o[c];}
+  });
+  document.getElementById(`score`).textContent=s+` z `+Q.length;
+  const r=E.find(e=>s>=e[0]&&s<=e[1]);document.getElementById(`rtext`).textContent=r?r[2]:``;
+  ev.style.display=`none`;hint.style.display=`none`;res.style.display=`block`;
+  res.scrollIntoView({behavior:`smooth`,block:`start`});
+});
+document.getElementById(`again`).addEventListener(`click`,()=>{render();window.scrollTo({top:0,behavior:`smooth`});});
+render();
+</script>
+</body>
+</html>
