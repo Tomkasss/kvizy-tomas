@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz pro seniory: Doplňte chybějící slovo v názvu oblíbené české pohádky</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.q{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px;line-height:1.45}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover{background:#f7f4f0}
+.locked .opt.sel:hover{background:#dcd3c7}
+.locked .opt.ok:hover{background:#d4edda}
+.locked .opt.bad:hover{background:#f8d7da}
+.fb{margin-top:8px;font-size:.95rem}
+.fb.ok{color:#1e5631}
+.fb.bad{color:#721c24}
+.btn{display:block;margin:40px auto 0;background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#721c24;margin-top:12px;font-size:.95rem}
+.res{display:none;background:#fefcf9;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-top:32px;border-top:4px solid #5b7e5f}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+.btn.again{background:#8c7b6b}
+.btn.again:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.q{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz pro seniory: Doplňte chybějící slovo v názvu oblíbené české pohádky</h1>
+<p class="perex">Kdo vyrůstal u černobílé obrazovky a pak předčítal pohádky dětem i vnoučatům, nosí jejich názvy v paměti desítky let. Jenže paměť ráda zaokrouhluje a z pevného titulu udělá přibližný. U které klasiky vás zradí?</p>
+<div id="quiz"></div>
+<button class="btn" id="eval" type="button" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="res" id="res">
+<p class="score" id="score"></p>
+<p class="rtext" id="rtext"></p>
+<button class="btn again" id="again" type="button">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q = [
+{t:`1. Které slovo chybí v názvu Erbenovy pohádky „Dlouhý, Široký a ___“?`, o:[`Bystrooký`,`Bystrozraký`,`Dalekozraký`,`Ostrozraký`], c:1},
+{t:`2. Které slovo chybí v názvu filmové pohádky „Princ a ___“?`, o:[`Večernice`,`Jitřenka`,`Zornička`,`Hvězdička`], c:0},
+{t:`3. Které slovo chybí na začátku názvu knížky Josefa Čapka „___ o pejskovi a kočičce“?`, o:[`Vyprávění`,`Říkání`,`Povídání`,`Příhody`], c:2},
+{t:`4. Které slovo chybí v názvu pohádky Josefa Lady „O chytré ___ lišce“?`, o:[`sestře`,`tetě`,`sousedce`,`kmotře`], c:3},
+{t:`5. Které slovo chybí v názvu filmové pohádky „O ___ kováři“?`, o:[`statečném`,`neohroženém`,`chytrém`,`silném`], c:0},
+{t:`6. Které slovo chybí v názvu televizní pohádky „O princezně, která ___“?`, o:[`šišlala`,`ráčkovala`,`koktala`,`huhňala`], c:1},
+{t:`7. Které slovo chybí v názvu Werichovy pohádky „___ Barka“?`, o:[`Líná`,`Mlsná`,`Lakomá`,`Pyšná`], c:2},
+{t:`8. Které slovo chybí v názvu filmové pohádky Karla Zemana „Čarodějův ___“?`, o:[`sluha`,`tovaryš`,`pomocník`,`učeň`], c:3},
+{t:`9. Které slovo chybí v názvu filmové pohádky „Strašidla z ___“?`, o:[`vikýře`,`půdy`,`komína`,`mlýna`], c:0},
+{t:`10. Které slovo chybí v názvu pohádky „Anička skřítek a ___ Hubert“?`, o:[`Dřevěný`,`Slaměný`,`Hadrový`,`Papírový`], c:1}
+];
+const L = [`a`,`b`,`c`,`d`];
+const R = [
+{min:0,max:3,t:`Tyhle pohádky si pamatujete podle děje a podle postav, ale jejich přesné názvy se vám za ta léta rozmazaly. Stačí pár večerů s vnoučaty a knížkou a slova se vám vrátí na svá místa.`},
+{min:4,max:6,t:`Klasiky z knížek a z obrazovky znáte dobře a jejich názvy vám většinou naskočí samy. Chyby přišly u slov, která si paměť ráda nahradí podobně znějícím slovem.`},
+{min:7,max:9,t:`Výborné. Názvy znáte ze slavných knížek, z filmů i z méně vysílaných pohádek, a to včetně slov, která si většina lidí plete. Na plný počet vám chybělo jen pár rozhodnutí mezi dvěma blízkými možnostmi.`},
+{min:10,max:10,t:`Plný počet, který dá jen menšina. Každý název máte v paměti přesně tak, jak stál na titulní straně nebo v úvodních titulcích, a nesplete vás ani pohádka, která se v televizi neopakuje každé Vánoce.`}
+];
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+const res = document.getElementById(`res`);
+let ans = [];
+let locked = false;
+
+function build(){
+  quiz.innerHTML = ``;
+  ans = new Array(Q.length).fill(null);
+  locked = false;
+  Q.forEach(function(q, qi){
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const p = document.createElement(`p`);
+    p.className = `qt`;
+    p.textContent = q.t;
+    box.appendChild(p);
+    q.o.forEach(function(o, oi){
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = L[oi] + `) ` + o;
+      b.addEventListener(`click`, function(){
+        if (locked) return;
+        ans[qi] = oi;
+        box.querySelectorAll(`.opt`).forEach(function(x){ x.classList.remove(`sel`); });
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`div`);
+    fb.className = `fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  res.style.display = `none`;
+  evalBtn.style.display = `block`;
+  update();
+}
+
+function update(){
+  const all = ans.every(function(a){ return a !== null; });
+  evalBtn.disabled = !all;
+  hint.style.display = all ? `none` : `block`;
+}
+
+evalBtn.addEventListener(`click`, function(){
+  if (ans.some(function(a){ return a === null; })) return;
+  locked = true;
+  let score = 0;
+  const boxes = quiz.querySelectorAll(`.q`);
+  Q.forEach(function(q, qi){
+    const box = boxes[qi];
+    box.classList.add(`locked`);
+    const opts = box.querySelectorAll(`.opt`);
+    const fb = box.querySelector(`.fb`);
+    opts[q.c].classList.add(`ok`);
+    if (ans[qi] === q.c){
+      score++;
+      fb.className = `fb ok`;
+      fb.textContent = `Správně.`;
+    } else {
+      opts[ans[qi]].classList.add(`bad`);
+      fb.className = `fb bad`;
+      fb.textContent = `Špatně. Správná odpověď: ` + L[q.c] + `) ` + q.o[q.c];
+    }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + Q.length;
+  const r = R.find(function(x){ return score >= x.min && score <= x.max; });
+  document.getElementById(`rtext`).textContent = r ? r.t : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  res.style.display = `block`;
+  res.scrollIntoView({behavior:`smooth`, block:`start`});
+});
+
+document.getElementById(`again`).addEventListener(`click`, function(){
+  build();
+  window.scrollTo({top:0, behavior:`smooth`});
+});
+
+build();
+</script>
+</body>
+</html>
