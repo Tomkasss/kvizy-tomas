@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz: Tyhle literární postavy zná skoro každý. Víte ale, ze které knihy pocházejí?</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.q{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 18px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin-bottom:10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-family:inherit;font-size:1rem;color:#3a3a3a;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover:not(.ok):not(.bad):not(.sel){background:#f7f4f0}
+.fb{margin-top:14px;font-size:.95rem;color:#4a4a4a}
+.btn{display:block;margin:40px auto 0;background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;font-family:inherit;cursor:pointer}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a7f73;font-size:.95rem;margin-top:12px}
+#result{display:none;background:#fefcf9;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-top:40px;border-top:4px solid #5b7e5f}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b;margin-top:28px}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.q{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz: Tyhle literární postavy zná skoro každý. Víte ale, ze které knihy pocházejí?</h1>
+<p class="perex">Některá jména žijí vlastním životem a používáme je, i když jsme knihu nikdy neotevřeli. Víte ale, ze kterého díla která postava vzešla? Dobrodružné romány, divadlo, česká klasika i světová detektivka, od dětské četby po maturitní seznam.</p>
+<div id="quiz"></div>
+<button class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div id="result">
+<p class="score" id="score"></p>
+<p class="rtext" id="rtext"></p>
+<button class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  {q: `1. Ze které knihy pochází tygr Šér Chán?`, o: [`Kniha džunglí`, `Tygři z Mompracemu`, `Tajemství černé džungle`, `Kim`], a: 0},
+  {q: `2. Ze které divadelní hry pochází Harpagon?`, o: [`Zdravý nemocný`, `Misantrop`, `Lakomec`, `Učené ženy`], a: 2},
+  {q: `3. Ze které knihy pochází Heathcliff?`, o: [`Jana Eyrová`, `Na Větrné hůrce`, `Pýcha a předsudek`, `Rozum a cit`], a: 1},
+  {q: `4. Ze které knihy pochází kapitán Nemo?`, o: [`Patnáctiletý kapitán`, `Děti kapitána Granta`, `Cesta do středu Země`, `Dvacet tisíc mil pod mořem`], a: 3},
+  {q: `5. Ze které knihy pochází Miloš Hrma?`, o: [`Ostře sledované vlaky`, `Postřižiny`, `Obsluhoval jsem anglického krále`, `Příliš hlučná samota`], a: 0},
+  {q: `6. Ze které knihy pochází Dlouhý John Silver?`, o: [`Korálový ostrov`, `Ostrov pokladů`, `Tajuplný ostrov`, `Dva roky prázdnin`], a: 1},
+  {q: `7. Ze které knihy pochází pan Vorel?`, o: [`Povídky z jedné kapsy`, `Arabesky`, `Povídky malostranské`, `Pražské obrázky`], a: 2},
+  {q: `8. Ze které knihy pochází Woland?`, o: [`Psí srdce`, `Bílá garda`, `Osudná vejce`, `Mistr a Markétka`], a: 3},
+  {q: `9. Ze které knihy pochází teta Kateřina?`, o: [`Saturnin`, `Muži v offsidu`, `Hostinec U Kamenného stolu`, `Rozmarné léto`], a: 0},
+  {q: `10. Ve kterém románu Agathy Christie se poprvé objevil Hercule Poirot?`, o: [`Tajemný protivník`, `Muž v hnědém obleku`, `Záhada na zámku Styles`, `Vražda na faře`], a: 2}
+];
+const letters = [`a`, `b`, `c`, `d`];
+const results = [
+  {min: 0, max: 3, t: `Postavy znáte spíš z doslechu nebo z filmu a knihy, ze kterých pocházejí, vám zatím unikají. Většina z nich přitom stojí za přečtení, a některé se dají zvládnout za jeden večer.`},
+  {min: 4, max: 6, t: `Slušný základ. Klasiku ze školy si pamatujete, ale tam, kde vypadá podobně víc titulů od jednoho autora, jste spíš hádali.`},
+  {min: 7, max: 9, t: `Jste opravdový čtenář. Postavy umíte zařadit i mezi díly stejného autora a mezi knihami, které si jsou na první pohled podobné.`},
+  {min: 10, max: 10, t: `Plný počet. Víte, odkud přišel tygr z džungle, ďábel v Moskvě i belgický detektiv. Takový přehled má jen málokdo.`}
+];
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+const resultBox = document.getElementById(`result`);
+let answers = [];
+let locked = false;
+
+function render() {
+  quiz.innerHTML = ``;
+  answers = new Array(questions.length).fill(null);
+  locked = false;
+  questions.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const t = document.createElement(`p`);
+    t.className = `qt`;
+    t.textContent = item.q;
+    box.appendChild(t);
+    item.o.forEach((opt, oi) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = letters[oi] + `) ` + opt;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`sel`));
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`p`);
+    fb.className = `fb`;
+    fb.style.display = `none`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  update();
+}
+
+function update() {
+  const done = answers.every(a => a !== null);
+  evalBtn.disabled = !done || locked;
+  hint.style.display = done || locked ? `none` : `block`;
+}
+
+evalBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) return;
+  locked = true;
+  let score = 0;
+  const boxes = quiz.querySelectorAll(`.q`);
+  questions.forEach((item, qi) => {
+    const box = boxes[qi];
+    box.classList.add(`locked`);
+    const opts = box.querySelectorAll(`.opt`);
+    opts[item.a].classList.add(`ok`);
+    const fb = box.querySelector(`.fb`);
+    if (answers[qi] === item.a) {
+      score++;
+    } else {
+      opts[answers[qi]].classList.add(`bad`);
+      fb.textContent = `Správná odpověď: ` + letters[item.a] + `) ` + item.o[item.a];
+      fb.style.display = `block`;
+    }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  const r = results.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`rtext`).textContent = r ? r.t : ``;
+  resultBox.style.display = `block`;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  resultBox.scrollIntoView({behavior: `smooth`, block: `start`});
+});
+
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  resultBox.style.display = `none`;
+  evalBtn.style.display = `block`;
+  render();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+
+render();
+</script>
+</body>
+</html>
