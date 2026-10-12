@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KVÍZ pro seniory: Co všechno si ještě vybavíte? Deset otázek otestuje paměť i životní zkušenosti</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover:not(.ok):not(.bad):not(.sel){background:#f7f4f0}
+.fb{margin-top:8px;font-size:.95rem}
+.fb.okt{color:#1e5631}
+.fb.badt{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:16px}.box{padding:20px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>KVÍZ pro seniory: Co všechno si ještě vybavíte? Deset otázek otestuje paměť i životní zkušenosti</h1>
+<p class="perex">Ze školy vám zůstalo víc, než si myslíte, a zbytek vás naučil život. Lékárnička, zahrádka, les, kuchyně i úřední pochůzky za socialismu: tady se ukáže, kolik z toho všeho si ještě vybavíte a kde už paměť trochu zaváhá.</p>
+<div id="quiz"></div>
+<button id="eval" class="btn" type="button" disabled>Vyhodnotit</button>
+<p id="hint" class="hint">Odpovězte prosím na všechny otázky</p>
+<div id="result" class="box">
+<p class="score" id="score"></p>
+<p class="rtext" id="rtext"></p>
+<button id="retry" class="btn" type="button">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const QUESTIONS = [
+  {q: `Ve kterém pohoří leží Štrbské pleso?`, opts: [`v Nízkých Tatrách`, `ve Vysokých Tatrách`, `v Malé Fatře`, `ve Velké Fatře`], correct: 1},
+  {q: `Který z těchto léků obsahuje stejnou účinnou látku jako Ibalgin?`, opts: [`Paralen`, `Acylpyrin`, `Novalgin`, `Nurofen`], correct: 3},
+  {q: `Jak se zachová úplně čerstvé syrové vejce, když ho ponoříte do hrnce se studenou vodou?`, opts: [`klesne ke dnu a lehne si na bok`, `klesne ke dnu a postaví se na špičku`, `vznáší se svisle uprostřed vody`, `vyplave na hladinu`], correct: 0},
+  {q: `Která houba roste na podzim v hustých trsech na pařezech a kořenech stromů?`, opts: [`bedla`, `ryzec`, `václavka`, `hřib`], correct: 2},
+  {q: `Ve které obci se narodil malíř Josef Lada?`, opts: [`v Mnichovicích`, `v Ondřejově`, `ve Struhařově`, `v Hrusicích`], correct: 3},
+  {q: `Kterou zeleninu se vyplatí sklízet až po prvních mrazících, protože jí mráz zlepší chuť?`, opts: [`kedlubnu`, `růžičkovou kapustu`, `květák`, `brokolici`], correct: 1},
+  {q: `Kde musí mít pozorovatel slunce, aby uviděl duhu?`, opts: [`za zády`, `přímo před sebou`, `vysoko nad hlavou`, `z boku`], correct: 0},
+  {q: `Které vkladní knížky se v Česku od roku 2003 přestaly úročit?`, opts: [`na jméno`, `na řad`, `na doručitele`, `s výpovědní lhůtou`], correct: 2},
+  {q: `Který úřad v sedmdesátých a osmdesátých letech vydával Čechoslovákům cestovní pasy k soukromé cestě?`, opts: [`ministerstvo vnitra`, `ministerstvo zahraničních věcí`, `okresní národní výbor`, `Státní banka československá`], correct: 0},
+  {q: `Jak se nazývala velká dřevorubecká pila s držadly na obou koncích, kterou řezali dva muži proti sobě?`, opts: [`ocaska`, `břichatka`, `čepovka`, `děrovka`], correct: 1}
+];
+const EVALS = [
+  {min: 0, max: 3, text: `Tentokrát se paměť schovala. Školní poučky i věci z domácnosti a z úřadů vám vyklouzly, ale stačí pár dní listování v atlasu nebo rozhovor s vrstevníky a hodně z toho se vrátí na své místo.`},
+  {min: 4, max: 6, text: `Polovina zásob je na svém místě. Některé věci ze školních lavic a z vlastní domácnosti vybavíte hned, jiné se schovaly hlouběji, třeba ty z lesa, z dílny nebo ze spořitelny.`},
+  {min: 7, max: 9, text: `Paměť i zkušenosti táhnou za jeden provaz. Školní znalosti jste nezahodili a z praktického života jste si odnesli víc než jen matnou vzpomínku. Uteklo vám jen málo.`},
+  {min: 10, max: 10, text: `Deset z deseti. Vybavili jste si školní lavice stejně spolehlivě jako zahrádku, kuchyni, lékárničku i úřední okénko a nezaskočila vás ani pila, se kterou se dnes potká málokdo.`}
+];
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+let answers = [];
+let locked = false;
+function render() {
+  quiz.innerHTML = ``;
+  quiz.classList.remove(`locked`);
+  answers = new Array(QUESTIONS.length).fill(null);
+  locked = false;
+  QUESTIONS.forEach((item, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(p);
+    item.opts.forEach((o, oi) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = `abcd`[oi] + `) ` + o;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`sel`));
+        b.classList.add(`sel`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb = document.createElement(`div`);
+    fb.className = `fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+  result.style.display = `none`;
+  evalBtn.style.display = `block`;
+  update();
+}
+function update() {
+  const all = answers.every(a => a !== null);
+  evalBtn.disabled = !all;
+  hint.style.display = all ? `none` : `block`;
+}
+evalBtn.addEventListener(`click`, () => {
+  if (answers.some(a => a === null)) return;
+  locked = true;
+  quiz.classList.add(`locked`);
+  let score = 0;
+  const boxes = quiz.querySelectorAll(`.box`);
+  QUESTIONS.forEach((item, qi) => {
+    const opts = boxes[qi].querySelectorAll(`.opt`);
+    const fb = boxes[qi].querySelector(`.fb`);
+    opts[item.correct].classList.add(`ok`);
+    if (answers[qi] === item.correct) {
+      score++;
+      fb.className = `fb okt`;
+      fb.textContent = `Správně.`;
+    } else {
+      opts[answers[qi]].classList.add(`bad`);
+      fb.className = `fb badt`;
+      fb.textContent = `Správná odpověď: ` + `abcd`[item.correct] + `) ` + item.opts[item.correct];
+    }
+  });
+  const ev = EVALS.find(x => score >= x.min && score <= x.max);
+  document.getElementById(`score`).textContent = score + ` z ` + QUESTIONS.length;
+  document.getElementById(`rtext`).textContent = ev ? ev.text : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior: `smooth`, block: `start`});
+});
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  render();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+render();
+</script>
+</body>
+</html>
