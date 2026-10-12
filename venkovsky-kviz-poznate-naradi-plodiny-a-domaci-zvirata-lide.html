@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Venkovský kvíz: Poznáte nářadí, plodiny a domácí zvířata? Lidé z měst nemají šanci</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover:not(.sel):not(.ok):not(.bad){background:#f7f4f0}
+.fb{margin-top:12px;font-size:.95rem}
+.fb.ok{color:#1e5631}.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a7f74;font-size:.95rem;margin-top:12px}
+.result{background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px;display:none}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+.retry{background:#8c7b6b}
+.retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Venkovský kvíz: Poznáte nářadí, plodiny a domácí zvířata? Lidé z měst nemají šanci</h1>
+<p class="perex">Brány, chmelnice, kurník, chlév i kukuřičné pole. Kdo vyrůstal u hospodářství, odpoví po paměti. Kdo zná zvířata z obrázků a zeleninu z regálu, bude tipovat. Na kterou stranu plotu patříte vy?</p>
+<div id="quiz"></div>
+<button id="eval" class="btn" disabled>Vyhodnotit</button>
+<p id="hint" class="hint">Odpovězte prosím na všechny otázky</p>
+<div id="result" class="box result">
+<p id="score" class="score"></p>
+<p id="rtext" class="rtext"></p>
+<button id="retry" class="btn retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q=[
+{q:`Co se stane se snáškou, když v kurníku chybí kohout?`,o:[`slepice přestanou snášet úplně`,`slepice snášejí dál, jen vejce nejsou oplozená`,`slepice snášejí jen v létě a v zimě přestanou`,`slepice snášejí vejce s měkkou skořápkou`],a:1},
+{q:`Kde na kukuřici vyrůstají samčí květy?`,o:[`v latě na vrcholu stébla`,`v palicích vyrůstajících z úžlabí listů`,`v drobných kláscích u paty stébla při zemi`,`na jiných rostlinách než květy samičí`],a:0},
+{q:`Čím se na zahradě nejčastěji rozmnožuje jahodník?`,o:[`semeny vybranými z povrchu plodů`,`oddělky kořenů`,`řízky z loňských výhonů`,`mladými rostlinkami na šlahounech`],a:3},
+{q:`Co se na poli dělá branami?`,o:[`obrací se jimi ornice do hloubky`,`vyhrnují se jimi brázdy pro sazenice`,`drobí se jimi hroudy a rovná povrch`,`utužuje se jimi půda po zasetí`],a:2},
+{q:`Které z těchto hospodářských zvířat je přežvýkavec?`,o:[`kůň`,`králík`,`koza`,`prase`],a:2},
+{q:`Které rostliny chmele se pěstují na českých chmelnicích?`,o:[`samčí i samičí, aby se šištice opylily`,`pouze samičí`,`pouze samčí`,`jednodomé, se samčími i samičími květy`],a:1},
+{q:`Kdy začne kráva poprvé dávat mléko?`,o:[`až po prvním otelení`,`jakmile pohlavně dospěje`,`ihned po odstavu od matky`,`po prvním jaru stráveném na pastvě`],a:0},
+{q:`Jakou barvu srsti má hafling?`,o:[`černou s bílou lysinou na čele`,`tmavě hnědou s černou hřívou a ocasem`,`šedou, která s věkem bělá`,`ryzou se světlou hřívou a ocasem`],a:3},
+{q:`Na čem se na statku drtilo zrní na krmení pro prasata a drůbež?`,o:[`na fukaru`,`na šrotovníku`,`na řezačce`,`na mlátičce`],a:1},
+{q:`Který prvek dostávají selata obvykle injekcí několik dní po narození?`,o:[`vápník`,`jód`,`železo`,`zinek`],a:2}
+];
+const E=[
+{lo:0,hi:3,t:`Tady to vypadá spíš na sídliště než na dvorek. Kurník, chlév i pole jsou pro vás zatím cizí kraj, ale na příští návštěvě u známých na vsi máte o čem se vyptávat.`},
+{lo:4,hi:6,t:`Základ máte, jen v mnoha věcech chybí vlastní zkušenost. Kde jste si nebyli jistí, tam jste tipovali, a jednou to vyšlo, jindy ne. S rukama v hlíně by se skóre rychle zvedlo.`},
+{lo:7,hi:9,t:`Takhle odpovídá člověk, který ví, jak to na hospodářství chodí, a to od záhonu až po chlév. Spletla vás jen některá podrobnost, kterou zná ten, kdo u zvířat nebo na poli tráví každý den.`},
+{lo:10,hi:10,t:`Bez jediné chyby, od bran přes chmelnici až po selata. Tohle se nedá vyčíst za jeden večer, tohle se dá jen zažít. Na venkově byste se neztratili ani v nejrušnějším týdnu sklizně.`}
+];
+const quiz=document.getElementById(`quiz`),evalBtn=document.getElementById(`eval`),hint=document.getElementById(`hint`),res=document.getElementById(`result`);
+let ans=[],locked=false;
+function render(){
+quiz.innerHTML=``;ans=new Array(Q.length).fill(null);locked=false;
+Q.forEach((q,i)=>{
+const b=document.createElement(`div`);b.className=`box`;
+const t=document.createElement(`p`);t.className=`qt`;t.textContent=(i+1)+`. `+q.q;b.appendChild(t);
+q.o.forEach((o,j)=>{
+const btn=document.createElement(`button`);btn.type=`button`;btn.className=`opt`;btn.textContent=`abcd`[j]+`) `+o;
+btn.addEventListener(`click`,()=>{if(locked)return;ans[i]=j;b.querySelectorAll(`.opt`).forEach((x,k)=>x.classList.toggle(`sel`,k===j));update();});
+b.appendChild(btn);
+});
+const fb=document.createElement(`div`);fb.className=`fb`;b.appendChild(fb);
+quiz.appendChild(b);
+});
+res.style.display=`none`;evalBtn.style.display=`block`;update();
+}
+function update(){const all=ans.every(a=>a!==null);evalBtn.disabled=!all;hint.style.display=all?`none`:`block`;}
+evalBtn.addEventListener(`click`,()=>{
+if(evalBtn.disabled)return;locked=true;let s=0;
+const boxes=quiz.querySelectorAll(`.box`);
+Q.forEach((q,i)=>{
+const b=boxes[i];b.classList.add(`locked`);const opts=b.querySelectorAll(`.opt`);const fb=b.querySelector(`.fb`);
+opts.forEach(o=>o.classList.remove(`sel`));
+opts[q.a].classList.add(`ok`);
+if(ans[i]===q.a){s++;fb.className=`fb ok`;fb.textContent=`Správně.`;}
+else{opts[ans[i]].classList.add(`bad`);fb.className=`fb bad`;fb.textContent=`Špatně. Správná odpověď: `+`abcd`[q.a]+`) `+q.o[q.a];}
+});
+document.getElementById(`score`).textContent=s+` z `+Q.length;
+const e=E.find(x=>s>=x.lo&&s<=x.hi);document.getElementById(`rtext`).textContent=e?e.t:``;
+evalBtn.style.display=`none`;hint.style.display=`none`;res.style.display=`block`;
+res.scrollIntoView({behavior:`smooth`,block:`start`});
+});
+document.getElementById(`retry`).addEventListener(`click`,()=>{render();window.scrollTo({top:0,behavior:`smooth`});});
+render();
+</script>
+</body>
+</html>
