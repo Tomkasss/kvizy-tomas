@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz: Poznáte český film podle trojice známých herců? Osm bodů získá jen opravdový znalec</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover:not(.ok):not(.bad):not(.sel){background:#f7f4f0}
+.fb{margin:12px 0 0;font-size:.98rem}
+.fb.ok{color:#1e5631}
+.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+.hint{text-align:center;color:#721c24;margin:12px 0 0;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz: Poznáte český film podle trojice známých herců? Osm bodů získá jen opravdový znalec</h1>
+<p class="perex">Tři jména z titulků, čtyři filmy na výběr a jen jeden, ve kterém se celá trojice opravdu potkala na place. Čekají vás černobílé komedie, pohádky i snímky z nového tisíciletí. Dva ze tří herců si přitom v nabídce často zahráli i jinde.</p>
+<div id="quiz">
+<div class="box q" id="q0"><p class="qt">1. Ve kterém filmu hráli Miloš Kopecký, Zdeněk Řehoř a Stella Zázvorková?</p><div class="opts"><button type="button" class="opt" data-q="0" data-o="0">a) Čtyři vraždy stačí, drahoušku</button><button type="button" class="opt" data-q="0" data-o="1">b) Jak utopit dr. Mráčka</button><button type="button" class="opt" data-q="0" data-o="2">c) Což takhle dát si špenát</button><button type="button" class="opt" data-q="0" data-o="3">d) Dívka na koštěti</button></div><p class="fb" id="fb0"></p></div><div class="box q" id="q1"><p class="qt">2. Ve kterém filmu se potkali Daniela Kolářová, Tatiana Vilhelmová a Jiří Macháček?</p><div class="opts"><button type="button" class="opt" data-q="1" data-o="0">a) Samotáři</button><button type="button" class="opt" data-q="1" data-o="1">b) Medvídek</button><button type="button" class="opt" data-q="1" data-o="2">c) Účastníci zájezdu</button><button type="button" class="opt" data-q="1" data-o="3">d) Vratné lahve</button></div><p class="fb" id="fb1"></p></div><div class="box q" id="q2"><p class="qt">3. Ve kterém filmu hráli Rudolf Hrušínský, Vlastimil Brodský a Míla Myslíková?</p><div class="opts"><button type="button" class="opt" data-q="2" data-o="0">a) Rozmarné léto</button><button type="button" class="opt" data-q="2" data-o="1">b) Ostře sledované vlaky</button><button type="button" class="opt" data-q="2" data-o="2">c) Spalovač mrtvol</button><button type="button" class="opt" data-q="2" data-o="3">d) Lásky jedné plavovlásky</button></div><p class="fb" id="fb2"></p></div><div class="box q" id="q3"><p class="qt">4. Ve které pohádce hráli Július Satinský, Milan Lasica a Petr Čepek?</p><div class="opts"><button type="button" class="opt" data-q="3" data-o="0">a) S čerty nejsou žerty</button><button type="button" class="opt" data-q="3" data-o="1">b) Perinbaba</button><button type="button" class="opt" data-q="3" data-o="2">c) Tři veteráni</button><button type="button" class="opt" data-q="3" data-o="3">d) Princ a Večernice</button></div><p class="fb" id="fb3"></p></div><div class="box q" id="q4"><p class="qt">5. Ve kterém filmu se objevili Nataša Gollová, Bohuš Záhorský a Jiří Plachý?</p><div class="opts"><button type="button" class="opt" data-q="4" data-o="0">a) Pyšná princezna</button><button type="button" class="opt" data-q="4" data-o="1">b) Císařův pekař – Pekařův císař</button><button type="button" class="opt" data-q="4" data-o="2">c) Hrátky s čertem</button><button type="button" class="opt" data-q="4" data-o="3">d) Byl jednou jeden král…</button></div><p class="fb" id="fb4"></p></div><div class="box q" id="q5"><p class="qt">6. Ve kterém filmu hráli Jaroslav Dušek, Jiří Pecha a Martin Huba?</p><div class="opts"><button type="button" class="opt" data-q="5" data-o="0">a) Musíme si pomáhat</button><button type="button" class="opt" data-q="5" data-o="1">b) Pupendo</button><button type="button" class="opt" data-q="5" data-o="2">c) Obsluhoval jsem anglického krále</button><button type="button" class="opt" data-q="5" data-o="3">d) Román pro ženy</button></div><p class="fb" id="fb5"></p></div><div class="box q" id="q6"><p class="qt">7. Ve kterém filmu se sešli Jan Libíček, Jiřina Jirásková a Iva Janžurová?</p><div class="opts"><button type="button" class="opt" data-q="6" data-o="0">a) Zabil jsem Einsteina, pánové…</button><button type="button" class="opt" data-q="6" data-o="1">b) Pane, vy jste vdova!</button><button type="button" class="opt" data-q="6" data-o="2">c) Šest medvědů s Cibulkou</button><button type="button" class="opt" data-q="6" data-o="3">d) Světáci</button></div><p class="fb" id="fb6"></p></div><div class="box q" id="q7"><p class="qt">8. Ve kterém filmu hráli Bolek Polívka, Eva Holubová a Ondřej Vetchý?</p><div class="opts"><button type="button" class="opt" data-q="7" data-o="0">a) Pelíšky</button><button type="button" class="opt" data-q="7" data-o="1">b) Kolja</button><button type="button" class="opt" data-q="7" data-o="2">c) Obecná škola</button><button type="button" class="opt" data-q="7" data-o="3">d) Tmavomodrý svět</button></div><p class="fb" id="fb7"></p></div><div class="box q" id="q8"><p class="qt">9. Ve kterém filmu hráli Ladislav Pešek, František Filipovský a František Smolík?</p><div class="opts"><button type="button" class="opt" data-q="8" data-o="0">a) Cesta do hlubin študákovy duše</button><button type="button" class="opt" data-q="8" data-o="1">b) Škola základ života</button><button type="button" class="opt" data-q="8" data-o="2">c) Klapzubova XI.</button><button type="button" class="opt" data-q="8" data-o="3">d) Ducháček to zařídí</button></div><p class="fb" id="fb8"></p></div><div class="box q" id="q9"><p class="qt">10. Ve kterém filmu se potkali Oldřich Nový, Adina Mandlová a Jan Pivec?</p><div class="opts"><button type="button" class="opt" data-q="9" data-o="0">a) Hotel Modrá hvězda</button><button type="button" class="opt" data-q="9" data-o="1">b) Kristian</button><button type="button" class="opt" data-q="9" data-o="2">c) Dívka v modrém</button><button type="button" class="opt" data-q="9" data-o="3">d) Valentin Dobrotivý</button></div><p class="fb" id="fb9"></p></div>
+</div>
+<button type="button" class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="rtext" id="rtext"></p>
+<button type="button" class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+(function(){
+const OPTS = [[`Čtyři vraždy stačí, drahoušku`,`Jak utopit dr. Mráčka`,`Což takhle dát si špenát`,`Dívka na koštěti`],[`Samotáři`,`Medvídek`,`Účastníci zájezdu`,`Vratné lahve`],[`Rozmarné léto`,`Ostře sledované vlaky`,`Spalovač mrtvol`,`Lásky jedné plavovlásky`],[`S čerty nejsou žerty`,`Perinbaba`,`Tři veteráni`,`Princ a Večernice`],[`Pyšná princezna`,`Císařův pekař – Pekařův císař`,`Hrátky s čertem`,`Byl jednou jeden král…`],[`Musíme si pomáhat`,`Pupendo`,`Obsluhoval jsem anglického krále`,`Román pro ženy`],[`Zabil jsem Einsteina, pánové…`,`Pane, vy jste vdova!`,`Šest medvědů s Cibulkou`,`Světáci`],[`Pelíšky`,`Kolja`,`Obecná škola`,`Tmavomodrý svět`],[`Cesta do hlubin študákovy duše`,`Škola základ života`,`Klapzubova XI.`,`Ducháček to zařídí`],[`Hotel Modrá hvězda`,`Kristian`,`Dívka v modrém`,`Valentin Dobrotivý`]];
+const CORRECT = [1, 3, 0, 2, 1, 0, 3, 2, 1, 0];
+const RANGES = [[0,3,`Herce znáte podle tváře, ale k filmu je zatím nepřiřadíte. Past byla v tom, že dvě ze tří jmen často seděla i na jinou variantu. Až příště v televizi poběží starší česká komedie, zkuste si všímat i vedlejších rolí.`],[4,6,`Filmy, které televize opakuje každý rok, jste poznali. Ztráceli jste tam, kde trojici tvořili herci z vedlejších rolí, nebo kde se nabídka skládala z podobných snímků jedné doby. Takhle obvykle dopadne divák, který české filmy zná hlavně z nedělních odpolední.`],[7,9,`Sedm bodů je solidní výsledek, chybělo vám ale pár vedlejších rolí. Osm a devět bodů už patří tomu, kdo si pamatuje i obsazení starých černobílých komedií a nespletl se ani tam, kde dva ze tří herců hráli spolu i v jiném filmu. V tom případě jste slib z titulku splnili.`],[10,10,`Všech deset trojic jste přiřadili správně, od předválečné gymnaziální komedie až po snímky z nového tisíciletí. Obsazení českých filmů znáte i ve vedlejších rolích, což mezi diváky zdaleka není běžné.`]];
+const LETTERS = [`a`,`b`,`c`,`d`];
+const sel = new Array(CORRECT.length).fill(null);
+let locked = false;
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+function update(){
+  const all = sel.every(function(v){return v !== null;});
+  evalBtn.disabled = !all;
+  hint.style.display = all ? `none` : `block`;
+}
+document.querySelectorAll(`.opt`).forEach(function(b){
+  b.addEventListener(`click`, function(){
+    if (locked) return;
+    const q = +b.dataset.q, o = +b.dataset.o;
+    sel[q] = o;
+    document.querySelectorAll(`.opt[data-q="` + q + `"]`).forEach(function(x){x.classList.remove(`sel`);});
+    b.classList.add(`sel`);
+    update();
+  });
+});
+evalBtn.addEventListener(`click`, function(){
+  if (evalBtn.disabled) return;
+  locked = true;
+  document.getElementById(`quiz`).classList.add(`locked`);
+  let score = 0;
+  CORRECT.forEach(function(c, q){
+    const fb = document.getElementById(`fb` + q);
+    const good = sel[q] === c;
+    if (good) score++;
+    document.querySelectorAll(`.opt[data-q="` + q + `"]`).forEach(function(x){
+      const o = +x.dataset.o;
+      x.classList.remove(`sel`);
+      if (o === c) x.classList.add(`ok`);
+      else if (o === sel[q]) x.classList.add(`bad`);
+    });
+    fb.className = `fb ` + (good ? `ok` : `bad`);
+    fb.textContent = good ? `Správně.` : `Špatně. Správná odpověď: ` + LETTERS[c] + `) ` + OPTS[q][c];
+  });
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  document.getElementById(`score`).textContent = score + ` z ` + CORRECT.length;
+  let t = ``;
+  RANGES.forEach(function(r){ if (score >= r[0] && score <= r[1]) t = r[2]; });
+  document.getElementById(`rtext`).textContent = t;
+  const res = document.getElementById(`result`);
+  res.style.display = `block`;
+  res.scrollIntoView({behavior:`smooth`, block:`start`});
+});
+document.getElementById(`retry`).addEventListener(`click`, function(){
+  locked = false;
+  sel.fill(null);
+  document.getElementById(`quiz`).classList.remove(`locked`);
+  document.querySelectorAll(`.opt`).forEach(function(x){x.classList.remove(`sel`,`ok`,`bad`);});
+  document.querySelectorAll(`.fb`).forEach(function(x){x.textContent = ``; x.className = `fb`;});
+  document.getElementById(`result`).style.display = `none`;
+  evalBtn.style.display = `block`;
+  update();
+  window.scrollTo({top:0, behavior:`smooth`});
+});
+update();
+})();
+</script>
+</body>
+</html>
