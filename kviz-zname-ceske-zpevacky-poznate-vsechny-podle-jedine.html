@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz: Známé české zpěvačky. Poznáte všechny podle jediné nápovědy? To zvládnou jen hudební fanoušci</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover:not(.ok):not(.bad):not(.sel){background:#f7f4f0}
+.fb{margin-top:8px;font-size:.95rem}
+.fb.ok{color:#1e5631}.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#721c24;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#again{background:#8c7b6b}#again:hover{background:#756658}
+@media(max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz: Známé české zpěvačky. Poznáte všechny podle jediné nápovědy? To zvládnou jen hudební fanoušci</h1>
+<p class="perex">Hlasy, které znáte z rádia, z gramofonových desek i z koncertních pódií. Některé zpívaly s legendárními kapelami, jiné uspěly v soutěžích doma i v cizině. Kdo českou scénu opravdu sleduje, nezaváhá ani jednou.</p>
+<div id="quiz"></div>
+<button class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result"><p class="score" id="score"></p><p class="rtext" id="rtext"></p><button class="btn" id="again">Zkusit znovu</button></div>
+</div>
+<script>
+const Q=[
+{q:`Která zpěvačka si vysloužila přezdívku Lady Soul?`,o:[`Hana Zagorová`,`Marie Rottrová`,`Věra Špinarová`,`Eva Pilarová`],a:1},
+{q:`Kdo vyhrál v roce 2004 první ročník soutěže Česko hledá SuperStar?`,o:[`Šárka Vaňková`,`Monika Bagárová`,`Gabriela Gunčíková`,`Aneta Langerová`],a:3},
+{q:`Která zpěvačka působila v letech 1987 až 1992 ve skupině Laura a její tygři?`,o:[`Ilona Csáková`,`Petra Janů`,`Lenka Filipová`,`Leona Machálková`],a:0},
+{q:`Která zpěvačka proslavila píseň Jednoho dne se vrátíš?`,o:[`Naďa Urbánková`,`Hana Zagorová`,`Věra Špinarová`,`Yvonne Přenosilová`],a:2},
+{q:`S kterou zpěvačkou nazpíval Petr Sepéši v roce 1984 duet Knoflíky lásky?`,o:[`Jitka Zelenková`,`Iveta Bartošová`,`Petra Černocká`,`Lenka Filipová`],a:1},
+{q:`Která zpěvačka se narodila jako Hana Zaňáková?`,o:[`Monika Absolonová`,`Petra Janů`,`Leona Machálková`,`Lucie Bílá`],a:3},
+{q:`Kdo reprezentoval Česko na Eurovizi v roce 2008?`,o:[`Tereza Kerndlová`,`Marta Jandová`,`Gabriela Gunčíková`,`Monika Absolonová`],a:0},
+{q:`Která zpěvačka zpívala ve druhé polovině 80. let ve skupině Stromboli?`,o:[`Jana Kratochvílová`,`Lenka Filipová`,`Bára Basiková`,`Zuzana Michnová`],a:2},
+{q:`Která zpěvačka získala v roce 2008 Oscara za píseň Falling Slowly?`,o:[`Lenka Dusilová`,`Markéta Irglová`,`Kateřina Marie Tichá`,`Radůza`],a:1},
+{q:`Která zpěvačka natočila se skupinou Koa album Barvy všecky?`,o:[`Zuzana Navarová`,`Pavlína Jíšová`,`Hana Ulrychová`,`Jana Koubková`],a:0}
+];
+const E=[{min:0,max:3,t:`Tentokrát to nevyšlo. Hity v rádiu vám asi hrají spíš do pozadí a za jménem zpěvačky se nepídíte. Projděte si správné odpovědi a příště si u známé písničky všimněte, kdo ji zpívá.`},{min:4,max:6,t:`Největší hvězdy poznáte, ale jakmile nápověda zabočí k přezdívce, kapele nebo méně omílanému hitu, začnete tipovat. Na hudebního fanouška vám chybí jen kousek.`},{min:7,max:9,t:`Českou scénu sledujete opravdu pozorně. Víte, kdo zpíval v jaké kapele a kdo s čím uspěl, a zaváhali jste jen u pár méně známých stop. Hudebním fanouškem se klidně můžete nazývat.`},{min:10,max:10,t:`Plný počet. Všechny zpěvačky jste poznali podle jediné nápovědy, ať šlo o přezdívku, kapelu, duet nebo Oscara. Přesně tohle titulek sliboval jen opravdovým hudebním fanouškům.`}];
+const L=[`a)`,`b)`,`c)`,`d)`];
+const quiz=document.getElementById(`quiz`),ev=document.getElementById(`eval`),hint=document.getElementById(`hint`),res=document.getElementById(`result`);
+let sel=[],done=false;
+function render(){
+quiz.innerHTML=``;quiz.classList.remove(`locked`);sel=new Array(Q.length).fill(null);done=false;
+Q.forEach((q,i)=>{
+const b=document.createElement(`div`);b.className=`box`;
+const t=document.createElement(`p`);t.className=`qt`;t.textContent=(i+1)+`. `+q.q;b.appendChild(t);
+q.o.forEach((o,j)=>{const x=document.createElement(`button`);x.type=`button`;x.className=`opt`;x.textContent=L[j]+` `+o;
+x.addEventListener(`click`,()=>{if(done)return;sel[i]=j;b.querySelectorAll(`.opt`).forEach((y,k)=>y.classList.toggle(`sel`,k===j));upd();});b.appendChild(x);});
+const f=document.createElement(`p`);f.className=`fb`;b.appendChild(f);
+quiz.appendChild(b);});
+res.style.display=`none`;ev.style.display=`block`;upd();}
+function upd(){const all=sel.every(v=>v!==null);ev.disabled=!all;hint.style.display=all||done?`none`:`block`;}
+ev.addEventListener(`click`,()=>{
+if(ev.disabled)return;done=true;quiz.classList.add(`locked`);let sc=0;
+quiz.querySelectorAll(`.box`).forEach((b,i)=>{const os=b.querySelectorAll(`.opt`),f=b.querySelector(`.fb`),a=Q[i].a;
+os[a].classList.add(`ok`);
+if(sel[i]===a){sc++;f.className=`fb ok`;f.textContent=`Správně`;}else{os[sel[i]].classList.remove(`sel`);os[sel[i]].classList.add(`bad`);f.className=`fb bad`;f.textContent=`Špatně. Správná odpověď: `+L[a]+` `+Q[i].o[a];}});
+document.getElementById(`score`).textContent=sc+` z `+Q.length;
+document.getElementById(`rtext`).textContent=E.find(e=>sc>=e.min&&sc<=e.max).t;
+ev.style.display=`none`;hint.style.display=`none`;res.style.display=`block`;res.scrollIntoView({behavior:`smooth`});});
+document.getElementById(`again`).addEventListener(`click`,()=>{render();window.scrollTo({top:0,behavior:`smooth`});});
+render();
+</script>
+</body>
+</html>
