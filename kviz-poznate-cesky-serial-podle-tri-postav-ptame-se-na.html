@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kvíz: poznáte český seriál podle tří postav? Ptáme se na pořady, které už dnešní mládež nepamatuje</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover:not(.ok):not(.bad):not(.sel){background:#f7f4f0}
+.fb{margin:12px 0 0;font-size:.98rem}
+.fb.ok{color:#1e5631}
+.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+.hint{text-align:center;color:#721c24;margin:12px 0 0;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz: poznáte český seriál podle tří postav? Ptáme se na pořady, které už dnešní mládež nepamatuje</h1>
+<p class="perex">Celá rodina u jediné obrazovky, nový díl jednou za týden a druhý den se o něm mluvilo v práci i ve škole. Jména postav tehdy znal skoro každý. Kolik z nich vám v paměti zůstalo po desítkách let?</p>
+<div id="quiz">
+<div class="box q" id="q0"><p class="qt">1. Ve kterém seriálu vystupují postavy Karel Arazím, Bedřich Jarý a Leopold Skrčílek?</p><div class="opts"><button type="button" class="opt" data-q="0" data-o="0">a) Hříšní lidé města pražského</button><button type="button" class="opt" data-q="0" data-o="1">b) Četnické humoresky</button><button type="button" class="opt" data-q="0" data-o="2">c) Malý pitaval z velkého města</button><button type="button" class="opt" data-q="0" data-o="3">d) Panoptikum Města pražského</button></div><p class="fb" id="fb0"></p></div>
+<div class="box q" id="q1"><p class="qt">2. Ve kterém seriálu vystupují postavy Pepek Zilvar, učitel Veselík a pan Fajst?</p><div class="opts"><button type="button" class="opt" data-q="1" data-o="0">a) Území bílých králů</button><button type="button" class="opt" data-q="1" data-o="1">b) My všichni školou povinní</button><button type="button" class="opt" data-q="1" data-o="2">c) Létající Čestmír</button><button type="button" class="opt" data-q="1" data-o="3">d) Bylo nás pět</button></div><p class="fb" id="fb1"></p></div>
+<div class="box q" id="q2"><p class="qt">3. Ve kterém seriálu vystupují postavy Matěj Budák, Eduard Drvota a Anděla Hrachová?</p><div class="opts"><button type="button" class="opt" data-q="2" data-o="0">a) Byl jednou jeden dům</button><button type="button" class="opt" data-q="2" data-o="1">b) Dnes v jednom domě</button><button type="button" class="opt" data-q="2" data-o="2">c) Byli jednou dva písaři</button><button type="button" class="opt" data-q="2" data-o="3">d) Hříšní lidé města pražského</button></div><p class="fb" id="fb2"></p></div>
+<div class="box q" id="q3"><p class="qt">4. Ve kterém seriálu vystupují postavy Pešák, Vojta Mráz a Andulka Šafářová?</p><div class="opts"><button type="button" class="opt" data-q="3" data-o="0">a) Hospoda</button><button type="button" class="opt" data-q="3" data-o="1">b) Arabela se vrací</button><button type="button" class="opt" data-q="3" data-o="2">c) Život na zámku</button><button type="button" class="opt" data-q="3" data-o="3">d) Bylo nás pět</button></div><p class="fb" id="fb3"></p></div>
+<div class="box q" id="q4"><p class="qt">5. Ve kterém seriálu vystupují postavy Václav Mrázek, Josef Bouše a Josef Brůžek?</p><div class="opts"><button type="button" class="opt" data-q="4" data-o="0">a) Malý pitaval z velkého města</button><button type="button" class="opt" data-q="4" data-o="1">b) Hříšní lidé města pražského</button><button type="button" class="opt" data-q="4" data-o="2">c) 30 případů majora Zemana</button><button type="button" class="opt" data-q="4" data-o="3">d) Četnické humoresky</button></div><p class="fb" id="fb4"></p></div>
+<div class="box q" id="q5"><p class="qt">6. Ve kterém seriálu vystupují postavy Kája Berka, Aleš Chvojka a Magda Berková?</p><div class="opts"><button type="button" class="opt" data-q="5" data-o="0">a) Křeček v noční košili</button><button type="button" class="opt" data-q="5" data-o="1">b) Létající Čestmír</button><button type="button" class="opt" data-q="5" data-o="2">c) Chobotnice z II. patra</button><button type="button" class="opt" data-q="5" data-o="3">d) Území bílých králů</button></div><p class="fb" id="fb5"></p></div>
+<div class="box q" id="q6"><p class="qt">7. Ve kterém seriálu vystupují postavy Jaroslav Dušek, Tomáš Babula a David Goliáš?</p><div class="opts"><button type="button" class="opt" data-q="6" data-o="0">a) Život na zámku</button><button type="button" class="opt" data-q="6" data-o="1">b) Nováci</button><button type="button" class="opt" data-q="6" data-o="2">c) Arabela se vrací</button><button type="button" class="opt" data-q="6" data-o="3">d) Hospoda</button></div><p class="fb" id="fb6"></p></div>
+<div class="box q" id="q7"><p class="qt">8. Ve kterém seriálu vystupují postavy Vojta Cirkl, Emil Krahulík a Bořivoj Bošek?</p><div class="opts"><button type="button" class="opt" data-q="7" data-o="0">a) Dynastie Nováků</button><button type="button" class="opt" data-q="7" data-o="1">b) Cirkus Humberto</button><button type="button" class="opt" data-q="7" data-o="2">c) Synové a dcery Jakuba skláře</button><button type="button" class="opt" data-q="7" data-o="3">d) Vlak dětství a naděje</button></div><p class="fb" id="fb7"></p></div>
+<div class="box q" id="q8"><p class="qt">9. Ve kterém seriálu vystupují postavy Martin Brázda, Hanka Tichá a Miky Kadlec?</p><div class="opts"><button type="button" class="opt" data-q="8" data-o="0">a) Chlapci a chlapi</button><button type="button" class="opt" data-q="8" data-o="1">b) Třetí patro</button><button type="button" class="opt" data-q="8" data-o="2">c) My všichni školou povinní</button><button type="button" class="opt" data-q="8" data-o="3">d) Plechová kavalerie</button></div><p class="fb" id="fb8"></p></div>
+<div class="box q" id="q9"><p class="qt">10. Ve kterém seriálu vystupují postavy František Bavor, Josef Hlavica a Vít Marek?</p><div class="opts"><button type="button" class="opt" data-q="9" data-o="0">a) Muž na radnici</button><button type="button" class="opt" data-q="9" data-o="1">b) Okres na severu</button><button type="button" class="opt" data-q="9" data-o="2">c) Inženýrská odysea</button><button type="button" class="opt" data-q="9" data-o="3">d) Nejmladší z rodu Hamrů</button></div><p class="fb" id="fb9"></p></div>
+</div>
+<button type="button" class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result"><p class="score" id="score"></p><p class="rtext" id="rtext"></p><button type="button" class="btn" id="retry">Zkusit znovu</button></div>
+</div>
+<script>
+(function(){
+const CORRECT = [1,3,0,2,1,0,3,2,1,0];
+const OPTS = [[`Hříšní lidé města pražského`,`Četnické humoresky`,`Malý pitaval z velkého města`,`Panoptikum Města pražského`],[`Území bílých králů`,`My všichni školou povinní`,`Létající Čestmír`,`Bylo nás pět`],[`Byl jednou jeden dům`,`Dnes v jednom domě`,`Byli jednou dva písaři`,`Hříšní lidé města pražského`],[`Hospoda`,`Arabela se vrací`,`Život na zámku`,`Bylo nás pět`],[`Malý pitaval z velkého města`,`Hříšní lidé města pražského`,`30 případů majora Zemana`,`Četnické humoresky`],[`Křeček v noční košili`,`Létající Čestmír`,`Chobotnice z II. patra`,`Území bílých králů`],[`Život na zámku`,`Nováci`,`Arabela se vrací`,`Hospoda`],[`Dynastie Nováků`,`Cirkus Humberto`,`Synové a dcery Jakuba skláře`,`Vlak dětství a naděje`],[`Chlapci a chlapi`,`Třetí patro`,`My všichni školou povinní`,`Plechová kavalerie`],[`Muž na radnici`,`Okres na severu`,`Inženýrská odysea`,`Nejmladší z rodu Hamrů`]];
+const RANGES = [[0,3,`Tady se jména postav už dávno rozplynula. Z těch večerů vám zůstala spíš atmosféra a znělky než to, kdo se jak jmenoval. Stačí jedna repríza a spousta jmen se vám zase vybaví.`],[4,6,`Seriály, které běžely znovu a znovu, poznáte bez potíží. Body vám utekly hlavně u vedlejších postav a u pořadů, které se na obrazovku vracejí jen zřídka.`],[7,9,`Výborný výsledek. Poznáte nejen ty nejslavnější seriály, ale většinou i ty, které si dnes už málokdo vybaví. K plnému počtu vám chybělo jen pár jmen.`],[10,10,`Všech deset trojic bez jediné chyby. Pamatujete si i vedlejší postavy a seriály, které dnešní televize skoro nepouští. Tohle zvládne jen menšina diváků.`]];
+const LETTERS = [`a`,`b`,`c`,`d`];
+const sel = new Array(CORRECT.length).fill(null);
+let locked = false;
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+function update(){
+  const all = sel.every(function(v){return v !== null;});
+  evalBtn.disabled = !all;
+  hint.style.display = all ? `none` : `block`;
+}
+document.querySelectorAll(`.opt`).forEach(function(b){
+  b.addEventListener(`click`, function(){
+    if (locked) return;
+    const q = +b.dataset.q, o = +b.dataset.o;
+    sel[q] = o;
+    document.querySelectorAll(`.opt[data-q="` + q + `"]`).forEach(function(x){x.classList.remove(`sel`);});
+    b.classList.add(`sel`);
+    update();
+  });
+});
+evalBtn.addEventListener(`click`, function(){
+  if (evalBtn.disabled) return;
+  locked = true;
+  document.getElementById(`quiz`).classList.add(`locked`);
+  let score = 0;
+  CORRECT.forEach(function(c, q){
+    const fb = document.getElementById(`fb` + q);
+    const good = sel[q] === c;
+    if (good) score++;
+    document.querySelectorAll(`.opt[data-q="` + q + `"]`).forEach(function(x){
+      const o = +x.dataset.o;
+      x.classList.remove(`sel`);
+      if (o === c) x.classList.add(`ok`);
+      else if (o === sel[q]) x.classList.add(`bad`);
+    });
+    fb.className = `fb ` + (good ? `ok` : `bad`);
+    fb.textContent = good ? `Správně.` : `Špatně. Správná odpověď: ` + LETTERS[c] + `) ` + OPTS[q][c];
+  });
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  document.getElementById(`score`).textContent = score + ` z ` + CORRECT.length;
+  let t = ``;
+  RANGES.forEach(function(r){ if (score >= r[0] && score <= r[1]) t = r[2]; });
+  document.getElementById(`rtext`).textContent = t;
+  const res = document.getElementById(`result`);
+  res.style.display = `block`;
+  res.scrollIntoView({behavior:`smooth`, block:`start`});
+});
+document.getElementById(`retry`).addEventListener(`click`, function(){
+  locked = false;
+  sel.fill(null);
+  document.getElementById(`quiz`).classList.remove(`locked`);
+  document.querySelectorAll(`.opt`).forEach(function(x){x.classList.remove(`sel`,`ok`,`bad`);});
+  document.querySelectorAll(`.fb`).forEach(function(x){x.textContent = ``; x.className = `fb`;});
+  document.getElementById(`result`).style.display = `none`;
+  evalBtn.style.display = `block`;
+  update();
+  window.scrollTo({top:0, behavior:`smooth`});
+});
+update();
+})();
+</script>
+</body>
+</html>
