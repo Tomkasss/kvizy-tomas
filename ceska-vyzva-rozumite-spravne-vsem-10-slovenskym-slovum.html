@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Česká výzva: Rozumíte správně všem 10 slovenským slovům? Otestujte se!</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover:not(.ok):not(.bad):not(.sel){background:#f7f4f0}
+.fb{margin:12px 0 0;font-size:.98rem}
+.fb.ok{color:#1e5631}
+.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+.hint{text-align:center;color:#721c24;margin:12px 0 0;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Česká výzva: Rozumíte správně všem 10 slovenským slovům? Otestujte se!</h1>
+<p class="perex">Slovenštinu slýcháte v televizi i od známých a máte pocit, že jí rozumíte bez titulků? Jenže některá slova znějí povědomě a znamenají něco jiného, než by člověk čekal, a u jiných vám čeština nenapoví vůbec.</p>
+<div id="quiz">
+<div class="box q" id="q0"><p class="qt">1. Jaký význam má ve slovenštině částice „iba"?</p><div class="opts"><button type="button" class="opt" data-q="0" data-o="0">a) pořád</button><button type="button" class="opt" data-q="0" data-o="1">b) zrovna</button><button type="button" class="opt" data-q="0" data-o="2">c) jen</button><button type="button" class="opt" data-q="0" data-o="3">d) taky</button></div><p class="fb" id="fb0"></p></div>
+<div class="box q" id="q1"><p class="qt">2. Jakou zeleninu Slovák myslí slovem „zemiaky"?</p><div class="opts"><button type="button" class="opt" data-q="1" data-o="0">a) kedlubny</button><button type="button" class="opt" data-q="1" data-o="1">b) brambory</button><button type="button" class="opt" data-q="1" data-o="2">c) dýně</button><button type="button" class="opt" data-q="1" data-o="3">d) lilky</button></div><p class="fb" id="fb1"></p></div>
+<div class="box q" id="q2"><p class="qt">3. Jakou činnost označuje slovenské sloveso „fajčiť"?</p><div class="opts"><button type="button" class="opt" data-q="2" data-o="0">a) kouřit</button><button type="button" class="opt" data-q="2" data-o="1">b) lhát</button><button type="button" class="opt" data-q="2" data-o="2">c) žvýkat</button><button type="button" class="opt" data-q="2" data-o="3">d) pomlouvat</button></div><p class="fb" id="fb2"></p></div>
+<div class="box q" id="q3"><p class="qt">4. Jak byste přeložili slovenské příslovce „zrazu"?</p><div class="opts"><button type="button" class="opt" data-q="3" data-o="0">a) potají</button><button type="button" class="opt" data-q="3" data-o="1">b) brzy</button><button type="button" class="opt" data-q="3" data-o="2">c) stěží</button><button type="button" class="opt" data-q="3" data-o="3">d) najednou</button></div><p class="fb" id="fb3"></p></div>
+<div class="box q" id="q4"><p class="qt">5. Jaký je člověk, o kterém Slovák řekne, že je „sprostý"?</p><div class="opts"><button type="button" class="opt" data-q="4" data-o="0">a) mlsný</button><button type="button" class="opt" data-q="4" data-o="1">b) upovídaný</button><button type="button" class="opt" data-q="4" data-o="2">c) hloupý</button><button type="button" class="opt" data-q="4" data-o="3">d) hubený</button></div><p class="fb" id="fb4"></p></div>
+<div class="box q" id="q5"><p class="qt">6. Jaké náčiní Slovák nazývá „vedro"?</p><div class="opts"><button type="button" class="opt" data-q="5" data-o="0">a) koště</button><button type="button" class="opt" data-q="5" data-o="1">b) trakař</button><button type="button" class="opt" data-q="5" data-o="2">c) kolíček</button><button type="button" class="opt" data-q="5" data-o="3">d) kbelík</button></div><p class="fb" id="fb5"></p></div>
+<div class="box q" id="q6"><p class="qt">7. Čemu v češtině odpovídá slovenská částice „najmä"?</p><div class="opts"><button type="button" class="opt" data-q="6" data-o="0">a) nejdříve</button><button type="button" class="opt" data-q="6" data-o="1">b) zejména</button><button type="button" class="opt" data-q="6" data-o="2">c) přesto</button><button type="button" class="opt" data-q="6" data-o="3">d) docela</button></div><p class="fb" id="fb6"></p></div>
+<div class="box q" id="q7"><p class="qt">8. Jaké koření se ve slovenštině jmenuje „rasca"?</p><div class="opts"><button type="button" class="opt" data-q="7" data-o="0">a) pepř</button><button type="button" class="opt" data-q="7" data-o="1">b) hřebíček</button><button type="button" class="opt" data-q="7" data-o="2">c) jalovec</button><button type="button" class="opt" data-q="7" data-o="3">d) kmín</button></div><p class="fb" id="fb7"></p></div>
+<div class="box q" id="q8"><p class="qt">9. Které české sloveso je překladem slovenského „štikútať"?</p><div class="opts"><button type="button" class="opt" data-q="8" data-o="0">a) kňourat</button><button type="button" class="opt" data-q="8" data-o="1">b) škytat</button><button type="button" class="opt" data-q="8" data-o="2">c) šilhat</button><button type="button" class="opt" data-q="8" data-o="3">d) mžourat</button></div><p class="fb" id="fb8"></p></div>
+<div class="box q" id="q9"><p class="qt">10. Který pták se slovensky jmenuje „jarabica"?</p><div class="opts"><button type="button" class="opt" data-q="9" data-o="0">a) koroptev</button><button type="button" class="opt" data-q="9" data-o="1">b) pěnkava</button><button type="button" class="opt" data-q="9" data-o="2">c) poštolka</button><button type="button" class="opt" data-q="9" data-o="3">d) sýček</button></div><p class="fb" id="fb9"></p></div>
+</div>
+<button type="button" class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result"><p class="score" id="score"></p><p class="rtext" id="rtext"></p><button type="button" class="btn" id="retry">Zkusit znovu</button></div>
+</div>
+<script>
+(function(){
+const CORRECT = [2,1,0,3,2,3,1,3,1,0];
+const OPTS = [[`pořád`,`zrovna`,`jen`,`taky`],[`kedlubny`,`brambory`,`dýně`,`lilky`],[`kouřit`,`lhát`,`žvýkat`,`pomlouvat`],[`potají`,`brzy`,`stěží`,`najednou`],[`mlsný`,`upovídaný`,`hloupý`,`hubený`],[`koště`,`trakař`,`kolíček`,`kbelík`],[`nejdříve`,`zejména`,`přesto`,`docela`],[`pepř`,`hřebíček`,`jalovec`,`kmín`],[`kňourat`,`škytat`,`šilhat`,`mžourat`],[`koroptev`,`pěnkava`,`poštolka`,`sýček`]];
+const RANGES = [[0,3,`Tentokrát slovenština vyhrála. Slova, která zněla povědomě, vás svedla na špatnou stopu, a tam, kde podobnost chyběla, nebylo čeho se chytit. Příště, až uslyšíte slovenský rozhovor, zkuste se na tahle slovíčka zaměřit.`],[4,6,`Polovina vám sedla, u druhé poloviny jste zaváhali. Základ máte, ale zrádná místa vás ještě občas vypeckují. Stačí pár dalších slovenských filmů nebo rozhovorů a skóre poskočí nahoru.`],[7,9,`Výborný výsledek. Ukazuje, že slovenštinu jen neposloucháte, ale opravdu jí rozumíte. Chyba se vloudila jen tam, kde by zaváhal i leckterý zkušený posluchač.`],[10,10,`Plný počet, žádné zaváhání. Nenechali jste se zmást ani povědomým zvukem, ani úplně cizím slovem. S takovou slovní zásobou byste v rozhovoru se Slovákem nemuseli nic dovysvětlovat.`]];
+const LETTERS = [`a`,`b`,`c`,`d`];
+const sel = new Array(CORRECT.length).fill(null);
+let locked = false;
+const evalBtn = document.getElementById(`eval`);
+const hint = document.getElementById(`hint`);
+function update(){
+  const all = sel.every(function(v){return v !== null;});
+  evalBtn.disabled = !all;
+  hint.style.display = all ? `none` : `block`;
+}
+document.querySelectorAll(`.opt`).forEach(function(b){
+  b.addEventListener(`click`, function(){
+    if (locked) return;
+    const q = +b.dataset.q, o = +b.dataset.o;
+    sel[q] = o;
+    document.querySelectorAll(`.opt[data-q="` + q + `"]`).forEach(function(x){x.classList.remove(`sel`);});
+    b.classList.add(`sel`);
+    update();
+  });
+});
+evalBtn.addEventListener(`click`, function(){
+  if (evalBtn.disabled) return;
+  locked = true;
+  document.getElementById(`quiz`).classList.add(`locked`);
+  let score = 0;
+  CORRECT.forEach(function(c, q){
+    const fb = document.getElementById(`fb` + q);
+    const good = sel[q] === c;
+    if (good) score++;
+    document.querySelectorAll(`.opt[data-q="` + q + `"]`).forEach(function(x){
+      const o = +x.dataset.o;
+      x.classList.remove(`sel`);
+      if (o === c) x.classList.add(`ok`);
+      else if (o === sel[q]) x.classList.add(`bad`);
+    });
+    fb.className = `fb ` + (good ? `ok` : `bad`);
+    fb.textContent = good ? `Správně.` : `Špatně. Správná odpověď: ` + LETTERS[c] + `) ` + OPTS[q][c];
+  });
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  document.getElementById(`score`).textContent = score + ` z ` + CORRECT.length;
+  let t = ``;
+  RANGES.forEach(function(r){ if (score >= r[0] && score <= r[1]) t = r[2]; });
+  document.getElementById(`rtext`).textContent = t;
+  const res = document.getElementById(`result`);
+  res.style.display = `block`;
+  res.scrollIntoView({behavior:`smooth`, block:`start`});
+});
+document.getElementById(`retry`).addEventListener(`click`, function(){
+  locked = false;
+  sel.fill(null);
+  document.getElementById(`quiz`).classList.remove(`locked`);
+  document.querySelectorAll(`.opt`).forEach(function(x){x.classList.remove(`sel`,`ok`,`bad`);});
+  document.querySelectorAll(`.fb`).forEach(function(x){x.textContent = ``; x.className = `fb`;});
+  document.getElementById(`result`).style.display = `none`;
+  evalBtn.style.display = `block`;
+  update();
+  window.scrollTo({top:0, behavior:`smooth`});
+});
+update();
+})();
+</script>
+</body>
+</html>
