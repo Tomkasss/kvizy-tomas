@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz: nakupování za socialismu. Klobouk dolů, pokud si ještě pamatujete tyto výrazy</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 32px}
+.q{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.fb{margin-top:8px;font-size:.95rem}
+.fb.ok{color:#1e5631}
+.fb.bad{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-top:40px;border-top:4px solid #5b7e5f}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.etext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b}
+#retry:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.q{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz: nakupování za socialismu. Klobouk dolů, pokud si ještě pamatujete tyto výrazy</h1>
+<p class="perex">Za socialismu se nenakupovalo, ale shánělo. Nákup měl vlastní slovník, značky i nepsaná pravidla a kdo tehdy obcházel obchody s taškou v ruce, ví, co se za těmi výrazy skrývalo. Vybavíte si je ještě dnes?</p>
+<div id="quiz"></div>
+<button class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div id="result"><p class="score" id="score"></p><p class="etext" id="etext"></p><button class="btn" id="retry">Zkusit znovu</button></div>
+</div>
+<script>
+const Q=[
+{q:`Kdy se za socialismu stávaly fronty před knihkupectvími na knižní novinky?`,o:[`v pondělí`,`ve středu`,`ve čtvrtek`,`v pátek`],a:2},
+{q:`Do kterého města se za socialismu jezdilo v létě na výstavní trhy, kde se dalo sehnat nedostatkové oblečení a látky?`,o:[`do Liberce`,`do Pardubic`,`do Hradce Králové`,`do Ústí nad Labem`],a:0},
+{q:`Co se prodávalo pod značkou Triola?`,o:[`pánské obleky`,`sportovní soupravy`,`zimní kabáty`,`dámské spodní prádlo`],a:3},
+{q:`Co byl krimplen?`,o:[`koženka na kabelky a bundy`,`nemačkavá syntetická látka na šaty a kostýmy`,`umělá kožešina na límce a čepice`,`bavlněný manšestr na kalhoty`],a:1},
+{q:`Ze které země pocházelo mýdlo Fa?`,o:[`z Rakouska`,`ze západního Německa (NSR)`,`z východního Německa (NDR)`,`ze Švýcarska`],a:1},
+{q:`Co se nakupovalo v prodejnách Eso?`,o:[`zahraniční zboží za tuzexové bony`,`zboží uvolněné ze státních hmotných rezerv`,`použité zboží prodávané v komisi`,`výběrové, často dovozové zboží za koruny`],a:3},
+{q:`Bez čeho zákazníka za socialismu zpravidla nepustili do samoobsluhy?`,o:[`bez nákupního košíku`,`bez vlastní nákupní tašky`,`bez pořadového lístku`,`bez občanského průkazu`],a:0},
+{q:`Co se za socialismu myslelo úzkoprofilovým zbožím?`,o:[`zboží, které se smělo prodávat jen ve vybraných prodejnách`,`zboží vyráběné jen v malém počtu velikostí a provedení`,`nedostatkové zboží, které se dalo jen těžko sehnat`,`zboží, které podniky vyráběly hlavně na vývoz`],a:2},
+{q:`V čem se prodávala Pompela?`,o:[`ve skleněných lahvích s korunkovým uzávěrem`,`v plastových kelímcích uzavřených fólií`,`v mikrotenových sáčcích s brčkem`,`v papírových krabičkách`],a:1},
+{q:`Ve kterém řetězci prodejen nakupovali Poláci za dolary západní zboží?`,o:[`v Intershopu`,`v Corecomu`,`v Pewexu`,`v Intertouristu`],a:2}
+];
+const EV=[
+{min:0,max:3,t:`Nákupní slovník té doby vám z hlavy skoro vymizel. Značky a výrazy, které tehdy zněly v každé frontě, se vám slily dohromady a o správné odpovědi rozhodovalo spíš štěstí. Možná jste tehdy nakupování nechávali na jiných.`},
+{min:4,max:6,t:`Základ máte. Běžné zboží z regálů vám ještě něco říká, ale u méně nápadných obchodů, nápojů a prodejních zvyklostí jste už váhali. Chybí vám jen pár střípků z doby, kdy se zboží shánělo.`},
+{min:7,max:9,t:`Výborný výsledek, přesně takový, jaký by měl mít pamětník, který tehdy chodil nakupovat s otevřenýma očima. Víte, co se skrývalo za značkami i za obchodními praktikami. K plnému počtu vám chyběl jen detail.`},
+{min:10,max:10,t:`Klobouk dolů. Bez jediné chyby jste prošli knihkupectví, drogerii, výstavní trhy i obchody za hranicemi. Socialistický nákupní slovník znáte do posledního výrazu a tehdy jste museli patřit k těm, kdo věděli, kde se co dá sehnat.`}
+];
+const L=[`a`,`b`,`c`,`d`];
+let sel=new Array(Q.length).fill(null);let done=false;
+const quiz=document.getElementById(`quiz`),evalBtn=document.getElementById(`eval`),hint=document.getElementById(`hint`);
+function render(){quiz.innerHTML=``;Q.forEach((q,i)=>{const box=document.createElement(`div`);box.className=`q`;const p=document.createElement(`p`);p.className=`qt`;p.textContent=(i+1)+`. `+q.q;box.appendChild(p);q.o.forEach((o,j)=>{const b=document.createElement(`button`);b.type=`button`;b.className=`opt`;b.textContent=L[j]+`) `+o;b.addEventListener(`click`,()=>{if(done)return;sel[i]=j;box.querySelectorAll(`.opt`).forEach((x,k)=>x.classList.toggle(`sel`,k===j));check();});box.appendChild(b);});const fb=document.createElement(`div`);fb.className=`fb`;box.appendChild(fb);quiz.appendChild(box);});}
+function check(){const all=sel.every(s=>s!==null);evalBtn.disabled=!all;hint.style.display=all?`none`:`block`;}
+evalBtn.addEventListener(`click`,()=>{if(done||sel.some(s=>s===null))return;done=true;let sc=0;const boxes=quiz.querySelectorAll(`.q`);Q.forEach((q,i)=>{const opts=boxes[i].querySelectorAll(`.opt`);opts.forEach(o=>o.disabled=true);const fb=boxes[i].querySelector(`.fb`);opts[q.a].classList.remove(`sel`);opts[q.a].classList.add(`ok`);if(sel[i]===q.a){sc++;fb.className=`fb ok`;fb.textContent=`Správně.`;}else{opts[sel[i]].classList.remove(`sel`);opts[sel[i]].classList.add(`bad`);fb.className=`fb bad`;fb.textContent=`Správná odpověď: `+L[q.a]+`) `+q.o[q.a];}});evalBtn.disabled=true;evalBtn.style.display=`none`;hint.style.display=`none`;document.getElementById(`score`).textContent=sc+` z `+Q.length;const e=EV.find(x=>sc>=x.min&&sc<=x.max);document.getElementById(`etext`).textContent=e?e.t:``;const r=document.getElementById(`result`);r.style.display=`block`;r.scrollIntoView({behavior:`smooth`});});
+document.getElementById(`retry`).addEventListener(`click`,()=>{sel=new Array(Q.length).fill(null);done=false;document.getElementById(`result`).style.display=`none`;evalBtn.style.display=`block`;render();check();window.scrollTo({top:0,behavior:`smooth`});});
+render();check();
+</script>
+</body>
+</html>
