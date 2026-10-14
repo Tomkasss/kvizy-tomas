@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10 otázek pro ty, kteří vyrůstali v Československu. Mladší ročníky nezískají ani 4 body</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:24px;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto}
+h1{font-size:1.8rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover{background:#f7f4f0}
+.locked .opt.sel:hover{background:#dcd3c7}
+.locked .opt.ok:hover{background:#d4edda}
+.locked .opt.bad:hover{background:#f8d7da}
+.fb{margin-top:6px;font-size:.95rem;color:#4a4a4a}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#721c24;margin-top:12px;font-size:.95rem}
+#result{background:#fefcf9;border-top:4px solid #5b7e5f;display:none;margin-top:32px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.evtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b;margin-top:24px}
+#retry:hover{background:#756658}
+@media (max-width:600px){body{padding:16px}.box{padding:20px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>10 otázek pro ty, kteří vyrůstali v Československu. Mladší ročníky nezískají ani 4 body</h1>
+<p class="perex">Kdo prožil dětství a mládí v Československu, tohle všechno potkával doma, na ulici, ve škole i cestou do práce rodičů. Narození po roce 1990 to znají jen z vyprávění. Uvidíme, kolik si toho vybavíte po letech vy.</p>
+<div id="quiz"></div>
+<button class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result">
+<p class="score" id="score"></p>
+<p class="evtext" id="evtext"></p>
+<button class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q=[
+{q:`Ze které země se do ČSSR dovážely fotoaparáty Praktica?`,opts:[`ze Sovětského svazu`,`z NDR`,`ze SRN`,`z Polska`],a:1},
+{q:`Co byl monoskop?`,opts:[`malý přenosný televizor na baterie`,`pokojová anténa pro příjem druhého programu`,`promítačka na diapozitivy pro domácí použití`,`zkušební obrazec vysílaný mimo program`],a:3},
+{q:`Podle čeho se na poště platilo za telegram?`,opts:[`podle počtu slov`,`podle počtu řádků`,`podle počtu písmen`,`podle počtu vět`],a:0},
+{q:`Jakou květinu dostávaly ženy za socialismu v práci k MDŽ?`,opts:[`karafiát`,`tulipán`,`gerberu`,`narcis`],a:0},
+{q:`Co měl byt I. kategorie, co byt II. kategorie neměl?`,opts:[`koupelnu`,`ústřední topení`,`splachovací záchod`,`výtah`],a:1},
+{q:`Kolik oktanů měl v 80. letech benzin Super?`,opts:[`98`,`95`,`96`,`91`],a:2},
+{q:`Jak často vycházel v 70. a 80. letech sportovní časopis Stadión?`,opts:[`každý den`,`jednou týdně`,`jednou za čtrnáct dní`,`jednou za měsíc`],a:1},
+{q:`Která firma vyráběla plastikové modely letadel ke slepení?`,opts:[`Moravská ústředna`,`Fatra`,`Hamiro`,`Směr`],a:3},
+{q:`Kterou zpěvačku doprovázela skupina Plameňáci?`,opts:[`Helena Vondráčková`,`Naďa Urbánková`,`Marie Rottrová`,`Jana Kratochvílová`],a:2},
+{q:`Čemu se na železnici říkalo brejlovec?`,opts:[`motorové lokomotivě`,`elektrické lokomotivě`,`parní lokomotivě`,`motorovému vozu`],a:0}
+];
+const EV=[
+{min:0,max:3,text:`Tohle je skóre, jaké titulek slibuje mladším ročníkům. Většina věcí z kvízu vám nic neříká a takový výsledek sedí spíš na někoho, kdo ty časy zná jen z vyprávění.`},
+{min:4,max:6,text:`Hranici čtyř bodů, na které mladší ročníky obvykle končí, jste přešli. Věci, se kterými se tehdy potkal každý, vám sedí, jen část detailů už vybledla.`},
+{min:7,max:9,text:`Takhle odpovídá opravdový pamětník. Chyběl vám jen detail, který zná ten, kdo se o danou věc tehdy zajímal víc.`},
+{min:10,max:10,text:`Plný počet, který zvládne jen menšina pamětníků. Poradili jste si i s přezdívkou lokomotivy a s firmou, která vyráběla modely ke slepení. Život v Československu máte pořád v živé paměti, se všemi detaily.`}
+];
+const quiz=document.getElementById(`quiz`);
+const evalBtn=document.getElementById(`eval`);
+const hint=document.getElementById(`hint`);
+const result=document.getElementById(`result`);
+let sel=new Array(Q.length).fill(null);
+let done=false;
+function render(){
+  quiz.innerHTML=``;
+  Q.forEach((q,i)=>{
+    const box=document.createElement(`div`);
+    box.className=`box`;
+    const p=document.createElement(`p`);
+    p.className=`qtext`;
+    p.textContent=(i+1)+`. `+q.q;
+    box.appendChild(p);
+    q.opts.forEach((o,j)=>{
+      const b=document.createElement(`button`);
+      b.type=`button`;
+      b.className=`opt`;
+      b.textContent=`abcd`[j]+`) `+o;
+      b.addEventListener(`click`,()=>{
+        if(done)return;
+        sel[i]=j;
+        box.querySelectorAll(`.opt`).forEach((x,k)=>x.classList.toggle(`sel`,k===j));
+        update();
+      });
+      box.appendChild(b);
+    });
+    const fb=document.createElement(`div`);
+    fb.className=`fb`;
+    box.appendChild(fb);
+    quiz.appendChild(box);
+  });
+}
+function update(){
+  const all=sel.every(x=>x!==null);
+  evalBtn.disabled=!all;
+  hint.style.display=all?`none`:`block`;
+}
+evalBtn.addEventListener(`click`,()=>{
+  if(done||sel.some(x=>x===null))return;
+  done=true;
+  let score=0;
+  quiz.querySelectorAll(`.box`).forEach((box,i)=>{
+    box.classList.add(`locked`);
+    const opts=box.querySelectorAll(`.opt`);
+    const a=Q[i].a;
+    opts[a].classList.add(`ok`);
+    const fb=box.querySelector(`.fb`);
+    if(sel[i]===a){score++;fb.textContent=`Správně.`;}
+    else{opts[sel[i]].classList.add(`bad`);fb.textContent=`Správná odpověď: `+`abcd`[a]+`) `+Q[i].opts[a];}
+  });
+  evalBtn.disabled=true;
+  evalBtn.style.display=`none`;
+  hint.style.display=`none`;
+  document.getElementById(`score`).textContent=score+` z `+Q.length;
+  const e=EV.find(r=>score>=r.min&&score<=r.max);
+  document.getElementById(`evtext`).textContent=e?e.text:``;
+  result.style.display=`block`;
+  result.scrollIntoView({behavior:`smooth`,block:`start`});
+});
+document.getElementById(`retry`).addEventListener(`click`,()=>{
+  sel=new Array(Q.length).fill(null);
+  done=false;
+  result.style.display=`none`;
+  evalBtn.style.display=`block`;
+  render();
+  update();
+  window.scrollTo({top:0,behavior:`smooth`});
+});
+render();
+update();
+</script>
+</body>
+</html>
