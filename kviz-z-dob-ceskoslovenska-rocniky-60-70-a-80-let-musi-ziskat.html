@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kvíz z dob Československa. Ročníky 60., 70. a 80. let musí získat více než 7/10. Pro narozené po roce 90, je to těžké</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:1.8rem;line-height:1.3;margin:0 0 16px;color:#2c2c2c}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-family:inherit;font-size:1rem;color:#3a3a3a;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.selected{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.correct{background:#d4edda;border:1px solid #7cb987;color:#1e5631}
+.opt.wrong{background:#f8d7da;border:1px solid #d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover:not(.correct):not(.wrong):not(.selected){background:#f7f4f0}
+.reveal{margin-top:12px;font-size:.95rem;color:#1e5631}
+.btn{display:block;margin:40px auto 0;background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#7a7a7a;margin-top:12px;font-size:.95rem}
+.result{background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+.retry{background:#8c7b6b;margin-top:24px}
+.retry:hover{background:#756658}
+.hidden{display:none}
+@media (max-width:600px){.wrap{padding:16px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Kvíz z dob Československa. Ročníky 60., 70. a 80. let musí získat více než 7/10. Pro narozené po roce 90, je to těžké</h1>
+<p class="perex">Vláček pod stromečkem, heslo z prvomájového transparentu, tank z válečného seriálu a slabikář z první třídy. Ročníky 60., 70. a 80. let by tu měly dát víc než sedm bodů. Kdo se narodil po roce 1990, bude většinou jen hádat.</p>
+<div id="quiz"></div>
+<button id="evaluate" class="btn" disabled>Vyhodnotit</button>
+<p id="hint" class="hint">Odpovězte prosím na všechny otázky</p>
+<div id="result" class="box result hidden">
+<p id="score" class="score"></p>
+<p id="rtext" class="rtext"></p>
+<button id="retry" class="btn retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+  {q: `Jak se jmenovala východoněmecká značka elektrických vláčků, které za socialismu jezdily po kolejištích v mnoha československých domácnostech?`, opts: [`Märklin`, `Fleischmann`, `Piko`, `Roco`], correct: 2},
+  {q: `Podle které knihy vznikl film Páni kluci?`, opts: [`Chlapci z Pavlovy ulice`, `Emil a detektivové`, `Bylo nás pět`, `Dobrodružství Toma Sawyera`], correct: 3},
+  {q: `Jakou hudbu představoval festival Porta?`, opts: [`dechovku a lidovku`, `trampskou písničku a country`, `jazz a swing`, `bigbít a rock`], correct: 1},
+  {q: `Jak se jmenoval čtrnáctideník vydávaný od roku 1964, který přinášel hlavně články převzaté ze zahraničního tisku?`, opts: [`Svět v obrazech`, `Květy`, `Mladý svět`, `100+1 ZZ`], correct: 3},
+  {q: `Ve které pražské čtvrti se vyráběly nákladní automobily Avia?`, opts: [`v Kbelích`, `v Libni`, `v Letňanech`, `na Smíchově`], correct: 2},
+  {q: `Jak se jmenoval tank ze seriálu Čtyři z tanku a pes?`, opts: [`Orel`, `Rudý`, `Rudá hvězda`, `Partyzán`], correct: 1},
+  {q: `Kterému ministerstvu podléhala v 80. letech Pohraniční stráž?`, opts: [`ministerstvu národní obrany`, `ministerstvu zahraničních věcí`, `ministerstvu zahraničního obchodu`, `ministerstvu vnitra`], correct: 3},
+  {q: `V jaké disciplíně získali bratři Jindřich a Jan Pospíšilové dvacet titulů mistrů světa?`, opts: [`v kolové`, `v jízdě na tandemu na dráze`, `v deblkanoi na divoké vodě`, `ve dvojbobu`], correct: 0},
+  {q: `Jak pokračovalo heslo „Se Sovětským svazem na věčné časy…", které viselo na školách a úřadech a provolávalo se v prvomájových průvodech?`, opts: [`…a nikdy jinak!`, `…a za mír ve světě!`, `…k vítězství socialismu!`, `…a vždy vpřed!`], correct: 0},
+  {q: `Kdo ilustroval Slabikář, ze kterého se v 80. letech učili číst čeští prvňáčci?`, opts: [`Helena Zmatlíková`, `Jiří Trnka`, `Ota Janeček`, `Marie Fischerová-Kvěchová`], correct: 2}
+];
+const evaluations = [
+  {min: 0, max: 3, text: `Tohle Československo vám skoro celé uteklo. Vláčky z NDR, festivaly pod širým nebem ani hesla z transparentů vám v paměti nezůstaly. Správné odpovědi výše ukazují, jak tehdy vypadal obyčejný den.`},
+  {min: 4, max: 6, text: `Polovinu jste trefili, ale do slíbené hranice zbývá ještě kus. Co člověk vídal denně, to ve vás zůstalo. Kde šlo o detail, který si zapamatoval jen pozorný divák nebo čtenář, tam jste spíš tipovali.`},
+  {min: 7, max: 9, text: `Se sedmi body stojíte přesně na hraně, titulek ale chce víc než sedm. Osm nebo devět znamená, že jste slib splnili. Pamatujete si hračky, televizi, časopisy i hřiště a minul vás jen jeden nebo dva drobné detaily.`},
+  {min: 10, max: 10, text: `Plný počet, a ten se povede jen menšině. Trefili jste i ilustrátora slabikáře, na kterého si většina lidí nevzpomene, přestože ty obrázky měla rok před očima.`}
+];
+const answers = new Array(questions.length).fill(null);
+let locked = false;
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`evaluate`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+
+function render() {
+  quiz.innerHTML = ``;
+  questions.forEach((q, qi) => {
+    const box = document.createElement(`div`);
+    box.className = `box`;
+    const p = document.createElement(`p`);
+    p.className = `qtext`;
+    p.textContent = (qi + 1) + `. ` + q.q;
+    box.appendChild(p);
+    q.opts.forEach((o, oi) => {
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = `abcd`[oi] + `) ` + o;
+      b.addEventListener(`click`, () => {
+        if (locked) return;
+        answers[qi] = oi;
+        box.querySelectorAll(`.opt`).forEach(x => x.classList.remove(`selected`));
+        b.classList.add(`selected`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    quiz.appendChild(box);
+  });
+}
+
+function update() {
+  const done = answers.every(a => a !== null);
+  evalBtn.disabled = !done;
+  hint.classList.toggle(`hidden`, done);
+}
+
+evalBtn.addEventListener(`click`, () => {
+  if (evalBtn.disabled) return;
+  locked = true;
+  quiz.classList.add(`locked`);
+  let score = 0;
+  const boxes = quiz.querySelectorAll(`.box`);
+  questions.forEach((q, qi) => {
+    const opts = boxes[qi].querySelectorAll(`.opt`);
+    opts[q.correct].classList.add(`correct`);
+    if (answers[qi] === q.correct) {
+      score++;
+    } else {
+      opts[answers[qi]].classList.remove(`selected`);
+      opts[answers[qi]].classList.add(`wrong`);
+      const r = document.createElement(`p`);
+      r.className = `reveal`;
+      r.textContent = `Správná odpověď: ` + `abcd`[q.correct] + `) ` + q.opts[q.correct];
+      boxes[qi].appendChild(r);
+    }
+  });
+  const ev = evaluations.find(e => score >= e.min && score <= e.max);
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  document.getElementById(`rtext`).textContent = ev ? ev.text : ``;
+  evalBtn.classList.add(`hidden`);
+  hint.classList.add(`hidden`);
+  result.classList.remove(`hidden`);
+  result.scrollIntoView({behavior: `smooth`});
+});
+
+document.getElementById(`retry`).addEventListener(`click`, () => {
+  answers.fill(null);
+  locked = false;
+  quiz.classList.remove(`locked`);
+  result.classList.add(`hidden`);
+  evalBtn.classList.remove(`hidden`);
+  render();
+  update();
+  window.scrollTo({top: 0, behavior: `smooth`});
+});
+
+render();
+update();
+</script>
+</body>
+</html>
