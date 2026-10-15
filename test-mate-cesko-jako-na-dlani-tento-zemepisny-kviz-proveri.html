@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test: máte Česko jako na dlani? Tento zeměpisný kvíz prověří, jak dobře znáte svou zemi</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:1.9rem;line-height:1.3;margin:0 0 16px;color:#2c2c2c}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qt{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-size:1rem;color:#3a3a3a;font-family:inherit;margin-bottom:10px;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.locked .opt{cursor:default}
+.locked .opt:hover{background:#f7f4f0}
+.locked .opt.ok:hover{background:#d4edda}
+.locked .opt.bad:hover{background:#f8d7da}
+.fb{margin-top:12px;font-size:.95rem}
+.fb.okt{color:#1e5631}
+.fb.badt{color:#721c24}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;cursor:pointer;font-family:inherit}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#8a8a8a;font-size:.95rem;margin-top:12px}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.rtext{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#again{background:#8c7b6b}
+#again:hover{background:#756658}
+@media (max-width:600px){.wrap{padding:16px}.box{padding:16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Test: máte Česko jako na dlani? Tento zeměpisný kvíz prověří, jak dobře znáte svou zemi</h1>
+<p class="perex">Kdo Česko jen projíždí, zná ho z map a směrovek. Kdo ho má jako na dlani, ví i to, co se za názvy na mapě skrývá: od skal a jeskyní přes přehrady a dálnice až po hraniční řeky.</p>
+<div id="quiz"></div>
+<button class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div class="box" id="result"><p class="score" id="score"></p><p class="rtext" id="rtext"></p><button class="btn" id="again">Zkusit znovu</button></div>
+</div>
+<script>
+const Q=[
+{q:`Ve které oblasti se v Česku pěstuje nejvíce chmele?`,o:[`na Hané`,`v Polabí`,`na Žatecku`,`na Slovácku`],c:2},
+{q:`Které město je centrem Chodska?`,o:[`Domažlice`,`Klatovy`,`Tachov`,`Sušice`],c:0},
+{q:`Ve které chráněné krajinné oblasti leží Prachovské skály?`,o:[`Kokořínsko`,`Broumovsko`,`Labské pískovce`,`Český ráj`],c:3},
+{q:`Které město je proslulým centrem české bižuterie?`,o:[`Nový Bor`,`Jablonec nad Nisou`,`Kamenický Šenov`,`Harrachov`],c:1},
+{q:`Na hranici se kterým státem končí dálnice D1?`,o:[`se Slovenskem`,`s Polskem`,`s Rakouskem`,`s Německem`],c:1},
+{q:`U kterého města stojí jaderná elektrárna Temelín?`,o:[`Týn nad Vltavou`,`Hluboká nad Vltavou`,`Písek`,`Třebíč`],c:0},
+{q:`Které krajské město má dnes nejméně obyvatel?`,o:[`Jihlava`,`Zlín`,`Karlovy Vary`,`Ústí nad Labem`],c:2},
+{q:`Ve které krasové oblasti leží Koněpruské jeskyně?`,o:[`Moravský kras`,`Javoříčský kras`,`Chýnovský kras`,`Český kras`],c:3},
+{q:`Které vodní dílo má nejvyšší přehradní hráz v Česku?`,o:[`Dalešice`,`Orlík`,`Šance`,`Vranov`],c:0},
+{q:`Na soutoku kterých dvou řek se stýkají hranice Česka, Slovenska a Rakouska?`,o:[`Dyje a Svratka`,`Morava a Dyje`,`Morava a Myjava`,`Svratka a Jihlava`],c:1}
+];
+const R=[
+{min:0,max:3,t:`Česko zatím znáte spíš z okna vlaku než z mapy. Tolik bodů napoví, že hodně míst tu máte jen jako názvy. Dobrá zpráva je, že zeměpis domova se nejlépe učí na výletech, a tipů na ně máte po tomhle kvízu dost.`},
+{min:4,max:6,t:`Hrubé obrysy země máte v hlavě, ale podrobnosti se vám rozmazávají. Jakmile otázka odbočí od učebnicových pouček, začnete tipovat. Na dlani to ještě není, spíš v dosahu ruky.`},
+{min:7,max:9,t:`Česko máte opravdu přečtené, od krajiny přes vodu po průmysl. Ztracené body padly na otázky, u kterých zaváhá i leckterý milovník map. Na plný počet vám chybí jen kousek.`},
+{min:10,max:10,t:`Plný počet. Česko máte jako na dlani, se všemi jeho kraji, řekami i hranicemi. Tohle už není školní znalost, ale vztah k zemi, kterou znáte do posledního údolí.`}
+];
+const quiz=document.getElementById(`quiz`);
+const evalBtn=document.getElementById(`eval`);
+const hint=document.getElementById(`hint`);
+const res=document.getElementById(`result`);
+let sel=[],locked=false;
+function render(){
+  quiz.innerHTML=``;sel=Q.map(()=>null);locked=false;
+  Q.forEach((q,i)=>{
+    const b=document.createElement(`div`);b.className=`box`;
+    const t=document.createElement(`p`);t.className=`qt`;t.textContent=(i+1)+`. `+q.q;b.appendChild(t);
+    const l=document.createElement(`div`);
+    q.o.forEach((o,j)=>{
+      const bt=document.createElement(`button`);bt.type=`button`;bt.className=`opt`;
+      bt.textContent=`abcd`[j]+`) `+o;
+      bt.addEventListener(`click`,()=>{
+        if(locked)return;sel[i]=j;
+        l.querySelectorAll(`.opt`).forEach((x,k)=>x.classList.toggle(`sel`,k===j));
+        upd();
+      });
+      l.appendChild(bt);
+    });
+    b.appendChild(l);
+    const fb=document.createElement(`p`);fb.className=`fb`;fb.style.display=`none`;b.appendChild(fb);
+    quiz.appendChild(b);
+  });
+  upd();
+}
+function upd(){const all=sel.every(s=>s!==null);evalBtn.disabled=!all||locked;hint.style.display=all||locked?`none`:`block`;}
+evalBtn.addEventListener(`click`,()=>{
+  if(locked||!sel.every(s=>s!==null))return;
+  locked=true;let sc=0;
+  quiz.querySelectorAll(`.box`).forEach((b,i)=>{
+    b.classList.add(`locked`);
+    const opts=b.querySelectorAll(`.opt`);const c=Q[i].c;const fb=b.querySelector(`.fb`);
+    opts.forEach(o=>o.classList.remove(`sel`));
+    opts[c].classList.add(`ok`);
+    if(sel[i]===c){sc++;fb.textContent=`Správně.`;fb.className=`fb okt`;}
+    else{opts[sel[i]].classList.add(`bad`);fb.textContent=`Správná odpověď: `+`abcd`[c]+`) `+Q[i].o[c];fb.className=`fb badt`;}
+    fb.style.display=`block`;
+  });
+  document.getElementById(`score`).textContent=sc+` z `+Q.length;
+  const r=R.find(x=>sc>=x.min&&sc<=x.max);
+  document.getElementById(`rtext`).textContent=r?r.t:``;
+  res.style.display=`block`;upd();
+  res.scrollIntoView({behavior:`smooth`,block:`start`});
+});
+document.getElementById(`again`).addEventListener(`click`,()=>{
+  res.style.display=`none`;render();window.scrollTo({top:0,behavior:`smooth`});
+});
+render();
+</script>
+</body>
+</html>
