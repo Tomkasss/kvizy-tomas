@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RETRO kvíz pro Husákovy děti: Těchto 10 předmětů mladší generace nepozná</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:24px;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c}
+.wrap{max-width:720px;margin:0 auto}
+h1{font-size:1.8rem;line-height:1.3;margin:0 0 16px}
+.perex{font-size:1.05rem;line-height:1.6;color:#4a4a4a;margin:0 0 28px}
+.q{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.q-text{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-family:inherit;font-size:1rem;color:#3a3a3a;cursor:pointer}
+.opt:last-child{margin-bottom:0}
+.opt:hover{background:#ede8e1}
+.opt.selected{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.locked .opt{cursor:default}
+.locked .opt:hover{background:#f7f4f0}
+.locked .opt.selected:hover{background:#dcd3c7}
+.opt.correct,.locked .opt.correct:hover{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.wrong,.locked .opt.wrong:hover{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.answer-note{margin-top:12px;font-size:.95rem;color:#1e5631;display:none}
+.btn{background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;display:block;margin:40px auto 0;font-family:inherit;cursor:pointer}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.hint{text-align:center;color:#721c24;margin-top:12px;font-size:.95rem}
+#result{display:none;background:#fefcf9;border-top:4px solid #5b7e5f;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-top:40px}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;text-align:center;margin:0 0 12px}
+.verdict{font-size:1rem;color:#4a4a4a;text-align:center;line-height:1.6;margin:0}
+#retry{background:#8c7b6b;margin-top:28px}
+#retry:hover{background:#756658}
+@media (max-width:600px){body{padding:16px}.q{padding:20px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>RETRO kvíz pro Husákovy děti: Těchto 10 předmětů mladší generace nepozná</h1>
+<p class="perex">Husákovy děti, otevřete pomyslnou skříň v dětském pokoji. Školní penál, koupelnová polička, obývák v paneláku i garáž po tátovi skrývají věci, které by dnešní dvacátníci nejspíš vyhodili, aniž by tušili, k čemu byly.</p>
+<div id="quiz"></div>
+<button class="btn" id="evaluate" disabled>Vyhodnotit</button>
+<p class="hint" id="hint">Odpovězte prosím na všechny otázky</p>
+<div id="result">
+<p class="score" id="score"></p>
+<p class="verdict" id="verdict"></p>
+<button class="btn" id="retry">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const questions = [
+{q:`K čemu ve škole sloužila versatilka?`,o:[`jako plnicí pero na inkoustové bombičky`,`jako mechanická tužka s vyměnitelnou tuhou`,`jako kružítko s nastavitelným ramenem`,`jako technické pero na tuš`],a:1},
+{q:`Co byly jarmilky?`,o:[`dívčí pletené podkolenky`,`plastové sponky do vlasů`,`plátěné cvičky s gumou přes nárt`,`zástěrky do hodin pracovního vyučování`],a:2},
+{q:`Co se vkládalo do prohlížečky Meoskop?`,o:[`kotouček se sedmi dvojicemi obrázků`,`pás diafilmu s pohádkou`,`jednotlivé diapozitivy v rámečcích`,`kazeta s osmimilimetrovým filmem`],a:0},
+{q:`Co byl na pionýrském táboře ešus?`,o:[`plátěný pytlík na špinavé prádlo`,`dřevěná truhla na osobní věci`,`polní lopatka na kopání latríny`,`kovová jídelní miska s víkem`],a:3},
+{q:`K čemu sloužil Pitralon?`,o:[`jako voda po holení`,`jako vlasová voda proti lupům`,`jako ústní voda`,`jako odlakovač na nehty`],a:0},
+{q:`Ze které země pochází plyšová hračka mončičák?`,o:[`z NDR`,`z Japonska`,`z Jugoslávie`,`z Rakouska`],a:1},
+{q:`Jaký výrobek nesl značku Jolana?`,o:[`elektrická kytara`,`akordeon`,`kazetový magnetofon`,`šicí stroj`],a:0},
+{q:`K čemu se v bytech používal Kovral?`,o:[`jako lepidlo na tapety`,`jako nátěr na radiátory`,`jako obklad do koupelny`,`jako koberec na podlahu`],a:3},
+{q:`Ve kterém městě se v roce 1885 začal v Čechách vyrábět porcelán s cibulovým vzorem?`,o:[`v Karlových Varech`,`v Klášterci nad Ohří`,`v Dubí`,`v Duchcově`],a:2},
+{q:`Ve kterém městě se vyráběly malé motocykly Jawa Pionýr?`,o:[`v Týnci nad Sázavou`,`v Považské Bystrici`,`ve Strakonicích`,`v Brně`],a:1}
+];
+const verdicts = [
+{min:0,max:3,t:`Tyhle věci jste nejspíš potkali jen letmo, třeba na půdě nebo v bazaru. Zkuste je probrat s někým, kdo tehdy chodil do školy, a uvidíte, jak se mu rozzáří oči.`},
+{min:4,max:6,t:`Slušný základ. Něco jste drželi v ruce, něco znáte z vyprávění a u zbytku jste tipovali. Šuplík s dětstvím máte pootevřený, ale pár věcí v něm leží hodně vzadu.`},
+{min:7,max:9,t:`Výborně. Pamatujete si penál, koupelnu, obývák i kamarády z Tuzexu. Pár detailů vám uteklo, ale paneláková domácnost ze 70. a 80. let je pro vás pořád jako otevřená kniha.`},
+{min:10,max:10,t:`Plný počet. Víte, co se cpalo do prohlížečky, čím voněl táta po holení i kde se vyráběl malý motocykl, o kterém snila celá ulice. Tohle zvládne jen opravdové Husákovo dítě s výbornou pamětí.`}
+];
+const letters = [`a`,`b`,`c`,`d`];
+const quiz = document.getElementById(`quiz`);
+const evalBtn = document.getElementById(`evaluate`);
+const hint = document.getElementById(`hint`);
+const result = document.getElementById(`result`);
+let answers = [];
+let locked = false;
+
+function render(){
+  quiz.innerHTML = ``;
+  answers = new Array(questions.length).fill(null);
+  locked = false;
+  questions.forEach(function(item, qi){
+    const box = document.createElement(`div`);
+    box.className = `q`;
+    const p = document.createElement(`p`);
+    p.className = `q-text`;
+    p.textContent = (qi + 1) + `. ` + item.q;
+    box.appendChild(p);
+    item.o.forEach(function(opt, oi){
+      const b = document.createElement(`button`);
+      b.type = `button`;
+      b.className = `opt`;
+      b.textContent = letters[oi] + `) ` + opt;
+      b.addEventListener(`click`, function(){
+        if (locked) return;
+        answers[qi] = oi;
+        box.querySelectorAll(`.opt`).forEach(function(x){ x.classList.remove(`selected`); });
+        b.classList.add(`selected`);
+        update();
+      });
+      box.appendChild(b);
+    });
+    const note = document.createElement(`div`);
+    note.className = `answer-note`;
+    note.textContent = `Správná odpověď: ` + letters[item.a] + `) ` + item.o[item.a];
+    box.appendChild(note);
+    quiz.appendChild(box);
+  });
+  result.style.display = `none`;
+  evalBtn.style.display = `block`;
+  update();
+}
+
+function update(){
+  const done = answers.every(function(a){ return a !== null; });
+  evalBtn.disabled = !done;
+  hint.style.display = done ? `none` : `block`;
+}
+
+evalBtn.addEventListener(`click`, function(){
+  if (evalBtn.disabled) return;
+  locked = true;
+  let score = 0;
+  const boxes = quiz.querySelectorAll(`.q`);
+  questions.forEach(function(item, qi){
+    const box = boxes[qi];
+    box.classList.add(`locked`);
+    const opts = box.querySelectorAll(`.opt`);
+    opts[item.a].classList.add(`correct`);
+    if (answers[qi] === item.a) {
+      score++;
+    } else {
+      opts[answers[qi]].classList.add(`wrong`);
+      box.querySelector(`.answer-note`).style.display = `block`;
+    }
+  });
+  document.getElementById(`score`).textContent = score + ` z ` + questions.length;
+  const v = verdicts.find(function(x){ return score >= x.min && score <= x.max; });
+  document.getElementById(`verdict`).textContent = v ? v.t : ``;
+  evalBtn.style.display = `none`;
+  hint.style.display = `none`;
+  result.style.display = `block`;
+  result.scrollIntoView({behavior:`smooth`, block:`start`});
+});
+
+document.getElementById(`retry`).addEventListener(`click`, function(){
+  render();
+  window.scrollTo({top:0, behavior:`smooth`});
+});
+
+render();
+</script>
+</body>
+</html>
