@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IQ KVÍZ: Těchto 10 úloh působí snadně, bez chyby je ale vyřeší jen nejchytřejší</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f0eb;font-family:Georgia,"Times New Roman",serif;color:#2c2c2c;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 16px;color:#2c2c2c}
+.perex{font-size:1.08rem;color:#4a4a4a;margin:0 0 28px}
+.box{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:24px}
+.qtext{font-weight:bold;font-size:1.15rem;color:#2c2c2c;margin:0 0 16px}
+.opt{display:block;width:100%;text-align:left;padding:14px 18px;margin:0 0 10px;background:#f7f4f0;border:1px solid #d9d2c9;border-radius:8px;font-family:inherit;font-size:1rem;color:#3a3a3a;cursor:pointer}
+.opt:hover{background:#ede8e1}
+.opt.sel{background:#dcd3c7;border:1px solid #a89e92;font-weight:bold}
+.opt.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.opt.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.opt:disabled{cursor:default}
+.inp{width:100%;padding:14px 18px;font-family:inherit;font-size:1rem;border:1px solid #d9d2c9;border-radius:8px;background:#f7f4f0;color:#3a3a3a}
+.inp.ok{background:#d4edda;border-color:#7cb987;color:#1e5631}
+.inp.bad{background:#f8d7da;border-color:#d4848a;color:#721c24}
+.fb{margin-top:12px;font-size:.98rem}
+.fb.ok{color:#1e5631}.fb.bad{color:#721c24}
+.btn{display:block;margin:40px auto 0;background:#5b7e5f;color:#fff;padding:16px 40px;border-radius:8px;font-size:1.1rem;font-weight:bold;border:none;font-family:inherit;cursor:pointer}
+.btn:hover{background:#4a6b4e}
+.btn:disabled{background:#b5b5b5;cursor:not-allowed}
+.btn.again{background:#8c7b6b}.btn.again:hover{background:#756658}
+.msg{text-align:center;color:#721c24;margin-top:12px;min-height:1.2em}
+.result{background:#fefcf9;border-top:4px solid #5b7e5f;display:none;text-align:center}
+.score{font-size:2.5rem;font-weight:bold;color:#5b7e5f;margin:0 0 12px}
+.etext{font-size:1rem;color:#4a4a4a;margin:0}
+@media (max-width:600px){.wrap{padding:20px 16px 40px}.box{padding:20px 16px}h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>IQ KVÍZ: Těchto 10 úloh působí snadně, bez chyby je ale vyřeší jen nejchytřejší</h1>
+<p class="perex">Cihla, výtah, okurky nebo devět kuliček na vahách. Zadání se vejdou do dvou řádků a vypadají jako ze sešitu páťáka. Kolik z nich vyřešíte správně, když si na každé dáte nanejvýš minutu?</p>
+<div id="quiz"></div>
+<button type="button" class="btn" id="eval" disabled>Vyhodnotit</button>
+<p class="msg" id="msg">Odpovězte prosím na všechny otázky</p>
+<div class="box result" id="result">
+<p class="score" id="score"></p>
+<p class="etext" id="etext"></p>
+<button type="button" class="btn again" id="again">Zkusit znovu</button>
+</div>
+</div>
+<script>
+const Q=[
+{q:`Cihla váží jeden kilogram a k tomu ještě polovinu své vlastní hmotnosti. Kolik váží celá cihla?`,type:`mc`,opts:[`1,5 kg`,`2 kg`,`2,5 kg`,`3 kg`],correct:1},
+{q:`Číslo 30 vydělíte jednou polovinou a k výsledku přičtete 10. Kolik vám vyjde?`,type:`mc`,opts:[`70`,`25`,`40`,`80`],correct:0},
+{q:`Které číslo pokračuje v řadě 2, 3, 5, 7, 11, 13, ?`,type:`mc`,opts:[`15`,`19`,`21`,`17`],correct:3},
+{q:`Dřevěnou krychli celou zvenku natřete načerveno a pak ji rozřežete na 27 stejných menších krychliček. Kolik z nich má natřenou právě jednu stěnu?`,type:`mc`,opts:[`8`,`9`,`6`,`12`],correct:2},
+{q:`Ve třídě je třikrát víc dívek než chlapců. Kolik procent žáků třídy tvoří chlapci?`,type:`mc`,opts:[`33 %`,`30 %`,`75 %`,`25 %`],correct:3},
+{q:`Které písmeno pokračuje v řadě L, Ú, B, D, K, Č, ?`,type:`mc`,opts:[`Č`,`S`,`Z`,`Ř`],correct:0},
+{q:`Výtah jede bez zastavení z 1. do 3. patra 20 sekund. Všechna patra jsou stejně vysoká. Za kolik sekund dojede stejnou rychlostí bez zastavení z 1. do 9. patra?`,type:`open`,accept:[`80`]},
+{q:`Do chaty jedete stálou rychlostí 60 km/h a zpátky stejnou cestou stálou rychlostí 40 km/h. Jaká byla vaše průměrná rychlost na celé cestě tam a zpět?`,type:`mc`,opts:[`50 km/h`,`48 km/h`,`45 km/h`,`52 km/h`],correct:1},
+{q:`Máte devět stejně vypadajících kuliček a jedna z nich je o něco těžší než ostatní. Kolikrát nejméně musíte vážit na rovnoramenných vahách bez závaží, abyste těžší kuličku zaručeně našli?`,type:`mc`,opts:[`4`,`3`,`2`,`8`],correct:2},
+{q:`Čerstvé okurky váží 100 kg a voda tvoří 99 % jejich hmotnosti. Během několika dnů část vody vyschne a voda pak tvoří 98 % jejich hmotnosti. Kolik kilogramů okurky váží teď?`,type:`open`,accept:[`50`]}
+];
+const E=[
+{min:0,max:3,text:`Tentokrát jste skoro pokaždé uvěřili první odpovědi, která vás napadla. Nic hrozného, tyhle úlohy jsou postavené přesně tak, aby rychlé myšlení naletělo. Zkuste je projít znovu a zpomalit, mnohé se vám otevřou hned napodruhé.`},
+{min:4,max:6,text:`Některé pasti jste prohlédli, do jiných jste ale šlápli. Víte, že první nápad je dobré si ověřit, jen jste to neudělali u každé úlohy. Kdo tu kontrolu udělá pokaždé, posune se rychle výš.`},
+{min:7,max:9,text:`Velmi dobrý výsledek. Přemýšlíte pečlivě a většinu chytáků jste odhalili dřív, než vás stačily zmást. Do plného počtu vám chyběly jedna až tři úlohy, nejspíš ty, u kterých se intuice tvářila obzvlášť přesvědčivě.`},
+{min:10,max:10,text:`Bez jediné chyby, a to se tady povede jen málokomu. Nenechali jste se ukolébat tím, jak snadno úlohy vypadají, a každou odpověď jste si nejdřív ověřili. Zpomalit jste dokázali i tam, kde se odpověď sama nabízela, a právě to tu dělá rozdíl mezi dobrým a bezchybným výsledkem.`}
+];
+const quiz=document.getElementById(`quiz`),evalBtn=document.getElementById(`eval`),msg=document.getElementById(`msg`),res=document.getElementById(`result`);
+let answers=[],locked=false;
+function norm(s){return s.toString().toLowerCase().normalize(`NFD`).replace(/[\u0300-\u036f]/g,``).replace(/\s+/g,` `).trim()}
+function update(){const all=answers.every((a,i)=>Q[i].type===`mc`?a!==null:(a!==null&&a.trim()!==``));evalBtn.disabled=!all||locked;msg.textContent=(all||locked)?``:`Odpovězte prosím na všechny otázky`}
+function render(){
+quiz.innerHTML=``;answers=Q.map(()=>null);locked=false;
+Q.forEach((q,i)=>{
+const box=document.createElement(`div`);box.className=`box`;
+const p=document.createElement(`p`);p.className=`qtext`;p.textContent=(i+1)+`. `+q.q;box.appendChild(p);
+if(q.type===`mc`){q.opts.forEach((o,j)=>{const b=document.createElement(`button`);b.type=`button`;b.className=`opt`;b.textContent=`abcd`[j]+`) `+o;
+b.addEventListener(`click`,()=>{if(locked)return;answers[i]=j;box.querySelectorAll(`.opt`).forEach(x=>x.classList.remove(`sel`));b.classList.add(`sel`);update()});box.appendChild(b)})}
+else{const inp=document.createElement(`input`);inp.type=`text`;inp.className=`inp`;inp.placeholder=`Napište odpověď číslem`;inp.setAttribute(`inputmode`,`numeric`);
+inp.addEventListener(`input`,()=>{if(locked)return;answers[i]=inp.value;update()});box.appendChild(inp)}
+const fb=document.createElement(`div`);fb.className=`fb`;box.appendChild(fb);
+quiz.appendChild(box)});
+res.style.display=`none`;evalBtn.style.display=`block`;update()}
+evalBtn.addEventListener(`click`,()=>{
+if(evalBtn.disabled)return;locked=true;let score=0;
+const boxes=quiz.querySelectorAll(`.box`);
+Q.forEach((q,i)=>{const box=boxes[i],fb=box.querySelector(`.fb`);let ok;
+if(q.type===`mc`){ok=answers[i]===q.correct;const bs=box.querySelectorAll(`.opt`);bs.forEach((b,j)=>{b.disabled=true;if(j===q.correct)b.classList.add(`ok`);else if(j===answers[i])b.classList.add(`bad`)});
+fb.textContent=ok?`Správně`:`Špatně. Správná odpověď: `+`abcd`[q.correct]+`) `+q.opts[q.correct]}
+else{const inp=box.querySelector(`.inp`);inp.disabled=true;ok=q.accept.some(a=>norm(a)===norm(answers[i]));inp.classList.add(ok?`ok`:`bad`);
+fb.textContent=ok?`Správně`:`Špatně. Správná odpověď: `+q.accept[0]}
+fb.className=`fb `+(ok?`ok`:`bad`);if(ok)score++});
+document.getElementById(`score`).textContent=score+` z `+Q.length;
+const e=E.find(x=>score>=x.min&&score<=x.max);document.getElementById(`etext`).textContent=e?e.text:``;
+res.style.display=`block`;evalBtn.style.display=`none`;msg.textContent=``;res.scrollIntoView({behavior:`smooth`,block:`start`})});
+document.getElementById(`again`).addEventListener(`click`,()=>{render();window.scrollTo({top:0,behavior:`smooth`})});
+render();
+</script>
+</body>
+</html>
